@@ -1,0 +1,29 @@
+# A sublime-project is provided, so ignore the generated sublime-workspace:
+*.sublime-workspace
+
+# build/premake4.lua generates build/{platform} directories when building:
+/build/windows
+/build/macosx
+/build/linux
+/build/ios
+/build/android
+/build/nacl
+
+# VCS crap:
+.svn/
+
+# CTags crap:
+.tags
+
+# Operating system crap:
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+ehtumbs.db
+Desktop.ini
+$RECYCLE.BIN/

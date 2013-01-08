@@ -1,0 +1,15 @@
+{
+	"folders":
+	[
+		{
+			"path": "include"
+		},
+		{
+			"path": "src"
+		},
+		{
+			"path": "build",
+			"folder_exclude_patterns": ["windows", "macosx", "linux"]
+		}
+	]
+}

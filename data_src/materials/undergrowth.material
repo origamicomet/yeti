@@ -1,0 +1,4 @@
+group name = undergrowth
+shader vertex = shaders/deferred/billboard.shader
+shader pixel = shaders/deferred/billboard.shader
+texture diffuse = textures/undergrowth.texture
