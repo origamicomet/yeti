@@ -1,0 +1,30 @@
+application = {
+  window = {
+    # The title of the main window.
+    title = "Engine";
+    width  = 1280;
+    height = 720;
+  };
+
+  graphics = {
+    # The adapater id to initialize the render-device with.
+    adapater_id = 0;
+
+    # The resolution to boot at.
+    resolution = {
+      width  = 1280;
+      height = 720;
+    };
+
+    # If true the application boots into a fullscreen.
+    fullscreen = false;
+
+    # If true the main swap-chain should synchronize buffer flips.
+    vertical_sync = true;
+  };
+
+  save_manager = {
+    # The directory to read and write saves.
+    directory = "%APPDATA%/lwe/saves";
+  };
+};

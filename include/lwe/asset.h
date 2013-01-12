@@ -44,18 +44,31 @@ typedef lwe_asset_t* (*lwe_asset_type_load_t)(
 typedef void (*lwe_asset_type_unload_t)(
     lwe_asset_t* asset );
 
+typedef struct lwe_asset_compile_data_t {
+  lwe_const_str_t data;
+  lwe_const_str_t data_src;
+  lwe_const_str_t path;
+  FILE *in, *mrd, *stream;
+} lwe_asset_compile_data_t;
+
+typedef bool (*lwe_asset_type_compile_t)(
+    lwe_type_id_t type_id,
+    lwe_asset_compile_data_t* acd );
+
 struct lwe_asset_type_t {
   lwe_type_id_t   type_id;
   lwe_const_str_t assoc_ext;
   lwe_asset_type_load_t load;
   lwe_asset_type_unload_t unload;
+  lwe_asset_type_compile_t compile;
 };
 
 extern lwe_asset_type_t* lwe_asset_register_type(
   lwe_type_id_t type_id,
   lwe_const_str_t assoc_ext,
   lwe_asset_type_load_t load,
-  lwe_asset_type_unload_t unload );
+  lwe_asset_type_unload_t unload,
+  lwe_asset_type_compile_t compile );
 
 extern lwe_type_id_t lwe_asset_path_to_type_id(
   lwe_const_str_t path );
@@ -67,7 +80,7 @@ extern lwe_asset_type_t* lwe_asset_type_id_to_type(
   lwe_type_id_t type_id );
 
 typedef enum lwe_asset_type_id_t {
-  LWE_ASSET_TYPE_ID_FORCE_INVALID = 0x00000000u,
+  LWE_ASSET_TYPE_ID_INVALID       = 0x00000000u,
   LWE_ASSET_TYPE_ID_FORCE_UINT32  = 0xFFFFFFFFu,
   LWE_ASSET_TYPE_ID_TEXTURE       = 0x00000001u,
   LWE_ASSET_TYPE_ID_VERTEX_SHADER = 0x00000002u,
@@ -75,5 +88,7 @@ typedef enum lwe_asset_type_id_t {
   LWE_ASSET_TYPE_ID_MATERIAL      = 0x00000004u,
   LWE_ASSET_TYPE_ID_MODEL         = 0x00000005u
 } lwe_asset_type_id_t;
+
+extern void lwe_asset_register_types();
 
 #endif // _LWE_ASSET_H_

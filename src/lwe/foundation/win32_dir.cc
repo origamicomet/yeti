@@ -22,19 +22,11 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <lwe/foundation/log.h>
+#include <lwe/foundation/dir.h>
+#include <lwe/foundation/platforms/windows.h>
 
-#include <stdio.h>
-#include <stdarg.h>
-
-void lwe_log( const char* format, ... )
+bool lwe_mkdir(
+  lwe_const_str_t path )
 {
-  // Redirect stdout to a file and remove buffering:
-  static const FILE* __unused = freopen("log.txt", "wb", stdout);
-  static const int __unused1 = setvbuf(stdout, NULL, _IONBF, 0);
-
-  va_list va;
-  va_start(va, format);
-  vfprintf(stdout, format, va);
-  va_end(va);
+  return CreateDirectory(path, NULL);
 }

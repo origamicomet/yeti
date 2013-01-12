@@ -1,5 +1,7 @@
-group name = deferred
-shader vertex = shaders/deferred/static_mesh.shader
-shader pixel = shaders/deferred/static_mesh.shader
-texture diffuse = textures/checker_diffuse.texture
-texture specular = textures/checker_specular.texture
+@include "materials/static_mesh.template"
+
+textures = (
+  "textures/not_found_diffuse.texture",
+  "textures/not_found_normal.texture",
+  "textures/not_found_properties.texture"
+);

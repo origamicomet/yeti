@@ -26,6 +26,13 @@ function collect_build_info()
   })
 end
 
+function copy_bins( dep )
+  local files = os.matchfiles(string.format("../deps/%s/bin/%s/**.dll", dep, build_info.build_dir))
+  for i,v in ipairs(files) do
+    os.copyfile(v, string.format("%s/bin/%s", build_info.build_dir, path.getname(v)))
+  end
+end
+
 local dispatch = {}
 
 dispatch.gmake = function()
@@ -51,6 +58,8 @@ end
 dispatch.build = function()
   build_info = collect_build_info()
 
+  os.mkdir(string.format("%s/bin", build_info.build_dir))
+
   solution("lwe")
     location(build_info.build_dir)
     configurations({ "debug", "development", "release" })
@@ -58,6 +67,8 @@ dispatch.build = function()
     project("engine")
       kind("WindowedApp")
       language("C++")
+      debugdir("../")
+      debugargs("--compile")
 
       objdir(string.format("%s/obj/lwe", build_info.build_dir))
       targetdir(string.format("%s/bin", build_info.build_dir))
@@ -79,6 +90,21 @@ dispatch.build = function()
       configuration("windows")
         links("DbgHelp")
         files("../src/**.rc")
+        includedirs("../deps/libconfig-1.4.9/include")
+        libdirs(string.format("../deps/libconfig-1.4.9/lib/%s", build_info.build_dir))
+
+        if build_info.platform == "windows" then
+          copy_bins("libconfig-1.4.9")
+        end
+
+      configuration({ "windows", "debug" })
+        links("libconfig-dbg")
+
+      configuration({ "windows", "not debug" })
+        links("libconfig")
+
+      configuration({ "macosx", "linux" })
+        links("libconfig")
 
       configuration("not windows")
         excludes("../src/**/win32_*.cc");

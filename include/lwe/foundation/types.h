@@ -53,6 +53,14 @@ typedef enum lwe_seek_origin_t {
   LWE_SEEK_ORIGIN_END     = 0x00000003u
 } lwe_seek_origin_t;
 
-#define LWE_HASH_FORMAT "#08X"
+#define LWE_HASH_FORMAT "08x"
+
+#ifndef FALSE
+  #define FALSE 0
+#endif
+
+#ifndef TRUE
+  #define TRUE 1
+#endif
 
 #endif // _LWE_FOUNDATION_TYPES_H_

@@ -103,12 +103,25 @@ static void lwe_pixel_shader_unload(
   lwe_free((void*)pixel_shader);
 }
 
+static bool lwe_pixel_shader_compile(
+  lwe_type_id_t type_id,
+  lwe_asset_compile_data_t* acd )
+{
+  lwe_assert(type_id == LWE_ASSET_TYPE_ID_PIXEL_SHADER);
+  lwe_assert(acd != NULL);
+
+  lwe_log("  > Pixel shader compilation is not yet supported.\n");
+
+  return FALSE;
+}
+
 void lwe_pixel_shader_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_PIXEL_SHADER,
-    "pixel_shader",
+    "ps",
     &lwe_pixel_shader_load,
-    &lwe_pixel_shader_unload
+    &lwe_pixel_shader_unload,
+    &lwe_pixel_shader_compile
   );
 }

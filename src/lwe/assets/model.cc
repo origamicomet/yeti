@@ -124,12 +124,24 @@ static void lwe_model_unload(
   lwe_free((void*)model);
 }
 
+static bool lwe_model_compile(
+  lwe_type_id_t type_id,
+  lwe_asset_compile_data_t* acd )
+{
+  lwe_assert(type_id == LWE_ASSET_TYPE_ID_MODEL);
+  lwe_assert(acd != NULL);
+
+  lwe_log("  > Model compilation not yet supported.\n");
+  return FALSE;
+}
+
 void lwe_model_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_MODEL,
     "model",
     &lwe_model_load,
-    &lwe_model_unload
+    &lwe_model_unload,
+    &lwe_model_compile
   );
 }

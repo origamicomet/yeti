@@ -22,19 +22,20 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <lwe/foundation/log.h>
+#ifndef _LWE_ASSET_COMPILER_H_
+#define _LWE_ASSET_COMPILER_H_
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <lwe/foundation.h>
 
-void lwe_log( const char* format, ... )
-{
-  // Redirect stdout to a file and remove buffering:
-  static const FILE* __unused = freopen("log.txt", "wb", stdout);
-  static const int __unused1 = setvbuf(stdout, NULL, _IONBF, 0);
+/// Compiles the specified asset.
+extern void lwe_asset_compiler_compile(
+  lwe_const_str_t data,
+  lwe_const_str_t data_src,
+  lwe_const_str_t path );
 
-  va_list va;
-  va_start(va, format);
-  vfprintf(stdout, format, va);
-  va_end(va);
-}
+/// Recursively compiles assets in a directory.
+extern void lwe_asset_compiler_compile_dir(
+  lwe_const_str_t data,
+  lwe_const_str_t data_src );
+
+#endif // _LWE_ASSET_COMPILER_H_

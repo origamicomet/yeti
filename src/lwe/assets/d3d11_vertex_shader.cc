@@ -145,12 +145,25 @@ static void lwe_vertex_shader_unload(
   lwe_free((void*)vertex_shader);
 }
 
+static bool lwe_vertex_shader_compile(
+  lwe_type_id_t type_id,
+  lwe_asset_compile_data_t* acd )
+{
+  lwe_assert(type_id == LWE_ASSET_TYPE_ID_VERTEX_SHADER);
+  lwe_assert(acd != NULL);
+
+  lwe_log("  > Vertex shader compilation is not yet supported.\n");
+
+  return FALSE;
+}
+
 void lwe_vertex_shader_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_VERTEX_SHADER,
-    "vertex_shader",
+    "vs",
     &lwe_vertex_shader_load,
-    &lwe_vertex_shader_unload
+    &lwe_vertex_shader_unload,
+    &lwe_vertex_shader_compile
   );
 }

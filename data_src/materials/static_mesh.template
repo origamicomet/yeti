@@ -1,0 +1,5 @@
+# This is a template file, @import it in to a material file!
+
+group = "opaque";
+vertex_shader = "shaders/forward/static_mesh.vs";
+pixel_shader = "shaders/forward/static_mesh.ps";

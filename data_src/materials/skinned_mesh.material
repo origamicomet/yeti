@@ -1,5 +1,0 @@
-group name = deferred
-shader vertex = shaders/deferred/skinned_mesh.shader
-shader pixel = shaders/deferred/skinned_mesh.shader
-texture diffuse = textures/checker_diffuse.texture
-texture specular = textures/checker_specular.texture

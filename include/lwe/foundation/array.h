@@ -69,7 +69,7 @@ LWE_INLINE T* lwe_array_index(
   lwe_size_t index )
 {
   lwe_assert(array != NULL);
-  lwe_assert(index >= array->size);
+  lwe_assert(index <= array->size);
   return &array->_internal[index];
 }
 
@@ -84,8 +84,8 @@ LWE_INLINE lwe_size_t lwe_array_push(
     lwe_array_reserve(array, 16);
 
   lwe_size_t index = array->size = array->size + 1;
-  memcpy((void*)&array->_internal[index], (void*)value, sizeof(T));
-  return index;
+  memcpy((void*)&array->_internal[index - 1], (void*)value, sizeof(T));
+  return index - 1;
 }
 
 template <typename T>

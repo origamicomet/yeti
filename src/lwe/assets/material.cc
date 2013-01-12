@@ -25,6 +25,8 @@
 #include <lwe/assets/material.h>
 #include <lwe/asset_manager.h>
 
+#include <libconfig.h>
+
 typedef struct lwe_material_blob_t {
   lwe_hash_t group;
   lwe_hash_t vertex_shader;
@@ -140,12 +142,91 @@ static void lwe_material_unload(
   lwe_free((void*)material);
 }
 
+static bool lwe_material_compile(
+  lwe_type_id_t type_id,
+  lwe_asset_compile_data_t* acd )
+{
+  lwe_assert(type_id == LWE_ASSET_TYPE_ID_MATERIAL);
+  lwe_assert(acd != NULL);
+
+  config_t cfg;
+  config_init(&cfg);
+  config_set_include_dir(&cfg, acd->data_src);
+
+  if (!config_read(&cfg, acd->in)) {
+    config_destroy(&cfg);
+    return FALSE;
+  }
+
+  lwe_str_t group = NULL;
+  if (!config_lookup_string(&cfg, "group", (const char**)&group)) {
+    lwe_log("  > Invalid group\n");
+    config_destroy(&cfg);
+    return FALSE;
+  }
+
+  lwe_str_t vertex_shader = NULL;
+  if (!config_lookup_string(&cfg, "vertex_shader", (const char**)&vertex_shader)) {
+    lwe_log("  > Invalid vertex shader\n");
+    config_destroy(&cfg);
+    return FALSE;
+  }
+
+  lwe_str_t pixel_shader = NULL;
+  if (!config_lookup_string(&cfg, "pixel_shader", (const char**)&pixel_shader)) {
+    lwe_log("  > Invalid pixel shader\n");
+    config_destroy(&cfg);
+    return FALSE;
+  }
+
+  config_setting_t* textures = config_lookup(&cfg, "textures");
+  config_setting_t* constants = config_lookup(&cfg, "constants");
+
+  lwe_material_blob_t blob;
+  blob.group = lwe_murmur_hash(group, 0);
+  blob.vertex_shader = lwe_murmur_hash(vertex_shader, 0);
+  blob.pixel_shader = lwe_murmur_hash(pixel_shader, 0);
+  blob.num_constants_bytes = 0;
+  blob.constants_offset = 0;
+  blob.num_textures = config_setting_length(textures);
+  blob.textures_offset = 0;
+
+  if (fwrite((void*)&blob, sizeof(lwe_material_blob_t), 1, acd->mrd) != 1) {
+    lwe_log("  > Unable to write to memory-resident-data\n");
+    config_destroy(&cfg);
+    return FALSE;
+  }
+
+  for (lwe_size_t i = 0; i < blob.num_textures; ++i) {
+    lwe_const_str_t texture =
+      (lwe_const_str_t)config_setting_get_string_elem(textures, i);
+
+    if (!texture) {
+      lwe_log("  > Invalid texture, id=%d\n", i);
+      config_destroy(&cfg);
+      return FALSE;
+    }
+
+    const lwe_hash_t hash = lwe_murmur_hash(texture, 0);
+
+    if (fwrite((void*)&hash, sizeof(lwe_hash_t), 1, acd->mrd) != 1) {
+      lwe_log("  > Unable to write to memory-resident-data\n");
+      config_destroy(&cfg);
+      return FALSE;
+    }
+  }
+
+  config_destroy(&cfg);
+  return TRUE;
+}
+
 void lwe_material_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_MATERIAL,
     "material",
     &lwe_material_load,
-    &lwe_material_unload
+    &lwe_material_unload,
+    &lwe_material_compile
   );
 }

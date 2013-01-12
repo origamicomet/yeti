@@ -1,3 +1,7 @@
+# Everything generates .logs :/
+**.log
+log.txt
+
 # A sublime-project is provided, so ignore the generated sublime-workspace:
 *.sublime-workspace
 

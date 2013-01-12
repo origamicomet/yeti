@@ -1,5 +1,4 @@
-// =============================================================================
-// This file is part of LWE. See readme.md for details.
+// This file is part of LWE. See README.md for more details.
 //
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 //
@@ -19,22 +18,25 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-// =============================================================================
 
-#include <lwe/foundation/log.h>
+#include "shaders/globals.inl"
 
-#include <stdio.h>
-#include <stdarg.h>
+struct VS_INPUT {
+  float3 position  : POSITION;
+  float2 tex_coord : TEXCOORD0;
+  float3 normal    : NORMAL;
+  float3 binormal  : BINORMAL;
+};
 
-void lwe_log( const char* format, ... )
+struct VS_OUTPUT {
+  float3 position  : POSITION;
+  float2 tex_coord : TEXCOORD0;
+};
+
+VS_OUTPUT vs_main( VS_INPUT IN )
 {
-  // Redirect stdout to a file and remove buffering:
-  static const FILE* __unused = freopen("log.txt", "wb", stdout);
-  static const int __unused1 = setvbuf(stdout, NULL, _IONBF, 0);
-
-  va_list va;
-  va_start(va, format);
-  vfprintf(stdout, format, va);
-  va_end(va);
+  VS_OUTPUT OUT;
+  OUT.position = mul(IN.position, Frame.model_view_projection);
+  OUT.tex_coord = IN.tex_coord;
+  return OUT;
 }

@@ -38,5 +38,20 @@ lwe_const_str_t lwe_path_find_ext(
   if (ext == path)
     return NULL;
 
-  return ext;
+  return (ext + 1);
+}
+
+lwe_const_str_t lwe_path_strip(
+  lwe_const_str_t dir,
+  lwe_const_str_t path )
+{
+  if (!dir || !path)
+    return path;
+
+  lwe_const_str_t stripped = strstr(path, dir);
+
+  if (!stripped)
+    return NULL;
+
+  return (stripped + strlen(dir));
 }

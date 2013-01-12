@@ -23,31 +23,80 @@
 // =============================================================================
 
 #include <lwe/foundation.h>
+#include <lwe/asset.h>
+#include <lwe/asset_compiler.h>
 #include <lwe/render_device.h>
 #include <lwe/window.h>
 #include <lwe/swap_chain.h>
 
-static lwe_window_t* _window = NULL;
-static lwe_swap_chain_t* _swap_chain = NULL;
+typedef void (*lwe_boot_command_t)(
+  lwe_size_t num_args,
+  lwe_const_str_t* args );
 
-int main( int argc, char** argv )
+static void _run(
+  lwe_size_t num_args,
+  lwe_const_str_t* args )
 {
+  lwe_asset_register_types();
+
+  lwe_window_t* window = NULL;
+  lwe_swap_chain_t* swap_chain = NULL;
+
   lwe_render_device_create(0);
 
-  _window = lwe_window_open(
+  window = lwe_window_open(
     "Engine", 1280, 720
   );
 
-  _swap_chain = lwe_swap_chain_create(
-    _window, 1280, 720, LWE_PIXEL_FORMAT_R8G8B8A8, false, false
+  swap_chain = lwe_swap_chain_create(
+    window, 1280, 720, LWE_PIXEL_FORMAT_R8G8B8A8, false, false
   );
 
-  lwe_window_show(_window);
+  lwe_window_show(window);
 
   while (true) {
     lwe_message_pump();
-    lwe_swap_chain_present(_swap_chain);
+    lwe_swap_chain_present(swap_chain);
+  }
+}
+
+static void _compile(
+  lwe_size_t num_args,
+  lwe_const_str_t* args )
+{
+  bool file = false;
+  lwe_str_t data = "data";
+  lwe_str_t data_src = "data_src";
+  lwe_str_t path = NULL;
+
+  for (lwe_size_t i = 0; i < num_args; ++i) {
+    if (strncmp("--data=", args[i], 7) == 0) {
+      data = &args[i][7];
+    } else if(strncmp("--data-src=", args[i], 11) == 0) {
+      data_src = &args[i][11];
+    } else if(strncmp("--path", args[i], 6) == 0) {
+      path = &args[i][6];
+      file = true;
+    }
   }
 
+  lwe_asset_register_types();
+
+  if (file)
+    lwe_asset_compiler_compile(data, data_src, path);
+  else
+    lwe_asset_compiler_compile_dir(data, data_src);
+}
+
+int main( lwe_size_t argc, lwe_const_str_t argv[] )
+{
+  lwe_boot_command_t boot_cmd = &_run;
+
+  if (argc >= 2) {
+    if (strcmp("--compile", argv[1]) == 0)
+      boot_cmd = &_compile;
+  }
+
+  boot_cmd(argc, argv);
   return EXIT_SUCCESS;
 }
