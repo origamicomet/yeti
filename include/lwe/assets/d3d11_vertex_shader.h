@@ -31,11 +31,11 @@
 #include <DXGI.h>
 #include <D3D11.h>
 
-typedef struct lwe_d3d11_vsp_t /* vertex_shader_permutation */
+typedef struct lwe_d3d11_vertex_shader_t
+  : public lwe_vertex_shader_t
 {
-  uint32_t flags;
   ID3D11InputLayout* input_layout;
   ID3D11VertexShader* vs;
-} lwe_d3d11_vsp_t;
+} lwe_d3d11_vertex_shader_t;
 
 #endif // _LWE_ASSETS_D3D11_VERTEX_SHADER_H_

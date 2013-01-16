@@ -26,13 +26,10 @@
 #define _LWE_ASSETS_PIXEL_SHADER_H_
 
 #include <lwe/asset.h>
-#include <lwe/assets/shader_permutation.h>
 
 typedef struct lwe_pixel_shader_t
   : public lwe_asset_t
 {
-  lwe_size_t num_permutations;
-  lwe_shader_permutation_t permutations[1];
 } lwe_pixel_shader_t;
 
 extern void lwe_pixel_shader_register_type();

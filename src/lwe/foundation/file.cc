@@ -22,19 +22,16 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_ASSETS_SHADER_PERMUTATION_H_
-#define _LWE_ASSETS_SHADER_PERMUTATION_H_
+#include <lwe/foundation/file.h>
+#include <lwe/foundation/preprocessor.h>
 
-// See lwe/assets/vertex_shader.h,
-//     lwe/assets/pixel_shader.h,
-//     lwe/assets/geometry_shader.h,
-//     lwe/assets/domain_shader.h,
-//     lwe/assets/hull_shader.h.,
-//     and lwe/assets/compute_shader.h.
-
-typedef struct lwe_shader_permutation_t {
-  uint32_t flags;
-  uint8_t  reserved[8];
-} lwe_shader_permutation_t;
-
-#endif // _LWE_ASSETS_SHADER_PERMUTATION_H_
+lwe_size_t lwe_file_size(
+  FILE* fh )
+{
+  lwe_assert(fh != NULL);
+  const long orig = ftell(fh);
+  fseek(fh, 0, SEEK_END);
+  const long len = ftell(fh);
+  fseek(fh, orig, SEEK_SET);
+  return (lwe_size_t)len;
+}

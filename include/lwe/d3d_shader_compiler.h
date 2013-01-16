@@ -1,4 +1,5 @@
-// This file is part of LWE. See README.md for more details.
+// =============================================================================
+// This file is part of LWE. See readme.md for details.
 //
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 //
@@ -19,10 +20,42 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+// =============================================================================
 
-cbuffer Frame : register(b0) {
-  float4x4 model_view_projection;
-  float4x4 inv_model;
-  float4x4 inv_view;
-  float4x4 inv_projection;
+#ifndef _LWE_D3D_SHADER_COMPILER_H_
+#define _LWE_D3D_SHADER_COMPILER_H_
+
+#include <lwe/foundation.h>
+#include <lwe/foundation/platforms/windows.h>
+#include <lwe/asset.h>
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#define INITGUID
+
+#include <DXGI.h>
+#include <D3D11.h>
+#include <D3Dcompiler.h>
+
+class D3DInclude
+  : public ID3DInclude
+{
+  public:
+    STDMETHOD(Open)(
+      THIS_
+      D3D_INCLUDE_TYPE include_types,
+      LPCSTR path,
+      LPCVOID /* parent_data */,
+      LPCVOID *out_buffer,
+      UINT *out_buffer_len );
+
+    STDMETHOD(Close)(
+      THIS_
+      LPCVOID buffer );
+
+  public:
+    lwe_asset_compile_data_t* acd;
 };
+
+#endif // _LWE_D3D_SHADER_COMPILER_H_

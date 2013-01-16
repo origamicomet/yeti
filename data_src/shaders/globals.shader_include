@@ -1,5 +1,4 @@
-// =============================================================================
-// This file is part of LWE. See readme.md for details.
+// This file is part of LWE. See README.md for more details.
 //
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 //
@@ -20,21 +19,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// =============================================================================
 
-#ifndef _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
-#define _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
-
-#include <lwe/foundation/platforms/windows.h>
-#include <lwe/assets/pixel_shader.h>
-
-#include <DXGI.h>
-#include <D3D11.h>
-
-typedef struct lwe_d3d11_pixel_shader_t
-  : public lwe_pixel_shader_t
-{
-  ID3D11PixelShader* ps;
-} lwe_d3d11_pixel_shader_t;
-
-#endif // _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
+cbuffer Frame : register(b0) {
+  float4x4 model_view_proj;
+  float4x4 inv_model;
+  float4x4 inv_view;
+  float4x4 inv_projection;
+};

@@ -9,5 +9,6 @@
 #include <lwe/foundation/dir.h>
 #include <lwe/foundation/digest.h>
 #include <lwe/foundation/bits.h>
+#include <lwe/foundation/file.h>
 #include <lwe/foundation/fsearch.h>
 #include <lwe/foundation/mmap.h>

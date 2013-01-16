@@ -10,8 +10,8 @@ Visual Studio
 
     i. C/C++ > Output Files:
 
-        ASM List Location = $(IntDir)/\_/\_/\_/%(RelativeDir)
-        Object File Name = $(IntDir)/\_/\_/\_/%(RelativeDir)
-        XML Documentation File Name = $(IntDir)/\_/\_/\_/%(RelativeDir)
+        ASM List Location = $(IntDir)/_/_/_/%(RelativeDir)
+        Object File Name = $(IntDir)/_/_/_/%(RelativeDir)
+        XML Documentation File Name = $(IntDir)/_/_/_/%(RelativeDir)
 
 3. Build for debug, development, and release.

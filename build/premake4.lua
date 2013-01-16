@@ -121,7 +121,9 @@ dispatch.build = function()
             excludes({ "../src/**/gcm_*.cc", "../include/**/gcm_*.h" })
 
             if build_info.platform == "windows" then
-              links({ "dxgi", "d3d11" })
+              links({ "dxgi", "d3d11", "d3dcompiler" })
+              includedirs({ "$(DXSDK_DIR)/Include" })
+              libdirs({ "$(DXSDK_DIR)/Lib/x86" })
             else
               print(string.format("Error: the render device `d3d11` is not supported on `%s`.", build_info.platform))
               os.exit()

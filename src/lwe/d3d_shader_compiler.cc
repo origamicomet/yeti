@@ -22,19 +22,44 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
-#define _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
+#include <lwe/d3d_shader_compiler.h>
 
-#include <lwe/foundation/platforms/windows.h>
-#include <lwe/assets/pixel_shader.h>
-
-#include <DXGI.h>
-#include <D3D11.h>
-
-typedef struct lwe_d3d11_pixel_shader_t
-  : public lwe_pixel_shader_t
+HRESULT D3DInclude::Open(
+  D3D_INCLUDE_TYPE include_type,
+  LPCSTR path,
+  LPCVOID /* parent_data */,
+  LPCVOID* out_buffer,
+  UINT* out_buffer_len )
 {
-  ID3D11PixelShader* ps;
-} lwe_d3d11_pixel_shader_t;
+  // What constitutes as a system directory?
+  if (include_type == D3D_INCLUDE_SYSTEM)
+    return E_NOTIMPL;
 
-#endif // _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
+  char include_path[LWE_MAX_PATH];
+  sprintf(&include_path[0], "%s/%s", acd->data_src, path);
+
+  FILE* fh = fopen(&include_path[0], "rb");
+  lwe_fail_if(!fh, "Unable to open `%s`", &path[0]);
+
+  fseek(fh, 0, SEEK_END);
+  *out_buffer_len = ftell(fh);
+  fseek(fh, 0, SEEK_SET);
+
+  *out_buffer = (LPCVOID)lwe_alloc(*out_buffer_len);
+
+  lwe_fail_if(
+    fread((void*)*out_buffer, 1, *out_buffer_len, fh) != *out_buffer_len,
+    "Unable to include `%s`, unexpected end-of-file",
+    &include_path[0]
+  );
+
+  return S_OK;
+}
+
+HRESULT D3DInclude::Close(
+  LPCVOID buffer )
+{
+  lwe_assert(buffer != NULL);
+  lwe_free((void*)buffer);
+  return S_OK;
+}

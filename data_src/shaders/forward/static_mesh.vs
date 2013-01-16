@@ -19,7 +19,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 
-#include "shaders/globals.inl"
+#include "shaders/globals.shader_include"
 
 struct VS_INPUT {
   float3 position  : POSITION;
@@ -29,14 +29,14 @@ struct VS_INPUT {
 };
 
 struct VS_OUTPUT {
-  float3 position  : POSITION;
+  float4 position  : POSITION;
   float2 tex_coord : TEXCOORD0;
 };
 
 VS_OUTPUT vs_main( VS_INPUT IN )
 {
   VS_OUTPUT OUT;
-  OUT.position = mul(IN.position, Frame.model_view_projection);
+  OUT.position = mul(IN.position, model_view_proj);
   OUT.tex_coord = IN.tex_coord;
   return OUT;
 }

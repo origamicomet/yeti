@@ -27,13 +27,11 @@
 
 #include <lwe/asset.h>
 #include <lwe/vertex_declaration.h>
-#include <lwe/assets/shader_permutation.h>
 
 typedef struct lwe_vertex_shader_t
   : public lwe_asset_t
 {
-  lwe_size_t num_permutations;
-  lwe_shader_permutation_t permutations[1];
+  lwe_vertex_declaration_t vertex_decl;
 } lwe_vertex_shader_t;
 
 extern void lwe_vertex_shader_register_type();

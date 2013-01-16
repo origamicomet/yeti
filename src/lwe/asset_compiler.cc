@@ -134,7 +134,7 @@ void lwe_asset_compiler_compile_dir(
   lwe_assert(data != NULL);
   lwe_assert(data_src != NULL);
 
-  lwe_log("\nStarting asset compile...\n\n >  data=`%s`\n >  data_src`%s`\n\n", data, data_src);
+  lwe_log("\nStarting asset compile...\n\n >  data=`%s`\n >  data_src=`%s`\n\n", data, data_src);
 
   {
     char dir[LWE_MAX_PATH];

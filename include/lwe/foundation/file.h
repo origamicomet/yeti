@@ -22,19 +22,15 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
-#define _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
+#ifndef _LWE_FOUNDATION_FILE_H_
+#define _LWE_FOUNDATION_FILE_H_
 
-#include <lwe/foundation/platforms/windows.h>
-#include <lwe/assets/pixel_shader.h>
+#include <lwe/foundation/types.h>
 
-#include <DXGI.h>
-#include <D3D11.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-typedef struct lwe_d3d11_pixel_shader_t
-  : public lwe_pixel_shader_t
-{
-  ID3D11PixelShader* ps;
-} lwe_d3d11_pixel_shader_t;
+extern lwe_size_t lwe_file_size(
+  FILE* fh );
 
-#endif // _LWE_ASSETS_D3D11_PIXEL_SHADER_H_
+#endif // _LWE_FOUNDATION_FILE_H_

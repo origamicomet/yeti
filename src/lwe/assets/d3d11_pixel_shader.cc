@@ -24,15 +24,11 @@
 
 #include <lwe/assets/d3d11_pixel_shader.h>
 #include <lwe/d3d11_render_device.h>
-
-typedef struct lwe_psbp_t /* pixel_shader_blob_permutation */ {
-  uint32_t flags;
-  lwe_size_t byte_code_len;
-  uint8_t byte_code[1];
-} lwe_psbp_t;
+#include <lwe/d3d_shader_compiler.h>
 
 typedef struct lwe_pixel_shader_blob_t {
-  lwe_size_t num_permutations;
+  lwe_size_t byte_code_len;
+  uint8_t byte_code[1];
 } lwe_pixel_shader_blob_t;
 
 static lwe_asset_t* lwe_pixel_shader_load(
@@ -47,41 +43,21 @@ static lwe_asset_t* lwe_pixel_shader_load(
   lwe_pixel_shader_blob_t* ps_blob =
     (lwe_pixel_shader_blob_t*)(blob + 0);
 
-  lwe_pixel_shader_t* pixel_shader =
-    (lwe_pixel_shader_t*)lwe_alloc(
-      sizeof(lwe_pixel_shader_t) +
-      (ps_blob->num_permutations - 1) * sizeof(lwe_shader_permutation_t)
-    );
+  lwe_d3d11_pixel_shader_t* pixel_shader =
+    (lwe_d3d11_pixel_shader_t*)lwe_alloc(sizeof(lwe_d3d11_pixel_shader_t));
 
-  pixel_shader->num_permutations = ps_blob->num_permutations;
+  HRESULT hr;
+  lwe_fail_if(FAILED(
+    hr = _d3d11_device->CreatePixelShader(
+      (const void*)&ps_blob->byte_code[0],
+      ps_blob->byte_code_len,
+      NULL,
+      &pixel_shader->ps
+    )),
 
-  lwe_psbp_t* permutation =
-    (lwe_psbp_t*)(blob + sizeof(lwe_pixel_shader_blob_t));
-
-  for (lwe_size_t i = 0; i < pixel_shader->num_permutations; ++i) {
-    lwe_d3d11_psp_t* psp = (lwe_d3d11_psp_t*)&pixel_shader->permutations[i];
-    psp->flags = permutation->flags;
-
-    HRESULT hr;
-    lwe_fail_if(FAILED(
-      hr = _d3d11_device->CreatePixelShader(
-      (const void*)&permutation->byte_code[0],
-        permutation->byte_code_len,
-        NULL,
-        &psp->ps
-      )),
-
-      "ID3D11Device::CreatePixelShader failed, hr=%#08X",
-      hr
-    );
-
-    permutation =
-      (lwe_psbp_t*)(
-        ((uint8_t*)permutation) +
-        sizeof(lwe_psbp_t)
-        + permutation->byte_code_len - 1
-      );
-  }
+    "ID3D11Device::CreatePixelShader failed, hr=%#08X",
+    hr
+  );
 
   lwe_asset_stream_close(stream);
   return (lwe_asset_t*)pixel_shader;
@@ -93,12 +69,10 @@ static void lwe_pixel_shader_unload(
   lwe_assert(asset != NULL);
   lwe_assert(asset->type_id == LWE_ASSET_TYPE_ID_PIXEL_SHADER);
 
-  lwe_pixel_shader_t* pixel_shader = (lwe_pixel_shader_t*)asset;
+  lwe_d3d11_pixel_shader_t* pixel_shader =
+	(lwe_d3d11_pixel_shader_t*)asset;
 
-  for (lwe_size_t i = 0; i < pixel_shader->num_permutations; ++i) {
-    lwe_d3d11_psp_t* psp = (lwe_d3d11_psp_t*)&pixel_shader->permutations[i];
-    psp->ps->Release();
-  }
+  pixel_shader->ps->Release();
 
   lwe_free((void*)pixel_shader);
 }
@@ -110,9 +84,83 @@ static bool lwe_pixel_shader_compile(
   lwe_assert(type_id == LWE_ASSET_TYPE_ID_PIXEL_SHADER);
   lwe_assert(acd != NULL);
 
-  lwe_log("  > Pixel shader compilation is not yet supported.\n");
+  const lwe_size_t src_len = lwe_file_size(acd->in);
+  void* src = lwe_alloc(src_len);
 
-  return FALSE;
+  if (fread(src, 1, src_len, acd->in) != src_len) {
+    lwe_log("  > Unexpected end-of-file!\n");
+    lwe_free(src);
+    return FALSE;
+  }
+
+  const D3D_SHADER_MACRO defines[] = {
+    { "PIXEL_SHADER", "1" },
+    { "D3D11",        "1" },
+    { NULL, NULL },
+  };
+
+  D3DInclude include;
+  include.acd = acd;
+
+#if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
+  static const UINT flags =
+    D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY |
+    D3DCOMPILE_OPTIMIZATION_LEVEL0 |
+    D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
+#else
+  static const UINT flags =
+    D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY |
+    D3DCOMPILE_OPTIMIZATION_LEVEL3 |
+    D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
+#endif
+
+  ID3DBlob* blob = NULL;
+  ID3DBlob* error_msg_blob = NULL;
+
+  HRESULT hr = D3DCompile(
+    src, src_len,
+    acd->path,
+    &defines[0],
+    &include,
+    "ps_main",
+    "ps_4_0",
+    flags, 0,
+    &blob,
+    &error_msg_blob
+  );
+
+  lwe_free(src);
+
+  if (FAILED(hr)) {
+    lwe_log(
+      "  > Compiler Error (hr=%#08X):\n\n    %s\n",
+      hr, error_msg_blob->GetBufferPointer()
+    );
+
+    error_msg_blob->Release();
+    return FALSE;
+  }
+
+  lwe_pixel_shader_blob_t ps_blob;
+  ps_blob.byte_code_len = blob->GetBufferSize();
+
+  static const lwe_size_t ps_blob_size =
+    sizeof(lwe_pixel_shader_blob_t) - sizeof(uint8_t);
+
+  if (fwrite((void*)&ps_blob, 1, ps_blob_size, acd->mrd) != ps_blob_size) {
+    lwe_log("  > Unable to write memory-resident data!\n");
+    blob->Release();
+    return FALSE;
+  }
+
+  if (fwrite((void*)blob->GetBufferPointer(), 1, blob->GetBufferSize(), acd->mrd) != blob->GetBufferSize()) {
+    lwe_log("  > Unable to write memory-resident data!\n");
+    blob->Release();
+    return FALSE;
+  }
+
+  blob->Release();
+  return TRUE;
 }
 
 void lwe_pixel_shader_register_type()
