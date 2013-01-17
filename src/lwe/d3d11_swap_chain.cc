@@ -23,14 +23,15 @@
 // =============================================================================
 
 #include <lwe/d3d11_swap_chain.h>
+#include <lwe/d3d11_render_target.h>
 #include <lwe/d3d11_pixel_format.h>
 #include <lwe/d3d11_render_device.h>
 
 lwe_swap_chain_t* lwe_swap_chain_create(
   lwe_window_t* window,
+  lwe_pixel_format_t pixel_format,
   uint32_t width,
   uint32_t height,
-  lwe_pixel_format_t pixel_format,
   bool fullscreen,
   bool vsync )
 {
@@ -41,11 +42,14 @@ lwe_swap_chain_t* lwe_swap_chain_create(
     (lwe_d3d11_swap_chain_t*)lwe_alloc(sizeof(lwe_d3d11_swap_chain_t));
 
   swap_chain->window = window;
-  swap_chain->width = width;
-  swap_chain->height = height;
-  swap_chain->pixel_format = pixel_format;
   swap_chain->fullscreen = fullscreen;
   swap_chain->vsync = vsync;
+
+  lwe_d3d11_render_target_t* render_target =
+    (lwe_d3d11_render_target_t*)lwe_alloc(sizeof(lwe_d3d11_render_target_t));
+
+  swap_chain->render_target =
+    (lwe_render_target_t*)render_target;
 
   DXGI_SWAP_CHAIN_DESC scd;
   scd.BufferDesc.Width = width;
@@ -88,11 +92,17 @@ lwe_swap_chain_t* lwe_swap_chain_create(
     "IDXGISwapChain::GetBuffer failed, hr=%#08X", hr
   );
 
+  render_target->pixel_format = pixel_format;
+  render_target->width = width;
+  render_target->height = height;
+  render_target->texture = NULL;
+  render_target->srv = NULL;
+
   lwe_fail_if(FAILED(
     hr = _d3d11_device->CreateRenderTargetView(
       color_buffer,
       NULL,
-      &swap_chain->rtv
+      &render_target->rtv
     )),
 
     "ID3D11Device::CreateRenderTargetView failed, hr=%#08X", hr
@@ -130,16 +140,6 @@ void lwe_swap_chain_toggle_vsync(
   lwe_fail("Currently not implemented.");
 }
 
-void lwe_swap_chain_present(
-  lwe_swap_chain_t* swap_chain_ )
-{
-  lwe_assert(swap_chain_ != NULL);
-
-  lwe_d3d11_swap_chain_t* swap_chain = (lwe_d3d11_swap_chain_t*)swap_chain_;
-
-  swap_chain->swap_chain->Present(0, 0);
-}
-
 void lwe_swap_chain_destroy(
   lwe_swap_chain_t* swap_chain_ )
 {
@@ -147,8 +147,12 @@ void lwe_swap_chain_destroy(
 
   lwe_d3d11_swap_chain_t* swap_chain = (lwe_d3d11_swap_chain_t*)swap_chain_;
 
-  swap_chain->rtv->Release();
-  swap_chain->swap_chain->Release();
+  lwe_d3d11_render_target_t* render_target =
+    (lwe_d3d11_render_target_t*)swap_chain->render_target;
 
+  render_target->rtv->Release();
+  lwe_free((void*)render_target);
+
+  swap_chain->swap_chain->Release();
   lwe_free((void*)swap_chain);
 }

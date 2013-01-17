@@ -22,24 +22,14 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_RENDER_DEVICE_H_
-#define _LWE_RENDER_DEVICE_H_
+#ifndef _LWE_VIEWPORT_H_
+#define _LWE_VIEWPORT_H_
 
 #include <lwe/foundation.h>
-#include <lwe/render_command.h>
-#include <lwe/render_command_stream.h>
 
-struct lwe_swap_chain_t;
-struct lwe_constant_buffer_t;
+typedef struct lwe_viewport_t {
+  float min_x, min_y;
+  float max_x, max_y;
+} lwe_viewport_t;
 
-extern void lwe_render_device_create(
-  uint32_t adapter_id );
-
-extern void lwe_render_device_dispatch(
-  lwe_size_t num_constant_buffers,
-  struct lwe_constant_buffer_t** constant_buffers,
-  struct lwe_swap_chain_t* swap_chain,
-  lwe_size_t num_streams,
-  const lwe_render_cmd_stream_t** streams );
-
-#endif // _LWE_RENDER_DEVICE_H_
+#endif // _LWE_VIEWPORT_H_

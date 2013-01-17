@@ -22,24 +22,44 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_RENDER_DEVICE_H_
-#define _LWE_RENDER_DEVICE_H_
+#ifndef _LWE_RENDER_COMMAND_STREAM_H_
+#define _LWE_RENDER_COMMAND_STREAM_H_
 
 #include <lwe/foundation.h>
 #include <lwe/render_command.h>
-#include <lwe/render_command_stream.h>
 
-struct lwe_swap_chain_t;
-struct lwe_constant_buffer_t;
+typedef struct lwe_render_cmd_stream_t {
+  lwe_size_t num_keys;
+  lwe_render_cmd_sort_key_t* keys;
+  lwe_size_t cmd_buffer_size;
+  uint8_t* cmd_buffer;
+  lwe_offset_t next_key;
+  lwe_offset_t next_cmd_offset;
+} lwe_render_cmd_stream_t;
 
-extern void lwe_render_device_create(
-  uint32_t adapter_id );
+extern lwe_render_cmd_stream_t* lwe_render_cmd_stream_create(
+  lwe_size_t num_keys,
+  lwe_size_t buffer_size );
 
-extern void lwe_render_device_dispatch(
-  lwe_size_t num_constant_buffers,
-  struct lwe_constant_buffer_t** constant_buffers,
-  struct lwe_swap_chain_t* swap_chain,
-  lwe_size_t num_streams,
-  const lwe_render_cmd_stream_t** streams );
+extern lwe_render_cmd_sort_key_t* lwe_render_cmd_stream_set_render_targets(
+  lwe_render_cmd_stream_t* cmd_stream,
+  lwe_size_t num_render_targets,
+  lwe_render_target_t** render_targets,
+  lwe_depth_stencil_target_t* depth_stencil_target );
 
-#endif // _LWE_RENDER_DEVICE_H_
+extern lwe_render_cmd_sort_key_t* lwe_render_cmd_stream_clear(
+  lwe_render_cmd_stream_t* cmd_stream,
+  bool clear_render_targets,
+  const float* rgba,
+  bool clear_depth_target,
+  float depth,
+  bool clear_stencil_target,
+  uint32_t stencil );
+
+extern lwe_render_cmd_sort_key_t* lwe_render_cmd_stream_present(
+  lwe_render_cmd_stream_t* cmd_stream );
+
+extern void lwe_render_cmd_stream_destroy(
+  lwe_render_cmd_stream_t* cmd_stream );
+
+#endif // _LWE_RENDER_COMMAND_STREAM_H_

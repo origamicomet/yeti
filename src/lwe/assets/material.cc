@@ -117,6 +117,8 @@ static lwe_asset_t* lwe_material_load(
         material_blob->num_constants_bytes,
         constants
       );
+  } else {
+    material->constants = NULL;
   }
 
   lwe_asset_stream_close(stream);

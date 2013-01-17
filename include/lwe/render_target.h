@@ -22,24 +22,24 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_RENDER_DEVICE_H_
-#define _LWE_RENDER_DEVICE_H_
+#ifndef _LWE_RENDER_TARGET_H_
+#define _LWE_RENDER_TARGET_H_
 
 #include <lwe/foundation.h>
-#include <lwe/render_command.h>
-#include <lwe/render_command_stream.h>
+#include <lwe/pixel_format.h>
 
-struct lwe_swap_chain_t;
-struct lwe_constant_buffer_t;
+typedef struct lwe_render_target_t {
+  lwe_pixel_format_t pixel_format;
+  uint32_t width;
+  uint32_t height;
+} lwe_render_target_t;
 
-extern void lwe_render_device_create(
-  uint32_t adapter_id );
+extern lwe_render_target_t* lwe_render_target_create(
+  lwe_pixel_format_t pixel_format,
+  uint32_t width,
+  uint32_t height );
 
-extern void lwe_render_device_dispatch(
-  lwe_size_t num_constant_buffers,
-  struct lwe_constant_buffer_t** constant_buffers,
-  struct lwe_swap_chain_t* swap_chain,
-  lwe_size_t num_streams,
-  const lwe_render_cmd_stream_t** streams );
+extern void lwe_render_target_destroy(
+  lwe_render_target_t* render_target );
 
-#endif // _LWE_RENDER_DEVICE_H_
+#endif // _LWE_RENDER_TARGET_H_

@@ -22,24 +22,21 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_RENDER_DEVICE_H_
-#define _LWE_RENDER_DEVICE_H_
+#ifndef _LWE_D3D11_DEPTH_STENCIL_TARGET_H_
+#define _LWE_D3D11_DEPTH_STENCIL_TARGET_H_
 
-#include <lwe/foundation.h>
-#include <lwe/render_command.h>
-#include <lwe/render_command_stream.h>
+#include <lwe/foundation/platforms/windows.h>
+#include <lwe/depth_stencil_target.h>
 
-struct lwe_swap_chain_t;
-struct lwe_constant_buffer_t;
+#include <DXGI.h>
+#include <D3D11.h>
 
-extern void lwe_render_device_create(
-  uint32_t adapter_id );
+typedef struct lwe_d3d11_depth_stencil_target_t
+  : public lwe_depth_stencil_target_t
+{
+  ID3D11Texture2D* texture;
+  ID3D11DepthStencilView* dstv;
+  ID3D11ShaderResourceView* srv;
+} lwe_d3d11_depth_stencil_target_t;
 
-extern void lwe_render_device_dispatch(
-  lwe_size_t num_constant_buffers,
-  struct lwe_constant_buffer_t** constant_buffers,
-  struct lwe_swap_chain_t* swap_chain,
-  lwe_size_t num_streams,
-  const lwe_render_cmd_stream_t** streams );
-
-#endif // _LWE_RENDER_DEVICE_H_
+#endif // _LWE_D3D11_DEPTH_STENCIL_TARGET_H_

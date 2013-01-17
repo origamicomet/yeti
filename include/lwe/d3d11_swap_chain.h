@@ -34,8 +34,7 @@
 typedef struct lwe_d3d11_swap_chain_t
   : public lwe_swap_chain_t
 {
-  IDXGISwapChain*         swap_chain;
-  ID3D11RenderTargetView* rtv;
+  IDXGISwapChain* swap_chain;
 } lwe_d3d11_swap_chain_t;
 
 #endif // _LWE_D3D11_SWAP_CHAIN_H_

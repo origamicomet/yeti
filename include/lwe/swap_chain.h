@@ -29,20 +29,20 @@
 #include <lwe/window.h>
 #include <lwe/pixel_format.h>
 
+struct lwe_render_target_t;
+
 typedef struct lwe_swap_chain_t {
   lwe_window_t* window;
-  uint32_t width;
-  uint32_t height;
-  lwe_pixel_format_t pixel_format;
   bool fullscreen;
   bool vsync;
+  struct lwe_render_target_t* render_target;
 } lwe_swap_chain_t;
 
 extern lwe_swap_chain_t* lwe_swap_chain_create(
   lwe_window_t* window,
+  lwe_pixel_format_t pixel_format,
   uint32_t width,
   uint32_t height,
-  lwe_pixel_format_t pixel_format,
   bool fullscreen,
   bool vsync );
 
@@ -58,9 +58,6 @@ extern void lwe_swap_chain_toggle_fullscreen(
 extern void lwe_swap_chain_toggle_vsync(
   lwe_swap_chain_t* swap_chain,
   bool vsync );
-
-extern void lwe_swap_chain_present(
-  lwe_swap_chain_t* swap_chain );
 
 extern void lwe_swap_chain_destroy(
   lwe_swap_chain_t* swap_chain );
