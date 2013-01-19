@@ -29,7 +29,7 @@
 #include <lwe/vertex_declaration.h>
 #include <lwe/viewport.h>
 
-struct lwe_swap_chain;
+struct lwe_swap_chain_t;
 struct lwe_render_target_t;
 struct lwe_depth_stencil_target_t;
 struct lwe_index_buffer_t;
@@ -83,13 +83,16 @@ typedef struct lwe_set_viewports_cmd_t
   lwe_viewport_t viewports[1];
 } lwe_set_viewports_cmd_t;
 
+typedef enum lwe_clear_flags_t {
+  LWE_CLEAR_COLOR   = (1 << 0),
+  LWE_CLEAR_DEPTH   = (1 << 1),
+  LWE_CLEAR_STENCIL = (1 << 2)
+} lwe_clear_flags_t;
+
 typedef struct lwe_clear_cmd_t
   : public lwe_render_cmd_t
 {
-  bool clear_render_targets : 1;
-  bool clear_depth_target : 1;
-  bool clear_stencil_target : 1;
-  unsigned reserved : 5;
+  uint32_t flags;
   float rgba[4];
   float depth;
   uint32_t stencil;
@@ -115,6 +118,7 @@ typedef struct lwe_draw_cmd_t
 typedef struct lwe_present_cmd_t
   : public lwe_render_cmd_t
 {
+  lwe_swap_chain_t* swap_chain;
 } lwe_present_cmd_t;
 
 #endif // _LWE_RENDER_COMMAND_H_

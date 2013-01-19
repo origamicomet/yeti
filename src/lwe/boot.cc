@@ -28,7 +28,7 @@
 #include <lwe/window.h>
 #include <lwe/swap_chain.h>
 #include <lwe/render_device.h>
-#include <lwe/render_command_stream.h>
+#include <lwe/render_stream.h>
 
 typedef void (*lwe_boot_command_t)(
   lwe_size_t num_args,
@@ -53,33 +53,35 @@ static void _run(
     window, LWE_PIXEL_FORMAT_R8G8B8A8, 1280, 720, false, false
   );
 
-  lwe_render_cmd_stream_t* cmd_stream =
-    lwe_render_cmd_stream_create(256, 65535);
+  lwe_render_stream_t* render_stream =
+    lwe_render_stream_create(65535);
 
-  lwe_render_cmd_stream_set_render_targets(
-    cmd_stream,
+  const float clear_color[4] = { 1.0f, 0.0f, 0.6f, 1.0f };
+
+  lwe_render_stream_set_render_targets(
+    render_stream,
     1, &swap_chain->render_target,
     NULL
   );
 
-  const float clear_color[4] = { 1.0f, 0.0f, 0.6f, 1.0f };
-
-  lwe_render_cmd_stream_clear(
-    cmd_stream,
-    true, &clear_color[0],
-    false, 0.0f,
-    false, 0x00000000u
+  lwe_render_stream_clear(
+    render_stream,
+    LWE_CLEAR_COLOR,
+    &clear_color[0],
+    0.0f,
+    0x00000000u
   );
 
-  lwe_render_cmd_stream_present(
-    cmd_stream
+  lwe_render_stream_present(
+    render_stream,
+    swap_chain
   );
 
   lwe_window_show(window);
 
   while (true) {
     lwe_message_pump();
-    lwe_render_device_dispatch(0, NULL, swap_chain, 1, (const lwe_render_cmd_stream_t**)&cmd_stream);
+    lwe_render_device_dispatch(0, NULL, 1, (const lwe_render_stream_t**)&render_stream);
   }
 }
 

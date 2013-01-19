@@ -27,7 +27,7 @@
 
 #include <lwe/foundation.h>
 #include <lwe/render_command.h>
-#include <lwe/render_command_stream.h>
+#include <lwe/render_stream.h>
 
 struct lwe_swap_chain_t;
 struct lwe_constant_buffer_t;
@@ -38,8 +38,7 @@ extern void lwe_render_device_create(
 extern void lwe_render_device_dispatch(
   lwe_size_t num_constant_buffers,
   struct lwe_constant_buffer_t** constant_buffers,
-  struct lwe_swap_chain_t* swap_chain,
   lwe_size_t num_streams,
-  const lwe_render_cmd_stream_t** streams );
+  const lwe_render_stream_t** streams );
 
 #endif // _LWE_RENDER_DEVICE_H_

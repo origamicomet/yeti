@@ -22,44 +22,39 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_RENDER_COMMAND_STREAM_H_
-#define _LWE_RENDER_COMMAND_STREAM_H_
+#ifndef _LWE_RENDER_STREAM_H_
+#define _LWE_RENDER_STREAM_H_
 
 #include <lwe/foundation.h>
 #include <lwe/render_command.h>
 
-typedef struct lwe_render_cmd_stream_t {
-  lwe_size_t num_keys;
-  lwe_render_cmd_sort_key_t* keys;
-  lwe_size_t cmd_buffer_size;
-  uint8_t* cmd_buffer;
-  lwe_offset_t next_key;
-  lwe_offset_t next_cmd_offset;
-} lwe_render_cmd_stream_t;
+typedef struct lwe_render_stream_t {
+  lwe_size_t size;
+  lwe_offset_t next_command;
+  uint8_t buffer[1];
+} lwe_render_stream_t;
 
-extern lwe_render_cmd_stream_t* lwe_render_cmd_stream_create(
-  lwe_size_t num_keys,
-  lwe_size_t buffer_size );
+extern lwe_render_stream_t* lwe_render_stream_create(
+  lwe_size_t size );
 
-extern lwe_render_cmd_sort_key_t* lwe_render_cmd_stream_set_render_targets(
-  lwe_render_cmd_stream_t* cmd_stream,
+extern void lwe_render_stream_set_render_targets(
+  lwe_render_stream_t* stream,
   lwe_size_t num_render_targets,
   lwe_render_target_t** render_targets,
   lwe_depth_stencil_target_t* depth_stencil_target );
 
-extern lwe_render_cmd_sort_key_t* lwe_render_cmd_stream_clear(
-  lwe_render_cmd_stream_t* cmd_stream,
-  bool clear_render_targets,
+extern void lwe_render_stream_clear(
+  lwe_render_stream_t* stream,
+  uint32_t flags,
   const float* rgba,
-  bool clear_depth_target,
   float depth,
-  bool clear_stencil_target,
   uint32_t stencil );
 
-extern lwe_render_cmd_sort_key_t* lwe_render_cmd_stream_present(
-  lwe_render_cmd_stream_t* cmd_stream );
+extern void lwe_render_stream_present(
+  lwe_render_stream_t* stream,
+  lwe_swap_chain_t* swap_chain );
 
-extern void lwe_render_cmd_stream_destroy(
-  lwe_render_cmd_stream_t* cmd_stream );
+extern void lwe_render_stream_destroy(
+  lwe_render_stream_t* stream );
 
-#endif // _LWE_RENDER_COMMAND_STREAM_H_
+#endif // _LWE_RENDER_STREAM_H_

@@ -90,7 +90,6 @@ void lwe_render_device_create(
 }
 
 LWE_INLINE static void _set_render_targets(
-  const lwe_render_cmd_sort_key_t sort_key,
   const lwe_set_render_targets_cmd_t* cmd )
 {
   ID3D11RenderTargetView* rtvs[8];
@@ -112,7 +111,6 @@ LWE_INLINE static void _set_render_targets(
 }
 
 LWE_INLINE static void _set_viewports(
-  const lwe_render_cmd_sort_key_t sort_key,
   const lwe_set_viewports_cmd_t* cmd )
 {
   D3D11_VIEWPORT viewports[8];
@@ -130,7 +128,6 @@ LWE_INLINE static void _set_viewports(
 }
 
 LWE_INLINE static void _clear(
-  const lwe_render_cmd_sort_key_t sort_key,
   const lwe_clear_cmd_t* cmd )
 {
   ID3D11RenderTargetView* rtvs[8];
@@ -138,7 +135,7 @@ LWE_INLINE static void _clear(
 
   _d3d11_context->OMGetRenderTargets(8, &rtvs[0], &dsv);
 
-  if (cmd->clear_render_targets) {
+  if (cmd->flags & LWE_CLEAR_COLOR) {
     for (lwe_size_t rt = 0; rt < 8; ++rt) {
       if (!rtvs[rt])
         continue;
@@ -147,23 +144,22 @@ LWE_INLINE static void _clear(
     }
   }
 
-  UINT clear_flags = 0;
+  UINT flags = 0;
 
-  if (cmd->clear_depth_target)
-    clear_flags |= D3D11_CLEAR_DEPTH;
+  if (cmd->flags & LWE_CLEAR_DEPTH)
+    flags |= D3D11_CLEAR_DEPTH;
 
-  if (cmd->clear_stencil_target)
-    clear_flags |= D3D11_CLEAR_STENCIL;
+  if (cmd->flags & LWE_CLEAR_STENCIL)
+    flags |= D3D11_CLEAR_STENCIL;
 
   if (dsv) {
     _d3d11_context->ClearDepthStencilView(
-      dsv, clear_flags, cmd->depth, cmd->stencil
+      dsv, flags, cmd->depth, cmd->stencil
     );
   }
 }
 
 LWE_INLINE static void _generate_mips(
-  const lwe_render_cmd_sort_key_t sort_key,
   const lwe_generate_mips_cmd_t* cmd )
 {
   lwe_d3d11_render_target_t* render_target =
@@ -174,7 +170,6 @@ LWE_INLINE static void _generate_mips(
 
 LWE_INLINE static void _draw(
   lwe_size_t constant_buffer_offset,
-  const lwe_render_cmd_sort_key_t sort_key,
   const lwe_draw_cmd_t* cmd )
 {
 #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
@@ -246,52 +241,87 @@ LWE_INLINE static void _draw(
 }
 
 LWE_INLINE static void _present(
-  lwe_swap_chain_t* swap_chain,
-  const lwe_render_cmd_sort_key_t sort_key,
   const lwe_present_cmd_t* cmd )
 {
-  ((lwe_d3d11_swap_chain_t*)swap_chain)->swap_chain->Present(0, 0);
+  ((lwe_d3d11_swap_chain_t*)cmd->swap_chain)->swap_chain->Present(0, 0);
 }
 
-LWE_INLINE static void _dispatch_render_command(
+LWE_INLINE static const lwe_render_cmd_t* _dispatch_render_command(
   lwe_size_t constant_buffer_offset,
-  lwe_swap_chain_t* swap_chain,
-  const lwe_render_cmd_sort_key_t sort_key,
-  const lwe_render_cmd_t* cmd )
+  const lwe_render_cmd_t* cmd_ )
 {
-  switch (cmd->type) {
-    case LWE_RENDER_COMMAND_TYPE_SET_RENDER_TARGETS:
-      _set_render_targets(sort_key, (const lwe_set_render_targets_cmd_t*)cmd);
-    break;
+  switch (cmd_->type) {
+    case LWE_RENDER_COMMAND_TYPE_SET_RENDER_TARGETS: {
+      const lwe_set_render_targets_cmd_t* cmd =
+        (const lwe_set_render_targets_cmd_t*)cmd_;
 
-    case LWE_RENDER_COMMAND_TYPE_SET_VIEWPORTS:
-      _set_viewports(sort_key, (const lwe_set_viewports_cmd_t*)cmd);
-    break;
+      _set_render_targets(cmd);
 
-    case LWE_RENDER_COMMAND_TYPE_CLEAR:
-      _clear(sort_key, (const lwe_clear_cmd_t*)cmd);
-    break;
+      return (const lwe_render_cmd_t*)(
+        ((uint8_t*)cmd_) +
+        sizeof(lwe_set_render_targets_cmd_t) +
+        (cmd->num_targets - 1) * sizeof(lwe_render_target_t*)
+      );
+    } break;
 
-    case LWE_RENDER_COMMAND_TYPE_GENERATE_MIPS:
-      _generate_mips(sort_key, (const lwe_generate_mips_cmd_t*)cmd);
-    break;
+    case LWE_RENDER_COMMAND_TYPE_SET_VIEWPORTS: {
+      const lwe_set_viewports_cmd_t* cmd =
+        (const lwe_set_viewports_cmd_t*)cmd_;
 
-    case LWE_RENDER_COMMAND_TYPE_DRAW:
-      _draw(constant_buffer_offset, sort_key, (const lwe_draw_cmd_t*)cmd);
-    break;
+      _set_viewports(cmd);
 
-    case LWE_RENDER_COMMAND_TYPE_PRESENT:
-      _present(swap_chain, sort_key, (const lwe_present_cmd_t*)cmd);
-    break;
+      return (const lwe_render_cmd_t*)(
+        ((uint8_t*)cmd_) +
+        sizeof(lwe_set_viewports_cmd_t) +
+        (cmd->num_viewports - 1) * sizeof(lwe_viewport_t)
+      );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_CLEAR: {
+      _clear((const lwe_clear_cmd_t*)cmd_);
+
+      return (const lwe_render_cmd_t*)(
+        ((uint8_t*)cmd_) +
+        sizeof(lwe_clear_cmd_t)
+      );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_GENERATE_MIPS: {
+      _generate_mips((const lwe_generate_mips_cmd_t*)cmd_);
+
+      return (const lwe_render_cmd_t*)(
+        ((uint8_t*)cmd_) +
+        sizeof(lwe_generate_mips_cmd_t)
+      );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_DRAW: {
+      _draw(constant_buffer_offset, (const lwe_draw_cmd_t*)cmd_);
+
+      return (const lwe_render_cmd_t*)(
+        ((uint8_t*)cmd_) +
+        sizeof(lwe_draw_cmd_t)
+      );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_PRESENT: {
+      _present((const lwe_present_cmd_t*)cmd_);
+
+      return (const lwe_render_cmd_t*)(
+        ((uint8_t*)cmd_) +
+        sizeof(lwe_present_cmd_t)
+      );
+    } break;
   }
+
+  return NULL;
 }
 
 void lwe_render_device_dispatch(
   lwe_size_t num_constant_buffers,
   lwe_constant_buffer_t** constant_buffers_,
-  lwe_swap_chain_t* swap_chain,
   lwe_size_t num_streams,
-  const lwe_render_cmd_stream_t** streams )
+  const lwe_render_stream_t** streams )
 {
   lwe_assert(num_streams > 0);
   lwe_assert(streams != NULL);
@@ -304,17 +334,12 @@ void lwe_render_device_dispatch(
     _d3d11_context->PSSetConstantBuffers(cb, 1, &constant_buffers[cb]->buffer);
   }
 
-  for (lwe_size_t stream = 0; stream < num_streams; ++stream) {
-    for (lwe_size_t key = 0; key < streams[stream]->next_key; ++key) {
-      const lwe_render_cmd_t* cmd =
-        (const lwe_render_cmd_t*)(
-          streams[stream]->cmd_buffer +
-          streams[stream]->keys[key].offset
-        );
+  for (lwe_size_t stream_idx = 0; stream_idx < num_streams; ++stream_idx) {
+    const uint8_t* stream = &streams[stream_idx]->buffer[0];
 
-      _dispatch_render_command(
-        num_constant_buffers, swap_chain, streams[stream]->keys[key], cmd
-      );
+    while (stream && (stream < (&streams[stream_idx]->buffer[streams[stream_idx]->next_command]))) {
+      const lwe_render_cmd_t* cmd = (const lwe_render_cmd_t*)stream;
+      stream = (uint8_t*)_dispatch_render_command(num_constant_buffers, cmd);
     }
   }
 }
