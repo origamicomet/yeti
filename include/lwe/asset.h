@@ -58,6 +58,7 @@ typedef bool (*lwe_asset_type_compile_t)(
 struct lwe_asset_type_t {
   lwe_type_id_t   type_id;
   lwe_const_str_t assoc_ext;
+  lwe_const_str_t assoc_compile_ext;
   lwe_asset_type_load_t load;
   lwe_asset_type_unload_t unload;
   lwe_asset_type_compile_t compile;
@@ -66,6 +67,7 @@ struct lwe_asset_type_t {
 extern lwe_asset_type_t* lwe_asset_register_type(
   lwe_type_id_t type_id,
   lwe_const_str_t assoc_ext,
+  lwe_const_str_t assoc_compile_ext,
   lwe_asset_type_load_t load,
   lwe_asset_type_unload_t unload,
   lwe_asset_type_compile_t compile );

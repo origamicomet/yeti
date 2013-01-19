@@ -220,22 +220,16 @@ static void lwe_d3d11_texture_unload(
   lwe_free((void*)texture);
 }
 
-static bool lwe_texture_compile(
+// See src/lwe/assets/texture.cc
+extern bool lwe_texture_compile(
   lwe_type_id_t type_id,
-  lwe_asset_compile_data_t* acd )
-{
-  lwe_assert(type_id == LWE_ASSET_TYPE_ID_TEXTURE);
-  lwe_assert(acd != NULL);
+  lwe_asset_compile_data_t* acd );
 
-  lwe_log("  > Texture compilation is not yet supported.\n");
-
-  return FALSE;
-}
 void lwe_texture_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_TEXTURE,
-    "texture",
+    "texture", "dds",
     &lwe_d3d11_texture_load,
     &lwe_d3d11_texture_unload,
     &lwe_texture_compile

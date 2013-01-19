@@ -226,7 +226,7 @@ void lwe_material_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_MATERIAL,
-    "material",
+    "material", "material",
     &lwe_material_load,
     &lwe_material_unload,
     &lwe_material_compile

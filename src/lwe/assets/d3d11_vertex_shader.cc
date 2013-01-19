@@ -303,7 +303,7 @@ void lwe_vertex_shader_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_VERTEX_SHADER,
-    "vs",
+    "vs", "vs",
     &lwe_vertex_shader_load,
     &lwe_vertex_shader_unload,
     &lwe_vertex_shader_compile

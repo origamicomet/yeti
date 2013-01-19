@@ -139,7 +139,7 @@ void lwe_model_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_MODEL,
-    "model",
+    "model", "dae",
     &lwe_model_load,
     &lwe_model_unload,
     &lwe_model_compile

@@ -38,9 +38,15 @@ static bool _compile(
   if (!type)
     return false;
 
-  lwe_const_str_t rel_path = lwe_path_strip(data_src, path);
-  lwe_fail_if(rel_path == NULL, "Unable to strip data_src from path");
-  const lwe_hash_t hash = lwe_murmur_hash((rel_path + 1), 0);
+  lwe_hash_t hash; {
+    lwe_const_str_t rel_path = lwe_path_strip(data_src, path);
+    lwe_fail_if(rel_path == NULL, "Unable to strip data_src from path");
+    char patched_path[LWE_MAX_PATH];
+    const lwe_size_t len = lwe_path_find_ext(rel_path) - rel_path;
+    strcpy(&patched_path[0], (rel_path + 1));
+    strcpy(&patched_path[len - 1], type->assoc_compile_ext);
+    hash = lwe_murmur_hash(&patched_path[0], 0);
+  }
 
   char paths[2][LWE_MAX_PATH];
   sprintf(&paths[0][0], "%s/streams/%" LWE_HASH_FORMAT ".mrd", data, hash);

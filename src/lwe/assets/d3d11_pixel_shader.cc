@@ -167,7 +167,7 @@ void lwe_pixel_shader_register_type()
 {
   lwe_asset_register_type(
     LWE_ASSET_TYPE_ID_PIXEL_SHADER,
-    "ps",
+    "ps", "ps",
     &lwe_pixel_shader_load,
     &lwe_pixel_shader_unload,
     &lwe_pixel_shader_compile
