@@ -25,6 +25,11 @@
 #include <lwe/assets/model.h>
 #include <lwe/asset_manager.h>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/mesh.h>
+#include <assimp/postprocess.h>
+
 typedef struct lwe_model_blob_t {
   uint32_t num_meshes;
 } lwe_model_blob_t;
@@ -124,6 +129,8 @@ static void lwe_model_unload(
   lwe_free((void*)model);
 }
 
+#include "assimp_stream.inl"
+
 static bool lwe_model_compile(
   lwe_type_id_t type_id,
   lwe_asset_compile_data_t* acd )
@@ -131,7 +138,141 @@ static bool lwe_model_compile(
   lwe_assert(type_id == LWE_ASSET_TYPE_ID_MODEL);
   lwe_assert(acd != NULL);
 
-  lwe_log("  > Model compilation not yet supported.\n");
+  IOSystem io_sys;
+  io_sys.acd = acd;
+
+  Assimp::Importer importer;
+  importer.SetIOHandler(&io_sys);
+
+  const aiScene* scene = importer.ReadFile(
+    acd->path,
+    aiProcess_CalcTangentSpace |
+    aiProcess_CalcTangentSpace |
+    aiProcess_JoinIdenticalVertices |
+    aiProcess_MakeLeftHanded |
+    aiProcess_Triangulate |
+    aiProcess_GenNormals |
+    aiProcess_LimitBoneWeights |
+    aiProcess_ImproveCacheLocality |
+    aiProcess_GenUVCoords |
+    aiProcess_OptimizeMeshes
+  );
+
+  if (!scene) {
+    lwe_log("  > Unable to import scene, `%s`\n", importer.GetErrorString());
+    return FALSE;
+  }
+
+  lwe_log(
+    "  > Succesfully imported scene, meshes=%u materials=%u textures=%u\n",
+    scene->mNumMeshes, scene->mNumMaterials, scene->mNumTextures
+  );
+
+  lwe_model_blob_t model_blob;
+  model_blob.num_meshes = scene->mNumMeshes;
+
+  if (fwrite((void*)&model_blob, sizeof(lwe_model_blob_t), 1, acd->mrd) != 1) {
+    lwe_log("  > Unable to write memory-resident data!\n");
+    goto failure;
+  }
+
+  for (lwe_size_t mesh_idx = 0; mesh_idx < scene->mNumMeshes; ++mesh_idx) {
+    aiMesh* mesh = scene->mMeshes[mesh_idx];
+
+    lwe_log(
+      "  > Mesh %u, num_vertices=%u num_faces=%u\n",
+      mesh_idx, mesh->mNumVertices, mesh->mNumFaces
+    );
+
+    lwe_mesh_blob_t mesh_blob;
+    mesh_blob.num_indicies = mesh->mNumFaces * 3;
+    mesh_blob.num_vertices = mesh->mNumVertices;
+    mesh_blob.vertex_decl.components = 0;
+
+    if (mesh->HasPositions())
+      mesh_blob.vertex_decl.position = 1;
+
+    if (mesh->HasNormals())
+      mesh_blob.vertex_decl.normal = 1;
+
+    if (mesh->HasTangentsAndBitangents()) {
+      mesh_blob.vertex_decl.tangent = 1;
+      mesh_blob.vertex_decl.binormal = 1;
+    }
+
+    if (mesh->HasVertexColors(0))
+      mesh_blob.vertex_decl.color0 = 1;
+
+    if (mesh->GetNumUVChannels() >= 1)
+      mesh_blob.vertex_decl.texcoord0 = 1;
+    if (mesh->GetNumUVChannels() == 2)
+      mesh_blob.vertex_decl.texcoord1 = 1;
+
+    if (mesh->HasBones()) {
+      mesh_blob.vertex_decl.boneindices = 1;
+      mesh_blob.vertex_decl.boneweights = 1;
+    }
+
+    if (!scene->mMaterials) {
+      if (mesh->HasBones())
+        mesh_blob.material = lwe_murmur_hash("materials/skinned_mesh.material", 0);
+      else
+        mesh_blob.material = lwe_murmur_hash("materials/static_mesh.material", 0);
+    } else {
+      char mat_path[LWE_MAX_PATH];
+      lwe_const_str_t rel_path = lwe_path_strip(acd->data_src, acd->path) + 1;
+      lwe_const_str_t ext = lwe_path_find_ext(rel_path);
+      const lwe_size_t len = ext - rel_path;
+      strcpy(&mat_path[0], rel_path);
+      sprintf(&mat_path[len - 1], "_%u.material", mesh->mMaterialIndex);
+      mesh_blob.material = lwe_murmur_hash(&mat_path[0], 0);
+    }
+
+    if (fwrite((void*)&mesh_blob, sizeof(lwe_mesh_blob_t), 1, acd->mrd) != 1)
+      goto failure;
+
+    for (lwe_size_t vertex = 0; vertex < mesh->mNumVertices; ++vertex) {
+      if (mesh_blob.vertex_decl.position)
+        if (fwrite((void*)&mesh->mVertices[vertex], sizeof(float), 3, acd->mrd) != 3)
+          goto failure;
+
+      if (mesh_blob.vertex_decl.color0)
+        if (fwrite((void*)&mesh->mColors[0][vertex], sizeof(float), 4, acd->mrd) != 4)
+          goto failure;
+
+      if (mesh_blob.vertex_decl.texcoord0)
+        if (fwrite((void*)&mesh->mTextureCoords[0][vertex], sizeof(float), 2, acd->mrd) != 2)
+          goto failure;
+
+      if (mesh_blob.vertex_decl.texcoord1)
+        if (fwrite((void*)&mesh->mTextureCoords[1][vertex], sizeof(float), 2, acd->mrd) != 2)
+          goto failure;
+
+      if (mesh_blob.vertex_decl.normal)
+        if (fwrite((void*)&mesh->mNormals[vertex], sizeof(float), 3, acd->mrd) != 3)
+          goto failure;
+
+      if (mesh_blob.vertex_decl.tangent)
+        if (fwrite((void*)&mesh->mTangents[vertex], sizeof(float), 3, acd->mrd) != 3)
+          goto failure;
+      
+      if (mesh_blob.vertex_decl.binormal)
+        if (fwrite((void*)&mesh->mBitangents[vertex], sizeof(float), 3, acd->mrd) != 3)
+          goto failure;
+
+      if (mesh_blob.vertex_decl.boneindices || mesh_blob.vertex_decl.boneweights)
+        goto failure;
+    }
+  }
+
+  importer.FreeScene();
+  importer.SetIOHandler(NULL);
+  return TRUE;
+
+failure:
+  lwe_log("  > Unable to write memory-resident data!\n");
+  importer.FreeScene();
+  importer.SetIOHandler(NULL);
   return FALSE;
 }
 

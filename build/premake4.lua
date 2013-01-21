@@ -74,15 +74,21 @@ dispatch.build = function()
       targetdir(string.format("%s/bin", build_info.build_dir))
       targetname("lwe")
 
+      configuration({ "debug", "development" })
+        includedirs("../deps/assimp-2.0/include")
+        libdirs(string.format("../deps/assimp-2.0/lib/%s", build_info.build_dir))
+
       configuration("debug")
         targetsuffix("-dbg")
         flags({ "Symbols" })
         defines("_DEBUG")
+        links("assimp-d")
 
       configuration("development")
         targetsuffix("-dev")
         flags({ "Symbols" })
         defines("_DEVELOPMENT")
+        links("assimp")
 
       configuration("release")
         flags({ "Optimize", "EnableSSE", "EnableSSE2" })
