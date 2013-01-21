@@ -24,6 +24,32 @@
 
 #include <lwe/pixel_format.h>
 
+lwe_const_str_t lwe_pixel_format_to_string(
+  lwe_pixel_format_t pixel_format )
+{
+  switch (pixel_format) {
+    case LWE_PIXEL_FORMAT_R8G8B8A8:
+      return "R8G8B8A8";
+
+    case LWE_PIXEL_FORMAT_R8G8B8A8_SRGB:
+      return "R8G8B8A8 (sRGB)";
+
+    case LWE_PIXEL_FORMAT_DXT1:
+      return "DXT1";
+
+    case LWE_PIXEL_FORMAT_DXT3:
+      return "DXT3";
+
+    case LWE_PIXEL_FORMAT_DXT5:
+      return "DXT5";
+
+    case LWE_PIXEL_FORMAT_D24_S8:
+      return "DS24_S8";
+  }
+
+  return "invalid";
+}
+
 lwe_size_t lwe_pixel_format_row_stride(
   lwe_pixel_format_t pixel_format,
   uint32_t width )

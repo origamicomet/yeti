@@ -44,7 +44,7 @@ typedef enum lwe_texture_flags_t {
   LWE_TEXTURE_FLAGS_DEFAULT          = 0x00000000u,
   LWE_TEXTURE_FLAGS_FORCE_UINT32     = 0xFFFFFFFFu,
 
-  LWE_TEXTURE_FLAGS_NO_MAPS          = (1u << 31u),
+  LWE_TEXTURE_FLAGS_NO_MIPS          = (1u << 31u),
   LWE_TEXTURE_FLAGS_PRECOMPUTED_MIPS = (1u << 30u),
 } lwe_texture_flags_t;
 

@@ -82,6 +82,9 @@ LWE_INLINE bool lwe_pixel_format_is_compressed(
   return (pixel_format & LWE_PIXEL_FORMAT_COMPRESSED_BIT) != 0;
 }
 
+extern lwe_const_str_t lwe_pixel_format_to_string(
+  lwe_pixel_format_t pixel_format );
+
 extern lwe_size_t lwe_pixel_format_row_stride(
   lwe_pixel_format_t pixel_format,
   uint32_t width );
