@@ -233,8 +233,9 @@ bool lwe_texture_compile(
   }
 
   lwe_log(
-    "  > pixel_format=%s is_compressed=%s\n",
+    "  > pixel_format=%s precomputed_mips=%s is_compressed=%s\n",
     lwe_pixel_format_to_string(pixel_format->lwepf),
+    (dds_header.header_flags & DDS_HEADER_FLAGS_MIPMAP) ? "true" : "false",
     lwe_pixel_format_is_compressed(pixel_format->lwepf) ? "true" : "false"
   );
 
