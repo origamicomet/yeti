@@ -76,17 +76,26 @@ static bool _compile(
     fclose(mrd);
     fclose(stream);
 
-    remove(paths[0]);
-    remove(paths[1]);
+    remove(&paths[0][0]);
+    remove(&paths[1][0]);
 
     return false;
   }
 
   lwe_log("  > Succesfully compiled\n\n");
 
+  const bool remove_mrd = (ftell(mrd) <= 0);
+  const bool remove_stream = (ftell(stream) <= 0);
+
   fclose(in);
   fclose(mrd);
   fclose(stream);
+
+  if (remove_mrd)
+    remove(&paths[0][0]);
+
+  if (remove_stream)
+    remove(&paths[1][0]);
 
   return true;
 }
