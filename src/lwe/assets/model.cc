@@ -131,6 +131,22 @@ static void lwe_model_unload(
 
 #include "assimp_stream.inl"
 
+static aiNode* _find_node_by_mesh(
+  aiNode* root,
+  uint32_t mesh )
+{
+  for (lwe_size_t child_idx = 0; child_idx < root->mNumChildren; ++child_idx) {
+    aiNode* node = _find_node_by_mesh(root->mChildren[child_idx], mesh);
+    if (node) return node;
+  }
+
+  for (lwe_size_t mesh_idx = 0; mesh_idx < root->mNumMeshes; ++mesh_idx)
+    if (root->mMeshes[mesh_idx] == mesh)
+      return root;
+
+  return NULL;
+}
+
 static bool lwe_model_compile(
   lwe_type_id_t type_id,
   lwe_asset_compile_data_t* acd )
@@ -178,10 +194,17 @@ static bool lwe_model_compile(
 
   for (lwe_size_t mesh_idx = 0; mesh_idx < scene->mNumMeshes; ++mesh_idx) {
     aiMesh* mesh = scene->mMeshes[mesh_idx];
+    aiNode* node = _find_node_by_mesh(scene->mRootNode, mesh_idx);
+
+    lwe_fail_if(
+      (!node) || (node->mName.length == 0),
+      "Unable to determine name for mesh, id=%u",
+      mesh_idx
+    );
 
     lwe_log(
-      "  > Mesh %u, num_vertices=%u num_faces=%u\n",
-      mesh_idx, mesh->mNumVertices, mesh->mNumFaces
+      "  > Mesh `%s`, id=%u num_vertices=%u num_faces=%u\n",
+      node->mName.C_Str(), mesh_idx, mesh->mNumVertices, mesh->mNumFaces
     );
 
     lwe_mesh_blob_t mesh_blob;
@@ -224,7 +247,7 @@ static bool lwe_model_compile(
       lwe_const_str_t ext = lwe_path_find_ext(rel_path);
       const lwe_size_t len = ext - rel_path;
       strcpy(&mat_path[0], rel_path);
-      sprintf(&mat_path[len - 1], "_%u.material", mesh->mMaterialIndex);
+      sprintf(&mat_path[len - 1], "_%s.material", node->mName.C_Str());
       mesh_blob.material = lwe_murmur_hash(&mat_path[0], 0);
     }
 
