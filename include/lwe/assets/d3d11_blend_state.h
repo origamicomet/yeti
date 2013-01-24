@@ -22,11 +22,19 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <lwe/foundation/dir.h>
-#include <lwe/foundation/platforms/windows.h>
+#ifndef _LWE_ASSETS_D3D11_BLEND_STATE_H_
+#define _LWE_ASSETS_D3D11_BLEND_STATE_H_
 
-bool lwe_mkdir(
-  lwe_const_str_t path )
+#include <lwe/foundation/platforms/windows.h>
+#include <lwe/assets/blend_state.h>
+
+#include <DXGI.h>
+#include <D3D11.h>
+
+typedef struct lwe_d3d11_blend_state_t :
+  public lwe_blend_state
 {
-  return (CreateDirectory(path, NULL) != FALSE);
-}
+  ID3D11BlendState* bs;
+} lwe_d3d11_blend_state_t;
+
+#endif // _LWE_ASSETS_D3D11_BLEND_STATE_H_

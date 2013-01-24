@@ -111,6 +111,7 @@ lwe_asset_type_t* lwe_asset_type_id_to_type(
 #include <lwe/assets/pixel_shader.h>
 #include <lwe/assets/material.h>
 #include <lwe/assets/model.h>
+#include <lwe/assets/blend_state.h>
 
 void lwe_asset_register_types()
 {
@@ -119,4 +120,5 @@ void lwe_asset_register_types()
   lwe_pixel_shader_register_type();
   lwe_material_register_type();
   lwe_model_register_type();
+  lwe_blend_state_register_type();
 }

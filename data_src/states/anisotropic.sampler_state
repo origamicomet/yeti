@@ -1,0 +1,7 @@
+filter = "ANISOTROPIC";
+
+address_u = "WRAP";
+address_v = "WRAP";
+address_w = "WRAP";
+
+max_anisotropy = 16;

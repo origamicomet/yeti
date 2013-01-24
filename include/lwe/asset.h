@@ -88,7 +88,8 @@ typedef enum lwe_asset_type_id_t {
   LWE_ASSET_TYPE_ID_VERTEX_SHADER = 0x00000002u,
   LWE_ASSET_TYPE_ID_PIXEL_SHADER  = 0x00000003u,
   LWE_ASSET_TYPE_ID_MATERIAL      = 0x00000004u,
-  LWE_ASSET_TYPE_ID_MODEL         = 0x00000005u
+  LWE_ASSET_TYPE_ID_MODEL         = 0x00000005u,
+  LWE_ASSET_TYPE_ID_BLEND_STATE   = 0x00000006u
 } lwe_asset_type_id_t;
 
 extern void lwe_asset_register_types();

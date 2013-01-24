@@ -22,11 +22,24 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <lwe/foundation/dir.h>
-#include <lwe/foundation/platforms/windows.h>
+#ifndef _LWE_MESH_RENDERER_H_
+#define _LWE_MESH_RENDERER_H_
 
-bool lwe_mkdir(
-  lwe_const_str_t path )
-{
-  return (CreateDirectory(path, NULL) != FALSE);
-}
+typedef struct lwe_mesh_renderer_t lwe_mesh_renderer_t;
+
+extern lwe_mesh_renderer_t* lwe_mesh_renderer_create(
+  lwe_size_t num_render_targets,
+  lwe_render_target_t** render_targets,
+  lwe_depth_stencil_target_t depth_stencil_target,
+  lwe_const_str_t group );
+
+extern void lwe_mesh_renderer_render(
+  lwe_mesh_renderer_t* mesh_renderer,
+  lwe_camera_t* camera,
+  const lwe_size_t* num_culled_objs,
+  const lwe_culled_object_t* culled_objs );
+
+extern void lwe_mesh_renderer_destroy(
+  lwe_mesh_renderer_t* mesh_renderer );
+
+#endif // _LWE_MESH_RENDERER_H_

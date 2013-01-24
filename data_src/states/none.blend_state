@@ -1,0 +1,13 @@
+enabled = false;
+
+color = {
+  src = "ONE";
+  dest = "ZERO";
+  operation = "ADD";
+};
+
+alpha = {
+  src = "ONE";
+  dest = "ZERO";
+  operation = "ADD";
+};

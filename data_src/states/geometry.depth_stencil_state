@@ -1,0 +1,19 @@
+depth_enabled = true;
+depth_writes = true;
+depth_func = "LESS";
+
+stencil_enabled = false;
+
+front_face = {
+  fail = "KEEP";
+  depth_fail = "KEEP";
+  pass = "KEEP";
+  func = "ALWAYS";
+};
+
+back_face = {
+  fail = "KEEP";
+  depth_fail = "KEEP";
+  pass = "KEEP";
+  func = "ALWAYS";
+};

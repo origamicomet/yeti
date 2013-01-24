@@ -74,7 +74,7 @@ dispatch.build = function()
       targetdir(string.format("%s/bin", build_info.build_dir))
       targetname("lwe")
 
-      configuration({ "debug", "development" })
+      configuration({ "debug or development" })
         includedirs("../deps/assimp-2.0/include")
         libdirs(string.format("../deps/assimp-2.0/lib/%s", build_info.build_dir))
 
@@ -93,11 +93,13 @@ dispatch.build = function()
       configuration("release")
         flags({ "Optimize", "EnableSSE", "EnableSSE2" })
 
+      configuration({ "windows", "debug or development" })
+        includedirs("../deps/libconfig-1.4.9/include")
+        libdirs(string.format("../deps/libconfig-1.4.9/lib/%s", build_info.build_dir))
+
       configuration("windows")
         links("DbgHelp")
         files("../src/**.rc")
-        includedirs("../deps/libconfig-1.4.9/include")
-        libdirs(string.format("../deps/libconfig-1.4.9/lib/%s", build_info.build_dir))
 
         if build_info.platform == "windows" then
           copy_bins("libconfig-1.4.9")

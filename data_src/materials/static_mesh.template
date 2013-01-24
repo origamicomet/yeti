@@ -1,5 +1,10 @@
 # This is a template file, @include it in to a material file!
 
 group = "opaque";
+
+blend_state = "states/none.blend_state";
+depth_stencil_state = "states/geometry.depth_stencil_state";
+rasterizer_state = "states/geometry.rasterizer_state";
+
 vertex_shader = "shaders/forward/static_mesh.vs";
 pixel_shader = "shaders/forward/static_mesh.ps";
