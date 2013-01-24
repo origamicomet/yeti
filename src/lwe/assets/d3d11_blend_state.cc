@@ -25,7 +25,7 @@
 #include <lwe/assets/d3d11_blend_state.h>
 #include <lwe/d3d11_render_device.h>
 
-static D3D11_BLEND lwe_blend_factor_to_d3d(
+static D3D11_BLEND _blend_factor_to_d3d(
   lwe_blend_factor_t blend_factor )
 {
   switch (blend_factor) {
@@ -56,7 +56,7 @@ static D3D11_BLEND lwe_blend_factor_to_d3d(
   lwe_fail("Invalid blend factor!\n");
 }
 
-static D3D11_BLEND_OP lwe_blend_operation_to_d3d(
+static D3D11_BLEND_OP _blend_operation_to_d3d(
   lwe_blend_operation_t blend_op )
 {
   switch (blend_op) {
@@ -93,12 +93,12 @@ static lwe_asset_t* lwe_d3d11_blend_state_load(
     &bd.RenderTarget[0];
 
   rtbd->BlendEnable = bs_blob->enabled;
-  rtbd->SrcBlend = lwe_blend_factor_to_d3d(bs_blob->color.src);
-  rtbd->DestBlend = lwe_blend_factor_to_d3d(bs_blob->color.dest);
-  rtbd->BlendOp = lwe_blend_operation_to_d3d(bs_blob->color.op);
-  rtbd->SrcBlendAlpha = lwe_blend_factor_to_d3d(bs_blob->color.src);
-  rtbd->DestBlendAlpha = lwe_blend_factor_to_d3d(bs_blob->color.dest);
-  rtbd->BlendOpAlpha = lwe_blend_operation_to_d3d(bs_blob->color.op);
+  rtbd->SrcBlend = _blend_factor_to_d3d(bs_blob->color.src);
+  rtbd->DestBlend = _blend_factor_to_d3d(bs_blob->color.dest);
+  rtbd->BlendOp = _blend_operation_to_d3d(bs_blob->color.op);
+  rtbd->SrcBlendAlpha = _blend_factor_to_d3d(bs_blob->color.src);
+  rtbd->DestBlendAlpha = _blend_factor_to_d3d(bs_blob->color.dest);
+  rtbd->BlendOpAlpha = _blend_operation_to_d3d(bs_blob->color.op);
   rtbd->RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
   lwe_d3d11_blend_state_t* blend_state =

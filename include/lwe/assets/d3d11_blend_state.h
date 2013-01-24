@@ -32,7 +32,7 @@
 #include <D3D11.h>
 
 typedef struct lwe_d3d11_blend_state_t :
-  public lwe_blend_state
+  public lwe_blend_state_t
 {
   ID3D11BlendState* bs;
 } lwe_d3d11_blend_state_t;
