@@ -113,6 +113,7 @@ lwe_asset_type_t* lwe_asset_type_id_to_type(
 #include <lwe/assets/model.h>
 #include <lwe/assets/blend_state.h>
 #include <lwe/assets/depth_stencil_state.h>
+#include <lwe/assets/rasterizer_state.h>
 
 void lwe_asset_register_types()
 {
@@ -123,4 +124,5 @@ void lwe_asset_register_types()
   lwe_model_register_type();
   lwe_blend_state_register_type();
   lwe_depth_stencil_state_register_type();
+  lwe_rasterizer_state_register_type();
 }

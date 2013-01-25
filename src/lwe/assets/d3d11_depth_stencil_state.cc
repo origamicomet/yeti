@@ -127,6 +127,7 @@ static lwe_asset_t* lwe_d3d11_depth_stencil_state_load(
     "ID3D11Device::CreateDepthStencilState failed, hr=%#08X", hr
   );
 
+  lwe_asset_stream_close(stream);
   return (lwe_asset_t*)depth_stencil_state;
 }
 

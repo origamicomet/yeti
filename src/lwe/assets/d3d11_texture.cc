@@ -26,6 +26,8 @@
 #include <lwe/d3d11_pixel_format.h>
 #include <lwe/d3d11_render_device.h>
 
+#include <float.h>
+
 static lwe_asset_t* lwe_d3d11_texture_load(
   lwe_type_id_t type_id,
   lwe_asset_stream_t* stream )
@@ -202,6 +204,33 @@ static lwe_asset_t* lwe_d3d11_texture_load(
     )),
 
     "ID3D11Device::CreateShaderResourceView failed, hr=%#08X", hr
+  );
+
+  D3D11_SAMPLER_DESC sd;
+  sd.AddressU       = D3D11_TEXTURE_ADDRESS_WRAP;
+  sd.AddressV       = D3D11_TEXTURE_ADDRESS_WRAP;
+  sd.AddressW       = D3D11_TEXTURE_ADDRESS_WRAP;
+  sd.MipLODBias     = 0.0f;
+  sd.MaxAnisotropy  = 16;
+  sd.ComparisonFunc = D3D11_COMPARISON_NEVER;
+  sd.BorderColor[0] = 0.0f;
+  sd.BorderColor[1] = 0.0f;
+  sd.BorderColor[2] = 0.0f;
+  sd.BorderColor[3] = 0.0f;
+  sd.MinLOD         = -FLT_MAX;
+  sd.MaxLOD         = FLT_MAX;
+
+  if ((texture_blob->flags & LWE_TEXTURE_FLAGS_NO_MIPS) ||
+     !(texture_blob->flags & LWE_TEXTURE_FLAGS_PRECOMPUTED_MIPS))
+  {
+    sd.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+  } else {
+    sd.Filter = D3D11_FILTER_ANISOTROPIC;
+  }
+
+  lwe_fail_if(FAILED(
+    hr = _d3d11_device->CreateSamplerState(&sd, &texture->ss)),
+    "ID3D11Device::CreateSamplerState failed, hr=%#08X", hr
   );
 
   lwe_asset_stream_close(stream);

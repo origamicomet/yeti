@@ -206,8 +206,9 @@ LWE_INLINE static void _draw(
     (lwe_d3d11_texture_t**)&cmd->material->textures[0];
 
   for (lwe_size_t tex = 0; tex < cmd->material->num_textures; ++tex) {
-    _d3d11_context->VSSetShaderResources(tex, 1, &textures[tex]->srv);
+    // _d3d11_context->VSSetShaderResources(tex, 1, &textures[tex]->srv);
     _d3d11_context->PSSetShaderResources(tex, 1, &textures[tex]->srv);
+    _d3d11_context->PSSetSamplers(tex, 1, &textures[tex]->ss);
   }
 
   _d3d11_context->IASetInputLayout(

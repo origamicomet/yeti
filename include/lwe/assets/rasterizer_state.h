@@ -22,21 +22,42 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_ASSETS_D3D11_TEXTURE_H_
-#define _LWE_ASSETS_D3D11_TEXTURE_H_
+#ifndef _LWE_ASSETS_RASTERIZER_STATE_H_
+#define _LWE_ASSETS_RASTERIZER_STATE_H_
 
-#include <lwe/foundation/platforms/windows.h>
-#include <lwe/assets/texture.h>
+#include <lwe/asset.h>
 
-#include <DXGI.h>
-#include <D3D11.h>
+typedef enum lwe_fill_mode_t {
+  LWE_FILL_MODE_FORCE_UINT32 = 0xFFFFFFFFu,
+  LWE_FILL_WIREFRAME         = 1,
+  LWE_FILL_SOLID             = 2
+} lwe_fill_mode_t;
 
-typedef struct lwe_d3d11_texture_t :
-  public lwe_texture_t
+typedef enum lwe_cull_mode_t {
+  LWE_CULL_FORCE_UINT32 = 0xFFFFFFFFu,
+  LWE_CULL_NONE         = 1,
+  LWE_CULL_FRONT        = 2,
+  LWE_CULL_BACK         = 3
+} lwe_cull_mode_t;
+
+typedef enum lwe_front_face_t {
+  LWE_FRONT_FACE_FORCE_UINT32 = 0xFFFFFFFFu,
+  LWE_FRONT_FACE_CW           = 1,
+  LWE_FRONT_FACE_CCW          = 2
+} lwe_front_face_t;
+
+typedef struct lwe_rasterizer_state_blob_t {
+  lwe_fill_mode_t fill_mode;
+  lwe_cull_mode_t cull_mode;
+  lwe_front_face_t front_face;
+  bool scissor_enabled;
+} lwe_rasterizer_state_blob_t;
+
+typedef struct lwe_rasterizer_state_t
+  : public lwe_asset_t
 {
-  ID3D11Resource* resource;
-  ID3D11ShaderResourceView* srv;
-  ID3D11SamplerState* ss;
-} lwe_d3d11_texture_t;
+} lwe_rasterizer_state_t;
 
-#endif // _LWE_ASSETS_D3D11_TEXTURE_H_
+extern void lwe_rasterizer_state_register_type();
+
+#endif // _LWE_ASSETS_RASTERIZER_STATE_H_

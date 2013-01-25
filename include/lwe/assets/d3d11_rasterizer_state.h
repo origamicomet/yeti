@@ -22,21 +22,19 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_ASSETS_D3D11_TEXTURE_H_
-#define _LWE_ASSETS_D3D11_TEXTURE_H_
+#ifndef _LWE_ASSETS_D3D11_RASTERIZER_STATE_H_
+#define _LWE_ASSETS_D3D11_RASTERIZER_STATE_H_
 
 #include <lwe/foundation/platforms/windows.h>
-#include <lwe/assets/texture.h>
+#include <lwe/assets/rasterizer_state.h>
 
 #include <DXGI.h>
 #include <D3D11.h>
 
-typedef struct lwe_d3d11_texture_t :
-  public lwe_texture_t
+typedef struct lwe_d3d11_rasterizer_state_t
+  : public lwe_rasterizer_state_t
 {
-  ID3D11Resource* resource;
-  ID3D11ShaderResourceView* srv;
-  ID3D11SamplerState* ss;
-} lwe_d3d11_texture_t;
+  ID3D11RasterizerState* rs;
+} lwe_d3d11_rasterizer_state_t;
 
-#endif // _LWE_ASSETS_D3D11_TEXTURE_H_
+#endif // _LWE_ASSETS_D3D11_RASTERIZER_STATE_H_
