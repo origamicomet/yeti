@@ -36,17 +36,23 @@ struct lwe_index_buffer_t;
 struct lwe_vertex_buffer_t;
 struct lwe_constant_buffer_t;
 struct lwe_material_t;
+struct lwe_blend_state_t;
+struct lwe_depth_stencil_state_t;
+struct lwe_rasterizer_state_t;
 
 typedef enum lwe_render_cmd_type_t {
   LWE_RENDER_COMMAND_TYPE_INVALID                  = 0x00000000u,
   LWE_RENDER_COMMAND_TYPE_FORCE_UINT32             = 0xFFFFFFFFu,
 
   LWE_RENDER_COMMAND_TYPE_SET_RENDER_TARGETS       = 0x00000001u,
-  LWE_RENDER_COMMAND_TYPE_SET_VIEWPORTS            = 0x00000002u,
-  LWE_RENDER_COMMAND_TYPE_CLEAR                    = 0x00000003u,
-  LWE_RENDER_COMMAND_TYPE_GENERATE_MIPS            = 0x00000004u,
-  LWE_RENDER_COMMAND_TYPE_DRAW                     = 0x00000005u,
-  LWE_RENDER_COMMAND_TYPE_PRESENT                  = 0x00000006u
+  LWE_RENDER_COMMAND_TYPE_SET_BLEND_STATE          = 0x00000002u,
+  LWE_RENDER_COMMAND_TYPE_SET_DEPTH_STENCIL_STATE  = 0x00000003u,
+  LWE_RENDER_COMMAND_TYPE_SET_RASTERIZER_STATE     = 0x00000004u,
+  LWE_RENDER_COMMAND_TYPE_SET_VIEWPORTS            = 0x00000005u,
+  LWE_RENDER_COMMAND_TYPE_CLEAR                    = 0x00000006u,
+  LWE_RENDER_COMMAND_TYPE_GENERATE_MIPS            = 0x00000007u,
+  LWE_RENDER_COMMAND_TYPE_DRAW                     = 0x00000008u,
+  LWE_RENDER_COMMAND_TYPE_PRESENT                  = 0x00000009u
 } lwe_render_cmd_type_t;
 
 typedef struct lwe_render_cmd_sort_key_t {
@@ -82,6 +88,25 @@ typedef struct lwe_set_viewports_cmd_t
   lwe_size_t num_viewports;
   lwe_viewport_t viewports[1];
 } lwe_set_viewports_cmd_t;
+
+typedef struct lwe_set_blend_state_cmd_t
+  : public lwe_render_cmd_t
+{
+  lwe_blend_state_t* blend_state;
+} lwe_set_blend_state_cmd_t;
+
+typedef struct lwe_set_depth_stencil_state_cmd_t
+  : public lwe_render_cmd_t
+{
+  lwe_depth_stencil_state_t* depth_stencil_state;
+  uint32_t stencil_ref;
+} lwe_set_depth_stencil_state_cmd_t;
+
+typedef struct lwe_set_rasterizer_state_cmd_t
+  : public lwe_render_cmd_t
+{
+  lwe_rasterizer_state_t* rasterizer_state;
+} lwe_set_rasterizer_state_cmd_t;
 
 typedef enum lwe_clear_flags_t {
   LWE_CLEAR_COLOR   = (1 << 0),

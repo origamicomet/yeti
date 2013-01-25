@@ -43,6 +43,19 @@ extern void lwe_render_stream_set_render_targets(
   lwe_render_target_t** render_targets,
   lwe_depth_stencil_target_t* depth_stencil_target );
 
+extern void lwe_render_stream_set_blend_state(
+  lwe_render_stream_t* stream,
+  lwe_blend_state_t* blend_state );
+
+extern void lwe_render_stream_set_depth_stencil_state(
+  lwe_render_stream_t* stream,
+  lwe_depth_stencil_state_t* depth_stencil_state,
+  uint32_t stencil_ref );
+
+extern void lwe_render_stream_set_rasterizer_state(
+  lwe_render_stream_t* stream,
+  lwe_rasterizer_state_t* rasterizer_state );
+
 extern void lwe_render_stream_clear(
   lwe_render_stream_t* stream,
   uint32_t flags,

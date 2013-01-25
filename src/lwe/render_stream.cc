@@ -53,7 +53,7 @@ void lwe_render_stream_set_render_targets(
     sizeof(lwe_set_render_targets_cmd_t) +
     (num_render_targets - 1) * sizeof(lwe_render_target_t*);
 
-  cmd->type = cmd->type = LWE_RENDER_COMMAND_TYPE_SET_RENDER_TARGETS;
+  cmd->type = LWE_RENDER_COMMAND_TYPE_SET_RENDER_TARGETS;
   cmd->num_targets = num_render_targets;
   cmd->dst = depth_stencil_target;
   cmd->num_targets = num_render_targets;
@@ -63,6 +63,59 @@ void lwe_render_stream_set_render_targets(
     (void*)render_targets,
     num_render_targets * sizeof(lwe_render_target_t*)
   );
+}
+
+void lwe_render_stream_set_blend_state(
+  lwe_render_stream_t* stream,
+  lwe_blend_state_t* blend_state )
+{
+  lwe_assert(stream != NULL);
+  lwe_assert(blend_state != NULL);
+
+  lwe_set_blend_state_cmd_t* cmd =
+    (lwe_set_blend_state_cmd_t*)&stream->buffer[stream->next_command];
+
+  stream->next_command +=
+    sizeof(lwe_set_blend_state_cmd_t);
+
+  cmd->type = LWE_RENDER_COMMAND_TYPE_SET_BLEND_STATE;
+  cmd->blend_state = blend_state;
+}
+
+void lwe_render_stream_set_depth_stencil_state(
+  lwe_render_stream_t* stream,
+  lwe_depth_stencil_state_t* depth_stencil_state,
+  uint32_t stencil_ref )
+{
+  lwe_assert(stream != NULL);
+  lwe_assert(depth_stencil_state != NULL);
+
+  lwe_set_depth_stencil_state_cmd_t* cmd =
+    (lwe_set_depth_stencil_state_cmd_t*)&stream->buffer[stream->next_command];
+
+  stream->next_command +=
+    sizeof(lwe_set_depth_stencil_state_cmd_t);
+
+  cmd->type = LWE_RENDER_COMMAND_TYPE_SET_DEPTH_STENCIL_STATE;
+  cmd->depth_stencil_state = depth_stencil_state;
+  cmd->stencil_ref = stencil_ref;
+}
+
+void lwe_render_stream_set_rasterizer_state(
+  lwe_render_stream_t* stream,
+  lwe_rasterizer_state_t* rasterizer_state )
+{
+  lwe_assert(stream != NULL);
+  lwe_assert(rasterizer_state != NULL);
+
+  lwe_set_rasterizer_state_cmd_t* cmd =
+    (lwe_set_rasterizer_state_cmd_t*)&stream->buffer[stream->next_command];
+
+  stream->next_command +=
+    sizeof(lwe_set_rasterizer_state_cmd_t);
+
+  cmd->type = LWE_RENDER_COMMAND_TYPE_SET_RASTERIZER_STATE;
+  cmd->rasterizer_state = rasterizer_state;
 }
 
 void lwe_render_stream_clear(

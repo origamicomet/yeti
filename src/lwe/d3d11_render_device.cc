@@ -32,6 +32,9 @@
 #include <lwe/assets/d3d11_texture.h>
 #include <lwe/assets/d3d11_vertex_shader.h>
 #include <lwe/assets/d3d11_pixel_shader.h>
+#include <lwe/assets/d3d11_blend_state.h>
+#include <lwe/assets/d3d11_depth_stencil_state.h>
+#include <lwe/assets/d3d11_rasterizer_state.h>
 #include <lwe/assets/material.h>
 
 D3D_FEATURE_LEVEL    _d3d_feature_level = D3D_FEATURE_LEVEL_11_0;
@@ -107,6 +110,39 @@ LWE_INLINE static void _set_render_targets(
   _d3d11_context->OMSetRenderTargets(
     cmd->num_targets, &rtvs[0],
     depth_stencil_target ? depth_stencil_target->dstv : NULL
+  );
+}
+
+LWE_INLINE static void _set_blend_state(
+  const lwe_set_blend_state_cmd_t* cmd )
+{
+  lwe_d3d11_blend_state_t* blend_state =
+    (lwe_d3d11_blend_state_t*)cmd->blend_state;
+
+  _d3d11_context->OMSetBlendState(
+    blend_state->bs, NULL, 0xffffffffu
+  );
+}
+
+LWE_INLINE static void _set_depth_stencil_state(
+  const lwe_set_depth_stencil_state_cmd_t* cmd )
+{
+  lwe_d3d11_depth_stencil_state_t* depth_stencil_state =
+    (lwe_d3d11_depth_stencil_state_t*)cmd->depth_stencil_state;
+
+  _d3d11_context->OMSetDepthStencilState(
+    depth_stencil_state->dss, cmd->stencil_ref
+  );
+}
+
+LWE_INLINE static void _set_rasterizer_state(
+  const lwe_set_rasterizer_state_cmd_t* cmd )
+{
+  lwe_d3d11_rasterizer_state_t* rasterizer_state =
+    (lwe_d3d11_rasterizer_state_t*)cmd->rasterizer_state;
+
+  _d3d11_context->RSSetState(
+    rasterizer_state->rs
   );
 }
 
@@ -263,6 +299,39 @@ LWE_INLINE static const lwe_render_cmd_t* _dispatch_render_command(
         sizeof(lwe_set_render_targets_cmd_t) +
         (cmd->num_targets - 1) * sizeof(lwe_render_target_t*)
       );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_SET_BLEND_STATE: {
+      const lwe_set_blend_state_cmd_t* cmd =
+        (const lwe_set_blend_state_cmd_t*)cmd_;
+
+        _set_blend_state(cmd);
+
+        return (const lwe_render_cmd_t*)(
+          ((uint8_t*)cmd_) + sizeof(lwe_set_blend_state_cmd_t)
+        );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_SET_DEPTH_STENCIL_STATE: {
+      const lwe_set_depth_stencil_state_cmd_t* cmd =
+        (const lwe_set_depth_stencil_state_cmd_t*)cmd_;
+
+        _set_depth_stencil_state(cmd);
+
+        return (const lwe_render_cmd_t*)(
+          ((uint8_t*)cmd_) + sizeof(lwe_set_depth_stencil_state_cmd_t)
+        );
+    } break;
+
+    case LWE_RENDER_COMMAND_TYPE_SET_RASTERIZER_STATE: {
+      const lwe_set_rasterizer_state_cmd_t* cmd =
+        (const lwe_set_rasterizer_state_cmd_t*)cmd_;
+
+        _set_rasterizer_state(cmd);
+
+        return (const lwe_render_cmd_t*)(
+          ((uint8_t*)cmd_) + sizeof(lwe_set_rasterizer_state_cmd_t)
+        );
     } break;
 
     case LWE_RENDER_COMMAND_TYPE_SET_VIEWPORTS: {
