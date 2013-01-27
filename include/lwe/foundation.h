@@ -12,3 +12,9 @@
 #include <lwe/foundation/file.h>
 #include <lwe/foundation/fsearch.h>
 #include <lwe/foundation/mmap.h>
+#include <lwe/foundation/util.h>
+#include <lwe/foundation/math/vec2.h>
+#include <lwe/foundation/math/vec3.h>
+#include <lwe/foundation/math/quat.h>
+#include <lwe/foundation/math/mat3.h>
+#include <lwe/foundation/math/mat4.h>

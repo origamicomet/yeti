@@ -49,3 +49,25 @@ DXGI_FORMAT lwe_pixel_format_to_dxgi(
 
   return DXGI_FORMAT_UNKNOWN;
 }
+
+DXGI_FORMAT lwe_pixel_format_to_typeless_dxgi(
+  lwe_pixel_format_t pixel_format )
+{
+  switch (pixel_format) {
+    case LWE_PIXEL_FORMAT_D24_S8:
+      return DXGI_FORMAT_R24G8_TYPELESS;
+  }
+
+  return DXGI_FORMAT_UNKNOWN;
+}
+
+DXGI_FORMAT lwe_pixel_format_to_masked_typeless_dxgi(
+  lwe_pixel_format_t pixel_format )
+{
+  switch (pixel_format) {
+    case LWE_PIXEL_FORMAT_D24_S8:
+      return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+  }
+
+  return DXGI_FORMAT_UNKNOWN;
+}

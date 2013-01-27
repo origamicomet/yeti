@@ -42,13 +42,13 @@
 #endif
 
 #define lwe_assert( condition ) \
-  lwe_assertf(condition, "In " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > An assertion failed:\n  > " #condition "\n\n")
+  lwe_assertf(condition, "\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > An assertion failed:\n  > " #condition "\n\n")
 
 #define lwe_fail( msg ) \
-  do {  { lwe_log("In " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" msg "\"\n\n"); raise(SIGABRT); } } while (0, 0)
+  do {  { lwe_log("\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" msg "\"\n\n"); raise(SIGABRT); } } while (0, 0)
 
 #define lwe_fail_if( condition, format, ... ) \
-  do { if ((condition)) { lwe_log("In " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" #condition "\"\n  > " format "\n\n", ##__VA_ARGS__); raise(SIGABRT); } } while (0, 0)
+  do { if ((condition)) { lwe_log("\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" #condition "\"\n  > " format "\n\n", ##__VA_ARGS__); raise(SIGABRT); } } while (0, 0)
 
 
 #if defined(_DEBUG)

@@ -32,4 +32,10 @@
 extern DXGI_FORMAT lwe_pixel_format_to_dxgi(
   lwe_pixel_format_t pixel_format );
 
+extern DXGI_FORMAT lwe_pixel_format_to_typeless_dxgi(
+  lwe_pixel_format_t pixel_format );
+
+extern DXGI_FORMAT lwe_pixel_format_to_masked_typeless_dxgi(
+  lwe_pixel_format_t pixel_format );
+
 #endif // _LWE_D3D11_PIXEL_FORMAT_H_

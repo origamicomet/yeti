@@ -29,6 +29,7 @@
 #include <lwe/d3d11_index_buffer.h>
 #include <lwe/d3d11_vertex_buffer.h>
 #include <lwe/d3d11_constant_buffer.h>
+#include <lwe/d3d11_input_layout.h>
 #include <lwe/assets/d3d11_texture.h>
 #include <lwe/assets/d3d11_vertex_shader.h>
 #include <lwe/assets/d3d11_pixel_shader.h>
@@ -205,24 +206,25 @@ LWE_INLINE static void _generate_mips(
 }
 
 LWE_INLINE static void _draw(
-  lwe_size_t constant_buffer_offset,
   const lwe_draw_cmd_t* cmd )
 {
-#if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
-  lwe_fail_if(
-    cmd->vertex_decl.components !=
-    cmd->material->vertex_shader->vertex_decl.components,
-    "Mesh and vertex shader vertex declarations don't match!"
-  );
-#endif
+  const lwe_d3d11_constant_buffer_t** constant_buffers =
+    (const lwe_d3d11_constant_buffer_t**)&cmd->constant_buffers[0];
 
-  const lwe_d3d11_constant_buffer_t* constant_buffer =
+  for (lwe_size_t i = 0; i < cmd->num_constant_buffers; ++i) {
+    _d3d11_context->VSSetConstantBuffers(
+      i, 1, constant_buffers[i] ? &constant_buffers[i]->buffer : NULL
+    );
+  }
+
+  const lwe_d3d11_constant_buffer_t* material_constants =
     (const lwe_d3d11_constant_buffer_t*)cmd->material->constants;
 
-  _d3d11_context->VSSetConstantBuffers(
-    constant_buffer_offset, 1,
-    constant_buffer ? &constant_buffer->buffer : NULL
-  );
+  if (material_constants) {
+    _d3d11_context->VSSetConstantBuffers(
+      cmd->num_constant_buffers, 1, &material_constants->buffer
+    );
+  }
 
   lwe_d3d11_vertex_shader_t* vertex_shader =
     (lwe_d3d11_vertex_shader_t*)cmd->material->vertex_shader;
@@ -247,8 +249,11 @@ LWE_INLINE static void _draw(
     _d3d11_context->PSSetSamplers(tex, 1, &textures[tex]->ss);
   }
 
+  lwe_d3d11_input_layout_t* input_layout =
+    (lwe_d3d11_input_layout_t*)cmd->input_layout;
+
   _d3d11_context->IASetInputLayout(
-    vertex_shader->input_layout
+    input_layout->input_layout
   );
   
   _d3d11_context->IASetPrimitiveTopology(
@@ -263,13 +268,15 @@ LWE_INLINE static void _draw(
   );
 
   const UINT vertex_stride =
-    lwe_vertex_declaration_to_size(cmd->vertex_decl);
+    input_layout->stride;
 
   lwe_d3d11_vertex_buffer_t* vertices =
     (lwe_d3d11_vertex_buffer_t*)cmd->vertices;
 
+  const UINT offset = 0;
+
   _d3d11_context->IASetVertexBuffers(
-    0, 1, &vertices->buffer, &vertex_stride, 0
+    0, 1, &vertices->buffer, &vertex_stride, &offset
   );
 
   _d3d11_context->DrawIndexed(
@@ -284,7 +291,6 @@ LWE_INLINE static void _present(
 }
 
 LWE_INLINE static const lwe_render_cmd_t* _dispatch_render_command(
-  lwe_size_t constant_buffer_offset,
   const lwe_render_cmd_t* cmd_ )
 {
   switch (cmd_->type) {
@@ -366,11 +372,16 @@ LWE_INLINE static const lwe_render_cmd_t* _dispatch_render_command(
     } break;
 
     case LWE_RENDER_COMMAND_TYPE_DRAW: {
-      _draw(constant_buffer_offset, (const lwe_draw_cmd_t*)cmd_);
+      const lwe_draw_cmd_t* cmd =
+        (const lwe_draw_cmd_t*)cmd_;
+
+      _draw(cmd);
 
       return (const lwe_render_cmd_t*)(
         ((uint8_t*)cmd_) +
-        sizeof(lwe_draw_cmd_t)
+        sizeof(lwe_draw_cmd_t) +
+        cmd->num_constant_buffers * sizeof(lwe_constant_buffer_t*) -
+        sizeof(lwe_constant_buffer_t*)
       );
     } break;
 
@@ -388,28 +399,18 @@ LWE_INLINE static const lwe_render_cmd_t* _dispatch_render_command(
 }
 
 void lwe_render_device_dispatch(
-  lwe_size_t num_constant_buffers,
-  lwe_constant_buffer_t** constant_buffers_,
   lwe_size_t num_streams,
   const lwe_render_stream_t** streams )
 {
   lwe_assert(num_streams > 0);
   lwe_assert(streams != NULL);
 
-  lwe_d3d11_constant_buffer_t** constant_buffers =
-    (lwe_d3d11_constant_buffer_t**)constant_buffers_;
-
-  for (lwe_size_t cb = 0; cb < num_constant_buffers; ++cb) {
-    _d3d11_context->VSSetConstantBuffers(cb, 1, &constant_buffers[cb]->buffer);
-    _d3d11_context->PSSetConstantBuffers(cb, 1, &constant_buffers[cb]->buffer);
-  }
-
   for (lwe_size_t stream_idx = 0; stream_idx < num_streams; ++stream_idx) {
     const uint8_t* stream = &streams[stream_idx]->buffer[0];
 
     while (stream && (stream < (&streams[stream_idx]->buffer[streams[stream_idx]->next_command]))) {
       const lwe_render_cmd_t* cmd = (const lwe_render_cmd_t*)stream;
-      stream = (uint8_t*)_dispatch_render_command(num_constant_buffers, cmd);
+      stream = (uint8_t*)_dispatch_render_command(cmd);
     }
   }
 }

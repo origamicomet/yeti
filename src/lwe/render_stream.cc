@@ -23,6 +23,7 @@
 // =============================================================================
 
 #include <lwe/render_stream.h>
+#include <lwe/assets/model.h>
 
 lwe_render_stream_t* lwe_render_stream_create(
   lwe_size_t size )
@@ -140,6 +141,63 @@ void lwe_render_stream_clear(
   cmd->stencil = stencil;
 }
 
+void lwe_render_stream_draw(
+  lwe_render_stream_t* stream,
+  lwe_mesh_t* mesh,
+  lwe_size_t num_constant_buffers,
+  lwe_constant_buffer_t** constant_buffers )
+{
+  lwe_assert(stream != NULL);
+
+  lwe_draw_cmd_t* cmd =
+    (lwe_draw_cmd_t*)&stream->buffer[stream->next_command];
+
+  stream->next_command +=
+    sizeof(lwe_draw_cmd_t) +
+    num_constant_buffers * sizeof(lwe_constant_buffer_t*) -
+    sizeof(lwe_constant_buffer_t*);
+
+  cmd->type = LWE_RENDER_COMMAND_TYPE_DRAW;
+  cmd->material = mesh->material;
+  cmd->input_layout = mesh->input_layout;
+  cmd->num_indicies = mesh->num_indicies;
+  cmd->indicies = mesh->indicies;
+  cmd->num_vertices = mesh->num_vertices;
+  cmd->vertices = mesh->vertices;
+  cmd->num_constant_buffers = num_constant_buffers;
+
+  memcpy(
+    (void*)&cmd->constant_buffers[0],
+    (void*)&constant_buffers[0],
+    num_constant_buffers * sizeof(lwe_constant_buffer_t*)
+  );
+}
+
+void lwe_render_stream_set_viewports(
+  lwe_render_stream_t* stream,
+  lwe_size_t num_viewports,
+  const lwe_viewport_t* viewports )
+{
+  lwe_assert(stream != NULL);
+
+  lwe_set_viewports_cmd_t* cmd =
+    (lwe_set_viewports_cmd_t*)&stream->buffer[stream->next_command];
+
+  stream->next_command +=
+    sizeof(lwe_set_viewports_cmd_t) +
+    num_viewports * sizeof(lwe_viewport_t) -
+    sizeof(lwe_viewport_t);
+
+  cmd->type = LWE_RENDER_COMMAND_TYPE_SET_VIEWPORTS;
+  cmd->num_viewports = num_viewports;
+
+  memcpy(
+    (void*)&cmd->viewports[0],
+    (void*)&viewports[0],
+    num_viewports * sizeof(lwe_viewport_t)
+  );
+}
+
 void lwe_render_stream_present(
   lwe_render_stream_t* stream,
   lwe_swap_chain_t* swap_chain )
@@ -154,6 +212,14 @@ void lwe_render_stream_present(
 
   cmd->type = LWE_RENDER_COMMAND_TYPE_PRESENT;
   cmd->swap_chain = swap_chain;
+}
+
+void lwe_render_stream_reset(
+  lwe_render_stream_t* stream )
+{
+  lwe_assert(stream != NULL);
+
+  stream->next_command = 0;
 }
 
 void lwe_render_stream_destroy(

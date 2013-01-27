@@ -26,7 +26,6 @@
 #define _LWE_RENDER_COMMAND_H_
 
 #include <lwe/foundation.h>
-#include <lwe/vertex_declaration.h>
 #include <lwe/viewport.h>
 
 struct lwe_swap_chain_t;
@@ -78,8 +77,8 @@ typedef struct lwe_set_render_targets_cmd_t
   : public lwe_render_cmd_t
 {
   lwe_size_t num_targets;
-  lwe_depth_stencil_target_t* dst;
-  lwe_render_target_t* targets[1];
+  struct lwe_depth_stencil_target_t* dst;
+  struct lwe_render_target_t* targets[1];
 } lwe_set_render_target_cmd_t;
 
 typedef struct lwe_set_viewports_cmd_t
@@ -92,20 +91,20 @@ typedef struct lwe_set_viewports_cmd_t
 typedef struct lwe_set_blend_state_cmd_t
   : public lwe_render_cmd_t
 {
-  lwe_blend_state_t* blend_state;
+  struct lwe_blend_state_t* blend_state;
 } lwe_set_blend_state_cmd_t;
 
 typedef struct lwe_set_depth_stencil_state_cmd_t
   : public lwe_render_cmd_t
 {
-  lwe_depth_stencil_state_t* depth_stencil_state;
+  struct lwe_depth_stencil_state_t* depth_stencil_state;
   uint32_t stencil_ref;
 } lwe_set_depth_stencil_state_cmd_t;
 
 typedef struct lwe_set_rasterizer_state_cmd_t
   : public lwe_render_cmd_t
 {
-  lwe_rasterizer_state_t* rasterizer_state;
+  struct lwe_rasterizer_state_t* rasterizer_state;
 } lwe_set_rasterizer_state_cmd_t;
 
 typedef enum lwe_clear_flags_t {
@@ -126,18 +125,20 @@ typedef struct lwe_clear_cmd_t
 typedef struct lwe_generate_mips_cmd_t
   : public lwe_render_cmd_t
 {
-  lwe_render_target_t* target;
+  struct lwe_render_target_t* target;
 } lwe_generate_mips_cmd_t;
 
 typedef struct lwe_draw_cmd_t
   : public lwe_render_cmd_t
 {
-  lwe_material_t* material;
-  lwe_vertex_declaration_t vertex_decl;
+  struct lwe_material_t* material;
+  struct lwe_input_layout_t* input_layout;
   lwe_size_t num_indicies;
+  struct lwe_index_buffer_t* indicies;
   lwe_size_t num_vertices;
-  lwe_index_buffer_t* indicies;
-  lwe_vertex_buffer_t* vertices;
+  struct lwe_vertex_buffer_t* vertices;
+  lwe_size_t num_constant_buffers;
+  struct lwe_constant_buffer_t* constant_buffers[1];
 } lwe_draw_cmd_t;
 
 typedef struct lwe_present_cmd_t

@@ -22,52 +22,16 @@
 // THE SOFTWARE.
 // =============================================================================
 
+#ifndef _LWE_MAP_FLAGS_H_
+#define _LWE_MAP_FLAGS_H_
+
 #include <lwe/foundation.h>
-#include <lwe/asset.h>
-#include <lwe/asset_compiler.h>
-#include <lwe/application.h>
 
-typedef void (*lwe_boot_command_t)(
-  lwe_size_t num_args,
-  lwe_const_str_t* args );
+typedef enum lwe_map_flags_t {
+  LWE_MAP_FLAGS_FORCE_UINT32 = 0xFFFFFFFFu,
+  LWE_MAP_FLAGS_READ         = (1 << 0),
+  LWE_MAP_FLAGS_WRITE        = (1 << 1),
+  LWE_MAP_FLAGS_DISCARD      = (1 << 2)
+} lwe_map_flags_t;
 
-static void _compile(
-  lwe_size_t num_args,
-  lwe_const_str_t* args )
-{
-  bool file = false;
-  lwe_str_t data = "data";
-  lwe_str_t data_src = "data_src";
-  lwe_str_t path = NULL;
-
-  for (lwe_size_t i = 0; i < num_args; ++i) {
-    if (strncmp("--data=", args[i], 7) == 0) {
-      data = &args[i][7];
-    } else if(strncmp("--data-src=", args[i], 11) == 0) {
-      data_src = &args[i][11];
-    } else if(strncmp("--path=", args[i], 6) == 0) {
-      path = &args[i][7];
-      file = true;
-    }
-  }
-
-  lwe_asset_register_types();
-
-  if (file)
-    lwe_asset_compiler_compile(data, data_src, path);
-  else
-    lwe_asset_compiler_compile_dir(data, data_src);
-}
-
-int main( lwe_size_t argc, lwe_const_str_t argv[] )
-{
-  lwe_boot_command_t boot_cmd = &lwe_application_run;
-
-  if (argc >= 2) {
-    if (strcmp("--compile", argv[1]) == 0)
-      boot_cmd = &_compile;
-  }
-
-  boot_cmd(argc, argv);
-  return EXIT_SUCCESS;
-}
+#endif // _LWE_MAP_FLAGS_H_

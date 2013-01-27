@@ -20,9 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-cbuffer Frame : register(b0) {
+cbuffer Model : register(b0) {
   float4x4 model_view_proj;
-  float4x4 inv_model;
-  float4x4 inv_view;
-  float4x4 inv_projection;
 };

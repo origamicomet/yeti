@@ -27,6 +27,7 @@
 
 #include <lwe/foundation.h>
 #include <lwe/buffer_flags.h>
+#include <lwe/map_flags.h>
 
 typedef struct lwe_constant_buffer_t {
 } lwe_constant_buffer_t;
@@ -35,6 +36,13 @@ extern lwe_constant_buffer_t* lwe_constant_buffer_create(
   uint32_t flags,
   lwe_size_t num_bytes,
   void* buffer );
+
+extern void* lwe_constant_buffer_map(
+  lwe_constant_buffer_t* constant_buffer,
+  uint32_t flags );
+
+extern void lwe_constant_buffer_unmap(
+  lwe_constant_buffer_t* constant_buffer );
 
 extern void lwe_constant_buffer_destroy(
   lwe_constant_buffer_t* constant_buffer );

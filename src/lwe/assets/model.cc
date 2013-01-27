@@ -35,6 +35,7 @@ typedef struct lwe_model_blob_t {
 } lwe_model_blob_t;
 
 typedef struct lwe_mesh_blob_t {
+  mat4_t transform;
   lwe_hash_t material;
   lwe_vertex_declaration_t vertex_decl;
   lwe_size_t num_indicies;
@@ -76,6 +77,12 @@ static lwe_asset_t* lwe_model_load(
 
     lwe_mesh_t* mesh = &model->meshes[i];
 
+    memcpy(
+      (void*)&mesh->transform,
+      (void*)&mesh_blob->transform,
+      sizeof(mat4_t)
+    );
+
     mesh->material =
       (lwe_material_t*)lwe_asset_manager_find_and_ref_by_hash(
         mesh_blob->material);
@@ -88,7 +95,10 @@ static lwe_asset_t* lwe_model_load(
         );
     }
 
-    mesh->vertex_decl = mesh_blob->vertex_decl;
+    mesh->input_layout = lwe_input_layout_create(
+      mesh->material->vertex_shader, mesh_blob->vertex_decl
+    );
+
     mesh->num_indicies = mesh_blob->num_indicies;
     mesh->num_vertices = mesh_blob->num_vertices;
 
@@ -124,6 +134,7 @@ static void lwe_model_unload(
     lwe_asset_manager_deref(mesh->material);
     lwe_index_buffer_destroy(mesh->indicies);
     lwe_vertex_buffer_destroy(mesh->vertices);
+    lwe_input_layout_destroy(mesh->input_layout);
   }
 
   lwe_free((void*)model);
@@ -180,7 +191,7 @@ static bool lwe_model_compile(
   }
 
   lwe_log(
-    "  > Succesfully imported scene, meshes=%u materials=%u textures=%u\n",
+    "  > Successfully imported scene, meshes=%u materials=%u textures=%u\n",
     scene->mNumMeshes, scene->mNumMaterials, scene->mNumTextures
   );
 
@@ -208,6 +219,15 @@ static bool lwe_model_compile(
     );
 
     lwe_mesh_blob_t mesh_blob;
+
+    const aiMatrix4x4& t = node->mTransformation;
+    mesh_blob.transform = mat4_t(
+      t.a1, t.a2, t.a3, t.a4,
+      t.b1, t.b2, t.b3, t.b4,
+      t.c1, t.c2, t.c3, t.c4,
+      t.d1, t.d2, t.d3, t.d4
+    );
+
     mesh_blob.num_indicies = mesh->mNumFaces * 3;
     mesh_blob.num_vertices = mesh->mNumVertices;
     mesh_blob.vertex_decl.components = 0;
@@ -244,15 +264,38 @@ static bool lwe_model_compile(
     } else {
       char mat_path[LWE_MAX_PATH];
       lwe_const_str_t rel_path = lwe_path_strip(acd->data_src, acd->path) + 1;
-      lwe_const_str_t ext = lwe_path_find_ext(rel_path);
-      const lwe_size_t len = ext - rel_path;
+      lwe_const_str_t basename = lwe_path_find_basename(rel_path);
+      const lwe_size_t len = basename - rel_path;
       strcpy(&mat_path[0], rel_path);
-      sprintf(&mat_path[len - 1], "_%s.material", node->mName.C_Str());
+      sprintf(&mat_path[len], "%s.material", node->mName.C_Str());
       mesh_blob.material = lwe_murmur_hash(&mat_path[0], 0);
+      lwe_log("  >  material=`%s`\n", &mat_path[0]);
     }
+
+    lwe_log("  >  vertex components:\n");
+    lwe_log("  >    POSITION:    [%c]\n", mesh_blob.vertex_decl.position ? 'X' : ' ');
+    lwe_log("  >    COLOR0:      [%c]\n", mesh_blob.vertex_decl.color0 ? 'X' : ' ');
+    lwe_log("  >    TEXCOORD0:   [%c]\n", mesh_blob.vertex_decl.texcoord0 ? 'X' : ' ');
+    lwe_log("  >    TEXCOORD1:   [%c]\n", mesh_blob.vertex_decl.texcoord1 ? 'X' : ' ');
+    lwe_log("  >    NORMAL:      [%c]\n", mesh_blob.vertex_decl.normal ? 'X' : ' ');
+    lwe_log("  >    TANGENT:     [%c]\n", mesh_blob.vertex_decl.tangent ? 'X' : ' ');
+    lwe_log("  >    BINORMAL:    [%c]\n", mesh_blob.vertex_decl.binormal ? 'X' : ' ');
+    lwe_log("  >    BONEINDICES: [%c]\n", mesh_blob.vertex_decl.boneindices ? 'X' : ' ');
+    lwe_log("  >    BONEWEIGHTS: [%c]\n", mesh_blob.vertex_decl.boneweights ? 'X' : ' ');
 
     if (fwrite((void*)&mesh_blob, sizeof(lwe_mesh_blob_t), 1, acd->mrd) != 1)
       goto failure;
+
+    for (lwe_size_t face = 0; face < mesh->mNumFaces; ++face) {
+      const uint32_t indices[3] = {
+        mesh->mFaces[face].mIndices[0],
+        mesh->mFaces[face].mIndices[1],
+        mesh->mFaces[face].mIndices[2]
+      };
+
+      if (fwrite((void*)&indices[0], sizeof(uint32_t), 3, acd->mrd) != 3)
+        goto failure;
+    }
 
     for (lwe_size_t vertex = 0; vertex < mesh->mNumVertices; ++vertex) {
       if (mesh_blob.vertex_decl.position)

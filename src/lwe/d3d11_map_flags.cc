@@ -22,52 +22,24 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#include <lwe/foundation.h>
-#include <lwe/asset.h>
-#include <lwe/asset_compiler.h>
-#include <lwe/application.h>
+#include <lwe/d3d11_map_flags.h>
 
-typedef void (*lwe_boot_command_t)(
-  lwe_size_t num_args,
-  lwe_const_str_t* args );
-
-static void _compile(
-  lwe_size_t num_args,
-  lwe_const_str_t* args )
+D3D11_MAP lwe_map_flags_to_d3d(
+  uint32_t flags )
 {
-  bool file = false;
-  lwe_str_t data = "data";
-  lwe_str_t data_src = "data_src";
-  lwe_str_t path = NULL;
+  switch (flags) {
+    case (LWE_MAP_FLAGS_READ):
+      return D3D11_MAP_READ;
 
-  for (lwe_size_t i = 0; i < num_args; ++i) {
-    if (strncmp("--data=", args[i], 7) == 0) {
-      data = &args[i][7];
-    } else if(strncmp("--data-src=", args[i], 11) == 0) {
-      data_src = &args[i][11];
-    } else if(strncmp("--path=", args[i], 6) == 0) {
-      path = &args[i][7];
-      file = true;
-    }
+    case (LWE_MAP_FLAGS_WRITE):
+      return D3D11_MAP_WRITE;
+
+    case (LWE_MAP_FLAGS_READ | LWE_MAP_FLAGS_WRITE):
+      return D3D11_MAP_READ_WRITE;
+
+    case (LWE_MAP_FLAGS_WRITE | LWE_MAP_FLAGS_DISCARD):
+      return D3D11_MAP_WRITE_DISCARD;
   }
 
-  lwe_asset_register_types();
-
-  if (file)
-    lwe_asset_compiler_compile(data, data_src, path);
-  else
-    lwe_asset_compiler_compile_dir(data, data_src);
-}
-
-int main( lwe_size_t argc, lwe_const_str_t argv[] )
-{
-  lwe_boot_command_t boot_cmd = &lwe_application_run;
-
-  if (argc >= 2) {
-    if (strcmp("--compile", argv[1]) == 0)
-      boot_cmd = &_compile;
-  }
-
-  boot_cmd(argc, argv);
-  return EXIT_SUCCESS;
+  lwe_fail("Invalid map flags (expected read/write/discard)!");
 }

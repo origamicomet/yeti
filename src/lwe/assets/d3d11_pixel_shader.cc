@@ -26,10 +26,21 @@
 #include <lwe/d3d11_render_device.h>
 #include <lwe/d3d_shader_compiler.h>
 
+#ifdef LWE_MSVC_BUILD
+  #pragma pack(push)
+  #pragma pack(1)
+#else
+#endif
+
 typedef struct lwe_pixel_shader_blob_t {
   lwe_size_t byte_code_len;
   uint8_t byte_code[1];
 } lwe_pixel_shader_blob_t;
+
+#ifdef LWE_MSVC_BUILD
+  #pragma pack(pop)
+#else
+#endif
 
 static lwe_asset_t* lwe_pixel_shader_load(
   lwe_type_id_t type_id,

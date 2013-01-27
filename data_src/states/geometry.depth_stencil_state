@@ -1,6 +1,6 @@
 # Depth:
 
-depth_tests = true;
+depth_tests = false;
 depth_writes = true;
 depth_func = "LESS";
 

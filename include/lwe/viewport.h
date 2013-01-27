@@ -28,8 +28,8 @@
 #include <lwe/foundation.h>
 
 typedef struct lwe_viewport_t {
-  float min_x, min_y;
-  float max_x, max_y;
+  uint32_t min_x, min_y;
+  uint32_t max_x, max_y;
 } lwe_viewport_t;
 
 #endif // _LWE_VIEWPORT_H_

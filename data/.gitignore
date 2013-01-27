@@ -1,2 +1,5 @@
 # Asset compilation creates stream/hash.{mrd,stream} data:
 streams/**
+
+# It also creates various databases:
+**.db

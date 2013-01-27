@@ -56,6 +56,11 @@ extern void lwe_render_stream_set_rasterizer_state(
   lwe_render_stream_t* stream,
   lwe_rasterizer_state_t* rasterizer_state );
 
+extern void lwe_render_stream_set_viewports(
+  lwe_render_stream_t* stream,
+  lwe_size_t num_viewports,
+  const lwe_viewport_t* viewports );
+
 extern void lwe_render_stream_clear(
   lwe_render_stream_t* stream,
   uint32_t flags,
@@ -63,9 +68,20 @@ extern void lwe_render_stream_clear(
   float depth,
   uint32_t stencil );
 
+struct lwe_mesh_t;
+
+extern void lwe_render_stream_draw(
+  lwe_render_stream_t* stream,
+  struct lwe_mesh_t* mesh,
+  lwe_size_t num_constant_buffers,
+  lwe_constant_buffer_t** constant_buffers );
+
 extern void lwe_render_stream_present(
   lwe_render_stream_t* stream,
   lwe_swap_chain_t* swap_chain );
+
+extern void lwe_render_stream_reset(
+  lwe_render_stream_t* stream );
 
 extern void lwe_render_stream_destroy(
   lwe_render_stream_t* stream );

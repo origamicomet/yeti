@@ -26,11 +26,22 @@
 #include <lwe/d3d11_render_device.h>
 #include <lwe/d3d_shader_compiler.h>
 
+#ifdef LWE_MSVC_BUILD
+  #pragma pack(push)
+  #pragma pack(1)
+#else
+#endif
+
 typedef struct lwe_vertex_shader_blob_t {
   lwe_vertex_declaration_t vertex_decl;
   lwe_size_t byte_code_len;
   uint8_t byte_code[1];
 } lwe_vertex_shader_blob_t;
+
+#ifdef LWE_MSVC_BUILD
+  #pragma pack(pop)
+#else
+#endif
 
 static lwe_asset_t* lwe_vertex_shader_load(
   lwe_type_id_t type_id,
@@ -38,18 +49,6 @@ static lwe_asset_t* lwe_vertex_shader_load(
 {
   lwe_assert(type_id == LWE_ASSET_TYPE_ID_VERTEX_SHADER);
   lwe_assert(stream != NULL);
-
-  static const D3D11_INPUT_ELEMENT_DESC iedt[] = {
-    { "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "COLOR0",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "TEXCOORD0",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "TEXCOORD1",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "TANGENT",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "BINORMAL",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT,   0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "BLENDWEIGHT",  0, DXGI_FORMAT_R8G8B8A8_UNORM,  0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-  };
 
   uint8_t* blob = (uint8_t*)lwe_asset_stream_mrd(stream);
 
@@ -73,33 +72,8 @@ static lwe_asset_t* lwe_vertex_shader_load(
     "ID3D11Device::CreateVertexShader failed, hr=%#08X", hr
   );
 
-  lwe_size_t num_ieds = 0;
-  D3D11_INPUT_ELEMENT_DESC ieds[9];
-  uint32_t components = vs_blob->vertex_decl.components;
-
-  while (components) {
-    memcpy(
-      (void*)&ieds[num_ieds++],
-      (const void*)&iedt[lwe_count_trailing_zeros(components)],
-      sizeof(D3D11_INPUT_ELEMENT_DESC)
-    );
-
-    components = components & (components - 1);
-  }
-
-  lwe_fail_if(FAILED(
-    hr = _d3d11_device->CreateInputLayout(
-      &ieds[0],
-      num_ieds,
-      (const void*)&vs_blob->byte_code[0],
-      vs_blob->byte_code_len,
-      &vertex_shader->input_layout
-    )),
-
-    "ID3D11Device::CreateInputLayout failed, hr=%#08X", hr
-  );
-
-  lwe_asset_stream_close(stream);
+  vertex_shader->byte_code = &vs_blob->byte_code[0];
+  vertex_shader->byte_code_len = vs_blob->byte_code_len;
   return (lwe_asset_t*)vertex_shader;
 }
 
@@ -110,11 +84,11 @@ static void lwe_vertex_shader_unload(
   lwe_assert(asset->type_id == LWE_ASSET_TYPE_ID_VERTEX_SHADER);
 
   lwe_d3d11_vertex_shader_t* vertex_shader =
-	(lwe_d3d11_vertex_shader_t*)asset;
+    (lwe_d3d11_vertex_shader_t*)asset;
 
-  vertex_shader->input_layout->Release();
   vertex_shader->vs->Release();
 
+  lwe_asset_stream_close(vertex_shader->stream);
   lwe_free((void*)vertex_shader);
 }
 
@@ -172,13 +146,13 @@ static bool _determine_vertex_decl(
     if ((vertex_decl->components & ~(component - 1)) != 0) {
       lwe_log("  > Vertex components out of order!\n");
       lwe_log("  > When trying to set %s\n", param_desc.SemanticName);
-      lwe_log("  >   POSITION: [%c]\n", vertex_decl->position ? 'X' : ' ');
-      lwe_log("  >   COLOR0: [%c]\n", vertex_decl->color0 ? 'X' : ' ');
-      lwe_log("  >   TEXCOORD0: [%c]\n", vertex_decl->texcoord0 ? 'X' : ' ');
-      lwe_log("  >   TEXCOORD1: [%c]\n", vertex_decl->texcoord1 ? 'X' : ' ');
-      lwe_log("  >   NORMAL: [%c]\n", vertex_decl->normal ? 'X' : ' ');
-      lwe_log("  >   TANGENT: [%c]\n", vertex_decl->tangent ? 'X' : ' ');
-      lwe_log("  >   BINORMAL: [%c]\n", vertex_decl->binormal ? 'X' : ' ');
+      lwe_log("  >   POSITION:    [%c]\n", vertex_decl->position ? 'X' : ' ');
+      lwe_log("  >   COLOR0:      [%c]\n", vertex_decl->color0 ? 'X' : ' ');
+      lwe_log("  >   TEXCOORD0:   [%c]\n", vertex_decl->texcoord0 ? 'X' : ' ');
+      lwe_log("  >   TEXCOORD1:   [%c]\n", vertex_decl->texcoord1 ? 'X' : ' ');
+      lwe_log("  >   NORMAL:      [%c]\n", vertex_decl->normal ? 'X' : ' ');
+      lwe_log("  >   TANGENT:     [%c]\n", vertex_decl->tangent ? 'X' : ' ');
+      lwe_log("  >   BINORMAL:    [%c]\n", vertex_decl->binormal ? 'X' : ' ');
       lwe_log("  >   BONEINDICES: [%c]\n", vertex_decl->boneindices ? 'X' : ' ');
       lwe_log("  >   BONEWEIGHTS: [%c]\n", vertex_decl->boneweights ? 'X' : ' ');
       return FALSE;

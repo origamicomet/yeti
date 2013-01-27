@@ -32,6 +32,9 @@
 extern lwe_const_str_t lwe_path_find_ext(
   lwe_const_str_t path );
 
+extern lwe_const_str_t lwe_path_find_basename(
+  lwe_const_str_t path );
+
 extern lwe_const_str_t lwe_path_strip(
   lwe_const_str_t dir,
   lwe_const_str_t path );

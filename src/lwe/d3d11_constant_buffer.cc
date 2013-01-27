@@ -24,6 +24,7 @@
 
 #include <lwe/d3d11_constant_buffer.h>
 #include <lwe/d3d11_render_device.h>
+#include <lwe/d3d11_map_flags.h>
 
 lwe_constant_buffer_t* lwe_constant_buffer_create(
   uint32_t flags,
@@ -40,7 +41,7 @@ lwe_constant_buffer_t* lwe_constant_buffer_create(
   bd.ByteWidth = num_bytes;
   bd.Usage = usage;
   bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-  bd.CPUAccessFlags = 0;
+  bd.CPUAccessFlags = (usage == D3D11_USAGE_DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
   bd.MiscFlags = 0;
   bd.StructureByteStride = 0;
 
@@ -57,6 +58,42 @@ lwe_constant_buffer_t* lwe_constant_buffer_create(
   );
 
   return (lwe_constant_buffer_t*)constant_buffer;
+}
+
+void* lwe_constant_buffer_map(
+  lwe_constant_buffer_t* constant_buffer_,
+  uint32_t flags )
+{
+  lwe_assert(constant_buffer_ != NULL);
+
+  lwe_d3d11_constant_buffer_t* constant_buffer =
+    (lwe_d3d11_constant_buffer_t*)constant_buffer_;
+
+  HRESULT hr;
+  D3D11_MAPPED_SUBRESOURCE msbr;
+
+  lwe_fail_if(FAILED(
+    hr =_d3d11_context->Map(
+      constant_buffer->buffer, 0,
+      lwe_map_flags_to_d3d(flags), 0,
+      &msbr
+    )),
+
+    "ID3D11DeviceContext::Map failed, hr=%#08X", hr
+  );
+
+  return msbr.pData;
+}
+
+void lwe_constant_buffer_unmap(
+  lwe_constant_buffer_t* constant_buffer_ )
+{
+  lwe_assert(constant_buffer_ != NULL);
+
+  lwe_d3d11_constant_buffer_t* constant_buffer =
+    (lwe_d3d11_constant_buffer_t*)constant_buffer_;
+
+  _d3d11_context->Unmap(constant_buffer->buffer, 0);
 }
 
 void lwe_constant_buffer_destroy(

@@ -26,17 +26,18 @@
 #define _LWE_ASSETS_MODEL_H_
 
 #include <lwe/asset.h>
-#include <lwe/vertex_declaration.h>
 #include <lwe/index_buffer.h>
 #include <lwe/vertex_buffer.h>
+#include <lwe/input_layout.h>
 #include <lwe/assets/material.h>
 
 typedef struct lwe_mesh_t {
+  mat4_t transform;
   lwe_material_t* material;
-  lwe_vertex_declaration_t vertex_decl;
+  lwe_input_layout_t* input_layout;
   lwe_size_t num_indicies;
-  lwe_size_t num_vertices;
   lwe_index_buffer_t* indicies;
+  lwe_size_t num_vertices;
   lwe_vertex_buffer_t* vertices;
 } lwe_mesh_t;
 

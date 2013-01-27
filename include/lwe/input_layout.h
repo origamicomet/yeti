@@ -22,52 +22,21 @@
 // THE SOFTWARE.
 // =============================================================================
 
+#ifndef _LWE_INPUT_LAYOUT_H_
+#define _LWE_INPUT_LAYOUT_H_
+
 #include <lwe/foundation.h>
-#include <lwe/asset.h>
-#include <lwe/asset_compiler.h>
-#include <lwe/application.h>
+#include <lwe/assets/vertex_shader.h>
+#include <lwe/vertex_declaration.h>
 
-typedef void (*lwe_boot_command_t)(
-  lwe_size_t num_args,
-  lwe_const_str_t* args );
+typedef struct lwe_input_layout_t {
+} lwe_input_layout_t;
 
-static void _compile(
-  lwe_size_t num_args,
-  lwe_const_str_t* args )
-{
-  bool file = false;
-  lwe_str_t data = "data";
-  lwe_str_t data_src = "data_src";
-  lwe_str_t path = NULL;
+extern lwe_input_layout_t* lwe_input_layout_create(
+  lwe_vertex_shader_t* vertex_shader,
+  lwe_vertex_declaration_t vertex_decl );
 
-  for (lwe_size_t i = 0; i < num_args; ++i) {
-    if (strncmp("--data=", args[i], 7) == 0) {
-      data = &args[i][7];
-    } else if(strncmp("--data-src=", args[i], 11) == 0) {
-      data_src = &args[i][11];
-    } else if(strncmp("--path=", args[i], 6) == 0) {
-      path = &args[i][7];
-      file = true;
-    }
-  }
+extern void lwe_input_layout_destroy(
+  lwe_input_layout_t* input_layout );
 
-  lwe_asset_register_types();
-
-  if (file)
-    lwe_asset_compiler_compile(data, data_src, path);
-  else
-    lwe_asset_compiler_compile_dir(data, data_src);
-}
-
-int main( lwe_size_t argc, lwe_const_str_t argv[] )
-{
-  lwe_boot_command_t boot_cmd = &lwe_application_run;
-
-  if (argc >= 2) {
-    if (strcmp("--compile", argv[1]) == 0)
-      boot_cmd = &_compile;
-  }
-
-  boot_cmd(argc, argv);
-  return EXIT_SUCCESS;
-}
+#endif // _LWE_INPUT_LAYOUT_H_

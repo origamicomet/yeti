@@ -94,7 +94,7 @@ bool lwe_rasterizer_state_compile(
     }
 
     if (!_string_to_fill_mode((lwe_const_str_t)fill_mode, &rs_blob.fill_mode)) {
-      lwe_log("  > `%s` is not a valid blend factor\n", fill_mode);
+      lwe_log("  > `%s` is not a valid fill mode\n", fill_mode);
       config_destroy(&cfg);
       return FALSE;
     }
@@ -109,7 +109,7 @@ bool lwe_rasterizer_state_compile(
     }
 
     if (!_string_to_cull_mode((lwe_const_str_t)cull_mode, &rs_blob.cull_mode)) {
-      lwe_log("  > `%s` is not a valid blend factor\n", cull_mode);
+      lwe_log("  > `%s` is not a valid cull mode\n", cull_mode);
       config_destroy(&cfg);
       return FALSE;
     }
@@ -124,7 +124,7 @@ bool lwe_rasterizer_state_compile(
     }
 
     if (!_string_to_front_face((lwe_const_str_t)front_face, &rs_blob.front_face)) {
-      lwe_log("  > `%s` is not a valid blend factor\n", front_face);
+      lwe_log("  > `%s` is not a valid front face\n", front_face);
       config_destroy(&cfg);
       return FALSE;
     }

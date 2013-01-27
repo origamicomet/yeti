@@ -128,38 +128,6 @@ static const DDSPF_TO_LWEPF* _ddspf_to_lwepf(
   return NULL;
 }
 
-static void _swizzle_argb(
-  const DDS_HEADER* header,
-  const void* data,
-  lwe_size_t num_faces )
-{
-  for (lwe_size_t face = 0; face < num_faces; ++face) {
-    lwe_size_t mw = header->width;
-    lwe_size_t mh = header->height;
-
-    for (lwe_size_t i = 0; i < mw * mh * 4; i += 4) {
-      uint32_t* uint_data = ((uint32_t*)data);
-      const uint32_t px = uint_data[i / 4];
-      uint_data[i / 4] = ((px & 0x00ffffff) << 8) | ((px & 0xff000000) >> 24);
-    }
-
-    data = (void*)(((uint8_t*)data) + mw * mh * 4);
-
-    for (lwe_size_t level = 0; level < header->mipmap_count; ++level) {
-      mw >>= 1;
-      mh >>= 1;
-
-      for (lwe_size_t i = 0; i < mw * mh * 4; i += 4) {
-        uint32_t* uint_data = ((uint32_t*)data);
-        const uint32_t px = uint_data[i / 4];
-        uint_data[i / 4] = ((px & 0x00ffffff) << 8) | ((px & 0xff000000) >> 24);
-      }
-
-      data = (void*)(((uint8_t*)data) + mw * mh * 4);
-    }
-  }
-}
-
 static lwe_size_t _determine_num_faces(
   const DDS_HEADER* header )
 {
@@ -255,9 +223,6 @@ bool lwe_texture_compile(
   }
 
   const lwe_size_t num_faces = _determine_num_faces(&dds_header);
-
-  if (pixel_format->ddspf == &DDSPF_A8R8G8B8)
-    _swizzle_argb(&dds_header, data, num_faces);
 
   lwe_texture_blob_t tex_blob;
   tex_blob.type = texture_type;

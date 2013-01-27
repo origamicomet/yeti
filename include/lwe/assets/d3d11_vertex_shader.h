@@ -34,8 +34,9 @@
 typedef struct lwe_d3d11_vertex_shader_t
   : public lwe_vertex_shader_t
 {
-  ID3D11InputLayout* input_layout;
   ID3D11VertexShader* vs;
+  void* byte_code;
+  lwe_size_t byte_code_len;
 } lwe_d3d11_vertex_shader_t;
 
 #endif // _LWE_ASSETS_D3D11_VERTEX_SHADER_H_

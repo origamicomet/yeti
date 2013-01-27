@@ -1,4 +1,4 @@
 fill_mode = "SOLID";
-cull_mode = "BACK";
+cull_mode = "NONE";
 front_face = "CCW";
-scissor_enabled = true;
+scissor_enabled = false;

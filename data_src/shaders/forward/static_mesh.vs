@@ -24,8 +24,8 @@
 struct VS_INPUT {
   float3 position  : POSITION;
   float2 tex_coord : TEXCOORD0;
-  float3 normal    : NORMAL;
-  float3 binormal  : BINORMAL;
+  // float3 normal    : NORMAL;
+  // float3 binormal  : BINORMAL;
 };
 
 struct VS_OUTPUT {
@@ -36,7 +36,7 @@ struct VS_OUTPUT {
 VS_OUTPUT vs_main( VS_INPUT IN )
 {
   VS_OUTPUT OUT;
-  OUT.position = mul(IN.position, model_view_proj);
+  OUT.position = mul(float4(IN.position, 1.0), model_view_proj);
   OUT.tex_coord = IN.tex_coord;
   return OUT;
 }

@@ -73,7 +73,7 @@ static lwe_asset_t* lwe_d3d11_texture_load(
 
       D3D11_TEXTURE1D_DESC td;
       td.Width          = texture->width;
-      td.MipLevels      = 0;
+      td.MipLevels      = 1;
       td.ArraySize      = texture->depth;
       td.Format         = lwe_pixel_format_to_dxgi(texture->pixel_format);
       td.Usage          = D3D11_USAGE_IMMUTABLE;
@@ -105,15 +105,17 @@ static lwe_asset_t* lwe_d3d11_texture_load(
     case LWE_TEXTURE_TYPE_2D:
     case LWE_TEXTURE_TYPE_2D_ARRAY: {
       D3D11_TEXTURE2D_DESC td;
-      td.Width          = texture->width;
-      td.Height         = texture->height;
-      td.MipLevels      = 0;
-      td.ArraySize      = texture->depth;
-      td.Format         = lwe_pixel_format_to_dxgi(texture->pixel_format);
-      td.Usage          = D3D11_USAGE_IMMUTABLE;
-      td.BindFlags      = D3D11_BIND_SHADER_RESOURCE;
-      td.CPUAccessFlags = 0;
-      td.MiscFlags      = 0;
+      td.Width              = texture->width;
+      td.Height             = texture->height;
+      td.MipLevels          = 1;
+      td.ArraySize          = texture->depth;
+      td.Format             = lwe_pixel_format_to_dxgi(texture->pixel_format);
+      td.SampleDesc.Count   = 1;
+      td.SampleDesc.Quality = 0;
+      td.Usage              = D3D11_USAGE_IMMUTABLE;
+      td.BindFlags          = D3D11_BIND_SHADER_RESOURCE;
+      td.CPUAccessFlags     = 0;
+      td.MiscFlags          = 0;
 
       lwe_fail_if(FAILED(
         hr = _d3d11_device->CreateTexture2D(
@@ -140,7 +142,7 @@ static lwe_asset_t* lwe_d3d11_texture_load(
       td.Width          = texture->width;
       td.Height         = texture->height;
       td.Depth          = texture->depth;
-      td.MipLevels      = 0;
+      td.MipLevels      = 1;
       td.Format         = lwe_pixel_format_to_dxgi(texture->pixel_format);
       td.Usage          = D3D11_USAGE_IMMUTABLE;
       td.BindFlags      = D3D11_BIND_SHADER_RESOURCE;
@@ -172,7 +174,7 @@ static lwe_asset_t* lwe_d3d11_texture_load(
       D3D11_TEXTURE2D_DESC td;
       td.Width          = texture->width;
       td.Height         = texture->height;
-      td.MipLevels      = 0;
+      td.MipLevels      = 1;
       td.ArraySize      = texture->depth;
       td.Format         = lwe_pixel_format_to_dxgi(texture->pixel_format);
       td.Usage          = D3D11_USAGE_IMMUTABLE;

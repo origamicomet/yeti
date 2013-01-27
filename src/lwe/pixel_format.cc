@@ -59,6 +59,11 @@ lwe_size_t lwe_pixel_format_row_stride(
     case LWE_PIXEL_FORMAT_R8G8B8A8_SRGB:
       return width * 4;
 
+    case LWE_PIXEL_FORMAT_DXT1:
+    case LWE_PIXEL_FORMAT_DXT3:
+    case LWE_PIXEL_FORMAT_DXT5:
+      return width / 4;
+
     case LWE_PIXEL_FORMAT_D24_S8:
       return width * 4;
   }
@@ -74,7 +79,7 @@ lwe_size_t lwe_pixel_format_layer_stride(
   switch (pixel_format) {
     case LWE_PIXEL_FORMAT_R8G8B8A8:
     case LWE_PIXEL_FORMAT_R8G8B8A8_SRGB:
-      return width * 4;
+      return width * height * 4;
 
     case LWE_PIXEL_FORMAT_DXT1:
       return ((width + 3) / 4) * ((height + 3) / 4) * 8;
@@ -84,7 +89,7 @@ lwe_size_t lwe_pixel_format_layer_stride(
       return ((width + 3) / 4) * ((height + 3) / 4) * 16;
 
     case LWE_PIXEL_FORMAT_D24_S8:
-      return width * 4;
+      return width * height * 4;
   }
 
   return 0;

@@ -41,6 +41,23 @@ lwe_const_str_t lwe_path_find_ext(
   return (ext + 1);
 }
 
+lwe_const_str_t lwe_path_find_basename(
+  lwe_const_str_t path )
+{
+  if (!path)
+    return NULL;
+
+  char* basename =
+    (char*)(((char*)path) + strlen(path));
+
+  while ((*(--basename) != '/') && (basename != path));
+
+  if (basename == path)
+    return basename;
+
+  return (basename + 1);
+}
+
 lwe_const_str_t lwe_path_strip(
   lwe_const_str_t dir,
   lwe_const_str_t path )

@@ -101,7 +101,8 @@ void lwe_asset_manager_deref(
 lwe_asset_t* lwe_asset_manager_find_by_hash(
   lwe_hash_t hash )
 {
-  return *lwe_dict_find(&_assets, hash);
+  lwe_asset_t** asset = lwe_dict_find(&_assets, hash);
+  return (asset ? *asset : NULL);
 }
 
 lwe_asset_t* lwe_asset_manager_find_and_ref_by_hash(

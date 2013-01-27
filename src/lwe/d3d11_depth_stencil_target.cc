@@ -47,15 +47,17 @@ lwe_depth_stencil_target_t* lwe_depth_stencil_target_create(
   depth_stencil_target->height = height;
 
   D3D11_TEXTURE2D_DESC td;
-  td.Width          = width;
-  td.Height         = height;
-  td.MipLevels      = 0;
-  td.ArraySize      = 1;
-  td.Format         = lwe_pixel_format_to_dxgi(pixel_format);
-  td.Usage          = D3D11_USAGE_DEFAULT;
-  td.BindFlags      = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-  td.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  td.MiscFlags      = 0;
+  td.Width              = width;
+  td.Height             = height;
+  td.MipLevels          = 1;
+  td.ArraySize          = 1;
+  td.Format             = lwe_pixel_format_to_typeless_dxgi(pixel_format);
+  td.SampleDesc.Count   = 1;
+  td.SampleDesc.Quality = 0;
+  td.Usage              = D3D11_USAGE_DEFAULT;
+  td.BindFlags          = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+  td.CPUAccessFlags     = 0;
+  td.MiscFlags          = 0;
 
   HRESULT hr;
 
@@ -68,7 +70,7 @@ lwe_depth_stencil_target_t* lwe_depth_stencil_target_create(
   );
 
   D3D11_DEPTH_STENCIL_VIEW_DESC dstvd;
-  dstvd.Format = td.Format;
+  dstvd.Format = lwe_pixel_format_to_dxgi(pixel_format);
   dstvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
   dstvd.Flags = 0;
   dstvd.Texture2D.MipSlice = 0;
@@ -82,7 +84,7 @@ lwe_depth_stencil_target_t* lwe_depth_stencil_target_create(
   );
 
   D3D11_SHADER_RESOURCE_VIEW_DESC srvd;
-  srvd.Format = td.Format;
+  srvd.Format = lwe_pixel_format_to_masked_typeless_dxgi(pixel_format);
   srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
   srvd.Texture2D.MostDetailedMip = 0;
   srvd.Texture2D.MipLevels = -1;

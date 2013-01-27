@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 static bool _compile(
+  FILE* database,
   lwe_type_id_t type_id,
   lwe_const_str_t data,
   lwe_const_str_t data_src,
@@ -44,8 +45,16 @@ static bool _compile(
     char patched_path[LWE_MAX_PATH];
     const lwe_size_t len = lwe_path_find_ext(rel_path) - rel_path;
     strcpy(&patched_path[0], (rel_path + 1));
-    strcpy(&patched_path[len - 1], type->assoc_compile_ext);
+    strcpy(&patched_path[len - 1], type->assoc_ext);
     hash = lwe_murmur_hash(&patched_path[0], 0);
+  }
+
+  if (database) {
+    fprintf(
+      database,
+      "%s,%u,0x%" LWE_HASH_FORMAT "\n",
+      path, type->type_id, hash
+    );
   }
 
   char paths[2][LWE_MAX_PATH];
@@ -82,7 +91,7 @@ static bool _compile(
     return false;
   }
 
-  lwe_log("  > Succesfully compiled\n\n");
+  lwe_log("  > Successfully compiled\n\n");
 
   const bool remove_mrd = (ftell(mrd) <= 0);
   const bool remove_stream = (ftell(stream) <= 0);
@@ -101,6 +110,7 @@ static bool _compile(
 }
 
 typedef struct lwe_compile_data_t {
+  FILE* database;
   lwe_const_str_t data;
   lwe_const_str_t data_src;
   lwe_size_t num_assets;
@@ -116,7 +126,7 @@ static void _on_found(
     return;
 
   cd->num_assets++;
-  if (_compile(type_id, cd->data, cd->data_src, path))
+  if (_compile(cd->database, type_id, cd->data, cd->data_src, path))
     cd->num_succesfuly_compiled_assets++;
 }
 
@@ -139,7 +149,7 @@ void lwe_asset_compiler_compile(
     lwe_mkdir(&dir[0]);
   }
 
-  _compile(type_id, data, data_src, path);
+  _compile(NULL, type_id, data, data_src, path);
 }
 
 void lwe_asset_compiler_compile_dir(
@@ -157,7 +167,15 @@ void lwe_asset_compiler_compile_dir(
     lwe_mkdir(&dir[0]);
   }
 
+  FILE* database = NULL; {
+    char db_path[LWE_MAX_PATH];
+    sprintf(&db_path[0], "%s/compile.db", data);
+    database = fopen(&db_path[0], "wb");
+    lwe_fail_if(database == NULL, "Unable to open %s/compile.db!", data);
+  }
+
   lwe_compile_data_t cd = {
+    database,
     data,
     data_src,
     0, 0
@@ -172,4 +190,6 @@ void lwe_asset_compiler_compile_dir(
     cd.num_assets,
     (cd.num_succesfuly_compiled_assets * 100) / (cd.num_assets ? cd.num_assets : 1)
   );
+
+  fclose(database);
 }

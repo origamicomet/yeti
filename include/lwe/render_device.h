@@ -36,8 +36,6 @@ extern void lwe_render_device_create(
   uint32_t adapter_id );
 
 extern void lwe_render_device_dispatch(
-  lwe_size_t num_constant_buffers,
-  struct lwe_constant_buffer_t** constant_buffers,
   lwe_size_t num_streams,
   const lwe_render_stream_t** streams );
 
