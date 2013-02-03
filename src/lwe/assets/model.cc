@@ -176,7 +176,8 @@ static bool lwe_model_compile(
     aiProcess_CalcTangentSpace |
     aiProcess_CalcTangentSpace |
     aiProcess_JoinIdenticalVertices |
-    aiProcess_MakeLeftHanded |
+    // aiProcess_MakeLeftHanded |
+    aiProcess_FlipUVs |
     aiProcess_Triangulate |
     aiProcess_GenNormals |
     aiProcess_LimitBoneWeights |

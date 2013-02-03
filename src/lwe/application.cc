@@ -53,7 +53,7 @@ static void lwe_application_update()
 static lwe_blend_state_t* _blend_state = NULL;
 static lwe_depth_stencil_state_t* _depth_stencil_state = NULL;
 static lwe_rasterizer_state_t* _rasterizer_state = NULL;
-static lwe_model_t* _unit_plane = NULL;
+static lwe_model_t* _suzanne = NULL;
 static lwe_constant_buffer_t* _model_constants = NULL;
 
 static void lwe_application_render(
@@ -67,17 +67,25 @@ static void lwe_application_render(
   static const float clear_color[4] =
     { 1.0f, 0.0f, 0.6f, 1.0f };
 
-  static const mat4_t model_mat =
-    mat4_t::identity();
+  static float rotation = 0.0f;
+  rotation += (1.0f / (180.0f / LWE_PI)) * 0.01f;
 
-  static const mat4_t view_mat =
-    mat4_t::translate(vec3_t(0.0f, 0.0f, -10.0f));
+  static const mat4_t model_mat =
+    _suzanne->meshes[0].transform *
+    mat3_t::rotate_x(LWE_PI / -2.0f);
+
+  const mat4_t view_mat =
+    mat4_t::look_at(
+      vec3_t(cos(rotation) * 2, sin(rotation) * 2, 2.0f),
+      vec3_t(0.0f, 0.0f, 0.0f),
+      vec3_t(0.0f, 1.0f, 0.0f)
+    );
 
   static const mat4_t proj_mat =
-    mat4_t::perspective(60.0f, 1280.0f / 720.0f, 1.0f, 100.0f);
+    mat4_t::perspective(45.0f / (180.0f / LWE_PI), 1280.0f / 720.0f, 1.0f, 100.0f);
 
-  static const mat4_t model_view_proj_mat =
-    model_mat;
+  const mat4_t model_view_proj_mat =
+    model_mat * view_mat * proj_mat;
 
   {
     void* constants = lwe_constant_buffer_map(
@@ -128,7 +136,7 @@ static void lwe_application_render(
 
   lwe_render_stream_draw(
     render_stream,
-    &_unit_plane->meshes[0],
+    &_suzanne->meshes[0],
     1, &_model_constants
   );
 
@@ -177,9 +185,9 @@ void lwe_application_run(
       "states/geometry.rasterizer_state"
     );
 
-  _unit_plane =
+  _suzanne =
     (lwe_model_t*)lwe_asset_manager_load(
-      "models/unit_plane/unit_plane.model"
+      "models/suzanne/suzanne.model"
     );
 
   {

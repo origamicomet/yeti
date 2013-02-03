@@ -47,14 +47,14 @@ static bool _compile(
     strcpy(&patched_path[0], (rel_path + 1));
     strcpy(&patched_path[len - 1], type->assoc_ext);
     hash = lwe_murmur_hash(&patched_path[0], 0);
-  }
 
-  if (database) {
-    fprintf(
-      database,
-      "%s,%u,0x%" LWE_HASH_FORMAT "\n",
-      path, type->type_id, hash
-    );
+    if (database) {
+      fprintf(
+        database,
+        "%s,%s,%u,0x%" LWE_HASH_FORMAT "\n",
+        path, &patched_path[0], type->type_id, hash
+      );
+    }
   }
 
   char paths[2][LWE_MAX_PATH];
@@ -188,7 +188,8 @@ void lwe_asset_compiler_compile_dir(
 
     cd.num_succesfuly_compiled_assets,
     cd.num_assets,
-    (cd.num_succesfuly_compiled_assets * 100) / (cd.num_assets ? cd.num_assets : 1)
+    (cd.num_succesfuly_compiled_assets * 100) /
+    (cd.num_assets ? cd.num_assets : 1)
   );
 
   fclose(database);

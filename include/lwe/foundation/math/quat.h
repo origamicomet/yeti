@@ -131,28 +131,25 @@ typedef struct quat_t {
     }
 
   public: /* constructor methods */
-    /// Constructs a quaternion from euler angles (in radians),
-    static quat_t from_euler_angles( float ex, float ey, float ez ) {
-      const float ex2 = ex * 0.5f;
-      const float sx = sin(ex2);
-      const float cx = cos(ex2);
-      const float ey2 = ey * 0.5f;
-      const float sy = sin(ey2);
-      const float cy = cos(ey2);
-      const float ez2 = ez * 0.5f;
-      const float sz = sin(ez2);
-      const float cz = cos(ez2);
-      const float cc = cx * cz;
-      const float cs = cx * sz;
-      const float sc = sx * cz;
-      const float ss = sx * sz;
+    /// Constructs a quaternion from an angle-axis representation.
+    static quat_t from_angle_axis( const vec3_t& axis, float angle ) {
+      const float half_angle = angle * 0.5f;
+      const float sin_of_half_angle = sin(half_angle);
 
       return quat_t(
-        cy * sc - sy * cs,
-        cy * ss + sy * cc,
-        cy * cs - sy * sc,
-        cy * cc + sy * ss
+        sin_of_half_angle * axis.x,
+        sin_of_half_angle * axis.y,
+        sin_of_half_angle * axis.z,
+        cos(half_angle)
       );
+    }
+
+    /// Constructs a quaternion from euler angles (in radians),
+    static quat_t from_euler_angles( float ex, float ey, float ez ) {
+      const quat_t qx = from_angle_axis(vec3_t(1.0f, 0.0f, 0.0f), ex);
+      const quat_t qy = from_angle_axis(vec3_t(0.0f, 1.0f, 0.0f), ey);
+      const quat_t qz = from_angle_axis(vec3_t(0.0f, 0.0f, 1.0f), ez);
+      return qx * qy * qz;
     }
 
   public:

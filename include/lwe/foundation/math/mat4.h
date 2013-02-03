@@ -47,6 +47,7 @@ typedef struct mat4_t {
       memcpy((void*)&m[0], (void*)&mat.m[0], 3 * sizeof(float));
       memcpy((void*)&m[4], (void*)&mat.m[3], 3 * sizeof(float));
       memcpy((void*)&m[8], (void*)&mat.m[6], 3 * sizeof(float));
+      m[15] = 1.0f;
     }
 
     LWE_INLINE mat4_t( float m00, float m01, float m02, float m03,
@@ -211,12 +212,12 @@ typedef struct mat4_t {
       );
     }
 
-    /// Creates a rotation matrix.
+    /// Creates a rotation matrix from a quaternion.
     static mat4_t rotate( const quat_t& q ) {
       return mat4_t(
-        (1.0f - 2.0f * q.y * q.y), (2.0f * q.x * q.y - 2.0f * q.w * q.z), (2.0f * q.x * q.z + 2.0f * q.w * q.y), 0.0f,
-        (2.0f * q.x * q.y + 2.0f * q.w * q.z), (1.0f - 2.0f * q.x * q.x - 2.0f * q.z * q.z), (2.0f * q.y * q.z + 2 * q.w * q.x), 0.0f,
-        (2.0f * q.x * q.z - 2.0f * q.w * q.y), (2.0f * q.y * q.z - 2.0f * q.w * q.x), (1.0f - 2.0f * q.x * q.x - 2 * q.y * q.y), 0.0f,
+        1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z, 2.0f * q.x * q.y - 2.0f * q.z * q.w, 2.0f * q.x * q.z + 2.0f * q.y * q.w, 0.0f,
+        2.0f * q.x * q.y + 2.0f * q.z * q.w, 1.0f - 2.0f * q.x * q.x - 2.0f * q.z * q.z, 2.0f * q.y * q.z - 2.0f * q.x * q.w, 0.0f,
+        2.0f * q.x * q.z - 2.0f * q.y * q.w, 2.0f * q.y * q.z + 2.0f * q.x * q.w, 1.0f - 2.0f * q.x * q.x - 2.0f * q.y * q.y, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
       );
     }
@@ -227,7 +228,7 @@ typedef struct mat4_t {
         s.x,  0.0f, 0.0f, 0.0f,
         0.0f, s.y,  0.0f, 0.0f,
         0.0f, 0.0f, s.z,  0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f
+        0.0f, 0.0f, 0.0f, 1.0f
       );
     }
 
@@ -242,7 +243,7 @@ typedef struct mat4_t {
              mat4_t::translate(translation);
     }
 
-    /// Creates a left-handed orthographic projection matrix.
+    /// Creates a right-handed orthographic projection matrix.
     static mat4_t orthographic(
       float min_x, float max_x,
       float min_y, float max_y,
@@ -250,17 +251,17 @@ typedef struct mat4_t {
     {
       const float dx = max_x - min_x;
       const float dy = max_y - min_y;
-      const float dz = far_plane - near_plane;
+      const float dz = near_plane - far_plane;
 
       return mat4_t(
         2.0f / dx, 0.0f, 0.0f, 0.0f,
         0.0f, 2.0f / dy, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f / dz, 0.0f,
-        0.0f, 0.0f, -near_plane / dz, 1.0f
+        0.0f, 0.0f, near_plane / dz, 1.0f
       );
     }
 
-    /// Creates a left-handed perspective projection matrix.
+    /// Creates a right-handed perspective projection matrix.
     static mat4_t perspective(
       float field_of_view,
       float aspect_ratio,
@@ -269,13 +270,31 @@ typedef struct mat4_t {
     {
       const float ys = tan(LWE_PI_2 - (field_of_view / 2.0f));
       const float xs = ys / aspect_ratio;
-      const float dz = far_plane - near_plane;
+      const float dz = near_plane - far_plane;
 
       return mat4_t(
         xs, 0.0f, 0.0f, 0.0f,
         0.0f, ys, 0.0f, 0.0f,
-        0.0f, 0.0f, far_plane / dz, 1.0f,
-        0.0f, 0.0f, 0.0f, -far_plane * near_plane / dz
+        0.0f, 0.0f, (far_plane - near_plane) / dz, (2 * far_plane * near_plane) / dz,
+        0.0f, 0.0f, -1.0f, 0.0f
+      );
+    }
+
+    /// Creates a right-handed look-at matrix.
+    static mat4_t look_at(
+      const vec3_t& eye,
+      const vec3_t& target,
+      const vec3_t& up )
+    {
+      const vec3_t z_axis = (eye - target).normalize();
+      const vec3_t x_axis = up.cross(z_axis).normalize();
+      const vec3_t y_axis = z_axis.cross(x_axis);
+
+      return mat4_t(
+        x_axis.x, y_axis.x, z_axis.x, 0.0f,
+        x_axis.y, y_axis.y, z_axis.y, 0.0f,
+        x_axis.z, y_axis.z, z_axis.z, 0.0f,
+        -x_axis.dot(eye), -y_axis.dot(eye), -z_axis.dot(eye), 1.0f
       );
     }
 
