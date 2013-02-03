@@ -60,9 +60,11 @@ lwe_size_t lwe_pixel_format_row_stride(
       return width * 4;
 
     case LWE_PIXEL_FORMAT_DXT1:
+      return ((width + 3) / 4) * 8;
+
     case LWE_PIXEL_FORMAT_DXT3:
     case LWE_PIXEL_FORMAT_DXT5:
-      return width / 4;
+      return ((width + 3) / 4) * 16;
 
     case LWE_PIXEL_FORMAT_D24_S8:
       return width * 4;
