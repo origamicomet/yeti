@@ -71,8 +71,7 @@ static void lwe_application_render(
   rotation += (1.0f / (180.0f / LWE_PI)) * 0.01f;
 
   static const mat4_t model_mat =
-    _suzanne->meshes[0].transform *
-    mat3_t::rotate_x(LWE_PI / -2.0f);
+    _suzanne->meshes[0].transform;
 
   const mat4_t view_mat =
     mat4_t::look_at(
