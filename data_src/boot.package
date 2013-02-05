@@ -1,0 +1,4 @@
+assets = [
+  "boot.script",
+  "textures/splash.texture"
+];

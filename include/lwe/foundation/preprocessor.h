@@ -44,8 +44,8 @@
 #define lwe_assert( condition ) \
   lwe_assertf(condition, "\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > An assertion failed:\n  > " #condition "\n\n")
 
-#define lwe_fail( msg ) \
-  do {  { lwe_log("\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" msg "\"\n\n"); raise(SIGABRT); } } while (0, 0)
+#define lwe_fail( msg, ... ) \
+  do {  { lwe_log("\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" msg "\"\n\n", ##__VA_ARGS__); raise(SIGABRT); } } while (0, 0)
 
 #define lwe_fail_if( condition, format, ... ) \
   do { if ((condition)) { lwe_log("\nIn " LWE_STRINGIFY(__FILE__) " : " LWE_STRINGIFY(__LINE__) "\n\n  > \"" #condition "\"\n  > " format "\n\n", ##__VA_ARGS__); raise(SIGABRT); } } while (0, 0)
@@ -108,6 +108,18 @@
 
 #if defined(LWE_MACOSX_BUILD) || defined(LWE_LINUX_BUILD)
   #define LWE_POSIX_BUILD
+#endif
+
+#if defined(LWE_WIN64_BUILD)
+  #define LWE_PLATFORM_STRING "win64"
+#elif defined(LWE_WIN32_BUILD)
+  #define LWE_PLATFORM_STRING "win32"
+#elif defined(LWE_MACOSX_BUILD)
+  #define LWE_PLATFORM_STRING "macosx"
+#elif defined(LWE_LINUX_BUILD)
+  #define LWE_PLATFORM_STRING "linux"
+#else
+  #error Unsupported platform.
 #endif
 
 #endif // _LWE_FOUNDATION_PREPROCESSOR_H_

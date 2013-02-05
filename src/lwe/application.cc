@@ -23,6 +23,7 @@
 // =============================================================================
 
 #include <lwe/foundation.h>
+#include <lwe/manifest.h>
 #include <lwe/asset.h>
 #include <lwe/asset_manager.h>
 #include <lwe/window.h>
@@ -156,16 +157,35 @@ void lwe_application_run(
   lwe_asset_register_types();
   lwe_render_device_create(0);
 
+  lwe_manifest_t* manifest =
+    lwe_manifest_load("data/manifest");
+
   lwe_window_t* window =
-    lwe_window_open("Engine", 1280, 720);
+    lwe_window_open(
+      manifest->window.title,
+      manifest->window.width,
+      manifest->window.height
+    );
+
   lwe_array_push(lwe_application_windows(), &window);
 
   lwe_swap_chain_t* swap_chain =
-    lwe_swap_chain_create(window, LWE_PIXEL_FORMAT_R8G8B8A8, 1280, 720, false, false);
+    lwe_swap_chain_create(
+      window, LWE_PIXEL_FORMAT_R8G8B8A8,
+      manifest->graphics.resolution.width,
+      manifest->graphics.resolution.height,
+      manifest->graphics.fullscreen,
+      manifest->graphics.vertical_sync
+    );
+
   lwe_array_push(lwe_application_swap_chains(), &swap_chain);
 
   lwe_depth_stencil_target_t* depth_stencil =
-    lwe_depth_stencil_target_create(LWE_PIXEL_FORMAT_D24_S8, 1280, 720);
+    lwe_depth_stencil_target_create(
+      LWE_PIXEL_FORMAT_D24_S8,
+      manifest->graphics.resolution.width,
+      manifest->graphics.resolution.height
+    );
 
   lwe_window_show(window);
 
