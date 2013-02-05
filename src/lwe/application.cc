@@ -51,6 +51,7 @@ static void lwe_application_update()
 {
 }
 
+static lwe_manifest_t* _manifest = NULL;
 static lwe_blend_state_t* _blend_state = NULL;
 static lwe_depth_stencil_state_t* _depth_stencil_state = NULL;
 static lwe_rasterizer_state_t* _rasterizer_state = NULL;
@@ -81,8 +82,12 @@ static void lwe_application_render(
       vec3_t(0.0f, 1.0f, 0.0f)
     );
 
+  static const float aspect_ratio =
+    (float)_manifest->graphics.resolution.width /
+    (float)_manifest->graphics.resolution.height;
+
   static const mat4_t proj_mat =
-    mat4_t::perspective(45.0f / (180.0f / LWE_PI), 1280.0f / 720.0f, 1.0f, 100.0f);
+    mat4_t::perspective(45.0f / (180.0f / LWE_PI), aspect_ratio, 1.0f, 100.0f);
 
   const mat4_t model_view_proj_mat =
     model_mat * view_mat * proj_mat;
@@ -106,7 +111,9 @@ static void lwe_application_render(
   );
 
   static const lwe_viewport_t viewport = {
-    0, 0, 1280, 720
+    0, 0,
+    _manifest->graphics.resolution.width,
+    _manifest->graphics.resolution.height
   };
 
   lwe_render_stream_set_viewports(
@@ -157,14 +164,14 @@ void lwe_application_run(
   lwe_asset_register_types();
   lwe_render_device_create(0);
 
-  lwe_manifest_t* manifest =
+  _manifest =
     lwe_manifest_load("data/manifest");
 
   lwe_window_t* window =
     lwe_window_open(
-      manifest->window.title,
-      manifest->window.width,
-      manifest->window.height
+      _manifest->window.title,
+      _manifest->window.width,
+      _manifest->window.height
     );
 
   lwe_array_push(lwe_application_windows(), &window);
@@ -172,10 +179,10 @@ void lwe_application_run(
   lwe_swap_chain_t* swap_chain =
     lwe_swap_chain_create(
       window, LWE_PIXEL_FORMAT_R8G8B8A8,
-      manifest->graphics.resolution.width,
-      manifest->graphics.resolution.height,
-      manifest->graphics.fullscreen,
-      manifest->graphics.vertical_sync
+      _manifest->graphics.resolution.width,
+      _manifest->graphics.resolution.height,
+      _manifest->graphics.fullscreen,
+      _manifest->graphics.vertical_sync
     );
 
   lwe_array_push(lwe_application_swap_chains(), &swap_chain);
@@ -183,8 +190,8 @@ void lwe_application_run(
   lwe_depth_stencil_target_t* depth_stencil =
     lwe_depth_stencil_target_create(
       LWE_PIXEL_FORMAT_D24_S8,
-      manifest->graphics.resolution.width,
-      manifest->graphics.resolution.height
+      _manifest->graphics.resolution.width,
+      _manifest->graphics.resolution.height
     );
 
   lwe_window_show(window);

@@ -1,16 +1,16 @@
 application = {
   window = {
     title = "engine";
-    width  = 1280;
-    height = 720;
+    width  = 640;
+    height = 480;
   };
 
   graphics = {
     adapter = 0;
 
     resolution = {
-      width  = 1280;
-      height = 720;
+      width  = 640;
+      height = 480;
     };
 
     fullscreen = false;
