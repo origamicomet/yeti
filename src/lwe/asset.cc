@@ -106,6 +106,7 @@ lwe_asset_type_t* lwe_asset_type_id_to_type(
   return NULL;
 }
 
+#include <lwe/assets/package.h>
 #include <lwe/assets/texture.h>
 #include <lwe/assets/vertex_shader.h>
 #include <lwe/assets/pixel_shader.h>
@@ -117,6 +118,7 @@ lwe_asset_type_t* lwe_asset_type_id_to_type(
 
 void lwe_asset_register_types()
 {
+  lwe_package_register_type();
   lwe_texture_register_type();
   lwe_vertex_shader_register_type();
   lwe_pixel_shader_register_type();

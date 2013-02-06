@@ -129,6 +129,7 @@ static void lwe_material_unload(
   lwe_asset_t* asset )
 {
   lwe_assert(asset != NULL);
+  lwe_assert(asset->type_id == LWE_ASSET_TYPE_ID_MATERIAL);
 
   lwe_material_t* material = (lwe_material_t*)asset;
 

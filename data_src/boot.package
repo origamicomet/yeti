@@ -1,4 +1,21 @@
-assets = [
-  "boot.script",
-  "textures/splash.texture"
+references = [
+  # "boot.script",
+  
+  # "textures/splash.texture",
+  "textures/checker_board_diffuse.texture",
+  "textures/checker_board_normals.texture",
+  "textures/checker_board_surface_properties.texture",
+  "textures/splash.texture",
+
+  "shaders/forward/static_mesh.vs",
+  "shaders/forward/static_mesh.ps",
+
+  "materials/static_mesh.material",
+
+  "models/suzanne/suzanne.model",
+  "models/unit_plane/unit_plane.model",
+
+  "states/none.blend_state",
+  "states/geometry.depth_stencil_state",
+  "states/geometry.rasterizer_state"
 ];

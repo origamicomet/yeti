@@ -75,9 +75,11 @@ static void lwe_application_render(
   static const mat4_t model_mat =
     _suzanne->meshes[0].transform;
 
+  static const float radius = 1.5f;
+
   const mat4_t view_mat =
     mat4_t::look_at(
-      vec3_t(cos(rotation) * 2, sin(rotation) * 2, 2.0f),
+      vec3_t(cos(rotation) * radius, sin(rotation) * radius, radius),
       vec3_t(0.0f, 0.0f, 0.0f),
       vec3_t(0.0f, 1.0f, 0.0f)
     );
@@ -196,23 +198,25 @@ void lwe_application_run(
 
   lwe_window_show(window);
 
+  lwe_asset_manager_load("boot.package");
+
   _blend_state =
-    (lwe_blend_state_t*)lwe_asset_manager_load(
+    (lwe_blend_state_t*)lwe_asset_manager_find(
       "states/none.blend_state"
     );
 
   _depth_stencil_state =
-    (lwe_depth_stencil_state_t*)lwe_asset_manager_load(
+    (lwe_depth_stencil_state_t*)lwe_asset_manager_find(
       "states/geometry.depth_stencil_state"
     );
 
   _rasterizer_state =
-    (lwe_rasterizer_state_t*)lwe_asset_manager_load(
+    (lwe_rasterizer_state_t*)lwe_asset_manager_find(
       "states/geometry.rasterizer_state"
     );
 
   _suzanne =
-    (lwe_model_t*)lwe_asset_manager_load(
+    (lwe_model_t*)lwe_asset_manager_find(
       "models/suzanne/suzanne.model"
     );
 
