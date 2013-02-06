@@ -39,14 +39,22 @@ template <typename K, typename V>
 LWE_INLINE int _lwe_dict_sort_comparator( const void* a, const void* b ) {
   lwe_pair_t<K, V>* ap = (lwe_pair_t<K, V>*)a;
   lwe_pair_t<K, V>* bp = (lwe_pair_t<K, V>*)b;
-  return ap->key - bp->key;
+
+  if (ap->key > bp->key) return 1;
+  if (ap->key < bp->key) return -1;
+
+  return 0;
 }
 
 template <typename K, typename V>
 LWE_INLINE int _lwe_dict_search_comparator( const void* k, const void* v ) {
   K key = *((K*)k);
   lwe_pair_t<K, V>* value = (lwe_pair_t<K, V>*)v;
-  return key - value->key;
+
+  if (key > value->key) return 1;
+  if (key < value->key) return -1;
+  
+  return 0;
 }
 
 template <typename K, typename V>
