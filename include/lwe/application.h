@@ -33,8 +33,11 @@ struct lwe_swap_chain_t;
 extern lwe_array_t<struct lwe_window_t*>* lwe_application_windows();
 extern lwe_array_t<struct lwe_swap_chain_t*>* lwe_application_swap_chains();
 
+extern void lwe_application_quit();
+
 extern void lwe_application_run(
   lwe_size_t num_args,
   lwe_const_str_t* args );
+
 
 #endif // _LWE_APPLICATION_H_

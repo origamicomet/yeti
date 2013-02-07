@@ -47,6 +47,10 @@ lwe_array_t<lwe_swap_chain_t*>* lwe_application_swap_chains() {
   return &swap_chains;
 }
 
+void lwe_application_quit() {
+  exit(EXIT_SUCCESS);
+}
+
 static lwe_manifest_t* _manifest = NULL;
 static lwe_window_t* _window = NULL;
 static lwe_swap_chain_t* _swap_chain = NULL;
@@ -85,8 +89,16 @@ static void lwe_application_update()
     }
   }
 
-  lwe_queue_fast_forward(&_window->input_events);
-  lwe_queue_fast_forward(&_window->window_events);
+  while (!lwe_queue_empty(&_window->window_events)) {
+    lwe_window_event_t* event = lwe_queue_queued(&_window->window_events);
+    lwe_queue_dequeue(&_window->window_events);
+
+    switch (event->type) {
+      case LWE_WINDOW_EVENT_CLOSED: {
+        lwe_application_quit();
+      } break;
+    }
+  }
 
   _rotation += _step;
 }
