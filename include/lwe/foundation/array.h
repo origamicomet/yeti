@@ -32,7 +32,7 @@
 template <typename T>
 struct lwe_array_t {
   lwe_array_t() { size = reserved = 0; _internal = NULL; }
-  ~lwe_array_t() { size = reserved = 0; lwe_realloc((void*)_internal, 0); }
+  ~lwe_array_t() { _internal = (T*)lwe_realloc((void*)_internal, 0); }
 
   lwe_size_t size;
   lwe_size_t reserved;
