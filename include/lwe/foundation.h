@@ -5,6 +5,7 @@
 #include <lwe/foundation/string.h>
 #include <lwe/foundation/array.h>
 #include <lwe/foundation/dict.h>
+#include <lwe/foundation/queue.h>
 #include <lwe/foundation/path.h>
 #include <lwe/foundation/dir.h>
 #include <lwe/foundation/digest.h>
