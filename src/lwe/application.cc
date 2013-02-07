@@ -47,30 +47,57 @@ lwe_array_t<lwe_swap_chain_t*>* lwe_application_swap_chains() {
   return &swap_chains;
 }
 
-static void lwe_application_update()
-{
-}
-
 static lwe_manifest_t* _manifest = NULL;
+static lwe_window_t* _window = NULL;
+static lwe_swap_chain_t* _swap_chain = NULL;
+static lwe_depth_stencil_target_t* _depth_stencil_target = NULL;
 static lwe_blend_state_t* _blend_state = NULL;
 static lwe_depth_stencil_state_t* _depth_stencil_state = NULL;
 static lwe_rasterizer_state_t* _rasterizer_state = NULL;
 static lwe_model_t* _suzanne = NULL;
 static lwe_constant_buffer_t* _model_constants = NULL;
 
-static void lwe_application_render(
-  lwe_window_t* window,
-  lwe_swap_chain_t* swap_chain,
-  lwe_depth_stencil_target_t* depth_stencil )
+static float _rotation = 0.0f;
+static float _step = 0.0f;
+
+static void lwe_application_update()
+{
+  while (!lwe_queue_empty(&_window->input_events)) {
+    lwe_input_event_t* event = lwe_queue_queued(&_window->input_events);
+    lwe_queue_dequeue(&_window->input_events);
+
+    switch (event->type) {
+      case LWE_INPUT_EVENT_MOUSE_BUTTON_PRESSED: {
+        if (event->mouse.button == LWE_MOUSE_BUTTON_LEFT) {
+          _step += (1.0f / (180.0f / LWE_PI)) * 0.01f;
+        } else if (event->mouse.button == LWE_MOUSE_BUTTON_RIGHT) {
+          _step -= (1.0f / (180.0f / LWE_PI)) * 0.01f;
+        }
+      } break;
+
+      case LWE_INPUT_EVENT_MOUSE_BUTTON_RELEASED: {
+        if (event->mouse.button == LWE_MOUSE_BUTTON_LEFT) {
+          _step -= (1.0f / (180.0f / LWE_PI)) * 0.01f;
+        } else if (event->mouse.button == LWE_MOUSE_BUTTON_RIGHT) {
+          _step += (1.0f / (180.0f / LWE_PI)) * 0.01f;
+        }
+      } break;
+    }
+  }
+
+  lwe_queue_fast_forward(&_window->input_events);
+  lwe_queue_fast_forward(&_window->window_events);
+
+  _rotation += _step;
+}
+
+static void lwe_application_render()
 {
   static lwe_render_stream_t* render_stream =
     lwe_render_stream_create(65535);
 
   static const float clear_color[4] =
     { 1.0f, 0.0f, 0.6f, 1.0f };
-
-  static float rotation = 0.0f;
-  rotation += (1.0f / (180.0f / LWE_PI)) * 0.01f;
 
   static const mat4_t model_mat =
     _suzanne->meshes[0].transform;
@@ -79,7 +106,7 @@ static void lwe_application_render(
 
   const mat4_t view_mat =
     mat4_t::look_at(
-      vec3_t(cos(rotation) * radius, sin(rotation) * radius, radius),
+      vec3_t(cos(_rotation) * radius, sin(_rotation) * radius, radius),
       vec3_t(0.0f, 0.0f, 0.0f),
       vec3_t(0.0f, 1.0f, 0.0f)
     );
@@ -108,8 +135,8 @@ static void lwe_application_render(
 
   lwe_render_stream_set_render_targets(
     render_stream,
-    1, &swap_chain->render_target,
-    depth_stencil
+    1, &_swap_chain->render_target,
+    _depth_stencil_target
   );
 
   static const lwe_viewport_t viewport = {
@@ -151,7 +178,7 @@ static void lwe_application_render(
 
   lwe_render_stream_present(
     render_stream,
-    swap_chain
+    _swap_chain
   );
 
   lwe_render_device_dispatch(
@@ -169,34 +196,34 @@ void lwe_application_run(
   _manifest =
     lwe_manifest_load("data/manifest");
 
-  lwe_window_t* window =
+  _window =
     lwe_window_open(
       _manifest->window.title,
       _manifest->window.width,
       _manifest->window.height
     );
 
-  lwe_array_push(lwe_application_windows(), &window);
+  lwe_array_push(lwe_application_windows(), &_window);
 
-  lwe_swap_chain_t* swap_chain =
+  _swap_chain =
     lwe_swap_chain_create(
-      window, LWE_PIXEL_FORMAT_R8G8B8A8,
+      _window, LWE_PIXEL_FORMAT_R8G8B8A8,
       _manifest->graphics.resolution.width,
       _manifest->graphics.resolution.height,
       _manifest->graphics.fullscreen,
       _manifest->graphics.vertical_sync
     );
 
-  lwe_array_push(lwe_application_swap_chains(), &swap_chain);
+  lwe_array_push(lwe_application_swap_chains(), &_swap_chain);
 
-  lwe_depth_stencil_target_t* depth_stencil =
+  _depth_stencil_target =
     lwe_depth_stencil_target_create(
       LWE_PIXEL_FORMAT_D24_S8,
       _manifest->graphics.resolution.width,
       _manifest->graphics.resolution.height
     );
 
-  lwe_window_show(window);
+  lwe_window_show(_window);
 
   lwe_asset_manager_load("boot.package");
 
@@ -231,6 +258,6 @@ void lwe_application_run(
   while (true) {
     lwe_message_pump();
     lwe_application_update();
-    lwe_application_render(window, swap_chain, depth_stencil);
+    lwe_application_render();
   }
 }
