@@ -29,6 +29,8 @@
 #include <lwe/foundation/preprocessor.h>
 #include <lwe/foundation/allocator.h>
 
+extern lwe_size_t _lwe_round_to_prime( lwe_size_t n );
+
 template <typename T>
 struct lwe_array_t {
   lwe_array_t() { size = reserved = 0; _internal = NULL; }
@@ -81,7 +83,7 @@ LWE_INLINE lwe_size_t lwe_array_push(
   lwe_assert(array != NULL);
 
   if (array->size == array->reserved)
-    lwe_array_reserve(array, 16);
+    lwe_array_reserve(array, _lwe_round_to_prime(array->size) - array->size);
 
   lwe_size_t index = array->size = array->size + 1;
   memcpy((void*)&array->_internal[index - 1], (void*)value, sizeof(T));
@@ -94,8 +96,12 @@ LWE_INLINE void lwe_array_pop(
 {
   lwe_assert(array != NULL);
 
-  if ((array->reserved - array->size) >= 16)
-    lwe_array_resize(array, array->size - 1);
+  /* array->size = */ {
+    const lwe_size_t rounded = _lwe_round_to_prime(array->size - 1);
+
+    if (rounded > (array->size - 1))
+      lwe_array_resize(array, rounded);
+  }
 
   array->size -= 1;
 }
