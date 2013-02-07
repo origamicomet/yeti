@@ -26,16 +26,27 @@
 #include <lwe/foundation/platforms/windows.h>
 #include "win32.rc.h"
 
+typedef struct lwe_win32_window_t
+  : public lwe_window_t
+{
+  int32_t mouse_x;
+  int32_t mouse_y;
+} lwe_win32_window_t;
+
 static LRESULT WINAPI _lwe_window_proc(
   HWND hWnd,
   UINT uMsg,
   WPARAM wParam,
   LPARAM lParam )
 {
-  lwe_window_t* window = (lwe_window_t*)GetPropA(hWnd, "lwe_window");
+  lwe_win32_window_t* window =
+    (lwe_win32_window_t*)GetPropA(hWnd, "lwe_window");
 
   switch( uMsg ) {
     case WM_CLOSE: {
+      lwe_window_event_t event;
+      event.type = LWE_WINDOW_EVENT_CLOSED;
+      lwe_queue_enqueue(&window->window_events, &event);
       return 0;
     } break;
 
@@ -43,6 +54,98 @@ static LRESULT WINAPI _lwe_window_proc(
       RECT client_rect;
       GetClientRect(hWnd, &client_rect);;
       return 0;
+    } break;
+
+    case WM_INPUT: {
+      uint8_t buffer[40 /* keyboard=32, mouse=40 */];
+      UINT buffer_size = sizeof(buffer);
+
+      lwe_fail_if(
+        (GetRawInputData(
+          (HRAWINPUT)lParam, RID_INPUT,
+          (void*)&buffer[0], &buffer_size,
+          sizeof(RAWINPUTHEADER)
+        ) == -1),
+        "GetRawInputData failed"
+      );
+
+      RAWINPUT* raw = (RAWINPUT*)&buffer[0];
+
+      switch (raw->header.dwType) {
+        case RIM_TYPEMOUSE: {
+          const bool relative =
+            (raw->data.mouse.usFlags & MOUSE_MOVE_RELATIVE) != 0;
+
+          const int32_t lmx = raw->data.mouse.lLastX;
+          const int32_t lmy = raw->data.mouse.lLastY;
+
+          if (relative) {
+            if ((lmx == 0) && (lmy == 0))
+              goto handle_mouse_buttons;
+
+            window->mouse_x += lmx;
+            window->mouse_y += lmy;
+          } else {
+            if ((window->mouse_x == lmx) && (window->mouse_y == lmy))
+              goto handle_mouse_buttons;
+
+            window->mouse_x = lmx;
+            window->mouse_y = lmy;
+          }
+
+          lwe_input_event_t event;
+          event.type = LWE_INPUT_EVENT_MOUSE_MOVED;
+          event.mouse.pos.x = window->mouse_x;
+          event.mouse.pos.y = window->mouse_y;
+          lwe_queue_enqueue(&window->input_events, &event);
+
+        handle_mouse_buttons:
+          const uint16_t button_flags = raw->data.mouse.usButtonFlags;
+          
+          // Left:
+          if (button_flags & RI_MOUSE_LEFT_BUTTON_DOWN) {
+            lwe_input_event_t event;
+            event.type = LWE_INPUT_EVENT_MOUSE_BUTTON_PRESSED;
+            event.mouse.button = LWE_MOUSE_BUTTON_LEFT;
+            lwe_queue_enqueue(&window->input_events, &event);
+          } else if (button_flags & RI_MOUSE_LEFT_BUTTON_UP) {
+            lwe_input_event_t event;
+            event.type = LWE_INPUT_EVENT_MOUSE_BUTTON_RELEASED;
+            event.mouse.button = LWE_MOUSE_BUTTON_LEFT;
+            lwe_queue_enqueue(&window->input_events, &event);
+          }
+
+          // Right:
+          if (button_flags & RI_MOUSE_RIGHT_BUTTON_DOWN) {
+            lwe_input_event_t event;
+            event.type = LWE_INPUT_EVENT_MOUSE_BUTTON_PRESSED;
+            event.mouse.button = LWE_MOUSE_BUTTON_RIGHT;
+            lwe_queue_enqueue(&window->input_events, &event);
+          } else if (button_flags & RI_MOUSE_RIGHT_BUTTON_UP) {
+            lwe_input_event_t event;
+            event.type = LWE_INPUT_EVENT_MOUSE_BUTTON_RELEASED;
+            event.mouse.button = LWE_MOUSE_BUTTON_RIGHT;
+            lwe_queue_enqueue(&window->input_events, &event);
+          }
+
+          // Middle:
+          if (button_flags & RI_MOUSE_MIDDLE_BUTTON_DOWN) {
+            lwe_input_event_t event;
+            event.type = LWE_INPUT_EVENT_MOUSE_BUTTON_PRESSED;
+            event.mouse.button = LWE_MOUSE_BUTTON_MIDDLE;
+            lwe_queue_enqueue(&window->input_events, &event);
+          } else if (button_flags & RI_MOUSE_MIDDLE_BUTTON_UP) {
+            lwe_input_event_t event;
+            event.type = LWE_INPUT_EVENT_MOUSE_BUTTON_RELEASED;
+            event.mouse.button = LWE_MOUSE_BUTTON_MIDDLE;
+            lwe_queue_enqueue(&window->input_events, &event);
+          }
+        } break;
+
+        case RIM_TYPEKEYBOARD: {
+          const USHORT key_code = raw->data.keyboard.VKey;
+        } break;
+      }
     } break;
   }
 
@@ -110,7 +213,9 @@ lwe_window_t* lwe_window_open(
   lwe_assert(width > 0);
   lwe_assert(height > 0);
 
-  lwe_window_t* window = (lwe_window_t*)lwe_alloc(sizeof(lwe_window_t));
+  lwe_win32_window_t* window =
+    (lwe_win32_window_t*)lwe_alloc(sizeof(lwe_win32_window_t));
+
   window->width = width;
   window->height = height;
   window->fullscreen = false;
@@ -143,6 +248,9 @@ lwe_window_t* lwe_window_open(
 
   SetPropA(sys_handle, "lwe_window", (HANDLE)window);
   window->sys_handle = (uintptr_t)sys_handle;
+  lwe_queue_resize(&window->input_events, 256);
+  lwe_queue_resize(&window->window_events, 256);
+  window->mouse_x = window->mouse_y = 0;
 
   return window;
 }
@@ -222,6 +330,8 @@ void lwe_window_close(
   lwe_assert(window != NULL);
 
   DestroyWindow((HWND)window->sys_handle);
+  lwe_queue_resize(&window->input_events, 0);
+  lwe_queue_resize(&window->window_events, 0);
   lwe_free((void*)window);
 }
 

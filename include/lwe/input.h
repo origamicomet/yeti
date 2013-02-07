@@ -22,63 +22,55 @@
 // THE SOFTWARE.
 // =============================================================================
 
-#ifndef _LWE_WINDOW_H_
-#define _LWE_WINDOW_H_
+#ifndef _LWE_INPUT_H_
+#define _LWE_INPUT_H_
 
 #include <lwe/foundation.h>
-#include <lwe/input.h>
 
-typedef enum lwe_window_event_type_t {
-  LWE_WINDOW_EVENT_FORCE_UINT32 = 0xFFFFFFFFu,
-  LWE_WINDOW_EVENT_INVALID      = 0x00000000u,
-  LWE_WINDOW_EVENT_CLOSED       = 0x00000001u
-} lwe_window_event_type_t;
+typedef enum lwe_key_code_t {
+  LWE_KEY_CODE_FORCE_UINT32 = 0xFFFFFFFFu,
+  LWE_KEY_CODE_INVALID      = 0x00000000u,
+} lwe_key_code_t;
 
-typedef struct lwe_window_event_t {
-  lwe_window_event_type_t type;
-} lwe_window_event_t;
+typedef enum lwe_mouse_button_t {
+  LWE_MOUSE_BUTTON_FORCE_UINT32 = 0xFFFFFFFFu,
+  LWE_MOUSE_BUTTON_INVALID      = 0x00000000u,
+  LWE_MOUSE_BUTTON_LEFT         = 0x00000001u,
+  LWE_MOUSE_BUTTON_RIGHT        = 0x00000002u,
+  LWE_MOUSE_BUTTON_MIDDLE       = 0x00000003u
+} lwe_mouse_button_t;
 
-typedef lwe_queue_t<lwe_window_event_t> lwe_window_event_queue_t;
+typedef enum lwe_input_event_type_t {
+  LWE_INPUT_EVENT_FORCE_UINT32          = 0xFFFFFFFFu,
+  LWE_INPUT_EVENT_INVALID               = 0x00000000u,
+  LWE_INPUT_EVENT_KEY_PRESSED           = 0x00000001u,
+  LWE_INPUT_EVENT_KEY_RELEASED          = 0x00000002u,
+  LWE_INPUT_EVENT_MOUSE_MOVED           = 0x00000003u,
+  LWE_INPUT_EVENT_MOUSE_BUTTON_PRESSED  = 0x00000004u,
+  LWE_INPUT_EVENT_MOUSE_BUTTON_RELEASED = 0x00000005u
+} lwe_input_event_type_t;
 
-typedef struct lwe_window_t {
-  uint32_t width;
-  uint32_t height;
-  bool fullscreen;
-  uintptr_t sys_handle;
-  lwe_input_queue_t input_events;
-  lwe_window_event_queue_t window_events;
-} lwe_window_t;
+typedef struct lwe_input_event_t {
+  lwe_input_event_type_t type;
 
-extern lwe_window_t* lwe_window_open(
-  lwe_const_str_t title,
-  uint32_t width,
-  uint32_t height );
+  union {
+    struct {
+      lwe_key_code_t code;
+    } key;
 
-extern void lwe_window_set_title(
-  lwe_window_t* window,
-  lwe_const_str_t new_title );
+    struct {
+      union {
+        struct {
+          int32_t x;
+          int32_t y;
+        } pos;
 
-extern void lwe_window_resize(
-  lwe_window_t* window,
-  uint32_t new_width,
-  uint32_t new_height );
+        lwe_mouse_button_t button;
+      };
+    } mouse;
+  };
+} lwe_input_event_t;
 
-extern void lwe_window_toggle_fullscreen(
-  lwe_window_t* window,
-  bool fullscreen );
+typedef lwe_queue_t<lwe_input_event_t> lwe_input_queue_t;
 
-extern void lwe_window_show(
-  lwe_window_t* window );
-
-extern void lwe_window_minimize(
-  lwe_window_t* window );
-
-extern void lwe_window_maximize(
-  lwe_window_t* window );
-
-extern void lwe_window_close(
-  lwe_window_t* window );
-
-extern void lwe_message_pump();
-
-#endif // _LWE_WINDOW_H_
+#endif // _LWE_INPUT_H_
