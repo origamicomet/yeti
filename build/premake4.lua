@@ -65,7 +65,7 @@ dispatch.build = function()
     configurations({ "debug", "development", "release" })
 
     project("engine")
-      kind("WindowedApp")
+      kind("ConsoleApp")
       language("C++")
       debugdir("../")
       debugargs("--compile")

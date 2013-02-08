@@ -36,6 +36,7 @@ static bool _compile(
   lwe_const_str_t path )
 {
   const lwe_asset_type_t* type = lwe_asset_type_id_to_type(type_id);
+
   if (!type)
     return false;
 
@@ -122,10 +123,12 @@ static void _on_found(
   lwe_const_str_t path )
 {
   const lwe_type_id_t type_id = lwe_asset_path_to_type_id(path);
+
   if (type_id == LWE_ASSET_TYPE_ID_INVALID)
     return;
 
   cd->num_assets++;
+  
   if (_compile(cd->database, type_id, cd->data, cd->data_src, path))
     cd->num_succesfuly_compiled_assets++;
 }
@@ -193,4 +196,54 @@ void lwe_asset_compiler_compile_dir(
   );
 
   fclose(database);
+}
+
+static void _on_modified(
+  lwe_compile_data_t* cd ,
+  lwe_fwatch_event_t event,
+  lwe_const_str_t path )
+{
+  if (event != LWE_FWATCH_EVENT_MODIFIED)
+    return;
+
+  const lwe_type_id_t type_id = lwe_asset_path_to_type_id(path);
+
+  if (type_id == LWE_ASSET_TYPE_ID_INVALID)
+    return;
+
+  cd->num_assets++;
+
+  if (_compile(cd->database, type_id, cd->data, cd->data_src, path))
+    cd->num_succesfuly_compiled_assets++;
+}
+
+void lwe_asset_compiler_watch_dir(
+  lwe_const_str_t data,
+  lwe_const_str_t data_src )
+{
+  lwe_assert(data != NULL);
+  lwe_assert(data_src != NULL);
+
+  lwe_compile_data_t cd = {
+    NULL,
+    data,
+    data_src,
+    0, 0
+  };
+
+  lwe_fwatch_t* fw =
+    lwe_fwatch_start(
+      data_src,
+      (void*)&cd,
+      (lwe_fwatch_callback_t)&_on_modified
+    );
+
+  if (!fw)
+    lwe_fail("Unable to watch directory `%s`", data_src);
+
+  lwe_log("\nWatching directory for modifications...\n\n >  data=`%s`\n >  data_src=`%s`\n\n", data, data_src);
+
+  while(true) {
+    lwe_fwatch_poll(fw);
+  }
 }

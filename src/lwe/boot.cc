@@ -59,6 +59,25 @@ static void _compile(
     lwe_asset_compiler_compile_dir(data, data_src);
 }
 
+static void _compile_server(
+  lwe_size_t num_args,
+  lwe_const_str_t* args )
+{
+  lwe_str_t data = "data";
+  lwe_str_t data_src = "data_src";
+
+  for (lwe_size_t i = 0; i < num_args; ++i) {
+    if (strncmp("--data=", args[i], 7) == 0) {
+      data = &args[i][7];
+    } else if(strncmp("--data-src=", args[i], 11) == 0) {
+      data_src = &args[i][11];
+    }
+  }
+
+  lwe_asset_register_types();
+  lwe_asset_compiler_watch_dir(data, data_src);
+}
+
 int main( lwe_size_t argc, lwe_const_str_t argv[] )
 {
   lwe_boot_command_t boot_cmd = &lwe_application_run;
@@ -66,6 +85,9 @@ int main( lwe_size_t argc, lwe_const_str_t argv[] )
   if (argc >= 2) {
     if (strcmp("--compile", argv[1]) == 0)
       boot_cmd = &_compile;
+
+    if (strcmp("--compile-server", argv[1]) == 0)
+      boot_cmd = &_compile_server;
   }
 
   boot_cmd(argc, argv);

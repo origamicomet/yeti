@@ -33,6 +33,7 @@ struct lwe_fwatch_t {
   uint8_t buffer[65535];
   unsigned stopped : 1;
   unsigned reserved : 31;
+  lwe_str_t path;
   void* user_ptr;
   lwe_fwatch_callback_t on_modified;
 };
@@ -61,13 +62,19 @@ static void CALLBACK _directory_changes_callback(
       offset += notify->NextEntryOffset;
 
       char path[LWE_MAX_PATH + 1] = { 0, }; {
+        strcpy(&path[0], fw->path);
+        const lwe_size_t len = strlen(fw->path);
+        
         int num_bytes = WideCharToMultiByte(
           CP_UTF8, 0,
           notify->FileName, notify->FileNameLength / sizeof(wchar_t),
-          &path[0], MAX_PATH, 0, 0
+          &path[len + 1], LWE_MAX_PATH - len - 1, 0, 0
         );
 
-        path[num_bytes] = '\0';
+        path[len] = '/';
+        path[len + num_bytes + 1] = '\0';
+        
+        lwe_path_unixify(&path[0]);
       }
 
       lwe_fwatch_event_t event;
@@ -136,6 +143,12 @@ lwe_fwatch_t* lwe_fwatch_start(
   lwe_fwatch_t* fw = (lwe_fwatch_t*)lwe_alloc(sizeof(lwe_fwatch_t));
   ZeroMemory((void*)fw, sizeof(lwe_fwatch_t));
 
+  fw->path = NULL; {
+    const lwe_size_t len = strlen(path);
+    fw->path = (lwe_str_t)lwe_alloc(len + 1);
+    memcpy((void*)fw->path, (const void*)path, len + 1);
+  }
+
   fw->user_ptr = user_ptr;
   fw->on_modified = on_modified;
   fw->dir_handle = dir_handle;
@@ -149,6 +162,7 @@ lwe_fwatch_t* lwe_fwatch_start(
   );
 
   if (!success) {
+    lwe_free((void*)fw->path);
     lwe_free((void*)fw);
     CloseHandle(event);
     CloseHandle(dir_handle);
@@ -181,5 +195,6 @@ void lwe_fwatch_stop(
 
   CloseHandle(fw->overlapped.hEvent);
   CloseHandle(fw->dir_handle);
+  lwe_free((void*)fw->path);
   lwe_free((void*)fw);
 }

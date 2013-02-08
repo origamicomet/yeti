@@ -38,4 +38,9 @@ extern void lwe_asset_compiler_compile_dir(
   lwe_const_str_t data,
   lwe_const_str_t data_src );
 
+/// Recursively watches a directory for modifications and re-compiles.
+extern void lwe_asset_compiler_watch_dir(
+  lwe_const_str_t data,
+  lwe_const_str_t data_src );
+
 #endif // _LWE_ASSET_COMPILER_H_

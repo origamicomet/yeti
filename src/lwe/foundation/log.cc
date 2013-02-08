@@ -23,14 +23,18 @@
 // =============================================================================
 
 #include <lwe/foundation/log.h>
+#include <lwe/foundation/preprocessor.h>
 
 #include <stdio.h>
 #include <stdarg.h>
 
 void lwe_log( const char* format, ... )
 {
+// #if !defined(LWE_DEBUG_BUILD)
   // Redirect stdout to a file and remove buffering:
   static const FILE* __unused = freopen("log.txt", "wb", stdout);
+// #endif
+  
   static const int __unused1 = setvbuf(stdout, NULL, _IONBF, 0);
 
   va_list va;

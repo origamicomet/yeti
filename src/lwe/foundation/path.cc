@@ -50,6 +50,7 @@ lwe_const_str_t lwe_path_find_basename(
   char* basename =
     (char*)(((char*)path) + strlen(path));
 
+  // TODO: '\' case
   while ((*(--basename) != '/') && (basename != path));
 
   if (basename == path)
@@ -71,4 +72,18 @@ lwe_const_str_t lwe_path_strip(
     return NULL;
 
   return (stripped + strlen(dir));
+}
+
+lwe_const_str_t lwe_path_unixify(
+  lwe_const_str_t path )
+{
+  if (!path)
+    return NULL;
+
+  char* iter = path, ch;
+  while ((ch = *iter++) != 0) {
+    if (ch == '\\') *(iter - 1) = '/';
+  }
+
+  return path;
 }
