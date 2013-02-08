@@ -12,6 +12,7 @@
 #include <lwe/foundation/bits.h>
 #include <lwe/foundation/file.h>
 #include <lwe/foundation/fsearch.h>
+#include <lwe/foundation/fwatch.h>
 #include <lwe/foundation/mmap.h>
 #include <lwe/foundation/util.h>
 #include <lwe/foundation/math/vec2.h>
