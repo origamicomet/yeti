@@ -144,6 +144,118 @@ static LRESULT WINAPI _lwe_window_proc(
 
         case RIM_TYPEKEYBOARD: {
           const USHORT key_code = raw->data.keyboard.VKey;
+
+          lwe_input_event_t event;
+
+          event.type = (raw->data.keyboard.Flags & RI_KEY_BREAK) ?
+            LWE_INPUT_EVENT_KEY_RELEASED :
+            LWE_INPUT_EVENT_KEY_PRESSED;
+
+          if (key_code >= 'A' && key_code <= 'Z') {
+            event.key.code = (lwe_key_code_t)(LWE_KEY_A + (key_code - 'A'));
+          } else if (key_code >= '0' && key_code <= '9') {
+            event.key.code = (lwe_key_code_t)(LWE_KEY_0 + (key_code - '0'));
+          } else {
+            switch (key_code) {
+              case VK_ESCAPE:
+                return LWE_KEY_ESC;
+              case VK_F1:
+                return LWE_KEY_F1;
+              case VK_F2:
+                return LWE_KEY_F2;
+              case VK_F3:
+                return LWE_KEY_F3;
+              case VK_F4:
+                return LWE_KEY_F4;
+              case VK_F5:
+                return LWE_KEY_F5;
+              case VK_F6:
+                return LWE_KEY_F6;
+              case VK_F7:
+                return LWE_KEY_F7;
+              case VK_F8:
+                return LWE_KEY_F8;
+              case VK_F9:
+                return LWE_KEY_F9;
+              case VK_F10:
+                return LWE_KEY_F10;
+              case VK_F11:
+                return LWE_KEY_F11;
+              case VK_F12:
+                return LWE_KEY_F12;
+              case VK_UP:
+                return LWE_KEY_UP;
+              case VK_DOWN:
+                return LWE_KEY_DOWN;
+              case VK_LEFT:
+                return LWE_KEY_LEFT;
+              case VK_RIGHT:
+                return LWE_KEY_RIGHT;
+              case VK_SHIFT:
+                return (raw->data.keyboard.Flags & RI_KEY_E0) ?
+                  LWE_KEY_LSHIFT : LWE_KEY_RSHIFT;
+              case VK_CONTROL:
+                return (raw->data.keyboard.Flags & RI_KEY_E0) ?
+                  LWE_KEY_LCTRL : LWE_KEY_RCTRL;
+              case VK_MENU:
+                return (raw->data.keyboard.Flags & RI_KEY_E0) ?
+                  LWE_KEY_LALT : LWE_KEY_RALT;
+              case VK_TAB:
+                return LWE_KEY_TAB;
+              case VK_RETURN:
+                return LWE_KEY_ENTER;
+              case VK_BACK:
+                return LWE_KEY_BACKSPACE;
+              case VK_INSERT:
+                return LWE_KEY_INSERT;
+              case VK_DELETE:
+                return LWE_KEY_DEL;
+              case VK_PRIOR:
+                return LWE_KEY_PAGEUP;
+              case VK_NEXT:
+                return LWE_KEY_PAGEDOWN;
+              case VK_HOME:
+                return LWE_KEY_HOME;
+              case VK_END:
+                return LWE_KEY_END;
+              case VK_NUMPAD0:
+                return LWE_KEY_NUM_PAD_0;
+              case VK_NUMPAD1:
+                return LWE_KEY_NUM_PAD_1;
+              case VK_NUMPAD2:
+                return LWE_KEY_NUM_PAD_2;
+              case VK_NUMPAD3:
+                return LWE_KEY_NUM_PAD_3;
+              case VK_NUMPAD4:
+                return LWE_KEY_NUM_PAD_4;
+              case VK_NUMPAD5:
+                return LWE_KEY_NUM_PAD_5;
+              case VK_NUMPAD6:
+                return LWE_KEY_NUM_PAD_6;
+              case VK_NUMPAD7:
+                return LWE_KEY_NUM_PAD_7;
+              case VK_NUMPAD8:
+                return LWE_KEY_NUM_PAD_8;
+              case VK_NUMPAD9:
+                return LWE_KEY_NUM_PAD_9;
+              case VK_DIVIDE:
+                return LWE_KEY_DIVIDE;
+              case VK_MULTIPLY:
+                return LWE_KEY_MULTIPLY;
+              case VK_SUBTRACT:
+                return LWE_KEY_SUBTRACT;
+              case VK_ADD:
+                return LWE_KEY_ADD;
+              case VK_DECIMAL:
+                return LWE_KEY_DECIMAL;
+              case VK_SPACE:
+                return LWE_KEY_SPACE;
+              default:
+                return 0;
+            }
+
+            lwe_queue_enqueue(&window->input_events, &event);
+          }
         } break;
       }
     } break;
