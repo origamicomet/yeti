@@ -83,6 +83,10 @@ extern void lwe_render_stream_present(
 extern void lwe_render_stream_reset(
   lwe_render_stream_t* stream );
 
+extern lwe_render_stream_t* lwe_render_stream_grow(
+  lwe_render_stream_t* stream,
+  lwe_size_t num_bytes );
+
 extern void lwe_render_stream_destroy(
   lwe_render_stream_t* stream );
 

@@ -222,6 +222,19 @@ void lwe_render_stream_reset(
   stream->next_command = 0;
 }
 
+lwe_render_stream_t* lwe_render_stream_grow(
+  lwe_render_stream_t* stream,
+  lwe_size_t num_bytes )
+{
+  lwe_assert(stream != NULL);
+
+  stream->size += num_bytes;
+
+  return (lwe_render_stream_t*)lwe_realloc(
+    (void*)stream, sizeof(lwe_render_stream_t) + stream->size - 1
+  );
+}
+
 void lwe_render_stream_destroy(
   lwe_render_stream_t* stream )
 {
