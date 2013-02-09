@@ -128,6 +128,7 @@ static void lwe_d3d11_blend_state_unload(
   lwe_free((void*)blend_state);
 }
 
+
 // See src/lwe/assets/blend_state.cc
 extern bool lwe_blend_state_compile(
   lwe_type_id_t type_id,
@@ -140,6 +141,11 @@ void lwe_blend_state_register_type()
     "blend_state", "blend_state",
     &lwe_d3d11_blend_state_load,
     &lwe_d3d11_blend_state_unload,
+
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_blend_state_compile
+  #else
+    NULL
+  #endif
   );
 }

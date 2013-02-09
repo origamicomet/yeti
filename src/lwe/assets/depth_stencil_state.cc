@@ -24,6 +24,8 @@
 
 #include <lwe/assets/depth_stencil_state.h>
 
+#if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
+
 #include <libconfig.h>
 
 static bool _string_to_comparison_func(
@@ -260,3 +262,5 @@ bool lwe_depth_stencil_state_compile(
 
   return TRUE;
 }
+
+#endif

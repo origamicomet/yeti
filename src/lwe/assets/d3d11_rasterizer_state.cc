@@ -117,6 +117,10 @@ void lwe_rasterizer_state_register_type()
     "rasterizer_state", "rasterizer_state",
     &lwe_d3d11_rasterizer_state_load,
     &lwe_d3d11_rasterizer_state_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_rasterizer_state_compile
+  #else
+    NULL
+  #endif
   );
 }

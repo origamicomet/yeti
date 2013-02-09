@@ -263,6 +263,10 @@ void lwe_texture_register_type()
     "texture", "dds",
     &lwe_d3d11_texture_load,
     &lwe_d3d11_texture_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_texture_compile
+  #else
+    NULL
+  #endif
   );
 }

@@ -161,6 +161,10 @@ void lwe_package_register_type()
     "package", "package",
     &lwe_package_load,
     &lwe_package_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_package_compile
+  #else
+    NULL
+  #endif
   );
 }

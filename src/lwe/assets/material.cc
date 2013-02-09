@@ -230,6 +230,10 @@ void lwe_material_register_type()
     "material", "material",
     &lwe_material_load,
     &lwe_material_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_material_compile
+  #else
+    NULL
+  #endif
   );
 }

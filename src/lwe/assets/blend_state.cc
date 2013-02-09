@@ -24,6 +24,8 @@
 
 #include <lwe/assets/blend_state.h>
 
+#if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
+
 #include <libconfig.h>
 
 static bool _string_to_blend_factor(
@@ -210,3 +212,5 @@ bool lwe_blend_state_compile(
 
   return TRUE;
 }
+
+#endif

@@ -181,6 +181,10 @@ void lwe_pixel_shader_register_type()
     "ps", "ps",
     &lwe_pixel_shader_load,
     &lwe_pixel_shader_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_pixel_shader_compile
+  #else
+    NULL
+  #endif
   );
 }

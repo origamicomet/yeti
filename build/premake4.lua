@@ -93,7 +93,7 @@ dispatch.build = function()
       configuration("release")
         flags({ "Optimize", "EnableSSE", "EnableSSE2" })
 
-      configuration({ "windows", "debug or development" })
+      configuration({ "windows" })
         includedirs("../deps/libconfig-1.4.9/include")
         libdirs(string.format("../deps/libconfig-1.4.9/lib/%s", build_info.build_dir))
 

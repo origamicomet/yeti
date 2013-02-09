@@ -157,6 +157,10 @@ void lwe_depth_stencil_state_register_type()
     "depth_stencil_state", "depth_stencil_state",
     &lwe_d3d11_depth_stencil_state_load,
     &lwe_d3d11_depth_stencil_state_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_depth_stencil_state_compile
+  #else
+    NULL
+  #endif
   );
 }

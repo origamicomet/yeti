@@ -24,6 +24,8 @@
 
 #include <lwe/assets/rasterizer_state.h>
 
+#if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
+
 #include <libconfig.h>
 
 static bool _string_to_fill_mode(
@@ -144,3 +146,5 @@ bool lwe_rasterizer_state_compile(
 
   return TRUE;
 }
+
+#endif

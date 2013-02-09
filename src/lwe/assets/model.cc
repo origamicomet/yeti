@@ -25,11 +25,6 @@
 #include <lwe/assets/model.h>
 #include <lwe/asset_manager.h>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/mesh.h>
-#include <assimp/postprocess.h>
-
 typedef struct lwe_model_blob_t {
   uint32_t num_meshes;
 } lwe_model_blob_t;
@@ -139,6 +134,13 @@ static void lwe_model_unload(
 
   lwe_free((void*)model);
 }
+
+#if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/mesh.h>
+#include <assimp/postprocess.h>
 
 #include "assimp_stream.inl"
 
@@ -343,6 +345,8 @@ failure:
   return FALSE;
 }
 
+#endif
+
 void lwe_model_register_type()
 {
   lwe_asset_register_type(
@@ -350,6 +354,10 @@ void lwe_model_register_type()
     "model", "dae",
     &lwe_model_load,
     &lwe_model_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_model_compile
+  #else
+    NULL
+  #endif
   );
 }

@@ -280,6 +280,10 @@ void lwe_vertex_shader_register_type()
     "vs", "vs",
     &lwe_vertex_shader_load,
     &lwe_vertex_shader_unload,
+  #if defined(LWE_DEBUG_BUILD) || defined(LWE_DEVELOPMENT_BUILD)
     &lwe_vertex_shader_compile
+  #else
+    NULL
+  #endif
   );
 }
