@@ -95,7 +95,7 @@ dispatch.build = function()
 
       configuration({ "windows" })
         links({ "DbgHelp", "Ws2_32" })
-        files("../src/**.rc")
+        files("../code/engine/src/**.rc")
 
         includedirs("../deps/libconfig-1.4.9/include")
         libdirs(string.format("../deps/libconfig-1.4.9/lib/%s", build_info.build_dir))
@@ -114,18 +114,18 @@ dispatch.build = function()
         links("libconfig")
 
       configuration("not windows")
-        excludes("../src/**/win32_*.cc");
+        excludes("../code/engine/src/**/win32_*.cc");
 
       configuration({})
-        includedirs("../include")
-        files({ "../include/**.h", "../src/**.c", "../src/**.cc" })
+        includedirs("../code/engine/include")
+        files({ "../code/engine/include/**.h", "../code/engine/src/**.c", "../code/engine/src/**.cc" })
 
         local render_devices = {
           ["d3d11"] = function()
-            excludes({ "../src/**/d3d9_*.cc", "../include/**/d3d9_*.h" })
-            excludes({ "../src/**/gl31_*.cc", "../include/**/gl31_*.h" })
-            excludes({ "../src/**/gles_*.cc", "../include/**/gles_*.h" })
-            excludes({ "../src/**/gcm_*.cc", "../include/**/gcm_*.h" })
+            excludes({ "../code/engine/src/**/d3d9_*.cc", "../code/engine/include/**/d3d9_*.h" })
+            excludes({ "../code/engine/src/**/gl31_*.cc", "../code/engine/include/**/gl31_*.h" })
+            excludes({ "../code/engine/src/**/gles_*.cc", "../code/engine/include/**/gles_*.h" })
+            excludes({ "../code/engine/src/**/gcm_*.cc", "../code/engine/include/**/gcm_*.h" })
 
             if build_info.platform == "windows" then
               links({ "dxgi", "d3d11", "d3dcompiler" })

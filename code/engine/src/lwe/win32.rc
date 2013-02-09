@@ -29,4 +29,4 @@
 #include <Richedit.h>
 
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-IDI_ENGINE_ICON ICON "..\\..\\engine.ico"
+IDI_ENGINE_ICON ICON "..\\..\\..\\..\\engine.ico"
