@@ -50,9 +50,15 @@ extern bool lwe_net_connect(
   lwe_socket_t* socket );
 
 extern bool lwe_net_listen(
-  lwe_ipv4_address_t local_addr,
+  const lwe_ipv4_address_t* local_addr,
   uint16_t local_port,
-  lwe_socket_t* socket_ );
+  lwe_socket_t* socket );
+
+extern bool lwe_net_accept(
+  lwe_socket_t listen_socket,
+  lwe_socket_t* remote_socket,
+  lwe_ipv4_address_t* remote_addr,
+  uint16_t* remote_port );
 
 extern lwe_size_t lwe_net_recv(
   lwe_socket_t socket,

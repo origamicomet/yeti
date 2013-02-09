@@ -82,8 +82,6 @@ void lwe_net_init()
     WSAStartup(MAKEWORD(2, 2), &wd) != 0,
     "Unable to initialize WinSock2"
   );
-
-  lwe_log("Initialized WinSock2.\n");
 }
 
 static sockaddr_in _lwe_address_and_port_to_sockaddr(
@@ -143,6 +141,30 @@ bool lwe_net_listen(
   }
 
   *socket_ = (lwe_socket_t)s;
+  return true;
+}
+
+bool lwe_net_accept(
+  lwe_socket_t listen_socket,
+  lwe_socket_t* remote_socket,
+  lwe_ipv4_address_t* remote_addr,
+  uint16_t* remote_port )
+{
+  sockaddr_in addr;
+  int addr_len = sizeof(sockaddr_in);
+  SOCKET s = accept(listen_socket, (sockaddr*)&addr, &addr_len);
+
+  if (s == INVALID_SOCKET)
+    return false;
+
+  *remote_socket = (lwe_socket_t)s;
+
+  if (remote_addr)
+    memcpy((void*)remote_addr, (const void*)&addr.sin_addr, 4);
+
+  if (remote_port)
+    *remote_port = ntohs(addr.sin_port);
+  
   return true;
 }
 
