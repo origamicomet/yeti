@@ -202,6 +202,7 @@ void lwe_application_run(
   lwe_size_t num_args,
   lwe_const_str_t* args )
 {
+  lwe_net_init();
   lwe_asset_register_types();
   lwe_render_device_create(0);
 

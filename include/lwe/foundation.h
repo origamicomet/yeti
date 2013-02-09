@@ -15,6 +15,7 @@
 #include <lwe/foundation/fwatch.h>
 #include <lwe/foundation/mmap.h>
 #include <lwe/foundation/util.h>
+#include <lwe/foundation/net.h>
 #include <lwe/foundation/math/vec2.h>
 #include <lwe/foundation/math/vec3.h>
 #include <lwe/foundation/math/quat.h>

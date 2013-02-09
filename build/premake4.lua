@@ -94,12 +94,11 @@ dispatch.build = function()
         flags({ "Optimize", "EnableSSE", "EnableSSE2" })
 
       configuration({ "windows" })
+        links({ "DbgHelp", "Ws2_32" })
+        files("../src/**.rc")
+
         includedirs("../deps/libconfig-1.4.9/include")
         libdirs(string.format("../deps/libconfig-1.4.9/lib/%s", build_info.build_dir))
-
-      configuration("windows")
-        links("DbgHelp")
-        files("../src/**.rc")
 
         if build_info.platform == "windows" then
           copy_bins("libconfig-1.4.9")
