@@ -360,7 +360,7 @@ lwe_window_t* lwe_window_open(
 
   SetPropA(sys_handle, "lwe_window", (HANDLE)window);
   window->sys_handle = (uintptr_t)sys_handle;
-  lwe_queue_resize(&window->input_events, 256);
+  lwe_queue_resize(&window->input_events, 2048);
   lwe_queue_resize(&window->window_events, 256);
   window->mouse_x = window->mouse_y = 0;
 
