@@ -118,6 +118,8 @@ dispatch.build = function()
 
       configuration({})
         includedirs("../code/engine/include")
+        includedirs("../code/foundation/include")
+        files({ "../code/foundation/include/**.h", "../code/foundation/src/**.c", "../code/foundation/src/**.cc" })
         files({ "../code/engine/include/**.h", "../code/engine/src/**.c", "../code/engine/src/**.cc" })
 
         local render_devices = {
