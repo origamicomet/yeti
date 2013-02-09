@@ -2,10 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "include"
-		},
-		{
-			"path": "src"
+			"path": "code"
 		},
 		{
 			"path": "build",
