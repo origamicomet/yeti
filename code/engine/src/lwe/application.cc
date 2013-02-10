@@ -203,6 +203,16 @@ void lwe_application_run(
   lwe_const_str_t* args )
 {
   lwe_net_init();
+
+  for (lwe_size_t i = 0; i < num_args; ++i) {
+    if (strncmp("--log-to-network", &args[i][0], 16) == 0) {
+      lwe_log_to_network("127.0.0.1", 6000);
+    } else if (strncmp("--log-to-file", &args[i][0], 13) == 0) {
+      if ((args[i][13] == '=') && args[i][14]) lwe_log_to_file(&args[i][14]);
+      else lwe_log_to_file("log.txt");
+    }
+  }
+
   lwe_asset_register_types();
   lwe_render_device_create(0);
 

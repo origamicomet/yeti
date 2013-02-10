@@ -25,6 +25,10 @@
 #ifndef _LWE_FOUNDATION_LOG_
 #define _LWE_FOUNDATION_LOG_
 
+#include <lwe/foundation/types.h>
+
+extern void lwe_log_to_file( const char* filename );
+extern void lwe_log_to_network( const char* address, uint16_t port );
 extern void lwe_log( const char* format, ... );
 
 #endif // _LWE_FOUNDATION_LOG_

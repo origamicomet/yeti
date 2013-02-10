@@ -151,6 +151,38 @@ dispatch.build = function()
         end
 
         render_devices[render_device]()
+
+    project("console")
+      kind("ConsoleApp")
+      language("C++")
+      debugdir("../")
+
+      objdir(string.format("%s/obj/lwe", build_info.build_dir))
+      targetdir(string.format("%s/bin", build_info.build_dir))
+      targetname("console")
+
+      configuration("debug")
+        targetsuffix("-dbg")
+        flags({ "Symbols" })
+        defines("_DEBUG")
+
+      configuration("development")
+        targetsuffix("-dev")
+        flags({ "Symbols" })
+        defines("_DEVELOPMENT")
+
+      configuration("release")
+        flags({ "Optimize", "EnableSSE", "EnableSSE2" })
+
+      configuration({ "windows" })
+        links({ "DbgHelp", "Ws2_32" })
+
+      configuration({})
+        includedirs("../code/console/include")
+        includedirs("../code/foundation/include")
+        files({ "../code/foundation/include/**.h", "../code/foundation/src/**.c", "../code/foundation/src/**.cc" })
+        files({ "../code/console/include/**.h", "../code/console/src/**.c", "../code/console/src/**.cc" })
+
 end
 
 if _ACTION and dispatch[_ACTION] then
