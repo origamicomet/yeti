@@ -70,7 +70,7 @@ void lwe_render_device_create(
   static const D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
 
 #if defined (LWE_DEBUG_BUILD)
-  static const UINT flags = D3D11_CREATE_DEVICE_DEBUG;
+  static const UINT flags = 0; // D3D11_CREATE_DEVICE_DEBUG; // TODO: find out the issue.
 #else
   static const UINT flags = 0;
 #endif

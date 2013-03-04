@@ -109,7 +109,8 @@ static void lwe_application_render()
     lwe_render_stream_create(65535);
 
   static const float clear_color[4] =
-    { 1.0f, 0.0f, 0.6f, 1.0f };
+    // { 1.0f, 0.0f, 0.6f, 1.0f };
+    { 0.07f, 0.07f, 0.12f, 1.0f };
 
   static const mat4_t model_mat =
     _suzanne->meshes[0].transform;
