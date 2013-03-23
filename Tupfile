@@ -1,0 +1,16 @@
+include_rules
+
+preload code/src
+preload code/src/bt
+
+ifeq (@(BUILD),debug)
+SUFFIX = -dbg
+endif
+
+ifeq (@(BUILD),development)
+SUFFIX = -dev
+endif
+
+SUFFIX += -@(TUP_ARCH)
+
+: code/src/*.o code/src/bt/*.o deps/foundation/foundation-@(TUP_ARCH)$(LIB_EXT) |> !ar |> butane$(SUFFIX)$(LIB_EXT)

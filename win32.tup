@@ -1,0 +1,45 @@
+CC = cl
+LD = link
+AR = lib
+AS = nasm
+
+CFLAGS += /nologo /c /W4 /GF /GL /GR- /I"$(TUP_CWD)\code\include"
+CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
+LDFLAGS += /NOLOGO /LTCG
+
+ifeq (@(TUP_ARCH),i386)
+CFLAGS += /arch:SSE2
+ASFLAGS += -f win32
+LDFLAGS += /MACHINE:X86
+endif
+ifeq (@(TUP_ARCH),x86_64)
+CFLAGS += /arch:SSE2
+ASFLAGS += -f win64
+LDFLAGS += /MACHINE:X64
+endif
+
+CFLAGS += /D "_CRT_SECURE_NO_WARNINGS" /Zi
+ifeq (@(BUILD),debug)
+CFLAGS += /MDd /D "_DEBUG"
+LDFLAGS += /DEBUG
+else
+CFLAGS += /MD /D "NDEBUG"
+endif
+
+!cc = |> $(CC) $(CFLAGS) /Fd"$(TUP_CWD)\%O.pdb" %f /Fo"%o" |>
+
+SHARED_LIB_EXT = .dll
+!so = |> $(LD) $(LDFLAGS) /DLL /OUT:"$(TUP_CWD)\%o" %f |>
+
+ifneq (@(BUILD),release)
+SUBSYSTEM = /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup
+else
+SUBSYSTEM = /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup
+endif
+
+EXE_EXT = .exe
+!exe = |> $(LD) $(LDFLAGS) $(SUBSYSTEM) /OUT:"$(TUP_CWD)\%o" %f |>
+
+LIB_EXT = .lib
+!ar = |> $(AR) $(ARFLAGS) /OUT:"$(TUP_CWD)\%o" %f |>
+!as = |> $(AS) $(ASFLAGS) -o %o %f |>

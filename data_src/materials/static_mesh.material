@@ -1,7 +1,0 @@
-@include "materials/static_mesh.template"
-
-textures = (
-  "textures/checker_board_diffuse.texture",
-  "textures/checker_board_normals.texture",
-  "textures/checker_board_surface_properties.texture"
-);
