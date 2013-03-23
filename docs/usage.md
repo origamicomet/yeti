@@ -30,6 +30,6 @@
   options (compile):
       -daemon runs the server as a daemon/service (and compiles on file system events)
 
-      -log-to-network [ipv4, or hostname] logs all compile output to the remote server over http
+      -log-to-network [ipv4/6, or hostname] logs all compile output to the remote server over http
         -lot-to-network resource.build.voxkings.com
 ```

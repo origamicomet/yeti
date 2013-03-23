@@ -13,4 +13,4 @@ endif
 
 SUFFIX += -@(TUP_ARCH)
 
-: code/src/*.o code/src/bt/*.o deps/foundation/foundation-@(TUP_ARCH)$(LIB_EXT) |> !ar |> butane$(SUFFIX)$(LIB_EXT)
+: code/src/*.o code/src/bt/*.o deps/foundation/foundation-@(TUP_ARCH)$(LIB_EXT) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
