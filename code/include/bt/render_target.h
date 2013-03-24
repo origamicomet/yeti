@@ -13,7 +13,7 @@ namespace bt {
   class RenderTarget {
     protected:
       RenderTarget();
-      ~RenderTarget();
+      virtual ~RenderTarget();
 
     public:
       static RenderTarget* create(

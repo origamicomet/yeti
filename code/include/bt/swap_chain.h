@@ -17,7 +17,7 @@ namespace bt {
 
     protected:
       SwapChain();
-      ~SwapChain();
+      virtual ~SwapChain();
 
     public:
       static SwapChain* create(
