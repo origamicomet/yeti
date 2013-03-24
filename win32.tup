@@ -5,6 +5,7 @@ AS = nasm
 
 CFLAGS += /nologo /c /W4 /GF /GL /GR- /I"$(TUP_CWD)\code\include"
 CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
+CFLAGS += /D "WIN32_LEAN_AND_MEAN" /D "NOMINMAX"
 LDFLAGS += /NOLOGO /LTCG
 
 ifeq (@(TUP_ARCH),i386)
