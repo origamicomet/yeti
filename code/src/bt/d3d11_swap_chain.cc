@@ -39,11 +39,11 @@ namespace bt {
     MAKE_DELETE(D3D11SwapChain, Allocator::heap(), (D3D11SwapChain*)this);
   }
 
-  void SwapChain::set_dimensions(
+  void SwapChain::resize(
     unsigned width,
     unsigned height )
   {
-    fail("SwapChain::set_dimensions is not implemented, yet!");
+    fail("SwapChain::resize is not implemented, yet!");
   }
 
   void SwapChain::set_window_mode(

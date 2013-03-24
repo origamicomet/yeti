@@ -30,7 +30,7 @@ namespace bt {
 
       void destroy();
 
-      void set_dimensions(
+      void resize(
         unsigned width,
         unsigned height );
 
