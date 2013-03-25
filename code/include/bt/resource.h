@@ -25,7 +25,7 @@ namespace bt {
         uint32_t id;
         String assoc_ext;
         Array<String> assoc_src_ext;
-        Resource* (*load)( ResourceStream* stream );
+        Resource* (*load)( Resource::Stream* stream );
         Resource* (*reload)( Resource* resource );
         void (*unload)( Resource* resource );
         bool (*compile)( CompileData& compile_data );
