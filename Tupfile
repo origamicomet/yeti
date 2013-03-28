@@ -11,6 +11,6 @@ ifeq (@(BUILD),development)
 SUFFIX = -dev
 endif
 
-SUFFIX += -@(TUP_ARCH)
+SUFFIX = $(SUFFIX)-@(TUP_ARCH)
 
 : code/src/*.o code/src/bt/*.o deps/foundation/foundation-@(TUP_ARCH)$(LIB_EXT) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
