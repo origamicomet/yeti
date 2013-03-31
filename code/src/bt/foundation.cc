@@ -10,13 +10,16 @@ namespace bt {
   {
     if (_file_log)
       fclose(_file_log);
+
     _file_log = fopen(path, "ab");
+    if (_file_log)
+      setvbuf(_file_log, nullptr, _IONBF, 0);
   }
 
   static void log_to_file( const char* format, va_list ap ) {
     if (!_file_log)
       return;
-    vfprintf(_file_log, format, ap)
+    vfprintf(_file_log, format, ap);
   }
 
   // extern void install_network_logger( const net::Host& host );
@@ -24,7 +27,8 @@ namespace bt {
 
   void log( const char* format, va_list ap )
   {
-    vfprintf(stdout, ap);
+    static const int _unused = setvbuf(stdout, nullptr, _IONBF, 0);
+    vfprintf(stdout, format, ap);
     log_to_file(format, ap);
     // log_to_network(format, ap);
   }
