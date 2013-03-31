@@ -5,6 +5,7 @@ preload code/src/bt
 
 ifeq (@(BUILD),debug)
 SUFFIX = -dbg
+LIB_SUFFIX = -dbg
 endif
 
 ifeq (@(BUILD),development)
@@ -12,5 +13,10 @@ SUFFIX = -dev
 endif
 
 SUFFIX = $(SUFFIX)-@(TUP_ARCH)
+LIB_SUFFIX = $(LIB_SUFFIX)-@(TUP_ARCH)
 
-: code/src/*.o code/src/bt/*.o deps/foundation/foundation-@(TUP_ARCH)$(LIB_EXT) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
+ifeq (@(TUP_PLATFORM),win32) 
+LIBS = DbgHelp.lib
+endif
+
+: code/src/*.o code/src/bt/*.o deps/foundation/foundation$(LIB_SUFFIX)$(LIB_EXT) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
