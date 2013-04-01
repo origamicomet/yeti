@@ -9,10 +9,11 @@ namespace Application {
     size_t num_args_,
     const char* args_[] )
   {
-    static const char* symbol_path = "./";
-    if (!load_debug_information(&symbol_path, 1))
-      log("Unable to load debug information (path=%s)!\n", symbol_path);
-    // install_crash_handler();
+    String symbol_path = Path::absolute(String(Allocator::heap(), "./"));
+    const char* symbol_paths[] = { symbol_path.to_ptr() };
+    if (!load_debug_information(&symbol_paths[0], 0))
+      log("Unable to load debug information (path=%s)!\n", symbol_paths[0]);
+    install_crash_handler();
 
     Array<const char*> args(Allocator::heap(), max((size_t)1, num_args_) - 1);
     for (size_t i = 1; i < num_args_; ++i)
