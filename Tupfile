@@ -8,6 +8,7 @@ OBJS = code/src/*.o code/src/bt/*.o
 ifeq (@(TUP_PLATFORM),win32)
 preload code/src/bt/win32
 OBJS += code/src/bt/win32/*.o
+OBJS += code/src/bt/win32/*.res
 endif
 
 ifeq (@(BUILD),debug)
