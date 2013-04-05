@@ -9,5 +9,7 @@
 #include <Windows.h>
 #include <D3D11.h>
 #include <DXGI.h>
+#undef NEAR
+#undef FAR
 
 #endif // _BUTANE_WIN32_D3D11_H_
