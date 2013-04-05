@@ -1,6 +1,7 @@
 CFLAGS =
 LDFLAGS =
 ASFLAGS =
+RCFLAGS =
 
 ifeq (@(TUP_PLATFORM),win32)
 include win32.tup

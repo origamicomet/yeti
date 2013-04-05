@@ -2,13 +2,35 @@ CC = cl
 LD = link
 AR = lib
 AS = nasm
+RC = rc
 
 CFLAGS += /nologo /c /W4 /GF /GL /GR- /I"$(TUP_CWD)\code\include"
 CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
+RCFLAGS += /nologo /l 0x0409
+RCFLAGS += /I"$(TUP_CWD)\code\include" /I"$(TUP_CWD)\deps\foundation\include"
+RCFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
 # CFLAGS += /D "WIN32_LEAN_AND_MEAN" /D "NOMINMAX"
 LDFLAGS += /NOLOGO /LTCG
 CFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
 LDFLAGS += /LIBPATH:"@(WINDOWS_SDK_DIR)Lib"
+
+ifeq (@(BUILD),debug)
+CFLAGS += /D"BT_DEBUG_BUILD"
+RCFLAGS += /D"BT_DEBUG_BUILD"
+ASFLAGS += /D"BT_DEBUG_BUILD"
+endif
+
+ifeq (@(BUILD),development)
+CFLAGS += /D"BT_DEVELOPMENT_BUILD"
+RCFLAGS += /D"BT_DEVELOPMENT_BUILD"
+ASFLAGS += /D"BT_DEVELOPMENT_BUILD"
+endif
+
+ifeq (@(BUILD),release)
+CFLAGS += /D"BT_RELEASE_BUILD"
+RCFLAGS += /D"BT_RELEASE_BUILD"
+ASFLAGS += /D"BT_RELEASE_BUILD"
+endif
 
 ifeq (@(TUP_ARCH),i386)
 CFLAGS += /arch:SSE2
@@ -26,8 +48,10 @@ ifeq (@(BUILD),debug)
 CFLAGS += /MDd /D "_DEBUG"
 LDFLAGS += /DEBUG
 ASFLAGS += -g
+RCFLAGS += /D "_DEBUG"
 else
 CFLAGS += /MD /D "NDEBUG"
+RCFLAGS += /D "NDEBUG"
 endif
 
 WIN32_LIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
@@ -49,3 +73,5 @@ EXE_EXT = .exe
 LIB_EXT = .lib
 !ar = |> $(AR) $(ARFLAGS) /OUT:"$(TUP_CWD)\%o" %f |>
 !as = |> $(AS) $(ASFLAGS) -o %o %f |>
+
+!rc = |> $(RC) $(RCFLAGS) /fo %o %f |>

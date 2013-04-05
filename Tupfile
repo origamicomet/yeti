@@ -3,6 +3,13 @@ include_rules
 preload code/src
 preload code/src/bt
 
+OBJS = code/src/*.o code/src/bt/*.o
+
+ifeq (@(TUP_PLATFORM),win32)
+preload code/src/bt/win32
+OBJS += code/src/bt/win32/*.o
+endif
+
 ifeq (@(BUILD),debug)
 SUFFIX = -dbg
 LIB_SUFFIX = -dbg
@@ -19,4 +26,4 @@ ifeq (@(TUP_PLATFORM),win32)
 LIBS = DbgHelp.lib
 endif
 
-: code/src/*.o code/src/bt/*.o deps/foundation/foundation$(LIB_SUFFIX)$(LIB_EXT) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
+: $(OBJS) deps/foundation/foundation$(LIB_SUFFIX)$(LIB_EXT) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
