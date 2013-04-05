@@ -1,4 +1,0 @@
-include_rules
-
-: foundation.cc |> !cc |> %B.o
-: application.cc |> !cc |> %B.o
