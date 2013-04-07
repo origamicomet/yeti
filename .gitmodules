@@ -1,3 +1,6 @@
 [submodule "deps/foundation"]
 	path = deps/foundation
 	url = git@github.com:mtwilliams/foundation.git
+[submodule "deps/lua"]
+	path = deps/lua
+	url = git@github.com:mtwilliams/Lua.git
