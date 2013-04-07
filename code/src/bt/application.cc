@@ -2,7 +2,7 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <bt/application.h>
-#include <bt/window.h>
+#include <bt/script.h>
 
 namespace bt {
 namespace Application {
@@ -176,6 +176,14 @@ namespace Application {
 
     window->show();
     windows().push_back(window);
+
+    const char* script_src = "function init()\n  Application.quit()\n\nend";
+    Script* script = Script::load(
+      (const void*)script_src, strlen(script_src), "add");
+
+    size_t num_returns = 0;
+    if (!script->call("init", 0, num_returns)) {
+    }
 
     while (true) {
       Windows::update();
