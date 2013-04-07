@@ -6,6 +6,7 @@ RC = rc
 
 CFLAGS += /nologo /c /W4 /GF /GL /GR- /I"$(TUP_CWD)\code\include"
 CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
+CFLAGS += /I"$(TUP_CWD)\deps\lua\include"
 RCFLAGS += /nologo /l 0x0409
 RCFLAGS += /I"$(TUP_CWD)\code\include" /I"$(TUP_CWD)\deps\foundation\include"
 RCFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
