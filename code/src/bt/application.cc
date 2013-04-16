@@ -193,6 +193,23 @@ namespace Application {
   void compile(
     const Array<const char*>& args )
   {
+    for (size_t i = 0; i < args.size(); ++i) {
+      if (strcmp("-log-to-network", args[i]) == 0) {
+        if ((args.size() - i - 1) < 1) {
+          log(
+            "Malformed command-line argument (-log-to-network).\n"
+            "  Expected: -log-to-network [address/hostname]\n"
+            "                                   ^ not supplied\n");
+          break;
+        }
+
+        // install_network_logger(args[i + 1]);
+        i += 1;
+      } else if (strcmp("-dameon", args[i]) == 0) {
+      }
+    }
+
+    bt::Application::quit();
   }
 
   void quit()

@@ -1,4 +1,5 @@
 tup.config
+.branch
 .tup
 *.sublime-workspace
 *.log
