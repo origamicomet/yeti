@@ -10,6 +10,7 @@ using namespace foundation;
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 namespace bt {
   extern void install_file_logger( const char* path );
@@ -18,6 +19,10 @@ namespace bt {
   extern void log( const char* format, va_list ap );
   extern void log( const char* format, ... );
   extern void fail( const char* format, ... );
+} // bt
+
+namespace bt {
+  typedef foundation::Hash<uint32_t, murmur_hash> Hash;
 } // bt
 
 #endif // _BUTANE_FOUNDATION_H_
