@@ -1,14 +1,14 @@
 // This file is part of Butane. See README.md and LICENSE.md for details.
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
-#ifndef _BUTANE_DATABASE_RECORDS_RESOURCE_H_
-#define _BUTANE_DATABASE_RECORDS_RESOURCE_H_
+#ifndef _BUTANE_DATABASE_MODELS_RESOURCE_H_
+#define _BUTANE_DATABASE_MODELS_RESOURCE_H_
 
 #include <bt/resource_database.h>
 
 namespace bt {
 namespace db {
-namespace Records {
+namespace Models {
   class Resource {
     FOUNDATION_NON_COPYABLE(Resource);
 
@@ -31,7 +31,7 @@ namespace Records {
       bool remove();
 
     public:
-      static bool schema(
+      static bool upgrade(
         sqlite3* database );
 
     public:
@@ -50,8 +50,8 @@ namespace Records {
       TimeStamp _last_modified;
       String _path;
   };
-} // Records
+} // Models
 } // db
 } // bt
 
-#endif // _BUTANE_DATABASE_RECORDS_RESOURCE_H_
+#endif // _BUTANE_DATABASE_MODELS_RESOURCE_H_

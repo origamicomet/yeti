@@ -2,7 +2,7 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <bt/resource_database.h>
-#include <bt/db/records/resource.h>
+#include <bt/db/models/resource.h>
 
 namespace bt {
   ResourceDatabase::ResourceDatabase()
@@ -33,11 +33,11 @@ namespace bt {
     return rdb;
   }
 
-  static bool schema( sqlite3* db )
+  static bool upgrade( sqlite3* db )
   {
     assert(db != nullptr);
 
-    if (!db::Records::Resource::schema(db))
+    if (!db::Models::Resource::upgrade(db))
       return false;
 
     return true;
@@ -55,7 +55,7 @@ namespace bt {
     if (sqlite3_open_v2(path, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) != SQLITE_OK)
       return nullptr;
 
-    if (!schema(db)) {
+    if (!upgrade(db)) {
       sqlite3_close_v2(db);
       File::destroy(path);
       return nullptr;

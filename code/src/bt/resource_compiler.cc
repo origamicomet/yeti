@@ -3,7 +3,7 @@
 
 #include <bt/resource_compiler.h>
 #include <bt/resource_database.h>
-#include <bt/db/records/resource.h>
+#include <bt/db/models/resource.h>
 
 namespace bt {
 namespace ResourceCompiler {

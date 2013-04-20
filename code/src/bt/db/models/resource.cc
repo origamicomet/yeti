@@ -1,11 +1,11 @@
 // This file is part of Butane. See README.md and LICENSE.md for details.
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
-#include <bt/db/records/resource.h>
+#include <bt/db/models/resource.h>
 
 namespace bt {
 namespace db {
-namespace Records {
+namespace Models {
   Resource::Resource()
     : _id(0)
   {
@@ -157,7 +157,7 @@ namespace Records {
     return true;
   }
 
-  bool Resource::schema(
+  bool Resource::upgrade(
     sqlite3* db )
   {
     static const char* sql = "CREATE TABLE resources ("
@@ -171,12 +171,12 @@ namespace Records {
     sqlite3_stmt* stmt;
 
     if ((err = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL)) != SQLITE_OK) {
-      log("[Resource::schema] unable to prepare statement, err=%d!\n", err);
+      log("[Resource::upgrade] unable to prepare statement, err=%d!\n", err);
       return false;
     }
 
     if ((err = sqlite3_step(stmt)) != SQLITE_DONE) {
-      log("[Resource::schema] unable to create table `resources` err=%d!\n", err);
+      log("[Resource::upgrade] unable to create table `resources` err=%d!\n", err);
       sqlite3_finalize(stmt);
       return false;
     }
@@ -184,6 +184,6 @@ namespace Records {
     sqlite3_finalize(stmt);
     return true;
   }
-} // Records
+} // Models
 } // db
 } // bt

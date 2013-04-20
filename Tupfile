@@ -4,13 +4,13 @@ preload code/src
 preload code/src/bt
 preload code/src/bt/lua
 preload code/src/bt/db
-preload code/src/bt/db/records
+preload code/src/bt/db/models
 
 OBJS = code/src/*.o
 OBJS += code/src/bt/*.o
 OBJS += code/src/bt/lua/*.o
 OBJS += code/src/bt/db/*.o
-OBJS += code/src/bt/db/records/*.o
+OBJS += code/src/bt/db/models/*.o
 
 ifeq (@(TUP_PLATFORM),win32)
 preload code/src/bt/win32
