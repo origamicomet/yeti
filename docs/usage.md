@@ -2,8 +2,8 @@
   usage: butane [options]
     runs the game engine
 
-  or: butane compile [file, or directory]
-    compiles a file, or a directory of resources
+  or: butane compile [source data directory] [data directory] [options]
+    compiles a directory of resources
 
   options (default):
       -log-to-file [path] logs all console output to a file

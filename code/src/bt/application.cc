@@ -3,6 +3,7 @@
 
 #include <bt/application.h>
 #include <bt/script.h>
+#include <bt/resource_compiler.h>
 
 namespace bt {
 namespace Application {
@@ -193,7 +194,25 @@ namespace Application {
   void compile(
     const Array<const char*>& args )
   {
-    for (size_t i = 0; i < args.size(); ++i) {
+    bool daemon = false;
+
+    if (args.size() < 3) {
+      log(
+        "Malformed compiler invocation!\n"
+        "  Expected: compile [source data directory] [data directory] [options]\n"
+        "                              ^--------------------^-- not supplied\n");
+      return;
+    }
+
+    if (!Directory::exists(args[1])) {
+      log(
+        "Malformed compiler invocation!\n"
+        "  Expected: compile [source data directory] [data directory] [options]\n"
+        "                              ^ directory doesn't exist\n");
+      return;
+    }
+
+    for (size_t i = 3; i < args.size(); ++i) {
       if (strcmp("-log-to-network", args[i]) == 0) {
         if ((args.size() - i - 1) < 1) {
           log(
@@ -205,11 +224,16 @@ namespace Application {
 
         // install_network_logger(args[i + 1]);
         i += 1;
-      } else if (strcmp("-dameon", args[i]) == 0) {
+      } else if (strcmp("-daemon", args[i]) == 0) {
+        daemon = true;
       }
     }
 
-    bt::Application::quit();
+    const String source_data_directory = String(args[1]);
+    const String data_directory = String(args[2]);
+
+    if (ResourceCompiler::compile(source_data_directory, data_directory, daemon))
+      bt::Application::quit();
   }
 
   void quit()
