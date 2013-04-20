@@ -4,3 +4,6 @@
 [submodule "deps/lua"]
 	path = deps/lua
 	url = git@github.com:mtwilliams/Lua.git
+[submodule "deps/sqlite"]
+	path = deps/sqlite
+	url = git@github.com:mtwilliams/sqlite.git
