@@ -467,10 +467,10 @@ namespace Lua {
   {
     assert(code != nullptr);
 
-    Script* script = MAKE_NEW(Script, Allocator::heap())();
+    Script* script = make_new(Script, Allocator::heap())();
 
     if (luaL_loadbuffer(script->_state, (const char*)code, code_len, name) != 0) {
-      MAKE_DELETE(Script, Allocator::heap(), script);
+      make_delete(Script, Allocator::heap(), script);
       return nullptr;
     }
 
@@ -483,7 +483,7 @@ namespace Lua {
 
     if (lua_pcall(script->_state, 0, LUA_MULTRET, -2) != 0) {
       script->_on_error(script, lua_tostring(script->_state, -1), cs);
-      MAKE_DELETE(Script, Allocator::heap(), script);
+      make_delete(Script, Allocator::heap(), script);
       return nullptr;
     }
 

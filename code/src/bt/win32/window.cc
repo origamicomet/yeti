@@ -68,7 +68,7 @@ namespace bt {
     if (!sys_handle)
       return nullptr;
 
-    Window* window = MAKE_NEW(Window, Allocator::heap());
+    Window* window = make_new(Window, Allocator::heap());
     window->_title = String(Allocator::heap(), title);
     window->_width = width;
     window->_height = height;
@@ -81,7 +81,7 @@ namespace bt {
 
   void Window::close()
   {
-    MAKE_DELETE(Window, Allocator::heap(), this);
+    make_delete(Window, Allocator::heap(), this);
   }
 
   void Window::set_title(
