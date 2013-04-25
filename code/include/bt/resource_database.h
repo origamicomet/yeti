@@ -7,8 +7,6 @@
 #include <bt/foundation.h>
 #include <bt/config.h>
 
-#include <sqlite3.h>
-
 namespace bt {
   class ResourceDatabase {
     FOUNDATION_NON_COPYABLE(ResourceDatabase);
@@ -25,13 +23,6 @@ namespace bt {
         const char* path );
 
       void close();
-
-    public:
-      FOUNDATION_INLINE sqlite3* sqlite() const
-      { return _sqlite; }
-
-    private:
-      sqlite3* _sqlite;
   };
 } // bt
 

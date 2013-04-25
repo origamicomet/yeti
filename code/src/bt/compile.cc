@@ -63,10 +63,16 @@ namespace bt {
   {
   }
 
+  Compile::~Compile()
+  {
+  }
+
   bool Compile::a_resource(
+    const String& path,
     const String& source_path,
     const String& data_directory,
     const String& source_data_directory,
+    size_t revision,
     Compile& compile )
   {
     const String source_path_ext =
@@ -76,10 +82,7 @@ namespace bt {
       Resource::determine_type_from_extension(source_path_ext.to_ptr());
 
     compile._status = Unknown;
-    compile._path =
-      Path::dirname(source_path).chomp(source_data_directory) +
-        '/' + Path::basename(source_path) +
-        '.' + type->associated_extension();
+    compile._path = path;
 
     if (!type) {
       compile._status = Failed;
@@ -90,9 +93,8 @@ namespace bt {
     }
 
     const Hash hash = Hash(compile._path);
-
+    
     FILE* input = File::open(source_path.to_ptr(), "rb");
-
     if (!input) {
       compile._status = Failed;
       compile._log = String(Allocator::heap(),
@@ -102,7 +104,9 @@ namespace bt {
     }
 
     const String memory_resident_data_path = String(Allocator::scratch(),
-      "%s/%08X.memory_resident_data", source_data_directory.to_ptr(), hash);
+      "%s/%08X%08X%u.memory_resident_data",
+      data_directory.to_ptr(),
+      (uint32_t)type->associated_extension(), hash, revision);
 
     FILE* memory_resident_data = File::open(
       memory_resident_data_path.to_ptr(), "wb");
@@ -115,7 +119,9 @@ namespace bt {
     }
 
     const String streaming_data_path = String(Allocator::scratch(),
-      "%s/%08X.streaming_data", source_data_directory.to_ptr(), hash);
+      "%s/%08X%08X%u.streaming_data",
+      data_directory.to_ptr(),
+      (uint32_t)type->associated_extension(), hash, revision);
 
     FILE* streaming_data = File::open(
       streaming_data_path.to_ptr(), "wb");
@@ -135,6 +141,9 @@ namespace bt {
 
     compile._status = type->compile(data);
 
+    const bool no_memory_resident_data = (ftell(memory_resident_data) == 0);
+    const bool no_streaming_data = (ftell(streaming_data) == 0);
+
     fclose(input);
     fclose(memory_resident_data);
     fclose(streaming_data);
@@ -145,10 +154,10 @@ namespace bt {
       return false;
     }
 
-    if (ftell(memory_resident_data) == 0)
+    if (no_memory_resident_data)
       File::destroy(memory_resident_data_path.to_ptr());
 
-    if (ftell(streaming_data) == 0)
+    if (no_streaming_data)
       File::destroy(streaming_data_path.to_ptr());
 
     return true;

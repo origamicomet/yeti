@@ -2,18 +2,14 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <bt/resource_database.h>
-#include <bt/db/models/resource.h>
 
 namespace bt {
   ResourceDatabase::ResourceDatabase()
-    : _sqlite(nullptr)
   {
   }
 
   ResourceDatabase::~ResourceDatabase()
   {
-    if (_sqlite)
-      sqlite3_close_v2(_sqlite);
   }
 
   ResourceDatabase* ResourceDatabase::open(
@@ -24,23 +20,8 @@ namespace bt {
     if (!File::exists(path))
       return nullptr;
 
-    sqlite3* db;
-    if (sqlite3_open_v2(path, &db, SQLITE_OPEN_READWRITE, NULL) != SQLITE_OK)
-      return nullptr;
-
     ResourceDatabase* rdb = make_new(ResourceDatabase, Allocator::heap())();
-    rdb->_sqlite = db;
     return rdb;
-  }
-
-  static bool upgrade( sqlite3* db )
-  {
-    assert(db != nullptr);
-
-    if (!db::Models::Resource::upgrade(db))
-      return false;
-
-    return true;
   }
 
   ResourceDatabase* ResourceDatabase::create(
@@ -51,18 +32,7 @@ namespace bt {
     if (File::exists(path))
       return nullptr;
 
-    sqlite3* db;
-    if (sqlite3_open_v2(path, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) != SQLITE_OK)
-      return nullptr;
-
-    if (!upgrade(db)) {
-      sqlite3_close_v2(db);
-      File::destroy(path);
-      return nullptr;
-    }
-
     ResourceDatabase* rdb = make_new(ResourceDatabase, Allocator::heap())();
-    rdb->_sqlite = db;
     return rdb;
   }
 

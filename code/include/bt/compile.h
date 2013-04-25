@@ -56,15 +56,25 @@ namespace bt {
           FILE* _streaming_data;
       };
 
-    private:
+    public:
       Compile();
+      ~Compile();
 
     public:
       static bool a_resource(
+        const String& path,
         const String& source_path,
         const String& data_directory,
         const String& source_data_directory,
+        size_t revision,
         Compile& compile );
+
+    public:
+      FOUNDATION_INLINE Status status() const
+      { return _status; }
+      
+      FOUNDATION_INLINE const String& log() const
+      { return _log; }
 
     private:
       Status _status;

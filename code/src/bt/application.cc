@@ -2,7 +2,6 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <bt/application.h>
-#include <bt/script.h>
 #include <bt/resource_compiler.h>
 
 namespace bt {
@@ -164,31 +163,31 @@ namespace Application {
       }
     }
 
-    Windows::initialize();
+    // Windows::initialize();
 
-    Window* window = Window::open(
-      "Butane (config=" __foundation_stringify(BT_BUILD)
-        ",arch=" __foundation_stringify(BT_ARCHITECTURE)
-        ",platform=" __foundation_stringify(BT_PLATFORM) ")",
-      1280, 720);
+    // Window* window = Window::open(
+    //   "Butane (config=" __foundation_stringify(BT_BUILD)
+    //     ",arch=" __foundation_stringify(BT_ARCHITECTURE)
+    //     ",platform=" __foundation_stringify(BT_PLATFORM) ")",
+    //   1280, 720);
 
-    if (!window)
-      fail("Window creation failed!\n");
+    // if (!window)
+    //   fail("Window creation failed!\n");
 
-    window->show();
-    windows().push_back(window);
+    // window->show();
+    // windows().push_back(window);
 
-    const char* script_src = "function init()\n  Application.quit()\n\nend";
-    Script* script = Script::load(
-      (const void*)script_src, strlen(script_src), "add");
+    // const char* script_src = "function init()\n  Application.quit()\n\nend";
+    // Script* script = Script::load(
+    //   (const void*)script_src, strlen(script_src), "add");
 
-    size_t num_returns = 0;
-    if (!script->call("init", 0, num_returns)) {
-    }
+    // size_t num_returns = 0;
+    // if (!script->call("init", 0, num_returns)) {
+    // }
 
-    while (true) {
-      Windows::update();
-    }
+    // while (true) {
+    //   Windows::update();
+    // }
   }
 
   void compile(
@@ -232,7 +231,7 @@ namespace Application {
     const String source_data_directory = String(args[1]);
     const String data_directory = String(args[2]);
 
-    if (ResourceCompiler::compile(source_data_directory, data_directory, daemon))
+    if (ResourceCompiler::compile(data_directory, source_data_directory, daemon))
       bt::Application::quit();
   }
 

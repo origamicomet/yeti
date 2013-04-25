@@ -3,14 +3,12 @@ include_rules
 preload code/src
 preload code/src/bt
 preload code/src/bt/lua
-preload code/src/bt/db
-preload code/src/bt/db/models
+preload code/src/bt/resource
 
 OBJS = code/src/*.o
 OBJS += code/src/bt/*.o
 OBJS += code/src/bt/lua/*.o
-OBJS += code/src/bt/db/*.o
-OBJS += code/src/bt/db/models/*.o
+OBJS += code/src/bt/resource/*.o
 
 ifeq (@(TUP_PLATFORM),win32)
 preload code/src/bt/win32
@@ -36,6 +34,6 @@ endif
 
 OBJS += deps/foundation/foundation$(LIB_SUFFIX)$(LIB_EXT)
 OBJS += deps/lua/lua52$(LIB_SUFFIX)$(LIB_EXT)
-OBJS += deps/sqlite/sqlite$(LIB_SUFFIX)$(LIB_EXT)
+OBJS += deps/sjson/sjson$(LIB_SUFFIX)$(LIB_EXT)
 
 : $(OBJS) |> !exe |> butane$(SUFFIX)$(EXE_EXT)

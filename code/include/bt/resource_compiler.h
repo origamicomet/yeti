@@ -10,8 +10,8 @@
 namespace bt {
 namespace ResourceCompiler {
   extern bool compile(
-    const String& source_data_directory,
     const String& data_directory,
+    const String& source_data_directory,
     bool daemon = false );
 } // ResourceCompiler
 } // bt
