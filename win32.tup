@@ -4,35 +4,35 @@ AR = lib
 AS = nasm
 RC = rc
 
-CFLAGS += /nologo /c /W4 /GF /GL /GR- /I"$(TUP_CWD)\code\include"
+CFLAGS += /nologo /c /W4 /GF /GL /GR-
+CFLAGS += /I"$(TUP_CWD)\code\include"
 CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
 CFLAGS += /I"$(TUP_CWD)\deps\lua\include"
-CFLAGS += /I"$(TUP_CWD)\deps\sqlite\include"
-CFLAGS += /I"$(TUP_CWD)\deps\sjson\include"
-RCFLAGS += /nologo /l 0x0409
-RCFLAGS += /I"$(TUP_CWD)\code\include" /I"$(TUP_CWD)\deps\foundation\include"
-RCFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
-# CFLAGS += /D "WIN32_LEAN_AND_MEAN" /D "NOMINMAX"
-LDFLAGS += /NOLOGO /LTCG
 CFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
+
+LDFLAGS += /NOLOGO /LTCG
 LDFLAGS += /LIBPATH:"@(WINDOWS_SDK_DIR)Lib"
 
-ifeq (@(BUILD),debug)
-CFLAGS += /D"BT_DEBUG_BUILD"
-RCFLAGS += /D"BT_DEBUG_BUILD"
-ASFLAGS += /D"BT_DEBUG_BUILD"
+RCFLAGS += /nologo /l 0x0409
+RCFLAGS += /I"$(TUP_CWD)\code\include"
+RCFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
+
+ifeq (@(BUTANE_BUILD),debug)
+CFLAGS += /D"BUTANE_DEBUG_BUILD"
+RCFLAGS += /D"BUTANE_DEBUG_BUILD"
+ASFLAGS += /D"BUTANE_DEBUG_BUILD"
 endif
 
-ifeq (@(BUILD),development)
-CFLAGS += /D"BT_DEVELOPMENT_BUILD"
-RCFLAGS += /D"BT_DEVELOPMENT_BUILD"
-ASFLAGS += /D"BT_DEVELOPMENT_BUILD"
+ifeq (@(BUTANE_BUILD),development)
+CFLAGS += /D"BUTANE_DEVELOPMENT_BUILD"
+RCFLAGS += /D"BUTANE_DEVELOPMENT_BUILD"
+ASFLAGS += /D"BUTANE_DEVELOPMENT_BUILD"
 endif
 
-ifeq (@(BUILD),release)
-CFLAGS += /D"BT_RELEASE_BUILD"
-RCFLAGS += /D"BT_RELEASE_BUILD"
-ASFLAGS += /D"BT_RELEASE_BUILD"
+ifeq (@(BUTANE_BUILD),release)
+CFLAGS += /D"BUTANE_RELEASE_BUILD"
+RCFLAGS += /D"BUTANE_RELEASE_BUILD"
+ASFLAGS += /D"BUTANE_RELEASE_BUILD"
 endif
 
 ifeq (@(TUP_ARCH),i386)
@@ -47,7 +47,7 @@ LDFLAGS += /MACHINE:X64
 endif
 
 CFLAGS += /D "_CRT_SECURE_NO_WARNINGS" /Zi
-ifeq (@(BUILD),debug)
+ifeq (@(BUTANE_BUILD),debug)
 CFLAGS += /MDd /D "_DEBUG"
 LDFLAGS += /DEBUG
 ASFLAGS += -g
@@ -59,14 +59,19 @@ endif
 
 WIN32_LIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 
+DEBUG_SYBMOLS_EXT = .pdb
 !cc = |> $(CC) $(CFLAGS) /Fd"$(TUP_CWD)\%O.pdb" %f /Fo"%o" |>
 
 SHARED_LIB_EXT = .dll
 !so = |> $(LD) $(LDFLAGS) /DLL /OUT:"$(TUP_CWD)\%o" %f $(WIN32_LIBS) $(LIBS) |>
 
-ifneq (@(BUILD),release)
+ifeq (@(BUTANE_BUILD),debug)
 SUBSYSTEM = /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup
-else
+endif
+ifeq (@(BUTANE_BUILD),development)
+SUBSYSTEM = /SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup
+endif
+ifeq (@(BUTANE_BUILD),release)
 SUBSYSTEM = /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup
 endif
 
@@ -75,6 +80,11 @@ EXE_EXT = .exe
 
 LIB_EXT = .lib
 !ar = |> $(AR) $(ARFLAGS) /OUT:"$(TUP_CWD)\%o" %f |>
+
+# ASM_EXT = .asm
 !as = |> $(AS) $(ASFLAGS) -o %o %f |>
 
+# RES_EXT = .res
 !rc = |> $(RC) $(RCFLAGS) /fo %o %f |>
+
+!copy = |> copy %f %o |>

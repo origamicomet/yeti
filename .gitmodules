@@ -7,3 +7,6 @@
 [submodule "deps/sjson"]
 	path = deps/sjson
 	url = git@github.com:mtwilliams/sjson.git
+[submodule "deps/enet"]
+	path = deps/enet
+	url = git@github.com:mtwilliams/enet.git

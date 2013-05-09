@@ -5,6 +5,7 @@ tup.config
 *.log
 *.o
 *.obj
+*.exp
 *.res
 *.pdb
 *.exe

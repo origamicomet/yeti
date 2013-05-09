@@ -1,0 +1,12 @@
+ifeq (@(BUTANE_BUILD),debug)
+SUFFIX = -dbg
+LIB_SUFFIX = -dbg
+endif
+
+ifeq (@(BUTANE_BUILD),development)
+SUFFIX = -dev
+LIB_SUFFIX = -dbg
+endif
+
+SUFFIX = $(SUFFIX)-@(TUP_ARCH)
+LIB_SUFFIX = $(LIB_SUFFIX)-@(TUP_ARCH)
