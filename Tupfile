@@ -1,0 +1,22 @@
+include_rules
+
+preload code/src
+preload code/src/butane
+preload code/src/butane/application
+preload code/src/butane/lua
+
+OBJS = code/src/*.o
+OBJS = code/src/*.res
+OBJS += code/src/butane/*.o
+OBJS += code/src/butane/application/*.o
+OBJS += code/src/butane/lua/*.o
+
+include deps/foundation/deps.tup
+LIBS = $(FOUNDATION_LIBS)
+
+include suffix.tup
+
+OBJS += deps/foundation/foundation$(LIB_SUFFIX)$(LIB_EXT)
+OBJS += deps/lua/lua52$(LIB_SUFFIX)$(LIB_EXT)
+
+: $(OBJS) |> !exe |> butane$(SUFFIX)$(EXE_EXT)
