@@ -4,12 +4,14 @@ preload code/src
 preload code/src/butane
 preload code/src/butane/application
 preload code/src/butane/lua
+preload code/src/butane/resource
 
 OBJS = code/src/*.o
 OBJS = code/src/*.res
 OBJS += code/src/butane/*.o
 OBJS += code/src/butane/application/*.o
 OBJS += code/src/butane/lua/*.o
+OBJS += code/src/butane/resource/*.o
 
 include deps/foundation/deps.tup
 LIBS = $(FOUNDATION_LIBS)
