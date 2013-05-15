@@ -52,7 +52,7 @@ If you want to run the game or compile resources from the command line, follow t
 If you want to connect a remote console to an engine instance from the command line, follow this:
 
 ```
- usage: console [address:port] [options]
+  usage: console [address:port] [options]
     connects to an engine instance and displays a Lua REPL
 
   options:
@@ -63,7 +63,7 @@ If you want to connect a remote console to an engine instance from the command l
 If you want to connect a profiler to an engine instance from the command line, follow this:
 
 ```
- usage: profiler [address:port] [options]
+  usage: profiler [address:port] [options]
     connects to an engine instance and profiles C/C++ and Lua code
 
   options:
@@ -74,7 +74,7 @@ If you want to connect a profiler to an engine instance from the command line, f
 If you want to connect a Lua debugger to an engine instance from the command line, follow this:
 
 ```
- usage: lua_debugger [address:port] [options]
+  usage: debugger [address:port] [options]
     connects to an engine instance and provides a Lua debugger
 
   options:
@@ -82,16 +82,18 @@ If you want to connect a Lua debugger to an engine instance from the command lin
         -t 10 # will stop trying to connect after ten seconds
 ```
 
-If you want to deploy updated code and data to another device over the network from the command line, follow this:
+If you want to deploy updated code and data to another device from the command line, follow this:
 
 ```
- usage: deploy [project] [address:port] [options]
-    deploys updated code and data (from the project directory) to a remote device over the network
+  usage: deploy [project] [address:port] [options]
+    deploys updated code and data (from the project directory) to a remote device over TCP/IP
+
+  usage: deploy [project] android [device id] [options]
+  usage: deploy [project] ouya [device id] [options]
+    deploys updated code and data (from the project directory) to a remote device using adb
 
   options:
-      -run -r runs the engine after deploying
-
-      -force-stop -fs stops the engine if it's running prior to deploying
+      -r starts or restarts the application after deploying
 
       -timeout -t [timeout] overrides the default timeout in seconds
         -t 10 # will stop trying to connect after ten seconds
