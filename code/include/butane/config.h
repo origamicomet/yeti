@@ -19,4 +19,7 @@
   #define BUTANE_EXPORT
 #endif
 
+// The size of the background resource unloading queue.
+#define BUTANE_BACKGROUND_RESOURCE_UNLOADING_QUEUE_SIZE 256
+
 #endif // _BUTANE_CONFIG_H_
