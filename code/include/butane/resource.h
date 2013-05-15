@@ -17,12 +17,36 @@ namespace butane {
       class Stream;
       class Compiler;
       class Database;
+      
+      #include <butane/resource/id.h>
+      #include <butane/resource/type.h>
+      #include <butane/resource/stream.h>
+      #include <butane/resource/compiler.h>
+      #include <butane/resource/database.h>
+
+    public:
+      static Resource* load(
+        const Type& type,
+        const char* path );
+
+      static Resource* load(
+        const Type& type,
+        const Id id );
+
+      void unload();
+
+    public:
+      void reference();
+      void dereference();
+
+    private:
+      void mark_for_unload();
+
+    private:
+      Id _resource_id;
+      Type _resource_type;
+      int32_t _resource_refs;
   };
 } // butane
-
-#include <butane/resource/id.h>
-#include <butane/resource/type.h>
-#include <butane/resource/compiler.h>
-#include <butane/resource/database.h>
 
 #endif // _BUTANE_RESOURCE_H_

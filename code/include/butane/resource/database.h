@@ -4,23 +4,18 @@
 #ifndef _BUTANE_RESOURCE_DATABASE_H_
 #define _BUTANE_RESOURCE_DATABASE_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+class Database final {
+  __foundation_trait(Database, non_copyable);
 
-namespace butane {
-  class Resource::Database final {
-    __foundation_trait(Database, non_copyable);
+  public:
+    struct Record {
+    };
 
-    public:
-      struct Record {
-      };
+  public:
+    Database();
 
-    public:
-      Database();
-
-    private:
-      HashTable<Resource::Id, Record> _entries;
-  };
-} // butane
+  private:
+    HashTable<Resource::Id, Record> _entries;
+};
 
 #endif // _BUTANE_RESOURCE_DATABASE_H_

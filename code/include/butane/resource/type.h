@@ -4,60 +4,55 @@
 #ifndef _BUTANE_RESOURCE_TYPE_H_
 #define _BUTANE_RESOURCE_TYPE_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+class Type final {
+  __foundation_trait(Type, non_copyable);
 
-namespace butane {
-  class Resource::Type final {
-    __foundation_trait(Type, non_copyable);
+  public:
+    typedef ImmutableHash<uint32_t, murmur_hash> Hash;
 
-    public:
-      typedef ImmutableHash<uint32_t, murmur_hash> Hash;
+  public:
+    typedef Resource* (*Load)(
+      const Resource::Stream& stream );
+    
+    typedef void (*Unload)(
+      Resource* resource );
 
-    public:
-      typedef Resource* (*Load)(
-        const Resource::Stream& stream );
-      
-      typedef void (*Unload)(
-        Resource* resource );
+    typedef bool (*Compile)(
+      void );
 
-      typedef bool (*Compile)(
-        const Resource::Stream& stream );
+  public:
+    Type(
+      Hash name,
+      const char* assoc_file_ext,
+      Load load,
+      Unload unload,
+      Compile compile );
 
-    public:
-      Type(
-        Hash name,
-        const char* assoc_file_ext,
-        Load load,
-        Unload unload,
-        Compile compile );
+  public:
+    FOUNDATION_INLINE const Hash& name() const
+    { return _name; }
 
-    public:
-      FOUNDATION_INLINE const Hash& name() const
-      { return _name; }
+    FOUNDATION_INLINE const String& associated_file_extension() const
+    { return _assoc_file_ext; }
 
-      FOUNDATION_INLINE const String& associated_file_extension() const
-      { return _assoc_file_ext; }
+    FOUNDATION_INLINE Resource* load(
+      const Resource::Stream& stream ) const
+    { return _load(stream); }
 
-      FOUNDATION_INLINE Resource* load(
-        const Resource::Stream& stream ) const
-      { return _load(stream); }
+    FOUNDATION_INLINE void unload(
+      Resource* resource ) const
+    { return _unload(resource); }
 
-      FOUNDATION_INLINE void unload(
-        Resource* resource ) const
-      { return _unload(resource); }
+    FOUNDATION_INLINE bool compile(
+      void ) const
+    { return _compile(); }
 
-      FOUNDATION_INLINE bool compile(
-        const Resource::Stream& stream ) const
-      { return _compile(stream); }
-
-    private:
-      Hash _name;
-      String _assoc_file_ext;
-      Load _load;
-      Unload _unload;
-      Compile _compile;
-  };
-} // butane
+  private:
+    Hash _name;
+    String _assoc_file_ext;
+    Load _load;
+    Unload _unload;
+    Compile _compile;
+};
 
 #endif // _BUTANE_RESOURCE_TYPE_H_

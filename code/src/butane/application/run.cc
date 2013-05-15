@@ -15,7 +15,7 @@ namespace Application {
     Lua::Script script;
     butane::expose(script);
     log("Hello, World!\n");
-    static const char code[] = "log('Hello, World!\\n')\nApplication.quit()";
+    static const char code[] = "log('Hello, World!\\n')\n--Application.quit()";
     script.load("example", &code[0], sizeof(code) - 1);
   }
 } // Application

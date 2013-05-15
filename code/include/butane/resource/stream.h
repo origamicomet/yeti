@@ -4,13 +4,18 @@
 #ifndef _BUTANE_RESOURCE_STREAM_H_
 #define _BUTANE_RESOURCE_STREAM_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+class Resource::Stream final {
+  __foundation_trait(Stream, non_copyable);
 
-namespace butane {
-  class Resource::Stream final {
-    __foundation_trait(Stream, non_copyable);
-  };
-} // butane
+  public:
+    Stream(
+      const Resource::Type& type,
+      const Resource::Id id );
+  
+  private:
+    void* _memory_resident_data;
+    size_t _memory_resident_data_len;
+    FILE* _streaming_data;
+};
 
 #endif // _BUTANE_RESOURCE_STREAM_H_

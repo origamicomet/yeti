@@ -4,28 +4,23 @@
 #ifndef _BUTANE_RESOURCE_ID_H_
 #define _BUTANE_RESOURCE_ID_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+class Id final
+  : public foundation::Hash<uint64_t>
+{
+  public:
+    Id(
+      const Type& type,
+      const char* path );
 
-namespace butane {
-  class Resource::Id final
-    : public foundation::Hash<uint64_t>
-  {
-    public:
-      Id(
-        const Type& type,
-        const char* path );
+    Id(
+      const Type& type,
+      const String& path );
 
-      Id(
-        const Type& type,
-        const String& path );
+  public:
+    operator uint64_t() const override;
 
-    public:
-      operator uint64_t() const override;
-
-    private:
-      uint64_t _hash;
-  };
-} // butane
+  private:
+    uint64_t _hash;
+};
 
 #endif // _BUTANE_RESOURCE_ID_H_
