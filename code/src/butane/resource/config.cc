@@ -1,0 +1,169 @@
+// This file is part of Butane. See README.md and LICENSE.md for details.
+// Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
+
+#include <butane/resource/config.h>
+
+#include <butane/math.h>
+
+namespace butane {
+  static Allocator& allocator() {
+    static ProxyAllocator allocator("resources (config)", Allocators::heap());
+    return allocator;
+  }
+
+  const Resource::Type& ConfigResource::type() {
+    static Resource::Type type(
+      "config", "config",
+      (Resource::Type::Load)&ConfigResource::load,
+      (Resource::Type::Unload)&ConfigResource::unload,
+      (Resource::Type::Compile)&ConfigResource::compile);
+    return type;
+  }
+
+  ConfigResource::ConfigResource(
+    const Resource::Id id
+  ) : butane::Resource(ConfigResource::type(), id)
+    , _root(nullptr)
+  {
+  }
+
+  ConfigResource::~ConfigResource()
+  {
+    allocator().free((void*)_root);
+  }
+
+  ConfigResource* ConfigResource::load(
+    const Resource::Id id,
+    const Resource::Stream& stream )
+  {
+    ConfigResource* cfg = make_new(ConfigResource, allocator())(id);
+    const sjson::Object* root =
+      (const sjson::Object*)stream.memory_resident_data();
+    cfg->_root =
+      (const sjson::Object*)allocator().alloc(stream.memory_resident_data_len());
+    copy((void*)cfg->_root, (const void*)root, stream.memory_resident_data_len());
+    return cfg;
+  }
+
+  void ConfigResource::unload(
+    ConfigResource* config )
+  {
+    assert(config != nullptr);
+    make_delete(ConfigResource, allocator(), config);
+  }
+
+  bool ConfigResource::compile(
+    void )
+  {
+    warn("ConfigResource::compile is not implemented, yet.\n");
+    return false;
+  }
+
+  template <>
+  bool ConfigResource::find<bool>(
+    const char* name,
+    bool& value )
+  {
+    assert(name != nullptr);
+    const sjson::Boolean* obj = (const sjson::Boolean*)_root->find(name);
+    if (obj)
+      value = (bool)*obj;
+    return (obj != nullptr);
+  }
+
+  template <>
+  bool ConfigResource::find<double>(
+    const char* name,
+    double& value )
+  {
+    assert(name != nullptr);
+    const sjson::Number* obj = (const sjson::Number*)_root->find(name);
+    if (obj)
+      value = (double)*obj;
+    return (obj != nullptr);
+  }
+
+  template <>
+  bool ConfigResource::find<const char*>(
+    const char* name,
+    const char*& value )
+  {
+    assert(name != nullptr);
+    const sjson::String* obj = (const sjson::String*)_root->find(name);
+    if (obj)
+      value = obj->raw();
+    return (obj != nullptr);
+  }
+
+  template <>
+  bool ConfigResource::find<Vec2f>(
+    const char* name,
+    Vec2f& value )
+  {
+    assert(name != nullptr);
+    const sjson::Array* obj = (const sjson::Array*)_root->find(name);
+    const bool valid = (obj && (obj->size() == 2) &&
+      obj->at(0)->is_number() && obj->at(1)->is_number());
+    if (valid) {
+      value = Vec2f(
+        (double)*((const sjson::Number*)obj->at(0)),
+        (double)*((const sjson::Number*)obj->at(1))); }
+    return valid;
+  }
+
+  template <>
+  bool ConfigResource::find<Vec3f>(
+    const char* name,
+    Vec3f& value )
+  {
+    assert(name != nullptr);
+    const sjson::Array* obj = (const sjson::Array*)_root->find(name);
+    const bool valid = (obj && (obj->size() == 3) &&
+      obj->at(0)->is_number() && obj->at(1)->is_number() &&
+      obj->at(2)->is_number());
+    if (valid) {
+      value = Vec3f(
+        (double)*((const sjson::Number*)obj->at(0)),
+        (double)*((const sjson::Number*)obj->at(1)),
+        (double)*((const sjson::Number*)obj->at(2))); }
+    return valid;
+  }
+
+  template <>
+  bool ConfigResource::find<Vec4f>(
+    const char* name,
+    Vec4f& value )
+  {
+    assert(name != nullptr);
+    const sjson::Array* obj = (const sjson::Array*)_root->find(name);
+    const bool valid = (obj && (obj->size() == 4) &&
+      obj->at(0)->is_number() && obj->at(1)->is_number() &&
+      obj->at(2)->is_number() && obj->at(3)->is_number());
+    if (valid) {
+      value = Vec4f(
+        (double)*((const sjson::Number*)obj->at(0)),
+        (double)*((const sjson::Number*)obj->at(1)),
+        (double)*((const sjson::Number*)obj->at(2)),
+        (double)*((const sjson::Number*)obj->at(3))); }
+    return valid;
+  }
+
+  template <>
+  bool ConfigResource::find<Quat>(
+    const char* name,
+    Quat& value )
+  {
+    assert(name != nullptr);
+    const sjson::Array* obj = (const sjson::Array*)_root->find(name);
+    const bool valid = (obj && (obj->size() == 4) &&
+      obj->at(0)->is_number() && obj->at(1)->is_number() &&
+      obj->at(2)->is_number() && obj->at(3)->is_number());
+    if (valid) {
+      value = Quat(
+        (double)*((const sjson::Number*)obj->at(0)),
+        (double)*((const sjson::Number*)obj->at(1)),
+        (double)*((const sjson::Number*)obj->at(2)),
+        (double)*((const sjson::Number*)obj->at(3))); }
+    return valid;
+  }
+} // butane
