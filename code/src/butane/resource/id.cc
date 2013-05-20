@@ -20,6 +20,19 @@ namespace butane {
     _hash |= ((uint64_t)murmur_hash((const void*)path.raw(), path.size(), 0));
   }
 
+  Resource::Id::Id(
+    const Id& id
+  ) : _hash(id._hash)
+  {
+  }
+
+  Resource::Id& Resource::Id::operator= (
+    const Id& id )
+  {
+    _hash = id._hash;
+    return *this;
+  }
+
   Resource::Id::operator uint64_t() const
   {
     return _hash;

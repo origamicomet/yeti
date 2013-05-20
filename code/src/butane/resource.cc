@@ -4,6 +4,19 @@
 #include <butane/resource.h>
 
 namespace butane {
+  Resource::Resource(
+    const Resource::Type& type,
+    const Resource::Id id
+  ) : _resource_id(id)
+    , _resource_type(type)
+    , _resource_refs(0)
+  {
+  }
+
+  Resource::~Resource()
+  {
+  }
+
   Resource* Resource::load(
     const Type& type,
     const char* path )
@@ -17,7 +30,7 @@ namespace butane {
     Id id )
   {
     const LogScope log_scope("Resource::Load");
-    return type.load(Stream(type, id));
+    return type.load(id, Stream(type, id));
   }
 
   void Resource::unload()

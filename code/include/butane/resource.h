@@ -8,7 +8,7 @@
 #include <butane/config.h>
 
 namespace butane {
-  class Resource {
+  class Resource abstract {
     __foundation_trait(Resource, non_copyable);
 
     public:
@@ -23,6 +23,13 @@ namespace butane {
       #include <butane/resource/stream.h>
       #include <butane/resource/compiler.h>
       #include <butane/resource/database.h>
+
+    protected:
+      Resource(
+        const Resource::Type& type,
+        const Resource::Id id );
+
+      virtual ~Resource();
 
     public:
       static Resource* load(
@@ -44,7 +51,7 @@ namespace butane {
 
     private:
       Id _resource_id;
-      Type _resource_type;
+      const Type& _resource_type;
       int32_t _resource_refs;
   };
 } // butane

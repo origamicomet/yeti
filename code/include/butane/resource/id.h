@@ -16,6 +16,12 @@ class Id final
       const Type& type,
       const String& path );
 
+    Id(
+      const Id& id );
+
+    Id& operator= (
+      const Id& id );
+
   public:
     operator uint64_t() const override;
 

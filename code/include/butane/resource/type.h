@@ -12,6 +12,7 @@ class Type final {
 
   public:
     typedef Resource* (*Load)(
+      const Resource::Id id,
       const Resource::Stream& stream );
     
     typedef void (*Unload)(
@@ -36,8 +37,9 @@ class Type final {
     { return _assoc_file_ext; }
 
     FOUNDATION_INLINE Resource* load(
+      const Resource::Id id,
       const Resource::Stream& stream ) const
-    { return _load(stream); }
+    { return _load(id, stream); }
 
     FOUNDATION_INLINE void unload(
       Resource* resource ) const
