@@ -29,6 +29,9 @@ class Type final {
       Unload unload,
       Compile compile );
 
+  private:
+    void expose() const;
+
   public:
     FOUNDATION_INLINE const Hash& name() const
     { return _name; }

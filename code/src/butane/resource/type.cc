@@ -13,5 +13,17 @@ namespace butane {
   ) : _name(name)
     , _assoc_file_ext(Allocators::heap(), assoc_file_ext)
     , _load(load), _unload(unload), _compile(compile)
-  {}
+  {
+    expose();
+  }
+
+  static Array<const Resource::Type*>& types() {
+    static Array<const Resource::Type*> types(Allocators::heap());
+    return types;
+  }
+
+  void Resource::Type::expose() const
+  {
+    types() += (const Resource::Type*)this;
+  }
 } // butane
