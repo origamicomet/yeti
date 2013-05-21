@@ -52,8 +52,6 @@ namespace butane {
   bool ConfigResource::compile(
     const Resource::Compiler::Stream& cs )
   {
-    // const LogScope log_scope("ConfigResource::compile");
-    
     const char* sjson =
       (const char*)File::read_in(cs.source_data(), allocator());
 

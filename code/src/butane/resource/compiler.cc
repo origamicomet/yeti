@@ -21,7 +21,7 @@ namespace butane {
     Logger logger,
     void* closure )
   {
-    const LogScope log_scope("Resource::Compiler");
+    const LogScope log_scope("Resource::Compiler::compile");
 
     assert(data_dir != nullptr);
     assert(source_data_dir != nullptr);
