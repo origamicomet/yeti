@@ -8,7 +8,7 @@ namespace butane {
     const Type& type,
     const char* path )
   {
-    _hash = (((uint64_t)type.name()) << 32);
+    _hash = (((uint64_t)Resource::Type::Hash(type.name())) << 32);
     _hash |= ((uint64_t)murmur_hash((const void*)path, strlen(path), 0));
   }
 
@@ -16,7 +16,7 @@ namespace butane {
     const Type& type,
     const String& path )
   {
-    _hash = (((uint64_t)type.name()) << 32);
+    _hash = (((uint64_t)Resource::Type::Hash(type.name())) << 32);
     _hash |= ((uint64_t)murmur_hash((const void*)path.raw(), path.size(), 0));
   }
 

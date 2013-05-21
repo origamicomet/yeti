@@ -5,12 +5,12 @@
 
 namespace butane {
   Resource::Type::Type(
-    Hash name,
+    const char* name,
     const char* assoc_file_ext,
     Load load,
     Unload unload,
     Compile compile
-  ) : _name(name)
+  ) : _name(Allocators::heap(), name)
     , _assoc_file_ext(Allocators::heap(), assoc_file_ext)
     , _load(load), _unload(unload), _compile(compile)
   {
@@ -25,5 +25,21 @@ namespace butane {
   void Resource::Type::expose() const
   {
     types() += (const Resource::Type*)this;
+  }
+
+  const Resource::Type* Resource::Type::determine(
+    const char* path )
+  {
+    if (!path)
+      return nullptr;
+
+    const String ext = Path::extension(String(Allocators::scratch(), path));
+    const Hash name(ext);
+
+    for (auto iter = types().begin(); iter != types().end(); ++iter) {
+      if (Hash((*iter)->_name) == name)
+        return *iter; }
+
+    return nullptr;
   }
 } // butane

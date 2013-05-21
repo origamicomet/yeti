@@ -17,7 +17,7 @@ namespace Application {
 
     static const char* symbol_search_dirs[1] = { "symbols" };
     if (!Symbols::load(&symbol_search_dirs[0], 1))
-      log("Unable to load debug symbols!\n");
+      log("Unable to load debug symbols!");
     set_exception_handler(&foundation::crash_handler);
 
     Array<const char*> args_(Allocators::heap(), max((size_t)1, num_args) - 1);

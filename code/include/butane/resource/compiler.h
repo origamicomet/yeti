@@ -20,12 +20,38 @@ class Compiler final {
       const char* format, ... );
 
   public:
-    Status compile(
-      const char* source_path,
+    class Stream final {
+      __foundation_trait(Stream, non_copyable);
+
+      public:
+        Stream(
+          FILE* source_data,
+          FILE* memory_resident_data,
+          FILE* streaming_data );
+
+      public:
+        FOUNDATION_INLINE FILE* source_data() const
+        { return _source_data; }
+
+        FOUNDATION_INLINE FILE* memory_resident_data() const
+        { return _memory_resident_data; }
+
+        FOUNDATION_INLINE FILE* streaming_data() const
+        { return _streaming_data; }
+      
+      private:
+        FILE* _source_data;
+        FILE* _memory_resident_data;
+        FILE* _streaming_data;
+    };
+
+  public:
+    static Status compile(
       const char* data_dir,
       const char* source_data_dir,
+      const char* source_path,
       Logger logger,
-      void* closure );
+      void* closure = nullptr );
 };
 
 #endif // _BUTANE_RESOURCE_COMPILER_H_

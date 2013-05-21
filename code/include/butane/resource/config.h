@@ -13,7 +13,7 @@ namespace butane {
     : public butane::Resource
   {
     public:
-      static const Resource::Type& type();
+      static const Resource::Type type;
 
     private:
       ConfigResource(
@@ -30,7 +30,7 @@ namespace butane {
         ConfigResource* config );
 
       static bool compile(
-        void );
+        const Resource::Compiler::Stream& cs );
 
     public:
       template <typename T>

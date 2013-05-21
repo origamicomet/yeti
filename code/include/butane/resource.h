@@ -12,17 +12,19 @@ namespace butane {
     __foundation_trait(Resource, non_copyable);
 
     public:
+      class Database;
+      class Compiler;
+
       class Id;
       class Type;
       class Stream;
-      class Compiler;
-      class Database;
+      
+      #include <butane/resource/database.h>
+      #include <butane/resource/compiler.h>
       
       #include <butane/resource/id.h>
       #include <butane/resource/type.h>
       #include <butane/resource/stream.h>
-      #include <butane/resource/compiler.h>
-      #include <butane/resource/database.h>
 
     protected:
       Resource(

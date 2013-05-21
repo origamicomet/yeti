@@ -11,7 +11,7 @@ namespace butane {
       const Script::Arguments& arguments )
     {
       if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.platform\n");
+        log("Superfluous arguments ignored in call to Application.platform");
       script.stack().push(Application::platform());
       return 1;
     }
@@ -21,7 +21,7 @@ namespace butane {
       const Script::Arguments& arguments )
     {
       if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.architecture\n");
+        log("Superfluous arguments ignored in call to Application.architecture");
       script.stack().push(Application::architecture());
       return 1;
     }
@@ -31,7 +31,7 @@ namespace butane {
       const Script::Arguments& arguments )
     {
       if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.build\n");
+        log("Superfluous arguments ignored in call to Application.build");
       script.stack().push(Application::build());
       return 1;
     }
@@ -42,7 +42,7 @@ namespace butane {
     {
       (void)script;
       if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.pause\n");
+        log("Superfluous arguments ignored in call to Application.pause");
       Application::pause();
       return 0;
     }
@@ -53,7 +53,7 @@ namespace butane {
     {
       (void)script;
       if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.unpause\n");
+        log("Superfluous arguments ignored in call to Application.unpause");
       Application::unpause();
       return 0;
     }
@@ -64,7 +64,7 @@ namespace butane {
     {
       (void)script;
       if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.quit\n");
+        log("Superfluous arguments ignored in call to Application.quit");
       Application::quit();
       __builtin_unreachable();
       return 0;

@@ -19,11 +19,11 @@ class Type final {
       Resource* resource );
 
     typedef bool (*Compile)(
-      void );
+      const Resource::Compiler::Stream& cs );
 
   public:
     Type(
-      Hash name,
+      const char* name,
       const char* assoc_file_ext,
       Load load,
       Unload unload,
@@ -33,7 +33,11 @@ class Type final {
     void expose() const;
 
   public:
-    FOUNDATION_INLINE const Hash& name() const
+    static const Resource::Type* determine(
+      const char* path );
+
+  public:
+    FOUNDATION_INLINE const String& name() const
     { return _name; }
 
     FOUNDATION_INLINE const String& associated_file_extension() const
@@ -49,11 +53,11 @@ class Type final {
     { return _unload(resource); }
 
     FOUNDATION_INLINE bool compile(
-      void ) const
-    { return _compile(); }
+      const Resource::Compiler::Stream& cs ) const
+    { return _compile(cs); }
 
   private:
-    Hash _name;
+    String _name;
     String _assoc_file_ext;
     Load _load;
     Unload _unload;

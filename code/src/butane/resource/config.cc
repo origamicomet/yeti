@@ -11,18 +11,15 @@ namespace butane {
     return allocator;
   }
 
-  const Resource::Type& ConfigResource::type() {
-    static Resource::Type type(
-      "config", "config",
-      (Resource::Type::Load)&ConfigResource::load,
-      (Resource::Type::Unload)&ConfigResource::unload,
-      (Resource::Type::Compile)&ConfigResource::compile);
-    return type;
-  }
+  const Resource::Type ConfigResource::type(
+    "config", "config",
+    (Resource::Type::Load)&ConfigResource::load,
+    (Resource::Type::Unload)&ConfigResource::unload,
+    (Resource::Type::Compile)&ConfigResource::compile);
 
   ConfigResource::ConfigResource(
     const Resource::Id id
-  ) : butane::Resource(ConfigResource::type(), id)
+  ) : butane::Resource(ConfigResource::type, id)
     , _root(nullptr)
   {
   }
@@ -53,10 +50,32 @@ namespace butane {
   }
 
   bool ConfigResource::compile(
-    void )
+    const Resource::Compiler::Stream& cs )
   {
-    warn("ConfigResource::compile is not implemented, yet.\n");
-    return false;
+    // const LogScope log_scope("ConfigResource::compile");
+    
+    const char* sjson =
+      (const char*)File::read_in(cs.source_data(), allocator());
+
+    if (!sjson)
+      return false;
+
+    Array<uint8_t> blob(Allocators::scratch(), 1 << 13 /* 8kb */);
+    blob.resize(blob.reserved());
+    sjson::Parser parser(allocator(), (void*)&blob[0], blob.size());
+
+    if (!parser.parse(sjson)) {
+      allocator().free((void*)sjson);
+      return false;
+    }
+
+    if (!File::write_out(cs.memory_resident_data(), (void*)&blob[0], blob.size())) {
+      allocator().free((void*)sjson);
+      return false;
+    }
+    
+    allocator().free((void*)sjson);
+    return true;
   }
 
   template <>
@@ -67,7 +86,7 @@ namespace butane {
     assert(name != nullptr);
     const sjson::Boolean* obj = (const sjson::Boolean*)_root->find(name);
     if (obj)
-      value = (bool)*obj;
+      value = obj->value();
     return (obj != nullptr);
   }
 
@@ -79,7 +98,7 @@ namespace butane {
     assert(name != nullptr);
     const sjson::Number* obj = (const sjson::Number*)_root->find(name);
     if (obj)
-      value = (double)*obj;
+      value = obj->value();
     return (obj != nullptr);
   }
 
@@ -106,8 +125,8 @@ namespace butane {
       obj->at(0)->is_number() && obj->at(1)->is_number());
     if (valid) {
       value = Vec2f(
-        (double)*((const sjson::Number*)obj->at(0)),
-        (double)*((const sjson::Number*)obj->at(1))); }
+        ((const sjson::Number*)obj->at(0))->value(),
+        ((const sjson::Number*)obj->at(1))->value()); }
     return valid;
   }
 
@@ -123,9 +142,9 @@ namespace butane {
       obj->at(2)->is_number());
     if (valid) {
       value = Vec3f(
-        (double)*((const sjson::Number*)obj->at(0)),
-        (double)*((const sjson::Number*)obj->at(1)),
-        (double)*((const sjson::Number*)obj->at(2))); }
+        ((const sjson::Number*)obj->at(0))->value(),
+        ((const sjson::Number*)obj->at(1))->value(),
+        ((const sjson::Number*)obj->at(2))->value()); }
     return valid;
   }
 
@@ -141,10 +160,10 @@ namespace butane {
       obj->at(2)->is_number() && obj->at(3)->is_number());
     if (valid) {
       value = Vec4f(
-        (double)*((const sjson::Number*)obj->at(0)),
-        (double)*((const sjson::Number*)obj->at(1)),
-        (double)*((const sjson::Number*)obj->at(2)),
-        (double)*((const sjson::Number*)obj->at(3))); }
+        ((const sjson::Number*)obj->at(0))->value(),
+        ((const sjson::Number*)obj->at(1))->value(),
+        ((const sjson::Number*)obj->at(2))->value(),
+        ((const sjson::Number*)obj->at(3))->value()); }
     return valid;
   }
 
@@ -160,10 +179,10 @@ namespace butane {
       obj->at(2)->is_number() && obj->at(3)->is_number());
     if (valid) {
       value = Quat(
-        (double)*((const sjson::Number*)obj->at(0)),
-        (double)*((const sjson::Number*)obj->at(1)),
-        (double)*((const sjson::Number*)obj->at(2)),
-        (double)*((const sjson::Number*)obj->at(3))); }
+        ((const sjson::Number*)obj->at(0))->value(),
+        ((const sjson::Number*)obj->at(1))->value(),
+        ((const sjson::Number*)obj->at(2))->value(),
+        ((const sjson::Number*)obj->at(3))->value()); }
     return valid;
   }
 } // butane
