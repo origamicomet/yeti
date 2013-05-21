@@ -51,6 +51,13 @@ namespace butane {
     private:
       void mark_for_unload();
 
+    public:
+      FOUNDATION_INLINE Id id() const
+      { return _resource_id; }
+
+      FOUNDATION_INLINE const Type& type() const
+      { return _resource_type; }
+
     private:
       Id _resource_id;
       const Type& _resource_type;
