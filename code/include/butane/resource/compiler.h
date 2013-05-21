@@ -4,7 +4,7 @@
 #ifndef _BUTANE_RESOURCE_COMPILER_H_
 #define _BUTANE_RESOURCE_COMPILER_H_
 
-class Compiler final {
+class BUTANE_EXPORT Compiler final {
   __foundation_trait(Compiler, non_copyable);
 
   public:

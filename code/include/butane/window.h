@@ -8,7 +8,7 @@
 #include <butane/config.h>
 
 namespace butane {
-  class Window abstract {
+  class BUTANE_EXPORT Window abstract {
     __foundation_trait(Window, non_copyable);
 
     public:

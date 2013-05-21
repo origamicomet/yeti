@@ -8,7 +8,7 @@
 #include <butane/config.h>
 
 namespace butane {
-  class Script abstract {
+  class BUTANE_EXPORT Script abstract {
     __foundation_trait(Script, non_copyable);
 
     public:

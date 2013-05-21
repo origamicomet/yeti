@@ -11,7 +11,7 @@
 
 namespace butane {
 namespace win32 {
-  class Window final
+  class BUTANE_EXPORT Window final
     : public butane::Window
   {
     __foundation_trait(Window, non_copyable);

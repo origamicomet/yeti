@@ -4,7 +4,7 @@
 #ifndef _BUTANE_RESOURCE_TYPE_H_
 #define _BUTANE_RESOURCE_TYPE_H_
 
-class Type final {
+class BUTANE_EXPORT Type final {
   __foundation_trait(Type, non_copyable);
 
   public:

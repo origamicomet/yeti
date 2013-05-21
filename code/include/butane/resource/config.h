@@ -9,7 +9,7 @@
 #include <butane/resource.h>
 
 namespace butane {
-  class ConfigResource final
+  class BUTANE_EXPORT ConfigResource final
     : public butane::Resource
   {
     public:

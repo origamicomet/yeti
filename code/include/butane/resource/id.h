@@ -4,7 +4,7 @@
 #ifndef _BUTANE_RESOURCE_ID_H_
 #define _BUTANE_RESOURCE_ID_H_
 
-class Id final
+class BUTANE_EXPORT Id final
   : public foundation::Hash<uint64_t>
 {
   public:

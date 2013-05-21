@@ -8,7 +8,7 @@
 #include <butane/config.h>
 
 namespace butane {
-  class Resource abstract {
+  class BUTANE_EXPORT Resource abstract {
     __foundation_trait(Resource, non_copyable);
 
     public:

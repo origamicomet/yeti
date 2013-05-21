@@ -4,7 +4,7 @@
 #ifndef _BUTANE_RESOURCE_DATABASE_H_
 #define _BUTANE_RESOURCE_DATABASE_H_
 
-class Database final {
+class BUTANE_EXPORT Database final {
   __foundation_trait(Database, non_copyable);
 
   public:

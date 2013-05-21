@@ -14,7 +14,7 @@ extern "C" {
 
 namespace butane {
 namespace Lua {
-  class Script final
+  class BUTANE_EXPORT Script final
     : public butane::Script
   {
     __foundation_trait(Script, non_copyable);

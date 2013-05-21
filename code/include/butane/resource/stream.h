@@ -4,7 +4,7 @@
 #ifndef _BUTANE_RESOURCE_STREAM_H_
 #define _BUTANE_RESOURCE_STREAM_H_
 
-class Resource::Stream final {
+class BUTANE_EXPORT Stream final {
   __foundation_trait(Stream, non_copyable);
 
   public:
