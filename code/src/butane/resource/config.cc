@@ -85,7 +85,7 @@ namespace butane {
   {
     assert(name != nullptr);
     const sjson::Boolean* obj = (const sjson::Boolean*)_root->find(name);
-    if (obj)
+    if (obj && obj->is_boolean())
       value = obj->value();
     return (obj != nullptr);
   }
@@ -97,7 +97,7 @@ namespace butane {
   {
     assert(name != nullptr);
     const sjson::Number* obj = (const sjson::Number*)_root->find(name);
-    if (obj)
+    if (obj && obj->is_number())
       value = obj->value();
     return (obj != nullptr);
   }
@@ -109,7 +109,7 @@ namespace butane {
   {
     assert(name != nullptr);
     const sjson::String* obj = (const sjson::String*)_root->find(name);
-    if (obj)
+    if (obj && obj->is_string())
       value = obj->raw();
     return (obj != nullptr);
   }
