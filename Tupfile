@@ -8,12 +8,17 @@ preload code/src/butane/math
 preload code/src/butane/resource
 
 OBJS = code/src/*.o
-OBJS = code/src/*.res
 OBJS += code/src/butane/*.o
 OBJS += code/src/butane/application/*.o
 OBJS += code/src/butane/lua/*.o
 OBJS += code/src/butane/math/*.o
 OBJS += code/src/butane/resource/*.o
+
+ifeq (@(TUP_PLATFORM),win32)
+preload code/src/butane/win32
+OBJS += code/src/butane/win32/*.o
+OBJS += code/src/*.res
+endif
 
 include deps/foundation/deps.tup
 LIBS = $(FOUNDATION_LIBS)

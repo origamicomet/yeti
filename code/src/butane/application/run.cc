@@ -8,6 +8,8 @@
 #include <butane/lua/script.h>
 #include <butane/resource.h>
 #include <butane/resource/config.h>
+#include <butane/window.h>
+#include <butane/math.h>
 
 namespace butane {
 namespace Application {
@@ -15,6 +17,14 @@ namespace Application {
     void* closure,
     const char* format, ... )
   {
+  }
+
+  static void on_window_closed(
+    void* closure,
+    Window* window )
+  {
+    window->close();
+    Application::quit();
   }
 
   void run(
@@ -29,13 +39,21 @@ namespace Application {
       (ConfigResource*)Resource::load(ConfigResource::type, "manifest");
     manifest->reference();
 
-    const char* saves_directory;
-    if (manifest->find("application.win32.saves_directory", saves_directory))
-      log("saves_directory = '%s'", saves_directory);
+    Vec2f dimensions;
+    if (!manifest->find("application.window.dimensions", dimensions))
+      dimensions = Vec2f(1280.0f, 720.0f);
+
+    Window* window =
+      Window::open("butane", (uint32_t)dimensions.x, (uint32_t)dimensions.y);
+
+    window->set_on_closed_handler(&on_window_closed);
+    window->show();
 
     manifest->dereference();
 
-    for(;;);
+    while (true) {
+      window->update();
+    }
   }
 } // Application
 } // butane
