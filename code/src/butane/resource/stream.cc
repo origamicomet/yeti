@@ -4,6 +4,11 @@
 #include <butane/resource.h>
 
 namespace butane {
+  static Allocator& allocator() {
+    static ProxyAllocator allocator("resource streams", Allocators::heap());
+    return allocator;
+  }
+
   Resource::Stream::Stream(
     const Resource::Type& type,
     const Resource::Id id
@@ -11,11 +16,45 @@ namespace butane {
     , _memory_resident_data_len(0)
     , _streaming_data(nullptr)
   {
-    const String path = String::format(
-      Allocators::scratch(),
-      "data/%016" PRIx64, (uint64_t)id);
-    
-    // if (!Directory::exists(path))
-      fail("The requested resource `%s` does not exist!", path.raw());
+    const LogScope log_scope("Resource::Stream");
+
+    const String streams_dir =
+      String::format(Allocators::scratch(), "data/%016" PRIx64, (uint64_t)id);
+
+    if (!Directory::exists(streams_dir.raw()))
+      fail("Streams directory, aka '%s', does not exist!", streams_dir.raw());
+
+    const String memory_resident_data_path =
+      String::format(Allocators::scratch(), "%s/memory_resident_data", streams_dir.raw());
+
+    FILE* memory_resident_data =
+      File::open(memory_resident_data_path.raw(), "rb");
+
+    const String streaming_data_path =
+      String::format(Allocators::scratch(), "%s/streaming_data", streams_dir.raw());
+
+    FILE* streaming_data =
+      File::open(streaming_data_path.raw(), "rb");
+
+    if (!memory_resident_data && !streaming_data)
+      fail("No streams exist in '%s'!", streams_dir.raw());
+
+    _memory_resident_data =
+      File::read_in(memory_resident_data, allocator(), &_memory_resident_data_len);
+
+    if (!_memory_resident_data)
+      fail("Unable to load memory-resident data from '%s'!", streams_dir.raw());
+
+    if (memory_resident_data)
+      fclose(memory_resident_data);    
+  }
+
+  Resource::Stream::~Stream()
+  {
+    if (_memory_resident_data)
+      allocator().free((void*)_memory_resident_data);
+
+    if (_streaming_data)
+      fclose(_streaming_data);
   }
 } // butane

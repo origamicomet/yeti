@@ -29,12 +29,13 @@ namespace butane {
     const Type& type,
     Id id )
   {
-    const LogScope log_scope("Resource::Load");
+    const LogScope log_scope("Resource::load");
     return type.load(id, Stream(type, id));
   }
 
   void Resource::unload()
   {
+    const LogScope log_scope("Resource::unload");
     _resource_type.unload(this);
   }
 
@@ -45,7 +46,7 @@ namespace butane {
 
   void Resource::dereference()
   {
-    if (__sync_fetch_and_sub(&_resource_refs, 1) <= 0)
+    if (__sync_fetch_and_sub(&_resource_refs, 1) <= 1)
       mark_for_unload();
   }
 

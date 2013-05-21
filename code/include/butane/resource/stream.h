@@ -12,6 +12,8 @@ class Resource::Stream final {
       const Resource::Type& type,
       const Resource::Id id );
 
+    ~Stream();
+
   public:
     FOUNDATION_INLINE void* memory_resident_data() const
     { return _memory_resident_data; }
