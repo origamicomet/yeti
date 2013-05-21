@@ -65,4 +65,10 @@ namespace butane {
   };
 } // butane
 
+namespace butane {
+  namespace Resources {
+    extern BUTANE_EXPORT HashTable<uint64_t, Resource*>& loaded();
+  } // Resources
+} // butane
+
 #endif // _BUTANE_RESOURCE_H_

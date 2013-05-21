@@ -15,7 +15,7 @@ class BUTANE_EXPORT Database final {
     Database();
 
   private:
-    HashTable<Resource::Id, Record> _entries;
+    HashTable<uint64_t, Record> _entries;
 };
 
 #endif // _BUTANE_RESOURCE_DATABASE_H_

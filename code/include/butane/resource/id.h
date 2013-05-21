@@ -8,6 +8,8 @@ class BUTANE_EXPORT Id final
   : public foundation::Hash<uint64_t>
 {
   public:
+    Id();
+
     Id(
       const Type& type,
       const char* path );

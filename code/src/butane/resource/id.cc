@@ -4,6 +4,11 @@
 #include <butane/resource.h>
 
 namespace butane {
+  Resource::Id::Id()
+  {
+    _hash = 0x0000000000000000ull;
+  }
+
   Resource::Id::Id(
     const Type& type,
     const char* path )

@@ -22,4 +22,7 @@
 // The size of the background resource unloading queue.
 #define BUTANE_BACKGROUND_RESOURCE_UNLOADING_QUEUE_SIZE 256
 
+// The initial size of the loaded resources hash-table.
+#define BUTANE_LOADED_RESOURCES_HASH_TABLE_INITAL_SIZE 4096
+
 #endif // _BUTANE_CONFIG_H_

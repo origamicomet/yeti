@@ -30,12 +30,21 @@ namespace butane {
     Id id )
   {
     const LogScope log_scope("Resource::load");
-    return type.load(id, Stream(type, id));
+    Resource* resource;
+    if (Resources::loaded().find(id, resource) && resource) {
+      resource->reference();
+      return resource; }
+    resource = type.load(id, Stream(type, id));
+    if (!Resources::loaded().insert(id, resource))
+      fail("Unable to marked resource as loaded!");
+    resource->reference();
+    return resource;
   }
 
   void Resource::unload()
   {
     const LogScope log_scope("Resource::unload");
+    Resources::loaded().remove(id());
     _resource_type.unload(this);
   }
 
@@ -89,4 +98,14 @@ namespace butane {
     __start_background_unloading_thread();
     __marked_for_unload().enqueue(this);
   }
+} // butane
+
+namespace butane {
+  namespace Resources {
+    HashTable<uint64_t, Resource*>& loaded() {
+      static HashTable<uint64_t, Resource*> loaded(
+        Allocators::heap(), BUTANE_LOADED_RESOURCES_HASH_TABLE_INITAL_SIZE);
+      return loaded;
+    }
+  } // Resources
 } // butane

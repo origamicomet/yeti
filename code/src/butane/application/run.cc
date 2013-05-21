@@ -37,7 +37,9 @@ namespace Application {
 
     ConfigResource* manifest = 
       (ConfigResource*)Resource::load(ConfigResource::type, "manifest");
-    manifest->reference();
+
+    manifest =
+      (ConfigResource*)Resource::load(ConfigResource::type, "manifest");
 
     Vec2f dimensions;
     if (!manifest->find("application.window.dimensions", dimensions))
