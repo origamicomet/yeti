@@ -72,9 +72,9 @@ namespace butane {
     while (true) {
       Resource* resource = nullptr;
       __marked_for_unload().dequeue(resource);
-      resource->unload();
-    }
+      resource->unload(); }
 
+    __builtin_unreachable();
     return 0;
   }
 
