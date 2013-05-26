@@ -26,7 +26,8 @@ namespace Application {
 
     if (args_.size() >= 1) {
       if (strcmp("compile", args_[0]) == 0)
-        compile(args_); }
+        compile(args_);
+        return; }
 
     run(args_);
   }
