@@ -7,6 +7,15 @@
 
 namespace butane {
 namespace Application {
+  static butane::RenderDevice* _render_device = nullptr;
+
+  butane::RenderDevice* render_device()
+  { return _render_device; }
+
+  void set_render_device(
+    butane::RenderDevice* render_device )
+  { _render_device = render_device; }
+
   void boot(
     size_t num_args,
     const char* args[] )

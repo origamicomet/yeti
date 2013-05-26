@@ -1,0 +1,5 @@
+include_rules
+
+ifeq (@(RENDERER),d3d11)
+: foreach *.cc |> !cc |> %B.o
+endif

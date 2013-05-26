@@ -5,6 +5,7 @@ preload code/src/butane
 preload code/src/butane/application
 preload code/src/butane/lua
 preload code/src/butane/math
+preload code/src/butane/render
 preload code/src/butane/resource
 
 OBJS = code/src/*.o
@@ -12,16 +13,27 @@ OBJS += code/src/butane/*.o
 OBJS += code/src/butane/application/*.o
 OBJS += code/src/butane/lua/*.o
 OBJS += code/src/butane/math/*.o
+OBJS += code/src/butane/render/*.o
 OBJS += code/src/butane/resource/*.o
 
 ifeq (@(TUP_PLATFORM),win32)
 preload code/src/butane/win32
 OBJS += code/src/butane/win32/*.o
 OBJS += code/src/*.res
+ifeq (@(RENDERER),d3d11)
+preload code/src/butane/render/d3d11
+OBJS += code/src/butane/render/d3d11/*.o
+endif
 endif
 
 include deps/foundation/deps.tup
 LIBS = $(FOUNDATION_LIBS)
+
+ifeq (@(TUP_PLATFORM),win32)
+ifeq (@(RENDERER),d3d11)
+LIBS += dxgi.lib d3d11.lib d3dcompiler.lib
+endif
+endif
 
 include suffix.tup
 

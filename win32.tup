@@ -8,9 +8,24 @@ CFLAGS += /nologo /c /W4 /GF /GL /GR-
 CFLAGS += /I"$(TUP_CWD)\code\include"
 CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
 CFLAGS += /I"$(TUP_CWD)\deps\lua\include"
+
+ifeq (@(RENDERER),d3d11)
+CFLAGS += /I"@(DXSDK_DIR)Include"
+endif
+
 CFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
 
 LDFLAGS += /NOLOGO /LTCG
+
+ifeq (@(RENDERER),d3d11)
+ifeq (@(TUP_ARCH),i386)
+LDFLAGS += /LIBPATH:"@(DXSDK_DIR)Lib/x86"
+endif
+ifeq (@(TUP_ARCH),x86_64)
+LDFLAGS += /LIBPATH:"@(DXSDK_DIR)Lib/x64"
+endif
+endif
+
 LDFLAGS += /LIBPATH:"@(WINDOWS_SDK_DIR)Lib"
 
 RCFLAGS += /nologo /l 0x0409

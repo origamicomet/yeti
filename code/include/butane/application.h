@@ -6,9 +6,15 @@
 
 #include <butane/foundation.h>
 #include <butane/config.h>
+#include <butane/render/device.h>
 
 namespace butane {
 namespace Application {
+  extern BUTANE_EXPORT butane::RenderDevice* render_device();
+
+  extern BUTANE_EXPORT void set_render_device(
+    butane::RenderDevice* render_device );
+
   extern BUTANE_EXPORT void boot(
     size_t num_args,
     const char* args[] );
@@ -16,8 +22,10 @@ namespace Application {
   extern BUTANE_EXPORT const char* platform();
   extern BUTANE_EXPORT const char* architecture();
   extern BUTANE_EXPORT const char* build();
+
   extern BUTANE_EXPORT void pause();
   extern BUTANE_EXPORT void unpause();
+
   extern BUTANE_EXPORT void quit();
 } // Application
 } // butane
