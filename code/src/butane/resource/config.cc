@@ -7,7 +7,7 @@
 
 namespace butane {
   static Allocator& allocator() {
-    static ProxyAllocator allocator("resources (config)", Allocators::heap());
+    static ProxyAllocator allocator("config resources", Allocators::heap());
     return allocator;
   }
 
@@ -50,29 +50,27 @@ namespace butane {
   }
 
   bool ConfigResource::compile(
+    const Resource::Compiler::Source& src,
     const Resource::Compiler::Stream& cs )
   {
+    size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(cs.source_data(), allocator());
-
-    if (!sjson)
-      return false;
+      (const char*)File::read_in(cs.source_data(), allocator(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 13 /* 8kb */);
     blob.resize(blob.reserved());
+    zero((void*)blob.raw(), blob.size());
     sjson::Parser parser(allocator(), (void*)&blob[0], blob.size());
 
-    if (!parser.parse(sjson)) {
+    if (!parser.parse(sjson, sjson_len)) {
       allocator().free((void*)sjson);
-      return false;
-    }
+      return false; }
 
-    if (!File::write_out(cs.memory_resident_data(), (void*)&blob[0], blob.size())) {
-      allocator().free((void*)sjson);
-      return false;
-    }
-    
     allocator().free((void*)sjson);
+
+    if (!File::write_out(cs.memory_resident_data(), (void*)&blob[0], blob.size()))
+      return false;
+
     return true;
   }
 

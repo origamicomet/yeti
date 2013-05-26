@@ -34,10 +34,12 @@ namespace butane {
       return nullptr;
 
     const String ext = Path::extension(String(Allocators::scratch(), path));
-    const Hash name(ext);
+    const Hash hash(ext);
 
     for (auto iter = types().begin(); iter != types().end(); ++iter) {
-      if (Hash((*iter)->_name) == name)
+      if (Hash((*iter)->_name) == hash)
+        return *iter;
+      if (Hash((*iter)->_assoc_file_ext) == hash)
         return *iter; }
 
     return nullptr;

@@ -74,7 +74,7 @@ namespace butane {
       __marked_for_unload().dequeue(resource);
       resource->unload();
     }
-    
+
     return 0;
   }
 

@@ -9,10 +9,35 @@ class BUTANE_EXPORT Database final {
 
   public:
     struct Record {
+      time_t last_modified;
     };
 
+  private:
+    typedef HashTable<uint64_t, Record>::Pair Entry;
+
+  private:
+    Database(
+      size_t size = BUTANE_RESOURCE_DATABASE_HASH_TABLE_INITAL_SIZE );
+
+    ~Database();
+
   public:
-    Database();
+    static Database* open(
+      const char* path );
+
+    bool save(
+      const char* path );
+
+    void close();
+
+  public:
+    bool find(
+      const Resource::Id id,
+      Record& record );
+
+    bool update(
+      const Resource::Id id,
+      const Record& record );
 
   private:
     HashTable<uint64_t, Record> _entries;

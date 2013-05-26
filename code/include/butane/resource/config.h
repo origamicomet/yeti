@@ -30,6 +30,7 @@ namespace butane {
         ConfigResource* config );
 
       static bool compile(
+        const Resource::Compiler::Source& src,
         const Resource::Compiler::Stream& cs );
 
     public:

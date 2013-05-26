@@ -53,7 +53,7 @@ namespace butane {
 
     if (!Directory::exists(streams_dir.raw())) {
       if (!Directory::create(streams_dir.raw())) {
-        warn("Unable to create '%s' for '%s'!", streams_dir.raw(), path.raw());
+        warn("Unable to create '%s' for '%s' (%s)!", streams_dir.raw(), path.raw(), type->name().raw());
         return Unsuccessful;
       }
     }
@@ -75,7 +75,7 @@ namespace butane {
       File::open(memory_resident_data_path.raw(), "wb");
 
     if (!memory_resident_data) {
-      warn("Unable to create '%s' for '%s'!", memory_resident_data_path.raw(), path.raw());
+      warn("Unable to create '%s' for '%s' (%s)!", memory_resident_data_path.raw(), path.raw(), type->name().raw());
       return Unsuccessful;
     }
 
@@ -84,16 +84,20 @@ namespace butane {
 
     FILE* streaming_data =
       File::open(streaming_data_path.raw(), "wb");
-      
+
     if (!streaming_data) {
-      warn("Unable to create '%s' for '%s'!", streaming_data_path.raw(), path.raw());
+      warn("Unable to create '%s' for '%s' (%s)!", streaming_data_path.raw(), path.raw(), type->name().raw());
       return Unsuccessful;
     }
 
+    Resource::Compiler::Source src;
+    src.root = source_data_dir;
+    src.path = source_path;
+
     const Resource::Compiler::Stream cs(
       source_data, memory_resident_data, streaming_data);
-    
-    if (type->compile(cs)) {
+
+    if (type->compile(src, cs)) {
       const bool no_memory_resident_data = (ftell(memory_resident_data) == 0);
       const bool no_streaming_data = (ftell(streaming_data) == 0);
 
@@ -102,17 +106,17 @@ namespace butane {
       fclose(memory_resident_data);
       if (no_memory_resident_data)
         File::destroy(memory_resident_data_path.raw());
-      
+
       fclose(streaming_data);
       if (no_streaming_data)
         File::destroy(streaming_data_path.raw());
 
       if (no_memory_resident_data && no_streaming_data) {
-        warn("Compilation of '%s' resulted in no output!", path.raw());
+        warn("Compilation of '%s' (%s) resulted in no output!", path.raw(), type->name().raw());
         return Successful;
       }
 
-      log("Compilation of '%s' successful.", path.raw());
+      log("Compilation of '%s' successful.", path.raw(), type->name().raw());
       return Successful;
     }
 
@@ -120,13 +124,13 @@ namespace butane {
 
     fclose(memory_resident_data);
     File::destroy(memory_resident_data_path.raw());
-    
+
     fclose(streaming_data);
     File::destroy(streaming_data_path.raw());
 
     Directory::destroy(streams_dir.raw());
 
-    log("Compilation of '%s' unsuccessful.", path.raw());
+    log("Compilation of '%s' unsuccessful.", path.raw(), type->name().raw());
     return Unsuccessful;
   }
 } // butane

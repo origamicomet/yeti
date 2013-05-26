@@ -20,6 +20,11 @@ class BUTANE_EXPORT Compiler final {
       const char* format, ... );
 
   public:
+    struct Source {
+      const char* root;
+      const char* path;
+    };
+
     class Stream final {
       __foundation_trait(Stream, non_copyable);
 
@@ -38,7 +43,7 @@ class BUTANE_EXPORT Compiler final {
 
         FOUNDATION_INLINE FILE* streaming_data() const
         { return _streaming_data; }
-      
+
       private:
         FILE* _source_data;
         FILE* _memory_resident_data;

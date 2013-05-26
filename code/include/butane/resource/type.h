@@ -14,11 +14,12 @@ class BUTANE_EXPORT Type final {
     typedef Resource* (*Load)(
       const Resource::Id id,
       const Resource::Stream& stream );
-    
+
     typedef void (*Unload)(
       Resource* resource );
 
     typedef bool (*Compile)(
+      const Resource::Compiler::Source& src,
       const Resource::Compiler::Stream& cs );
 
   public:
@@ -53,8 +54,9 @@ class BUTANE_EXPORT Type final {
     { return _unload(resource); }
 
     FOUNDATION_INLINE bool compile(
+      const Resource::Compiler::Source& src,
       const Resource::Compiler::Stream& cs ) const
-    { return _compile(cs); }
+    { return _compile(src, cs); }
 
   private:
     String _name;
