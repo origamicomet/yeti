@@ -57,6 +57,7 @@ namespace butane {
     public:
       size_t size() const;
 
+    public:
       FOUNDATION_INLINE uint32_t& components()
       { return _components; }
 
