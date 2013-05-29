@@ -4,8 +4,7 @@
 #ifndef _BUTANE_SCRIPT_H_
 #define _BUTANE_SCRIPT_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+#include <butane/butane.h>
 
 namespace butane {
   class BUTANE_EXPORT Script abstract {

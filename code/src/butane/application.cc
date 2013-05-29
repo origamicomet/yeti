@@ -2,6 +2,11 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <butane/application.h>
+
+#include <butane/window.h>
+#include <butane/graphics/render_device.h>
+#include <butane/graphics/swap_chain.h>
+
 #include <butane/application/run.h>
 #include <butane/application/compile.h>
 

@@ -8,7 +8,7 @@ class BUTANE_EXPORT Type final {
   __foundation_trait(Type, non_copyable);
 
   public:
-    typedef ImmutableHash<uint32_t, murmur_hash> Hash;
+    typedef Hash<uint32_t, murmur_hash> Hash;
 
   public:
     typedef Resource* (*Load)(

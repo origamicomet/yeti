@@ -4,8 +4,7 @@
 #ifndef _BUTANE_MATH_CONSTANTS_H_
 #define _BUTANE_MATH_CONSTANTS_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+#include <butane/butane.h>
 
 namespace butane {
   static const float PI   = 3.14159265358979323846f;

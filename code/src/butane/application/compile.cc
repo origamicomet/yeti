@@ -64,7 +64,7 @@ namespace Application {
 
   struct Event {
     Directory::Entry entry;
-    ImmutableHash<uint32_t, murmur_hash> hash;
+    Hash<uint32_t, murmur_hash> hash;
 
     public:
       FOUNDATION_INLINE bool operator< ( const Event& e ) const
@@ -91,7 +91,7 @@ namespace Application {
     copy((void*)&event_.entry.path[0], (const void*)&path[0], min(sizeof(event_.entry.path) - 1, strlen(path) + 1));
     event_.entry.path[sizeof(event_.entry.path) - 1] = '\0';
     event_.entry.last_modified = time(nullptr);
-    event_.hash = ImmutableHash<uint32_t, murmur_hash>(&event_.entry.path[0]);
+    event_.hash = Hash<uint32_t, murmur_hash>(&event_.entry.path[0]);
     (*events) += event_;
   }
 

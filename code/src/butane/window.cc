@@ -21,6 +21,8 @@ namespace butane {
   {
     _on_closed.handler = nullptr;
     _on_closed.closure = nullptr;
+    _on_resized.handler = nullptr;
+    _on_resized.closure = nullptr;
     _on_windowed.handler = nullptr;
     _on_windowed.closure = nullptr;
     _on_fullscreen.handler = nullptr;
@@ -47,7 +49,12 @@ namespace butane {
   void Window::set_dimensions(
     const uint32_t width,
     const uint32_t height )
-  { _width = width; _height = height; }
+  {
+    _width = width; _height = height;
+
+    if (_on_resized.handler)
+      _on_resized.handler(_on_resized.closure, this);
+  }
 
   bool Window::fullscreen() const
   { return _fullscreen; }
@@ -64,7 +71,7 @@ namespace butane {
           _on_windowed.handler(_on_windowed.closure, this);
       }
     }
-    
+
     _fullscreen = fullscreen;
   }
 
@@ -74,6 +81,14 @@ namespace butane {
   {
     _on_closed.handler = handler;
     _on_closed.closure = closure;
+  }
+
+  void Window::set_on_resized_handler(
+    OnResizedHandler handler,
+    void* closure )
+  {
+    _on_resized.handler = handler;
+    _on_resized.closure = closure;
   }
 
   void Window::set_on_windowed_handler(

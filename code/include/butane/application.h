@@ -4,16 +4,19 @@
 #ifndef _BUTANE_APPLICATION_H_
 #define _BUTANE_APPLICATION_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
-#include <butane/render/device.h>
+#include <butane/butane.h>
 
 namespace butane {
+  class RenderDevice;
+  class Window;
+  class SwapChain;
 namespace Application {
   extern BUTANE_EXPORT butane::RenderDevice* render_device();
-
   extern BUTANE_EXPORT void set_render_device(
     butane::RenderDevice* render_device );
+
+  extern BUTANE_EXPORT Array< Pair<uint32_t, Window*> >& windows();
+  extern BUTANE_EXPORT Array< Pair<uint32_t, SwapChain*> >& swap_chains();
 
   extern BUTANE_EXPORT void boot(
     size_t num_args,

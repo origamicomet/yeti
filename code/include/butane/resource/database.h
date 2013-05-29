@@ -13,7 +13,7 @@ class BUTANE_EXPORT Database final {
     };
 
   private:
-    typedef HashTable<uint64_t, Record>::Pair Entry;
+    typedef HashTable<Resource::Id, Record>::Pair Entry;
 
   private:
     Database(
@@ -40,7 +40,7 @@ class BUTANE_EXPORT Database final {
       const Record& record );
 
   private:
-    HashTable<uint64_t, Record> _entries;
+    HashTable<Resource::Id, Record> _entries;
 };
 
 #endif // _BUTANE_RESOURCE_DATABASE_H_

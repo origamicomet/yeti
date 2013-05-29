@@ -1,0 +1,55 @@
+// This file is part of Butane. See README.md and LICENSE.md for details.
+// Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
+
+#include <butane/graphics/swap_chain.h>
+
+namespace butane {
+  SwapChain::SwapChain(
+    Window* window,
+    const PixelFormat pixel_format,
+    const uint32_t width,
+    const uint32_t height,
+    bool fullscreen,
+    bool vertical_sync
+  ) : _window(window)
+    , _pixel_format(pixel_format)
+    , _width(width)
+    , _height(height)
+    , _fullscreen(fullscreen)
+    , _vertical_sync(vertical_sync)
+  {
+    _on_resized.handler = nullptr;
+    _on_resized.closure = nullptr;
+  }
+
+  SwapChain::~SwapChain()
+  {
+  }
+
+  // void SwapChain::set_window(
+  //   Window* window )
+  // {}
+
+  // void SwapChain::set_pixel_format(
+  //   const PixelFormat pf )
+  // {}
+
+  void SwapChain::set_dimensions(
+    const uint32_t width,
+    const uint32_t height )
+  {
+    _width = width;
+    _height = height;
+
+    if (_on_resized.handler)
+      _on_resized.handler(_on_resized.closure, this);
+  }
+
+  void SwapChain::set_fullscreen(
+    bool fullscreen )
+  { _fullscreen = fullscreen; }
+
+  void SwapChain::set_vertical_sync(
+    bool vertical_sync )
+  { _vertical_sync = vertical_sync; }
+} // butane

@@ -4,8 +4,7 @@
 #ifndef _BUTANE_MATH_MAT3_H_
 #define _BUTANE_MATH_MAT3_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+#include <butane/butane.h>
 #include <butane/math/quat.h>
 
 #include <math.h>

@@ -102,8 +102,8 @@ namespace butane {
 
 namespace butane {
   namespace Resources {
-    HashTable<uint64_t, Resource*>& loaded() {
-      static HashTable<uint64_t, Resource*> loaded(
+    HashTable<Resource::Id, Resource*>& loaded() {
+      static HashTable<Resource::Id, Resource*> loaded(
         Allocators::heap(), BUTANE_LOADED_RESOURCES_HASH_TABLE_INITAL_SIZE);
       return loaded;
     }

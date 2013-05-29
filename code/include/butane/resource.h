@@ -4,25 +4,22 @@
 #ifndef _BUTANE_RESOURCE_H_
 #define _BUTANE_RESOURCE_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+#include <butane/butane.h>
 
 namespace butane {
   class BUTANE_EXPORT Resource abstract {
     __foundation_trait(Resource, non_copyable);
 
     public:
+      class Id;
       class Database;
       class Compiler;
-
-      class Id;
       class Type;
       class Stream;
-      
+
+      #include <butane/resource/id.h>
       #include <butane/resource/database.h>
       #include <butane/resource/compiler.h>
-      
-      #include <butane/resource/id.h>
       #include <butane/resource/type.h>
       #include <butane/resource/stream.h>
 
@@ -67,7 +64,7 @@ namespace butane {
 
 namespace butane {
   namespace Resources {
-    extern BUTANE_EXPORT HashTable<uint64_t, Resource*>& loaded();
+    extern BUTANE_EXPORT HashTable<Resource::Id, Resource*>& loaded();
   } // Resources
 } // butane
 

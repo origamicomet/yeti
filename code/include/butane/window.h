@@ -4,8 +4,7 @@
 #ifndef _BUTANE_WINDOW_H_
 #define _BUTANE_WINDOW_H_
 
-#include <butane/foundation.h>
-#include <butane/config.h>
+#include <butane/butane.h>
 
 namespace butane {
   class BUTANE_EXPORT Window abstract {
@@ -13,6 +12,10 @@ namespace butane {
 
     public:
       typedef void (*OnClosedHandler)(
+        void* closure,
+        Window* window );
+
+      typedef void (*OnResizedHandler)(
         void* closure,
         Window* window );
 
@@ -71,8 +74,13 @@ namespace butane {
       virtual void set_fullscreen(
         bool fullscreen );
 
+    public:
       void set_on_closed_handler(
         OnClosedHandler handler,
+        void* closure = nullptr );
+
+      void set_on_resized_handler(
+        OnResizedHandler handler,
         void* closure = nullptr );
 
       void set_on_windowed_handler(
@@ -93,6 +101,11 @@ namespace butane {
         OnClosedHandler handler;
         void* closure;
       } _on_closed;
+
+      struct {
+        OnResizedHandler handler;
+        void* closure;
+      } _on_resized;
 
       struct {
         OnWindowedHandler handler;

@@ -2,6 +2,3 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <butane/math/vec2.h>
-
-namespace butane {
-} // butane

@@ -5,7 +5,6 @@
 #define _BUTANE_RESOURCE_ID_H_
 
 class BUTANE_EXPORT Id final
-  : public foundation::Hash<uint64_t>
 {
   public:
     Id();
@@ -25,7 +24,24 @@ class BUTANE_EXPORT Id final
       const Id& id );
 
   public:
-    operator uint64_t() const override;
+    FOUNDATION_INLINE bool operator== (
+      const Resource::Id& id ) const
+    { return (_hash == id._hash); }
+
+    FOUNDATION_INLINE bool operator!= (
+      const Resource::Id& id ) const
+    { return (_hash != id._hash); }
+
+    FOUNDATION_INLINE bool operator< (
+      const Resource::Id& id ) const
+    { return (_hash < id._hash); }
+
+    FOUNDATION_INLINE bool operator> (
+      const Resource::Id& id ) const
+    { return (_hash > id._hash); }
+
+  public:
+    operator uint64_t() const;
 
   private:
     uint64_t _hash;
