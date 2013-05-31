@@ -7,12 +7,4 @@
 #include <butane/graphics/d3d11/d3d11.h>
 #include <butane/graphics/render_context.h>
 
-namespace butane {
-  class BUTANE_EXPORT D3D11RenderContext final
-    : public RenderContext
-  {
-    __foundation_trait(D3D11RenderContext, non_copyable);
-  };
-} // butane
-
 #endif // _BUTANE_D3D11_RENDER_CONTEXT_H_

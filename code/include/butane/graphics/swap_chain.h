@@ -7,7 +7,7 @@
 #include <butane/butane.h>
 
 #include <butane/window.h>
-#include <butane/graphics/pixel_format.h>
+#include <butane/graphics/render_target.h>
 
 namespace butane {
   class BUTANE_EXPORT SwapChain abstract {
@@ -21,6 +21,7 @@ namespace butane {
     protected:
       SwapChain(
         Window* window,
+        RenderTarget* render_target,
         const PixelFormat pixel_format,
         const uint32_t width,
         const uint32_t height,
@@ -46,6 +47,9 @@ namespace butane {
 
       // virtual void set_window(
       //   Window* window );
+
+      FOUNDATION_INLINE RenderTarget* render_target() const
+      { return _render_target; }
 
       FOUNDATION_INLINE PixelFormat pixel_format() const
       { return _pixel_format; }
@@ -80,8 +84,9 @@ namespace butane {
         OnResizedHandler handler,
         void* closure = nullptr );
 
-    private:
+    protected:
       Window* _window;
+      RenderTarget* _render_target;
       PixelFormat _pixel_format;
       uint32_t _width;
       uint32_t _height;

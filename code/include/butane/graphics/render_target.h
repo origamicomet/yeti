@@ -10,6 +10,27 @@
 namespace butane {
   class BUTANE_EXPORT RenderTarget abstract {
     __foundation_trait(RenderTarget, non_copyable);
+
+    protected:
+      RenderTarget(
+        Texture* texture );
+
+      virtual ~RenderTarget();
+
+    public:
+      static RenderTarget* create(
+        const PixelFormat pixel_format,
+        const uint32_t width,
+        const uint32_t height );
+
+      virtual void destroy() = 0;
+
+    public:
+      FOUNDATION_INLINE Texture* texture() const
+      { return _texture; }
+
+    private:
+      Texture* _texture;
   };
 } // butane
 

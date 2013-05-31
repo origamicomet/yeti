@@ -6,12 +6,14 @@
 namespace butane {
   SwapChain::SwapChain(
     Window* window,
+    RenderTarget* render_target,
     const PixelFormat pixel_format,
     const uint32_t width,
     const uint32_t height,
     bool fullscreen,
     bool vertical_sync
   ) : _window(window)
+    , _render_target(nullptr)
     , _pixel_format(pixel_format)
     , _width(width)
     , _height(height)
@@ -24,6 +26,8 @@ namespace butane {
 
   SwapChain::~SwapChain()
   {
+    if (_render_target)
+      _render_target->destroy();
   }
 
   // void SwapChain::set_window(

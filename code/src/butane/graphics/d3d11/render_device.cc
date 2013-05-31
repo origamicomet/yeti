@@ -74,4 +74,58 @@ namespace butane {
   {
     make_delete(D3D11RenderDevice, allocator(), this);
   }
+
+  void D3D11RenderDevice::dispatch(
+    size_t num_render_contexts,
+    const RenderContext** render_contexts )
+  {
+    assert(num_render_contexts > 0);
+    assert(render_contexts != nullptr);
+
+    // 1: Gather and Merge
+    Array<RenderContext::Command> commands(allocator());
+    for (size_t context = 0; context < num_render_contexts; ++context) {
+      const size_t offset = commands.size();
+      const size_t num_of_cmds = render_contexts[context]->num_of_commands();
+      commands.resize(commands.size() + num_of_cmds);
+      for (size_t c = 0; c < num_of_cmds; ++c) {
+        RenderContext::Command& cmd = commands[offset + c];
+        cmd = render_contexts[context]->commands()[c];
+        cmd.offset += (uintptr_t)render_contexts[context]->stream(); }
+    }
+
+    // 2: Sort
+    sort(commands.raw(), commands.size());
+
+    // 3: Build
+    for (auto iter = commands.begin(); iter != commands.end(); ++iter)
+      dispatch(*((const Command*)(*iter).offset));
+  }
+
+  void D3D11RenderDevice::dispatch(
+    const Command& command )
+  {
+    switch (command.type) {
+      case Command::CLEAR_RENDER_TARGET_VIEW: {
+        const Commands::ClearRenderTargetView& cmd =
+          *((const Commands::ClearRenderTargetView*)&command);
+        _context->ClearRenderTargetView(cmd.view, &cmd.rgba[0]);
+      } return;
+
+      case Command::CLEAR_DEPTH_STENCIL_VIEW: {
+        static const UINT clear_flags = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
+        const Commands::ClearDepthStencilView& cmd =
+          *((const Commands::ClearDepthStencilView*)&command);
+        _context->ClearDepthStencilView(cmd.view, clear_flags, cmd.depth, cmd.stencil);
+      } return;
+
+      case Command::PRESENT: {
+        const Commands::Present& cmd =
+          *((const Commands::Present*)&command);
+        cmd.swap_chain->Present(cmd.interval, 0);
+      } return;
+    }
+
+    __builtin_unreachable();
+  }
 } // butane

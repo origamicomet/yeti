@@ -92,8 +92,15 @@ namespace Application {
 
     manifest->dereference();
 
+    RenderContext rc;
+    rc.clear(0, swap_chain->render_target(), Vec4f(1.0f, 0.0f, 0.5f, 1.0f));
+    rc.present(1, swap_chain);
+
     while (true) {
       window->update();
+
+      const RenderContext* render_contexts[1] = { &rc };
+      rd->dispatch(1, &render_contexts[0]);
     }
   }
 } // Application

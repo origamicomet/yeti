@@ -8,10 +8,32 @@
 #include <butane/graphics/render_target.h>
 
 namespace butane {
+  class SwapChain;
   class BUTANE_EXPORT D3D11RenderTarget final
     : public RenderTarget
   {
     __foundation_trait(D3D11RenderTarget, non_copyable);
+
+    private:
+      friend class RenderTarget;
+      friend class SwapChain;
+      friend class D3D11SwapChain;
+
+    private:
+      D3D11RenderTarget(
+        Texture* texture );
+
+      ~D3D11RenderTarget();
+
+    public:
+      void destroy() override;
+
+    public:
+      FOUNDATION_INLINE ID3D11RenderTargetView* view() const
+      { return _view; }
+
+    private:
+      ID3D11RenderTargetView* _view;
   };
 } // butane
 

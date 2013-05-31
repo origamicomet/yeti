@@ -16,12 +16,85 @@ namespace butane {
     private:
       friend class RenderDevice;
 
+    public:
+      struct Command {
+        public:
+          enum Type {
+            CLEAR_RENDER_TARGET_VIEW = 1,
+            CLEAR_DEPTH_STENCIL_VIEW = 2,
+            PRESENT                  = 3
+          };
+
+        protected:
+          Command( const Type type )
+            : type(type)
+          {}
+
+        public:
+          Type type;
+      };
+
+      class Commands final {
+        __foundation_trait(Commands, non_constructable);
+        __foundation_trait(Commands, non_copyable);
+
+        public:
+          struct ClearRenderTargetView final
+            : public Command
+          {
+            public:
+              ClearRenderTargetView()
+                : Command(Command::CLEAR_RENDER_TARGET_VIEW)
+              {}
+
+            public:
+              ID3D11RenderTargetView* view;
+              float rgba[4];
+          };
+
+          struct ClearDepthStencilView final
+            : public Command
+          {
+            public:
+              ClearDepthStencilView()
+                : Command(Command::CLEAR_DEPTH_STENCIL_VIEW)
+              {}
+
+            public:
+              ID3D11DepthStencilView* view;
+              float depth;
+              uint32_t stencil;
+          };
+
+          struct Present final
+            : public Command
+          {
+            public:
+              Present()
+                : Command(Command::PRESENT)
+              {}
+
+            public:
+              IDXGISwapChain* swap_chain;
+              uint32_t interval;
+          };
+      };
+
     protected:
       D3D11RenderDevice();
       ~D3D11RenderDevice();
 
     public:
       void destroy() override;
+
+    public:
+      void dispatch(
+        size_t num_render_contexts,
+        const RenderContext** render_contexts ) override;
+
+    private:
+      void dispatch(
+        const Command& command );
 
     public:
       FOUNDATION_INLINE IDXGIFactory* factory() const

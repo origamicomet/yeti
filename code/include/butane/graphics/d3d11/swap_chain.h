@@ -19,6 +19,7 @@ namespace butane {
     private:
       D3D11SwapChain(
         Window* window,
+        RenderTarget* render_target,
         const PixelFormat pixel_format,
         const uint32_t width,
         const uint32_t height,
@@ -61,7 +62,7 @@ namespace butane {
         Window* window );
 
     public:
-      FOUNDATION_INLINE bool interface() const
+      FOUNDATION_INLINE IDXGISwapChain* interface() const
       { return _interface; }
 
     private:

@@ -5,6 +5,7 @@
 #define _BUTANE_RENDER_DEVICE_H_
 
 #include <butane/butane.h>
+#include <butane/graphics/render_context.h>
 
 namespace butane {
   class BUTANE_EXPORT RenderDevice abstract {
@@ -19,6 +20,11 @@ namespace butane {
         const uint32_t adapter );
 
       virtual void destroy() = 0;
+
+    public:
+      virtual void dispatch(
+        size_t num_render_contexts,
+        const RenderContext** render_contexts ) = 0;
   };
 } // butane
 
