@@ -13,8 +13,32 @@ namespace butane {
   {
     __foundation_trait(D3D11Texture, non_copyable);
 
+    private:
+      friend class Texture;
+
+    private:
+      D3D11Texture(
+        const Type type,
+        const PixelFormat pixel_format,
+        const uint32_t width,
+        const uint32_t height,
+        const uint32_t depth );
+
+      ~D3D11Texture();
+
     public:
       void destroy() override;
+
+    public:
+      FOUNDATION_INLINE ID3D11Resource* resource() const
+      { return _resource; }
+
+      FOUNDATION_INLINE ID3D11ShaderResourceView* srv() const
+      { return _srv; }
+
+    private:
+      ID3D11Resource* _resource;
+      ID3D11ShaderResourceView* _srv;
   };
 } // butane
 

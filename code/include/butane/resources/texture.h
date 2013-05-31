@@ -16,9 +16,6 @@ namespace butane {
     __foundation_trait(TextureResource, non_copyable);
 
     private:
-      // The texture has precomputed mipmaps.
-      static const uint32_t HasMipmaps = (1u << 0u);
-
       struct MemoryResidentData {
         Texture::Type type;
         PixelFormat pixel_format;
@@ -48,10 +45,6 @@ namespace butane {
       static bool compile(
         const Resource::Compiler::Source& src,
         const Resource::Compiler::Stream& cs );
-
-    public: /* private */
-      // void stream();
-      // void mark_for_streaming();
 
     public:
       Texture* texture() const

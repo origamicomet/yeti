@@ -19,8 +19,54 @@ namespace butane {
         CUBE_MAP   = 4
       };
 
+      enum Flags {
+        HAS_MIP_MAPS = (1 << 0)
+      };
+
+    protected:
+      Texture(
+        const Type type,
+        const PixelFormat pixel_format,
+        const uint32_t width,
+        const uint32_t height,
+        const uint32_t depth );
+
+      virtual ~Texture();
+
     public:
+      static Texture* create(
+        const Type type,
+        const PixelFormat pixel_format,
+        const uint32_t width,
+        const uint32_t height,
+        const uint32_t depth,
+        const uint32_t flags,
+        const void* data = nullptr );
+
       virtual void destroy() = 0;
+
+    public:
+      FOUNDATION_INLINE Type type() const
+      { return _type; }
+
+      FOUNDATION_INLINE PixelFormat pixel_format() const
+      { return _pixel_format; }
+
+      FOUNDATION_INLINE uint32_t width() const
+      { return _width; }
+
+      FOUNDATION_INLINE uint32_t height() const
+      { return _height; }
+
+      FOUNDATION_INLINE uint32_t depth() const
+      { return _depth; }
+
+    private:
+      Type _type;
+      PixelFormat _pixel_format;
+      uint32_t _width;
+      uint32_t _height;
+      uint32_t _depth;
   };
 } // butane
 

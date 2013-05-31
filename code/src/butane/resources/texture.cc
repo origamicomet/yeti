@@ -9,6 +9,11 @@ namespace butane {
     return allocator;
   }
 
+  static Allocator& scratch() {
+    static ProxyAllocator allocator("texture resources (scratch)", Allocators::heap());
+    return allocator;
+  }
+
   const Resource::Type TextureResource::type(
     "texture", "dds",
     (Resource::Type::Load)&TextureResource::load,
@@ -32,14 +37,25 @@ namespace butane {
     const Resource::Id id,
     const Resource::Stream& stream )
   {
-    // TextureResource* tr = make_new(TextureResource, allocator())(id);
-    // const Header* header = (const Header*)stream.memory_resident_data();
-    // copy((void*)&tr->_header, (const void*)header, sizeof(Header));
-    // tr->_texture = Texture::create(header->type, header->pixel_format, header->width, header->height, header->depth, true);
-    // tr->mark_for_streaming();
-    // return tr;
+    const MemoryResidentData& mrd =
+      *((const MemoryResidentData*)stream.memory_resident_data());
 
-    return nullptr;
+    TextureResource* texture =
+      make_new(TextureResource, allocator())(id);
+
+    const size_t storage_requirements =
+      mrd.pixel_format.storage_requirements(mrd.width, mrd.height, mrd.depth);
+
+    void* buffer = scratch().alloc(storage_requirements);
+    if (!File::read_in(stream.streaming_data(), buffer, storage_requirements))
+      fail("Malformed streaming data for %016 (texture)" PRIx64);
+
+    // http://stackoverflow.com/questions/6347950/programmatically-creating-directx-11-textures-pros-and-cons-of-the-three-differ
+    texture->_texture = Texture::create(
+      mrd.type, mrd.pixel_format, mrd.width, mrd.height, mrd.depth, mrd.flags, buffer);
+
+    scratch().free(buffer);
+    return texture;
   }
 
   void TextureResource::unload(
@@ -85,7 +101,7 @@ namespace butane {
     }
 
     if (dds.header_flags & DDS_HEADER_FLAGS_MIPMAP)
-      mrd.flags |= HasMipmaps;
+      mrd.flags |= Texture::HAS_MIP_MAPS;
 
     if (!File::write_out(cs.memory_resident_data(), (const void*)&mrd, sizeof(MemoryResidentData)))
       return false;
@@ -95,47 +111,4 @@ namespace butane {
 
     return true;
   }
-
-  // static thread_safe::Queue<TextureResource*>& __marked_for_streaming() {
-  //   static thread_safe::Queue<TextureResource*> marked_for_streaming(
-  //     Allocators::heap(), BUTANE_BACKGROUND_RESOURCE_UNLOADING_QUEUE_SIZE);
-  //   return marked_for_streaming;
-  // }
-
-  // static Thread::Return __background_streaming_thread(
-  //   Thread& thread,
-  //   void* closure )
-  // {
-  //   while (true) {
-  //     TextureResource* tr = nullptr;
-  //     __marked_for_streaming().dequeue(tr);
-  //     tr->stream();
-  //     tr->dereference(); }
-
-  //   __builtin_unreachable();
-  //   return 0;
-  // }
-
-  // static void __start_background_streaming_thread()
-  // {
-  //   static bool has_started = false;
-  //   if (has_started) return;
-  //   static Thread background_streaming_thread(&__background_streaming_thread);
-  //   background_streaming_thread.detach();
-  //   has_started = true;
-  // }
-
-  // void TextureResource::stream()
-  // {
-  // }
-
-  // void TextureResource::mark_for_streaming()
-  // {
-  //   // A reference is held to prevent the texture from being unloaded while the
-  //   // background thread is streaming it in.
-  //   reference();
-
-  //   __start_background_streaming_thread();
-  //   __marked_for_streaming().enqueue(this);
-  // }
 } // butane
