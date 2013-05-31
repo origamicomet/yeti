@@ -98,7 +98,7 @@ namespace Application {
   void compile(
     const Array<const char*>& args )
   {
-    const LogScope log_scope("Application::compile");
+    const LogScope _("Application::compile");
 
     if (args.size() < 2) {
       log("Malformed compiler invocation!");

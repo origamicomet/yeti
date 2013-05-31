@@ -35,7 +35,7 @@ namespace Application {
   void run(
     const Array<const char*>& args )
   {
-    const LogScope log_scope("Application::run");
+    const LogScope _("Application::run");
 
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type, "manifest");

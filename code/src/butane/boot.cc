@@ -4,7 +4,7 @@
 #include <butane/application.h>
 
 int main( int argc, const char* argv[] ) {
-  foundation::LogScope log_scope("Engine");
+  foundation::LogScope _("Engine");
   butane::Application::boot(argc, &argv[0]);
   return EXIT_FAILURE;
 }
