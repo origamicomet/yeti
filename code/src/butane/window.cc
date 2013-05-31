@@ -63,7 +63,7 @@ namespace butane {
     bool fullscreen )
   {
     if (_fullscreen != fullscreen) {
-      if (_fullscreen) {
+      if (fullscreen) {
         if (_on_fullscreen.handler)
           _on_fullscreen.handler(_on_fullscreen.closure, this);
       } else {

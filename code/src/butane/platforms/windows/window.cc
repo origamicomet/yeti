@@ -111,8 +111,12 @@ namespace windows {
     bool fullscreen )
   {
     butane::Window::set_fullscreen(fullscreen);
-    // http://stackoverflow.com/questions/2382464/win32-full-screen-and-hiding-taskbar
-    fail("Window::set_fullscreen is not implemented, yet.");
+
+    // This isn't required?
+    // DWORD styles, ex_styles;
+    // state_to_styles(fullscreen, styles, ex_styles);
+    // SetWindowLongPtr(_hwnd, GWL_STYLE, (LONG_PTR)styles);
+    // SetWindowLongPtr(_hwnd, GWL_EXSTYLE, (LONG_PTR)ex_styles);
   }
 
   void Window::_initialize()
