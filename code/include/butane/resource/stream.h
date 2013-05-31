@@ -15,12 +15,15 @@ class BUTANE_EXPORT Stream final {
     ~Stream();
 
   public:
+    FOUNDATION_INLINE FILE* streaming_data() const
+    { return _streaming_data; }
+
     FOUNDATION_INLINE void* memory_resident_data() const
     { return _memory_resident_data; }
 
     FOUNDATION_INLINE size_t memory_resident_data_len() const
     { return _memory_resident_data_len; }
-  
+
   private:
     void* _memory_resident_data;
     size_t _memory_resident_data_len;
