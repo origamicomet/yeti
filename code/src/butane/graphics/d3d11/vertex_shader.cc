@@ -166,7 +166,7 @@ namespace butane {
         else if (strcmp("TANGENT", param.SemanticName) == 0)
           component = VertexDeclaration::TANGENT;
         else if (strcmp("BINORMAL", param.SemanticName) == 0)
-          component = VertexDeclaration::BINORMAL;
+          component = VertexDeclaration::BITANGENT;
         else if (strcmp("BONEINDICES", param.SemanticName) == 0)
           component = VertexDeclaration::BONEINDICES;
         else if (strcmp("BONEWEIGHTS", param.SemanticName) == 0)

@@ -29,7 +29,7 @@ namespace butane {
         TEXCOORD7   = (1 << 16),
         NORMAL      = (1 << 17),
         TANGENT     = (1 << 18),
-        BINORMAL    = (1 << 19),
+        BITANGENT   = (1 << 19),
         BONEINDICES = (1 << 20),
         BONEWEIGHTS = (1 << 21)
       };
