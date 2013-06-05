@@ -12,6 +12,28 @@ namespace butane {
     : public VertexBuffer
   {
     __foundation_trait(D3D11VertexBuffer, non_copyable);
+
+    private:
+      friend class VertexBuffer;
+
+    private:
+      D3D11VertexBuffer();
+      ~D3D11VertexBuffer();
+
+    public:
+      void destroy() override;
+
+    public:
+      void update(
+        const void* data,
+        const size_t data_len ) override;
+
+    public:
+      FOUNDATION_INLINE ID3D11Resource* resource() const
+      { return _resource; }
+
+    private:
+      ID3D11Buffer* _resource;
   };
 } // butane
 
