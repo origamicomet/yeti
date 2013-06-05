@@ -20,6 +20,6 @@ namespace butane {
     va_start(ap, format);
     log(format, ap);
     va_end(ap);
-    raise(SIGABRT);
+    die(true);
   }
 } // butane
