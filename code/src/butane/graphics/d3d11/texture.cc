@@ -32,6 +32,23 @@ namespace butane {
       _resource->Release();
   }
 
+  static D3D11_USAGE d3d11_usage_from_flags(
+    const uint32_t flags )
+  {
+    if (flags & (Texture::RENDER_TARGETABLE | Texture::DEPTH_STENCIL_TARGETABLE))
+      return D3D11_USAGE_DEFAULT;
+    return D3D11_USAGE_IMMUTABLE;
+  }
+
+  static UINT d3d11_bind_flags_from_flags(
+    const uint32_t flags )
+  {
+    UINT bind_flags = D3D11_BIND_SHADER_RESOURCE;
+    bind_flags |= ((flags & Texture::RENDER_TARGETABLE) ? D3D11_BIND_RENDER_TARGET : 0);
+    bind_flags |= ((flags & Texture::DEPTH_STENCIL_TARGETABLE) ? D3D11_BIND_DEPTH_STENCIL : 0);
+    return bind_flags;
+  }
+
   Texture* Texture::create(
     const Type type,
     const PixelFormat pixel_format,
@@ -63,8 +80,8 @@ namespace butane {
         td.MipLevels      = 0;
         td.ArraySize      = depth;
         td.Format         = dxgi_format_from_pixel_format(pixel_format);
-        td.Usage          = D3D11_USAGE_IMMUTABLE;
-        td.BindFlags      = D3D11_BIND_SHADER_RESOURCE;
+        td.Usage          = d3d11_usage_from_flags(flags);
+        td.BindFlags      = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags = 0;
         td.MiscFlags      = 0;
 
@@ -94,8 +111,8 @@ namespace butane {
         td.Format             = dxgi_format_from_pixel_format(pixel_format);
         td.SampleDesc.Count   = 1;
         td.SampleDesc.Quality = 0;
-        td.Usage              = D3D11_USAGE_IMMUTABLE;
-        td.BindFlags          = D3D11_BIND_SHADER_RESOURCE;
+        td.Usage              = d3d11_usage_from_flags(flags);
+        td.BindFlags          = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags     = 0;
         td.MiscFlags          = 0;
 
@@ -122,8 +139,8 @@ namespace butane {
         td.Depth          = depth;
         td.MipLevels      = 0;
         td.Format         = dxgi_format_from_pixel_format(pixel_format);
-        td.Usage          = D3D11_USAGE_IMMUTABLE;
-        td.BindFlags      = D3D11_BIND_SHADER_RESOURCE;
+        td.Usage          = d3d11_usage_from_flags(flags);
+        td.BindFlags      = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags = 0;
         td.MiscFlags      = 0;
 
@@ -149,8 +166,8 @@ namespace butane {
         td.MipLevels      = 0;
         td.ArraySize      = depth;
         td.Format         = dxgi_format_from_pixel_format(pixel_format);
-        td.Usage          = D3D11_USAGE_IMMUTABLE;
-        td.BindFlags      = D3D11_BIND_SHADER_RESOURCE;
+        td.Usage          = d3d11_usage_from_flags(flags);
+        td.BindFlags      = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags = 0;
         td.MiscFlags      = 0;
 

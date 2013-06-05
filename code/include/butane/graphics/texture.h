@@ -20,7 +20,12 @@ namespace butane {
       };
 
       enum Flags {
-        HAS_MIP_MAPS = (1 << 0)
+        // The specified data includes mip maps.
+        HAS_MIP_MAPS             = (1 << 0),
+        // Allows a texture to be rendered through a butane::RenderTarget.
+        RENDER_TARGETABLE        = (1 << 1),
+        // Allows a texture to be rendered through a butane::DepthStencilTarget.
+        DEPTH_STENCIL_TARGETABLE = (1 << 2)
       };
 
     protected:

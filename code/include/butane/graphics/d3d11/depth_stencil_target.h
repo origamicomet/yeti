@@ -12,6 +12,26 @@ namespace butane {
     : public DepthStencilTarget
   {
     __foundation_trait(D3D11DepthStencilTarget, non_copyable);
+
+    private:
+      friend class DepthStencilTarget;
+      friend class D3D11SwapChain;
+
+    private:
+      D3D11DepthStencilTarget(
+        Texture* texture );
+
+      ~D3D11DepthStencilTarget();
+
+    public:
+      void destroy() override;
+
+    public:
+      FOUNDATION_INLINE ID3D11DepthStencilView* view() const
+      { return _view; }
+
+    private:
+      ID3D11DepthStencilView* _view;
   };
 } // butane
 
