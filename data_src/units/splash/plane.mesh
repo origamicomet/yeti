@@ -6,6 +6,7 @@ NORMAL
 4
 6
 default
+shaders/mesh
 1
 diffuse
 -1.7777777910232544 1.0 0.0

@@ -6,6 +6,7 @@
 
 #include <butane/resource.h>
 #include <butane/resources/texture.h>
+#include <butane/resources/shader.h>
 #include <butane/graphics/vertex_declaration.h>
 #include <butane/graphics/vertex_buffer.h>
 #include <butane/graphics/index_buffer.h>
@@ -20,6 +21,8 @@ namespace butane {
       struct Material {
         typedef Hash<uint32_t, murmur_hash> Name;
         Name name;
+        Resource::Id shader;
+        // Resource::Handle<ShaderResource> shader;
         Resource::Id textures[8];
         // Resource::Handle<TextureResource> textures[8];
       };
@@ -33,6 +36,7 @@ namespace butane {
 
         struct Material {
           MeshResource::Material::Name name;
+          Resource::Id shader;
           Resource::Id textures[8];
         };
 

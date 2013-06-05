@@ -149,6 +149,7 @@ namespace butane {
     if (mrd.num_of_materials == 0) {
       zero(&materials[0], sizeof(MemoryResidentData::Material));
       materials[0].name = Material::Name("default");
+      materials[0].shader = Resource::Id(ShaderResource::type, "shaders/mesh");
       materials[0].textures[1] = Resource::Id(TextureResource::type, "textures/not_found");
     } else {
       for (uint32_t m = 0; m < mrd.num_of_materials; ++m) {
@@ -158,6 +159,13 @@ namespace butane {
         if (fscanf(input.data, "%255s", &material[0]) != 1)
           return false;
         materials[m].name = Material::Name(&material[0]);
+
+        /* materials[m].shader = */ {
+          char shader[256] = { 0, };
+          if (fscanf(input.data, "%255s", &shader[0]) != 1)
+            return false;
+          materials[m].shader = Resource::Id(ShaderResource::type, &shader[0]);
+        }
 
         unsigned num_of_textures = 0;
         if (fscanf(input.data, "%u", &num_of_textures) != 1)
