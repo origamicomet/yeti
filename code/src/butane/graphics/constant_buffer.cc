@@ -2,3 +2,13 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <butane/graphics/constant_buffer.h>
+
+namespace butane {
+  ConstantBuffer::ConstantBuffer()
+  {
+  }
+
+  ConstantBuffer::~ConstantBuffer()
+  {
+  }
+} // butane

@@ -9,6 +9,23 @@
 namespace butane {
   class BUTANE_EXPORT ConstantBuffer {
     __foundation_trait(ConstantBuffer, non_copyable);
+
+    protected:
+      ConstantBuffer();
+      virtual ~ConstantBuffer();
+
+    public:
+      static ConstantBuffer* create(
+        const void* data,
+        size_t data_len,
+        bool immutable = true );
+
+      virtual void destroy() = 0;
+
+    public:
+      virtual void update(
+        const void* data,
+        const size_t data_len ) = 0;
   };
 } // butane
 

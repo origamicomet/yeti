@@ -12,6 +12,28 @@ namespace butane {
     : public IndexBuffer
   {
     __foundation_trait(D3D11IndexBuffer, non_copyable);
+
+    private:
+      friend class IndexBuffer;
+
+    private:
+      D3D11IndexBuffer();
+      ~D3D11IndexBuffer();
+
+    public:
+      void destroy() override;
+
+    public:
+      void update(
+        const void* data,
+        const size_t data_len ) override;
+
+    public:
+      FOUNDATION_INLINE ID3D11Resource* resource() const
+      { return _resource; }
+
+    private:
+      ID3D11Buffer* _resource;
   };
 } // butane
 

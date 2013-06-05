@@ -64,6 +64,12 @@ namespace butane {
         const float to_depth,
         const uint32_t to_stencil );
 
+      void bind_render_and_depth_stencil_views(
+        const Command::Key key,
+        size_t num_of_render_targets,
+        RenderTarget** render_targets,
+        DepthStencilTarget* depth_stencil_target );
+
       void present(
         const Command::Key key,
         SwapChain* swap_chain );

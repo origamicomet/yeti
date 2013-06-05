@@ -2,3 +2,13 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <butane/graphics/index_buffer.h>
+
+namespace butane {
+  IndexBuffer::IndexBuffer()
+  {
+  }
+
+  IndexBuffer::~IndexBuffer()
+  {
+  }
+} // butane

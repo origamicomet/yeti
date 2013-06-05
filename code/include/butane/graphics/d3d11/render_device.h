@@ -20,9 +20,10 @@ namespace butane {
       struct Command {
         public:
           enum Type {
-            CLEAR_RENDER_TARGET_VIEW = 1,
-            CLEAR_DEPTH_STENCIL_VIEW = 2,
-            PRESENT                  = 3
+            CLEAR_RENDER_TARGET_VIEW            = 1,
+            CLEAR_DEPTH_STENCIL_VIEW            = 2,
+            BIND_RENDER_AND_DEPTH_STENCIL_VIEWS = 4,
+            PRESENT                             = 3
           };
 
         protected:
@@ -64,6 +65,20 @@ namespace butane {
               ID3D11DepthStencilView* view;
               float depth;
               uint32_t stencil;
+          };
+
+          struct BindRenderAndDepthStencilViews final
+            : public Command
+          {
+            public:
+              BindRenderAndDepthStencilViews()
+                : Command(Command::BIND_RENDER_AND_DEPTH_STENCIL_VIEWS)
+              {}
+
+            public:
+              size_t num_of_render_target_views;
+              ID3D11RenderTargetView* render_target_views[8];
+              ID3D11DepthStencilView* depth_stencil_view;
           };
 
           struct Present final
