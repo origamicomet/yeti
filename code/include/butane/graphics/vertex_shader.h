@@ -38,8 +38,8 @@ namespace butane {
         VertexShader* vertex_shader );
 
       static bool compile(
-        const Resource::Compiler::Source& src,
-        const Resource::Compiler::Stream& cs );
+        const Resource::Compiler::Input& input,
+        const Resource::Compiler::Output& output );
 
     public:
       FOUNDATION_INLINE const VertexDeclaration& vertex_declaration() const

@@ -4,16 +4,6 @@
 #include <butane/resource.h>
 
 namespace butane {
-  Resource::Compiler::Stream::Stream(
-    FILE* source_data,
-    FILE* memory_resident_data,
-    FILE* streaming_data
-  ) : _source_data(source_data)
-    , _memory_resident_data(memory_resident_data)
-    , _streaming_data(streaming_data)
-  {
-  }
-
   Resource::Compiler::Status Resource::Compiler::compile(
     const char* data_dir,
     const char* source_data_dir,
@@ -90,14 +80,17 @@ namespace butane {
       return Unsuccessful;
     }
 
-    Resource::Compiler::Source src;
-    src.root = source_data_dir;
-    src.path = source_path;
+    Input input;
+    input.root = source_data_dir;
+    input.path = source_path;
+    input.data = source_data;
 
-    const Resource::Compiler::Stream cs(
-      source_data, memory_resident_data, streaming_data);
+    Output output;
+    output.path = path.raw();
+    output.memory_resident_data = memory_resident_data;
+    output.streaming_data = streaming_data;
 
-    if (type->compile(src, cs)) {
+    if (type->compile(input, output)) {
       const bool no_memory_resident_data = (ftell(memory_resident_data) == 0);
       const bool no_streaming_data = (ftell(streaming_data) == 0);
 

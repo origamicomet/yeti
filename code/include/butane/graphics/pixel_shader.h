@@ -36,8 +36,8 @@ namespace butane {
         PixelShader* pixel_shader );
 
       static bool compile(
-        const Resource::Compiler::Source& src,
-        const Resource::Compiler::Stream& cs );
+        const Resource::Compiler::Input& input,
+        const Resource::Compiler::Output& output );
   };
 } // butane
 

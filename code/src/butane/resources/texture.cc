@@ -37,6 +37,8 @@ namespace butane {
     const Resource::Id id,
     const Resource::Stream& stream )
   {
+    const LogScope _("TextureResource::load");
+
     const MemoryResidentData& mrd =
       *((const MemoryResidentData*)stream.memory_resident_data());
 
@@ -61,25 +63,29 @@ namespace butane {
   void TextureResource::unload(
     TextureResource* texture )
   {
+    const LogScope _("TextureResource::unload");
+
     assert(texture != nullptr);
     make_delete(TextureResource, allocator(), texture);
   }
 
   bool TextureResource::compile(
-    const Resource::Compiler::Source& src,
-    const Resource::Compiler::Stream& cs )
+    const Resource::Compiler::Input& input,
+    const Resource::Compiler::Output& output )
   {
+    const LogScope _("TextureResource::compile");
+
     /* Determine if it is actually a DDS */ {
       char magic[4];
-      if (!File::read_in(cs.source_data(), (void*)&magic[0], 4))
+      if (!File::read_in(input.data, (void*)&magic[0], 4))
         return false;
       if (strncmp("DDS ", &magic[0], 4) != 0) {
-        log("Not a DirectDraw Surface", src.path);
+        log("Not a DirectDraw Surface", input.path);
         return false; }
     }
 
     DDS_HEADER dds;
-    if (!File::read_in(cs.source_data(), (void*)&dds, sizeof(DDS_HEADER)))
+    if (!File::read_in(input.data, (void*)&dds, sizeof(DDS_HEADER)))
       return false;
 
     MemoryResidentData mrd; {
@@ -103,10 +109,10 @@ namespace butane {
     if (dds.header_flags & DDS_HEADER_FLAGS_MIPMAP)
       mrd.flags |= Texture::HAS_MIP_MAPS;
 
-    if (!File::write_out(cs.memory_resident_data(), (const void*)&mrd, sizeof(MemoryResidentData)))
+    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
       return false;
 
-    if (!File::copy(cs.source_data(), cs.streaming_data()))
+    if (!File::copy(input.data, output.streaming_data))
       return false;
 
     return true;

@@ -61,8 +61,8 @@ namespace butane {
   }
 
   bool PixelShader::compile(
-    const Resource::Compiler::Source& src,
-    const Resource::Compiler::Stream& cs )
+    const Resource::Compiler::Input& input,
+    const Resource::Compiler::Output& output )
   {
     const LogScope _("D3D11PixelShader::compile");
 
@@ -85,7 +85,7 @@ namespace butane {
   #endif
 
     size_t shader_len = 0;
-    void* shader = File::read_in(cs.source_data(), Allocators::heap(), &shader_len);
+    void* shader = File::read_in(input.data, Allocators::heap(), &shader_len);
 
     if (!shader)
       return false;
@@ -94,10 +94,10 @@ namespace butane {
     ID3DBlob* err_blob = nullptr;
 
     D3DInclude include;
-    include.src = src;
+    include.input = input;
 
     const HRESULT hr = D3DCompile(
-      shader, shader_len, src.path,
+      shader, shader_len, input.path,
       &defines[0], &include,
       "ps_main", "ps_4_0",
       flags, 0, &blob, &err_blob);
@@ -114,11 +114,11 @@ namespace butane {
     MemoryResidentData mrd;
     mrd.byte_code_len = blob->GetBufferSize();
 
-    if (!File::write_out(cs.memory_resident_data(), (const void*)&mrd, offsetof(MemoryResidentData, byte_code))) {
+    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, offsetof(MemoryResidentData, byte_code))) {
       blob->Release();
       return false; }
 
-    if (!File::write_out(cs.memory_resident_data(), (const void*)blob->GetBufferPointer(), blob->GetBufferSize())) {
+    if (!File::write_out(output.memory_resident_data, (const void*)blob->GetBufferPointer(), blob->GetBufferSize())) {
       blob->Release();
       return false; }
 

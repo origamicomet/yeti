@@ -37,7 +37,7 @@ namespace butane {
       return E_NOTIMPL;
 
     const String path =
-      String::format(Allocators::scratch(), "%s/%s", src.root, requested_path);
+      String::format(Allocators::scratch(), "%s/%s", input.root, requested_path);
 
     FILE* fh = File::open(path.raw(), "rb");
     if (!fh)

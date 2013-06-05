@@ -43,7 +43,7 @@ namespace butane {
         LPCVOID buffer );
 
     public:
-      Resource::Compiler::Source src;
+      Resource::Compiler::Input input;
   };
 } // butane
 

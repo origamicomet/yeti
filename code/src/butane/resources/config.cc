@@ -58,14 +58,14 @@ namespace butane {
   }
 
   bool ConfigResource::compile(
-    const Resource::Compiler::Source& src,
-    const Resource::Compiler::Stream& cs )
+    const Resource::Compiler::Input& input,
+    const Resource::Compiler::Output& output )
   {
     const LogScope _("ConfigResource::compile");
 
     size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(cs.source_data(), allocator(), &sjson_len);
+      (const char*)File::read_in(input.data, allocator(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 13 /* 8kb */);
     blob.resize(blob.reserved());
@@ -78,7 +78,7 @@ namespace butane {
 
     allocator().free((void*)sjson);
 
-    if (!File::write_out(cs.memory_resident_data(), (void*)&blob[0], blob.size()))
+    if (!File::write_out(output.memory_resident_data, (void*)&blob[0], blob.size()))
       return false;
 
     return true;

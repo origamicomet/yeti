@@ -57,14 +57,14 @@ namespace butane {
   }
 
   bool ShaderResource::compile(
-    const Resource::Compiler::Source& src,
-    const Resource::Compiler::Stream& cs )
+    const Resource::Compiler::Input& input,
+    const Resource::Compiler::Output& output )
   {
     const LogScope _("ShaderResource::compile");
 
     size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(cs.source_data(), allocator(), &sjson_len);
+      (const char*)File::read_in(input.data, allocator(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 12 /* 4kb */);
     blob.resize(blob.reserved());
@@ -87,7 +87,7 @@ namespace butane {
         log("Layer not specified!");
         return false; }
       const Hash<uint32_t, murmur_hash> name(layer->raw());
-      if (!File::write_out(cs.memory_resident_data(), (void*)&name, sizeof(name)))
+      if (!File::write_out(output.memory_resident_data, (void*)&name, sizeof(name)))
         return false;
     }
 
@@ -98,7 +98,7 @@ namespace butane {
         log("Vertex shader not specified!");
         return false; }
       const Resource::Id id(VertexShader::type, vs->raw());
-      if (!File::write_out(cs.memory_resident_data(), (void*)&id, sizeof(id)))
+      if (!File::write_out(output.memory_resident_data, (void*)&id, sizeof(id)))
         return false;
     }
 
@@ -109,7 +109,7 @@ namespace butane {
         log("Pixel shader not specified!");
         return false; }
       const Resource::Id id(VertexShader::type, ps->raw());
-      if (!File::write_out(cs.memory_resident_data(), (void*)&id, sizeof(id)))
+      if (!File::write_out(output.memory_resident_data, (void*)&id, sizeof(id)))
         return false;
     }
 

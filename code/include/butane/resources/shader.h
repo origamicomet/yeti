@@ -37,8 +37,8 @@ namespace butane {
         ShaderResource* config );
 
       static bool compile(
-        const Resource::Compiler::Source& src,
-        const Resource::Compiler::Stream& cs );
+        const Resource::Compiler::Input& input,
+        const Resource::Compiler::Output& output );
 
     public:
       FOUNDATION_INLINE Hash<uint32_t, murmur_hash> layer() const
