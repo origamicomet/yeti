@@ -119,7 +119,7 @@ namespace butane {
         bit = VertexDeclaration::NORMAL;
       else if (strncmp("TANGENT", &component[0], 7) == 0)
         bit = VertexDeclaration::TANGENT;
-      else if (strncmp("BINORMAL", &component[0], 8) == 0)
+      else if (strncmp("BITANGENT", &component[0], 8) == 0)
         bit = VertexDeclaration::BITANGENT;
       // else if (strncmp("BONEINDICES", &component[0], 11) == 0)
       //   bit = VertexDeclaration::BONEINDICES;
