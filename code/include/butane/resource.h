@@ -16,12 +16,15 @@ namespace butane {
       class Compiler;
       class Type;
       class Stream;
+      template <typename T>
+      class Handle;
 
       #include <butane/resource/id.h>
       #include <butane/resource/database.h>
       #include <butane/resource/compiler.h>
       #include <butane/resource/type.h>
       #include <butane/resource/stream.h>
+      #include <butane/resource/handle.h>
 
     protected:
       Resource(
@@ -31,6 +34,14 @@ namespace butane {
       virtual ~Resource();
 
     public:
+      static Resource* find(
+        const Type& type,
+        const char* path );
+
+      static Resource* find(
+        const Type& type,
+        const Id id );
+
       static Resource* load(
         const Type& type,
         const char* path );

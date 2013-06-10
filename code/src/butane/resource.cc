@@ -17,6 +17,26 @@ namespace butane {
   {
   }
 
+  Resource* Resource::find(
+    const Type& type,
+    const char* path )
+  {
+    assert(path != nullptr);
+    return Resource::find(type, Id(type, path));
+  }
+
+  Resource* Resource::find(
+    const Type& type,
+    Id id )
+  {
+    const LogScope log_scope("Resource::find");
+    Resource* resource;
+    if (Resources::loaded().find(id, resource) && resource) {
+      resource->reference();
+      return resource; }
+    return nullptr;
+  }
+
   Resource* Resource::load(
     const Type& type,
     const char* path )
