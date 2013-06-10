@@ -132,14 +132,14 @@ class Mesh(Node):
             if len(face.vertices) == 4:
               v[3].texcoord[coords.image.render_slot] = (coords.uv4[0], coords.uv4[1], 0.0)
 
-      mesh.indicies.append(face.vertices[0])
-      mesh.indicies.append(face.vertices[1])
       mesh.indicies.append(face.vertices[2])
+      mesh.indicies.append(face.vertices[1])
+      mesh.indicies.append(face.vertices[0])
 
       if len(face.vertices) == 4:
-        mesh.indicies.append(face.vertices[2])
-        mesh.indicies.append(face.vertices[3])
         mesh.indicies.append(face.vertices[0])
+        mesh.indicies.append(face.vertices[3])
+        mesh.indicies.append(face.vertices[2])
 
     if properties.export_tangents_and_bitangents:
       mesh.__calculate_tangents_and_bitangents()

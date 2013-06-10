@@ -47,18 +47,20 @@ namespace butane {
 
     mesh->_vertex_declaration = mrd.vertex_declaration;
 
-    mesh->_materials.resize(mrd.num_of_materials);
-
     const MemoryResidentData::Material* materials =
-      ((const MemoryResidentData::Material*)((uintptr_t)&mrd) + sizeof(MemoryResidentData));
+      ((const MemoryResidentData::Material*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData)));
 
+    mesh->_materials.resize(mrd.num_of_materials);
     for (size_t m = 0; m < mrd.num_of_materials; ++m) {
       mesh->_materials[m].name = materials[m].name;
-
+      mesh->_materials[m].shader = materials[m].shader;
+      mesh->_materials[m].num_of_textures = 0;
       for (size_t t = 0; t < 8; ++t) {
         if (materials[m].textures[t] == Resource::Id())
           break;
-        mesh->_materials[m].textures[t] = materials[m].textures[t]; }
+        mesh->_materials[m].textures[t] = materials[m].textures[t];
+        ++mesh->_materials[m].num_of_textures;
+      }
     }
 
     const void* vertices =
@@ -181,7 +183,7 @@ namespace butane {
       }
     }
 
-    if (!File::write_out(output.memory_resident_data, materials.raw(), mrd.num_of_materials * sizeof(Material)))
+    if (!File::write_out(output.memory_resident_data, materials.raw(), max(mrd.num_of_materials, (size_t)1) * sizeof(MemoryResidentData::Material)))
       return false;
 
     for (uint32_t v = 0; v < mrd.num_of_vertices; ++v) {
@@ -195,10 +197,10 @@ namespace butane {
 
       for (uint32_t channel = 0; channel < 8; ++channel) {
         if (mrd.vertex_declaration & (VertexDeclaration::COLOR0 << channel)) {
-          float rgb[3];
-          if (fscanf(input.data, "%f %f %f", &rgb[0], &rgb[1], &rgb[2]) != 3)
+          float rgba[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+          if (fscanf(input.data, "%f %f %f", &rgba[0], &rgba[1], &rgba[2]) != 3)
             return false;
-          if (!File::write_out(output.memory_resident_data, (const void*)&rgb[0], 12))
+          if (!File::write_out(output.memory_resident_data, (const void*)&rgba[0], 16))
             return false; }
       }
 
