@@ -65,18 +65,18 @@ namespace butane {
 
     size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(input.data, allocator(), &sjson_len);
+      (const char*)File::read_in(input.data, Allocators::heap(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 13 /* 8kb */);
     blob.resize(blob.reserved());
     zero((void*)blob.raw(), blob.size());
-    sjson::Parser parser(allocator(), (void*)&blob[0], blob.size());
+    sjson::Parser parser(Allocators::heap(), (void*)&blob[0], blob.size());
 
     if (!parser.parse(sjson, sjson_len)) {
-      allocator().free((void*)sjson);
+      Allocators::heap().free((void*)sjson);
       return false; }
 
-    allocator().free((void*)sjson);
+    Allocators::heap().free((void*)sjson);
 
     if (!File::write_out(output.memory_resident_data, (void*)&blob[0], blob.size()))
       return false;
