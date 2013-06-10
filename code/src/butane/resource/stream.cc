@@ -33,10 +33,10 @@ namespace butane {
     const String streaming_data_path =
       String::format(Allocators::scratch(), "%s/streaming_data", streams_dir.raw());
 
-    FILE* streaming_data =
+    _streaming_data =
       File::open(streaming_data_path.raw(), "rb");
 
-    if (!memory_resident_data && !streaming_data)
+    if (!memory_resident_data && !_streaming_data)
       fail("No streams exist in '%s'!", streams_dir.raw());
 
     _memory_resident_data =
@@ -46,7 +46,7 @@ namespace butane {
       fail("Unable to load memory-resident data from '%s'!", streams_dir.raw());
 
     if (memory_resident_data)
-      fclose(memory_resident_data);    
+      fclose(memory_resident_data);
   }
 
   Resource::Stream::~Stream()
