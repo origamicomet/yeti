@@ -28,8 +28,10 @@ namespace butane {
   {
     if (_resource)
       _resource->Release();
+    _resource = nullptr;
     if (_srv)
-      _resource->Release();
+      _srv->Release();
+    _srv = nullptr;
   }
 
   static D3D11_USAGE d3d11_usage_from_flags(

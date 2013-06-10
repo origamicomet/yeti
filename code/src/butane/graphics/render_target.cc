@@ -14,5 +14,6 @@ namespace butane {
   {
     if (_texture)
       _texture->destroy();
+    _texture = nullptr;
   }
 } // butane

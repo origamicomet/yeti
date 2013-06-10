@@ -31,6 +31,7 @@ namespace butane {
   {
     if (_interface)
       _interface->Release();
+    _interface = nullptr;
   }
 
   SwapChain* SwapChain::create(

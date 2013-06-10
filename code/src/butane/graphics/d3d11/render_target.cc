@@ -23,6 +23,7 @@ namespace butane {
   {
     if (_view)
       _view->Release();
+    _view = nullptr;
   }
 
   RenderTarget* RenderTarget::create(
