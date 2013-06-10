@@ -25,6 +25,14 @@ namespace butane {
   extern BUTANE_EXPORT DXGI_FORMAT dxgi_format_from_pixel_format(
     const PixelFormat pixel_format );
 
+  // Converts a butane::PixelFormat to a typeless DXGI_FORMAT.
+  extern BUTANE_EXPORT DXGI_FORMAT dxgi_typeless_format_from_pixel_format(
+    const PixelFormat pixel_format );
+
+  // Converts a butane::PixelFormat to a samplable DXGI_FORMAT.
+  extern BUTANE_EXPORT DXGI_FORMAT dxgi_samplable_format_from_pixel_format(
+    const PixelFormat pixel_format );
+
   // See butane/graphics/d3d11/{vertex,pixel,...}_shader.cc for usage.
   class BUTANE_EXPORT D3DInclude final
     : public ID3DInclude

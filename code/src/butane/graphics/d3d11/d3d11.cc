@@ -25,6 +25,46 @@ namespace butane {
     return DXGI_FORMAT_UNKNOWN;
   }
 
+  DXGI_FORMAT dxgi_typeless_format_from_pixel_format(
+    const PixelFormat pixel_format )
+  {
+    switch (pixel_format) {
+      case PixelFormat::R8G8B8A8:
+      case PixelFormat::R8G8B8A8_SRGB:
+        return DXGI_FORMAT_R8G8B8A8_TYPELESS;
+      case PixelFormat::DXT1:
+        return DXGI_FORMAT_BC1_TYPELESS;
+      case PixelFormat::DXT3:
+        return DXGI_FORMAT_BC2_TYPELESS;
+      case PixelFormat::DXT5:
+        return DXGI_FORMAT_BC3_TYPELESS;
+      case PixelFormat::D24S8:
+        return DXGI_FORMAT_R24G8_TYPELESS; }
+
+    __builtin_unreachable();
+    return DXGI_FORMAT_UNKNOWN;
+  }
+
+  DXGI_FORMAT dxgi_samplable_format_from_pixel_format(
+    const PixelFormat pixel_format )
+  {
+    switch (pixel_format) {
+      case PixelFormat::R8G8B8A8:
+      case PixelFormat::R8G8B8A8_SRGB:
+        return DXGI_FORMAT_R8G8B8A8_UNORM;
+      case PixelFormat::DXT1:
+        return DXGI_FORMAT_BC1_UNORM;
+      case PixelFormat::DXT3:
+        return DXGI_FORMAT_BC2_UNORM;
+      case PixelFormat::DXT5:
+        return DXGI_FORMAT_BC3_UNORM;
+      case PixelFormat::D24S8:
+        return DXGI_FORMAT_R24_UNORM_X8_TYPELESS; }
+
+    __builtin_unreachable();
+    return DXGI_FORMAT_UNKNOWN;
+  }
+
   HRESULT D3DInclude::Open(
     D3D_INCLUDE_TYPE include_type,
     LPCSTR requested_path,
