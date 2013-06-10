@@ -26,6 +26,9 @@ namespace butane {
       FOUNDATION_INLINE ID3D11VertexShader* resource() const
       { return _resource; }
 
+      FOUNDATION_INLINE const Array<uint8_t> byte_code() const
+      { return _byte_code; }
+
     private:
       ID3D11VertexShader* _resource;
       Array<uint8_t> _byte_code;

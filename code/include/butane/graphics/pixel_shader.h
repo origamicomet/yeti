@@ -15,7 +15,7 @@ namespace butane {
     private:
       struct MemoryResidentData {
         uint32_t byte_code_len;
-        uint8_t byte_code[1];
+        // uint8_t byte_code[byte_code_len];
       };
 
     public:

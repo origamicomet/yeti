@@ -24,6 +24,7 @@ namespace butane {
   {
     if (_resource)
       _resource->Release();
+    _resource = nullptr;
   }
 
   VertexShader* VertexShader::load(
@@ -40,14 +41,16 @@ namespace butane {
 
     vertex_shader->_vertex_declaration = mrd.vertex_declaration;
     vertex_shader->_byte_code.resize(mrd.byte_code_len);
-    copy((void*)vertex_shader->_byte_code.raw(), (const void*)&mrd.byte_code[0], mrd.byte_code_len);
+    const void* byte_code =
+      (const void*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData));
+    copy((void*)vertex_shader->_byte_code.raw(), byte_code, mrd.byte_code_len);
 
     D3D11RenderDevice* render_device =
       ((D3D11RenderDevice*)Application::render_device());
 
     /* vertex_shader->_resource */ {
       const HRESULT hr = render_device->device()->CreateVertexShader(
-        (const void*)&mrd.byte_code[0], mrd.byte_code_len, NULL, &vertex_shader->_resource);
+        byte_code, mrd.byte_code_len, NULL, &vertex_shader->_resource);
 
       if (FAILED(hr))
         fail("ID3D11Device::CreateVertexShader failed, hr=%#08x", hr);
@@ -190,7 +193,7 @@ namespace butane {
 
     shader_refl->Release();
 
-    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, offsetof(MemoryResidentData, byte_code))) {
+    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
       blob->Release();
       return false; }
 
