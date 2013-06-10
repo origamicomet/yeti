@@ -1,0 +1,21 @@
+rasterizer = {
+}
+
+depth_stencil = {
+}
+
+blending = {
+  enabled = false,
+
+  color = {
+    src = "one"
+    dest = "zero"
+    op = "add"
+  }
+
+  alpha = {
+    src = "one"
+    dest = "zero"
+    op = "add"
+  }
+}

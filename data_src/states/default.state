@@ -1,0 +1,7 @@
+rasterizer = {
+  cull = "none"
+}
+
+blending = {
+  enabled = false
+}
