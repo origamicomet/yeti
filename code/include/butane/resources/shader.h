@@ -5,6 +5,9 @@
 #define _BUTANE_SHADER_RESOURCE_H_
 
 #include <butane/resource.h>
+#include <butane/resources/state.h>
+#include <butane/graphics/vertex_shader.h>
+#include <butane/graphics/pixel_shader.h>
 
 namespace butane {
   class BUTANE_EXPORT ShaderResource final
@@ -15,6 +18,7 @@ namespace butane {
     private:
       struct MemoryResidentData {
         Hash<uint32_t, murmur_hash> layer;
+        Resource::Id state;
         Resource::Id vertex_shader;
         Resource::Id pixel_shader;
       };
@@ -34,7 +38,7 @@ namespace butane {
         const Resource::Stream& stream );
 
       static void unload(
-        ShaderResource* config );
+        ShaderResource* shader );
 
       static bool compile(
         const Resource::Compiler::Input& input,
@@ -44,16 +48,20 @@ namespace butane {
       FOUNDATION_INLINE Hash<uint32_t, murmur_hash> layer() const
       { return _layer; }
 
-      FOUNDATION_INLINE Resource::Id vertex_shader() const
+      FOUNDATION_INLINE Resource::Handle<StateResource> state() const
+      { return _state; }
+
+      FOUNDATION_INLINE Resource::Handle<VertexShader> vertex_shader() const
       { return _vertex_shader; }
 
-      FOUNDATION_INLINE Resource::Id pixel_shader() const
+      FOUNDATION_INLINE Resource::Handle<PixelShader> pixel_shader() const
       { return _pixel_shader; }
 
     private:
       Hash<uint32_t, murmur_hash> _layer;
-      Resource::Id _vertex_shader;
-      Resource::Id _pixel_shader;
+      Resource::Handle<StateResource> _state;
+      Resource::Handle<VertexShader> _vertex_shader;
+      Resource::Handle<PixelShader> _pixel_shader;
   };
 } // butane
 

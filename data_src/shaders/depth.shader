@@ -1,3 +1,4 @@
 layer = "depth"
-vertex = "shaders/depth.vs"
-pixel = "shaders/none.ps"
+state = "states/depth"
+vertex = "shaders/depth"
+pixel = "shaders/none"

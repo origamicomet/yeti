@@ -41,6 +41,7 @@ namespace butane {
       make_new(ShaderResource, allocator())(id);
 
     shader->_layer = mrd.layer;
+    shader->_state = mrd.state;
     shader->_vertex_shader = mrd.vertex_shader;
     shader->_pixel_shader = mrd.pixel_shader;
 
@@ -64,21 +65,23 @@ namespace butane {
 
     size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(input.data, allocator(), &sjson_len);
+      (const char*)File::read_in(input.data, Allocators::heap(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 12 /* 4kb */);
     blob.resize(blob.reserved());
     zero((void*)blob.raw(), blob.size());
-    sjson::Parser parser(allocator(), (void*)&blob[0], blob.size());
+    sjson::Parser parser(Allocators::heap(), (void*)&blob[0], blob.size());
 
     if (!parser.parse(sjson, sjson_len)) {
-      allocator().free((void*)sjson);
+      Allocators::heap().free((void*)sjson);
       return false; }
 
-    allocator().free((void*)sjson);
+    Allocators::heap().free((void*)sjson);
 
     const sjson::Object* root =
       (const sjson::Object*)&blob[0];
+
+    MemoryResidentData mrd;
 
     /* layer = */ {
       const sjson::String* layer =
@@ -86,9 +89,16 @@ namespace butane {
       if (!layer || !layer->is_string()) {
         log("Layer not specified!");
         return false; }
-      const Hash<uint32_t, murmur_hash> name(layer->raw());
-      if (!File::write_out(output.memory_resident_data, (void*)&name, sizeof(name)))
-        return false;
+      mrd.layer = Hash<uint32_t, murmur_hash>(layer->raw());
+    }
+
+    /* state = */ {
+      const sjson::String* state =
+        (const sjson::String*)root->find("state");
+      if (!state || !state->is_string()) {
+        log("State not specified!");
+        return false; }
+      mrd.state = Resource::Id(StateResource::type, state->raw());
     }
 
     /* vertex shader = */ {
@@ -97,9 +107,7 @@ namespace butane {
       if (!vs || !vs->is_string()) {
         log("Vertex shader not specified!");
         return false; }
-      const Resource::Id id(VertexShader::type, vs->raw());
-      if (!File::write_out(output.memory_resident_data, (void*)&id, sizeof(id)))
-        return false;
+      mrd.vertex_shader = Resource::Id(VertexShader::type, vs->raw());
     }
 
     /* pixel shader = */ {
@@ -108,10 +116,11 @@ namespace butane {
       if (!ps || !ps->is_string()) {
         log("Pixel shader not specified!");
         return false; }
-      const Resource::Id id(VertexShader::type, ps->raw());
-      if (!File::write_out(output.memory_resident_data, (void*)&id, sizeof(id)))
-        return false;
+      mrd.pixel_shader = Resource::Id(PixelShader::type, ps->raw());
     }
+
+    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
+      return false;
 
     return true;
   }
