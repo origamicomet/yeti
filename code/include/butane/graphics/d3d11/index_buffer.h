@@ -29,7 +29,7 @@ namespace butane {
         const size_t data_len ) override;
 
     public:
-      FOUNDATION_INLINE ID3D11Resource* resource() const
+      FOUNDATION_INLINE ID3D11Buffer* resource() const
       { return _resource; }
 
     private:

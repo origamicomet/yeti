@@ -21,6 +21,7 @@ namespace butane {
   {
     if (_resource)
       _resource->Release();
+    _resource = nullptr;
   }
 
   VertexBuffer* VertexBuffer::create(
@@ -38,7 +39,7 @@ namespace butane {
     bd.ByteWidth           = data_len;
     bd.Usage               = immutable ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
     bd.BindFlags           = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags      = immutable ? D3D11_CPU_ACCESS_WRITE : 0;
+    bd.CPUAccessFlags      = immutable ? 0 : D3D11_CPU_ACCESS_WRITE;
     bd.MiscFlags           = 0;
     bd.StructureByteStride = 0;
 
