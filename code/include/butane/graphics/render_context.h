@@ -6,9 +6,23 @@
 
 #include <butane/butane.h>
 #include <butane/math.h>
+#include <butane/graphics/vertex_declaration.h>
+#include <butane/graphics/topology.h>
+#include <butane/graphics/viewport.h>
+#include <butane/resources/shader.h>
 
 namespace butane {
   class SwapChain;
+  class RasterizerState;
+  class DepthStencilState;
+  class BlendState;
+  class IndexBuffer;
+  class VertexBuffer;
+  class ConstantBuffer;
+  class Sampler;
+  class Texture;
+  class VertexShader;
+  class PixelShader;
   class RenderTarget;
   class DepthStencilTarget;
   class BUTANE_EXPORT RenderContext final {
@@ -53,6 +67,17 @@ namespace butane {
       ~RenderContext();
 
     public:
+      void set_render_and_depth_stencil_targets(
+        const Command::Key key,
+        size_t num_of_render_targets,
+        RenderTarget** render_targets,
+        DepthStencilTarget* depth_stencil_target );
+
+      void set_viewports(
+        const Command::Key key,
+        size_t num_of_viewports,
+        const Viewport* viewports );
+
       void clear(
         const Command::Key key,
         RenderTarget* render_target,
@@ -64,11 +89,23 @@ namespace butane {
         const float to_depth,
         const uint32_t to_stencil );
 
-      void bind_render_and_depth_stencil_views(
+      void draw(
         const Command::Key key,
-        size_t num_of_render_targets,
-        RenderTarget** render_targets,
-        DepthStencilTarget* depth_stencil_target );
+        RasterizerState* rasterizer_state,
+        DepthStencilState* depth_stencil_state,
+        BlendState* blend_state,
+        VertexShader* vertex_shader,
+        PixelShader* pixel_shader,
+        size_t num_of_samplers_and_textures,
+        Sampler** samplers,
+        Texture** textures,
+        VertexDeclaration vertex_declaration,
+        VertexBuffer* verticies,
+        IndexBuffer* indicies,
+        size_t num_of_constants,
+        ConstantBuffer** constants,
+        Topology topology,
+        size_t num_of_primitives );
 
       void present(
         const Command::Key key,

@@ -11,6 +11,13 @@
 #include <butane/window.h>
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
+#include <butane/graphics/render_context.h>
+
+#include <butane/resources/shader.h>
+#include <butane/resources/state.h>
+#include <butane/resources/mesh.h>
+#include <butane/graphics/render_target.h>
+#include <butane/graphics/depth_stencil_target.h>
 
 namespace butane {
 namespace Application {
@@ -87,14 +94,41 @@ namespace Application {
       swap_chains() += Pair<uint32_t, SwapChain*>(0, swap_chain);
     }
 
+    DepthStencilTarget* depth = DepthStencilTarget::create(
+      PixelFormat::D24S8, swap_chain->width(), swap_chain->height());
+
+    MeshResource* mesh = (MeshResource*)Resource::load(MeshResource::type, "units/splash/plane");
+    ShaderResource* shader = *(mesh->materials()[0].shader);
+    StateResource* state = *(shader->state());
+
     window->set_on_closed_handler(&on_window_closed);
     window->show();
 
     manifest->dereference();
 
     RenderContext rc;
-    rc.clear(0, swap_chain->render_target(), Vec4f(1.0f, 0.0f, 0.5f, 1.0f));
-    rc.present(1, swap_chain);
+
+    RenderTarget* render_targets[1] = { swap_chain->render_target() };
+    rc.set_render_and_depth_stencil_targets(
+      0, 1, &render_targets[0], depth);
+
+    const Viewport viewports[1] = {
+      Viewport(0, 0, 720, 1280)
+    };
+
+    rc.set_viewports(1, 1, &viewports[0]);
+
+    rc.clear(2, swap_chain->render_target(), Vec4f(1.0f, 0.0f, 0.5f, 1.0f));
+    rc.clear(3, depth, 1.0f, 0x00000000u);
+
+    rc.draw(
+      4, state->rasterizer_state(), state->depth_stencil_state(), state->blend_state(),
+      shader->vertex_shader(), shader->pixel_shader(),
+      0 /* mesh->materials()[0].num_of_textures */, nullptr, nullptr,
+      mesh->vertex_declaration(), mesh->vertices(), mesh->indicies(),
+      0, nullptr, Topology::TRIANGLES, mesh->num_of_primitives());
+
+    rc.present(5, swap_chain);
 
     while (true) {
       window->update();

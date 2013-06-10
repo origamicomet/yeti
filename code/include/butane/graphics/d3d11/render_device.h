@@ -6,8 +6,10 @@
 
 #include <butane/graphics/d3d11/d3d11.h>
 #include <butane/graphics/render_device.h>
+#include <butane/graphics/vertex_declaration.h>
 
 namespace butane {
+  class VertexShader;
   class BUTANE_EXPORT D3D11RenderDevice final
     : public RenderDevice
   {
@@ -20,10 +22,12 @@ namespace butane {
       struct Command {
         public:
           enum Type {
-            CLEAR_RENDER_TARGET_VIEW            = 1,
-            CLEAR_DEPTH_STENCIL_VIEW            = 2,
-            BIND_RENDER_AND_DEPTH_STENCIL_VIEWS = 4,
-            PRESENT                             = 3
+            BIND_RENDER_AND_DEPTH_STENCIL_VIEWS = 1,
+            SET_VIEWPORTS                       = 2,
+            CLEAR_RENDER_TARGET_VIEW            = 3,
+            CLEAR_DEPTH_STENCIL_VIEW            = 4,
+            DRAW                                = 5,
+            PRESENT                             = 6
           };
 
         protected:
@@ -40,6 +44,33 @@ namespace butane {
         __foundation_trait(Commands, non_copyable);
 
         public:
+          struct BindRenderAndDepthStencilViews final
+            : public Command
+          {
+            public:
+              BindRenderAndDepthStencilViews()
+                : Command(Command::BIND_RENDER_AND_DEPTH_STENCIL_VIEWS)
+              {}
+
+            public:
+              UINT num_of_render_target_views;
+              ID3D11RenderTargetView* render_target_views[8];
+              ID3D11DepthStencilView* depth_stencil_view;
+          };
+
+          struct SetViewports final
+            : public Command
+          {
+            public:
+              SetViewports()
+                : Command(Command::SET_VIEWPORTS)
+              {}
+
+            public:
+              UINT num_of_viewports;
+              D3D11_VIEWPORT viewports[8];
+          };
+
           struct ClearRenderTargetView final
             : public Command
           {
@@ -67,18 +98,31 @@ namespace butane {
               uint32_t stencil;
           };
 
-          struct BindRenderAndDepthStencilViews final
+          struct Draw final
             : public Command
           {
             public:
-              BindRenderAndDepthStencilViews()
-                : Command(Command::BIND_RENDER_AND_DEPTH_STENCIL_VIEWS)
+              Draw()
+                : Command(Command::DRAW)
               {}
 
             public:
-              size_t num_of_render_target_views;
-              ID3D11RenderTargetView* render_target_views[8];
-              ID3D11DepthStencilView* depth_stencil_view;
+              ID3D11RasterizerState* rasterizer_state;
+              ID3D11DepthStencilState* depth_stencil_state;
+              ID3D11BlendState* blend_state;
+              UINT num_of_samplers_and_textures;
+              ID3D11SamplerState* samplers[8];
+              ID3D11ShaderResourceView* textures[8];
+              ID3D11VertexShader* vertex_shader;
+              ID3D11PixelShader* pixel_shader;
+              UINT stride;
+              ID3D11InputLayout* input_layout;
+              ID3D11Buffer* index_buffer;
+              ID3D11Buffer* vertex_buffer;
+              UINT num_of_constant_buffers;
+              ID3D11Buffer* constant_buffers[8];
+              D3D11_PRIMITIVE_TOPOLOGY topology;
+              UINT num_of_indicies;
           };
 
           struct Present final
@@ -111,6 +155,11 @@ namespace butane {
       void dispatch(
         const Command& command );
 
+    public: /* private */
+      ID3D11InputLayout* find_or_create_input_layout(
+        const VertexDeclaration input,
+        const VertexShader* shader );
+
     public:
       FOUNDATION_INLINE IDXGIFactory* factory() const
       { return _factory; }
@@ -129,6 +178,7 @@ namespace butane {
       IDXGIAdapter* _adapter;
       ID3D11Device* _device;
       ID3D11DeviceContext* _context;
+      HashTable<uint64_t, ID3D11InputLayout*> _input_layout_cache;
   };
 } // butane
 

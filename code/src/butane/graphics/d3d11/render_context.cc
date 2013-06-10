@@ -3,12 +3,74 @@
 
 #include <butane/graphics/d3d11/render_context.h>
 
+#include <butane/application.h>
+#include <butane/graphics/d3d11/render_device.h>
 #include <butane/graphics/d3d11/swap_chain.h>
+#include <butane/graphics/d3d11/rasterizer_state.h>
+#include <butane/graphics/d3d11/depth_stencil_state.h>
+#include <butane/graphics/d3d11/blend_state.h>
+#include <butane/graphics/d3d11/index_buffer.h>
+#include <butane/graphics/d3d11/vertex_buffer.h>
+#include <butane/graphics/d3d11/constant_buffer.h>
+#include <butane/graphics/d3d11/sampler.h>
+#include <butane/graphics/d3d11/texture.h>
+#include <butane/graphics/d3d11/vertex_shader.h>
+#include <butane/graphics/d3d11/pixel_shader.h>
 #include <butane/graphics/d3d11/render_target.h>
 #include <butane/graphics/d3d11/depth_stencil_target.h>
-#include <butane/graphics/d3d11/render_device.h>
 
 namespace butane {
+  void RenderContext::set_render_and_depth_stencil_targets(
+    const Command::Key key,
+    size_t num_of_render_targets,
+    RenderTarget** render_targets,
+    DepthStencilTarget* depth_stencil_target )
+  {
+    assert((num_of_render_targets > 0) ? (render_targets != nullptr) : true);
+
+    D3D11RenderDevice::Commands::BindRenderAndDepthStencilViews cmd;
+
+    D3D11RenderTarget** render_targets_ =
+      ((D3D11RenderTarget**)render_targets);
+
+    cmd.num_of_render_target_views = num_of_render_targets;
+
+    for (size_t i = 0; i < num_of_render_targets; ++i)
+      cmd.render_target_views[i] = render_targets_[i]->view();
+
+    D3D11DepthStencilTarget* depth_stencil_target_ =
+      ((D3D11DepthStencilTarget*)depth_stencil_target);
+
+    cmd.depth_stencil_view =
+      depth_stencil_target_ ? depth_stencil_target_->view() : nullptr;
+
+    command(key, (const void*)&cmd, sizeof(cmd));
+  }
+
+  void RenderContext::set_viewports(
+    const Command::Key key,
+    size_t num_of_viewports,
+    const Viewport* viewports )
+  {
+    assert(num_of_viewports > 0);
+    assert(num_of_viewports <= 8);
+    assert(viewports != nullptr);
+
+    D3D11RenderDevice::Commands::SetViewports cmd;
+
+    cmd.num_of_viewports = num_of_viewports;
+    for (size_t i = 0; i < num_of_viewports; ++i) {
+      cmd.viewports[i].TopLeftX = viewports[i].left();
+      cmd.viewports[i].TopLeftY = viewports[i].top();
+      cmd.viewports[i].Width    = viewports[i].width();
+      cmd.viewports[i].Height   = viewports[i].height();
+      cmd.viewports[i].MinDepth = 0.0f;
+      cmd.viewports[i].MaxDepth = 1.0f;
+    }
+
+    command(key, (const void*)&cmd, sizeof(cmd));
+  }
+
   void RenderContext::clear(
     const Command::Key key,
     RenderTarget* render_target,
@@ -39,29 +101,77 @@ namespace butane {
     command(key, (const void*)&cmd, sizeof(cmd));
   }
 
-  void RenderContext::bind_render_and_depth_stencil_views(
+  void RenderContext::draw(
     const Command::Key key,
-    size_t num_of_render_targets,
-    RenderTarget** render_targets,
-    DepthStencilTarget* depth_stencil_target )
+    RasterizerState* rasterizer_state,
+    DepthStencilState* depth_stencil_state,
+    BlendState* blend_state,
+    VertexShader* vertex_shader,
+    PixelShader* pixel_shader,
+    size_t num_of_samplers_and_textures,
+    Sampler** samplers,
+    Texture** textures,
+    VertexDeclaration vertex_declaration,
+    VertexBuffer* verticies,
+    IndexBuffer* indicies,
+    size_t num_of_constants,
+    ConstantBuffer** constants,
+    Topology topology,
+    size_t num_of_primitives )
   {
-    assert((num_of_render_targets > 0) ? (render_targets != nullptr) : true);
+    assert(rasterizer_state != nullptr);
+    assert(depth_stencil_state != nullptr);
+    assert(blend_state != nullptr);
+    assert(vertex_shader != nullptr);
+    assert(pixel_shader != nullptr);
+    assert(num_of_samplers_and_textures <= 8);
+    assert((num_of_samplers_and_textures > 0) ? (samplers != nullptr) : true);
+    assert((num_of_samplers_and_textures > 0) ? (textures != nullptr) : true);
+    assert(vertex_declaration != 0);
+    assert(verticies != nullptr);
+    assert(indicies != nullptr);
+    assert((num_of_constants > 0) ? (constants != nullptr) : true);
+    assert(num_of_constants <= 8);
+    assert(topology != Topology::INVALID);
+    assert(num_of_primitives > 0);
 
-    D3D11RenderDevice::Commands::BindRenderAndDepthStencilViews cmd;
+    D3D11RenderDevice::Commands::Draw cmd;
+    cmd.rasterizer_state = ((D3D11RasterizerState*)rasterizer_state)->interface();
+    cmd.depth_stencil_state = ((D3D11DepthStencilState*)depth_stencil_state)->interface();
+    cmd.blend_state = ((D3D11BlendState*)blend_state)->interface();
 
-    D3D11RenderTarget** render_targets_ =
-      ((D3D11RenderTarget**)render_targets);
+    cmd.num_of_samplers_and_textures = num_of_samplers_and_textures;
+    D3D11Sampler** samplers_ = ((D3D11Sampler**)samplers);
+    D3D11Texture** textures_ = ((D3D11Texture**)textures);
+    for (size_t i = 0; i < num_of_samplers_and_textures; ++i) {
+      cmd.samplers[i] = samplers_[i]->interface();
+      cmd.textures[i] = textures_[i]->srv(); }
 
-    cmd.num_of_render_target_views = num_of_render_targets;
+    cmd.vertex_shader = ((D3D11VertexShader*)vertex_shader)->resource();
+    cmd.pixel_shader = ((D3D11PixelShader*)pixel_shader)->resource();
 
-    for (size_t i = 0; i < num_of_render_targets; ++i)
-      cmd.render_target_views[i] = render_targets_[i]->view();
+    cmd.stride = vertex_declaration.size();
 
-    D3D11DepthStencilTarget* depth_stencil_target_ =
-      ((D3D11DepthStencilTarget*)depth_stencil_target);
+    D3D11RenderDevice* render_device =
+      ((D3D11RenderDevice*)Application::render_device());
 
-    cmd.depth_stencil_view =
-      depth_stencil_target_ ? depth_stencil_target_->view() : nullptr;
+    cmd.input_layout = render_device->find_or_create_input_layout(
+      vertex_declaration, vertex_shader);
+
+    cmd.index_buffer = ((D3D11IndexBuffer*)indicies)->resource();
+    cmd.vertex_buffer = ((D3D11VertexBuffer*)verticies)->resource();
+
+    cmd.num_of_constant_buffers = num_of_constants;
+    D3D11ConstantBuffer** constants_ = ((D3D11ConstantBuffer**)constants);
+    for (size_t i = 0; i < num_of_constants; ++i)
+      cmd.constant_buffers[i] = constants_[i]->resource();
+
+    switch (topology) {
+      case Topology::TRIANGLES:
+        cmd.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        cmd.num_of_indicies = num_of_primitives * 3;
+      break;
+    }
 
     command(key, (const void*)&cmd, sizeof(cmd));
   }

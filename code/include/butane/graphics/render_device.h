@@ -5,9 +5,9 @@
 #define _BUTANE_RENDER_DEVICE_H_
 
 #include <butane/butane.h>
-#include <butane/graphics/render_context.h>
 
 namespace butane {
+  class RenderContext;
   class BUTANE_EXPORT RenderDevice abstract {
     __foundation_trait(RenderDevice, non_copyable);
 
