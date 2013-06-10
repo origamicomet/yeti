@@ -51,6 +51,15 @@ namespace butane {
     return bind_flags;
   }
 
+  static DXGI_FORMAT dxgi_appropriate_format_from_flags(
+    const uint32_t flags,
+    const PixelFormat pixel_format )
+  {
+    if (flags & Texture::DEPTH_STENCIL_TARGETABLE)
+      return dxgi_typeless_format_from_pixel_format(pixel_format);
+    return dxgi_format_from_pixel_format(pixel_format);
+  }
+
   Texture* Texture::create(
     const Type type,
     const PixelFormat pixel_format,
@@ -79,9 +88,9 @@ namespace butane {
 
         D3D11_TEXTURE1D_DESC td;
         td.Width          = width;
-        td.MipLevels      = 0;
+        td.MipLevels      = (flags & Texture::HAS_MIP_MAPS) ? 0 : 1;
         td.ArraySize      = depth;
-        td.Format         = dxgi_format_from_pixel_format(pixel_format);
+        td.Format         = dxgi_appropriate_format_from_flags(flags, pixel_format);
         td.Usage          = d3d11_usage_from_flags(flags);
         td.BindFlags      = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags = 0;
@@ -89,12 +98,12 @@ namespace butane {
 
         /* texture->_resource = */ {
           const HRESULT hr = render_device->device()->CreateTexture1D(
-            &td, &srd, (ID3D11Texture1D**)&texture->_resource);
+            &td, data ? &srd : nullptr, (ID3D11Texture1D**)&texture->_resource);
           if (FAILED(hr))
             fail("ID3D11Device::CreateTexture1D failed, hr=%#08x", hr);
         }
 
-        srvd.Format = td.Format;
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format);
         srvd.ViewDimension = (depth > 1) ?
           D3D11_SRV_DIMENSION_TEXTURE1DARRAY :
           D3D11_SRV_DIMENSION_TEXTURE1D;
@@ -108,9 +117,9 @@ namespace butane {
         D3D11_TEXTURE2D_DESC td;
         td.Width              = width;
         td.Height             = height;
-        td.MipLevels          = 1;
+        td.MipLevels          = (flags & Texture::HAS_MIP_MAPS) ? 0 : 1;
         td.ArraySize          = depth;
-        td.Format             = dxgi_format_from_pixel_format(pixel_format);
+        td.Format             = dxgi_appropriate_format_from_flags(flags, pixel_format);
         td.SampleDesc.Count   = 1;
         td.SampleDesc.Quality = 0;
         td.Usage              = d3d11_usage_from_flags(flags);
@@ -120,18 +129,19 @@ namespace butane {
 
         /* texture->_resource = */ {
           const HRESULT hr = render_device->device()->CreateTexture2D(
-            &td, &srd, (ID3D11Texture2D**)&texture->_resource);
+            &td, data ? &srd : nullptr, (ID3D11Texture2D**)&texture->_resource);
           if (FAILED(hr))
             fail("ID3D11Device::CreateTexture2D failed, hr=%#08x", hr);
         }
 
-        srvd.Format = td.Format;
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format);
         srvd.ViewDimension = (depth > 1) ?
           D3D11_SRV_DIMENSION_TEXTURE2DARRAY :
           D3D11_SRV_DIMENSION_TEXTURE2D;
         srvd.Texture2DArray.MostDetailedMip = 0;
         srvd.Texture2DArray.MipLevels = -1;
         srvd.Texture2DArray.FirstArraySlice = 0;
+        srvd.Texture2DArray.ArraySize = depth;
       } break;
 
       case Texture::TEXTURE_3D: {
@@ -139,8 +149,8 @@ namespace butane {
         td.Width          = width;
         td.Height         = height;
         td.Depth          = depth;
-        td.MipLevels      = 0;
-        td.Format         = dxgi_format_from_pixel_format(pixel_format);
+        td.MipLevels      = (flags & Texture::HAS_MIP_MAPS) ? 0 : 1;
+        td.Format         = dxgi_appropriate_format_from_flags(flags, pixel_format);
         td.Usage          = d3d11_usage_from_flags(flags);
         td.BindFlags      = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags = 0;
@@ -148,11 +158,12 @@ namespace butane {
 
         /* texture->_resource = */ {
           const HRESULT hr = render_device->device()->CreateTexture3D(
-            &td, &srd, (ID3D11Texture3D**)&texture->_resource);
+            &td, data ? &srd : nullptr, (ID3D11Texture3D**)&texture->_resource);
           if (FAILED(hr))
             fail("ID3D11Device::CreateTexture3D failed, hr=%#08x", hr);
         }
 
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format);
         srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
         srvd.Texture3D.MostDetailedMip = 0;
         srvd.Texture3D.MipLevels = -1;
@@ -165,9 +176,9 @@ namespace butane {
         D3D11_TEXTURE2D_DESC td;
         td.Width          = width;
         td.Height         = height;
-        td.MipLevels      = 0;
+        td.MipLevels      = (flags & Texture::HAS_MIP_MAPS) ? 0 : 1;
         td.ArraySize      = depth;
-        td.Format         = dxgi_format_from_pixel_format(pixel_format);
+        td.Format         = dxgi_appropriate_format_from_flags(flags, pixel_format);
         td.Usage          = d3d11_usage_from_flags(flags);
         td.BindFlags      = d3d11_bind_flags_from_flags(flags);
         td.CPUAccessFlags = 0;
@@ -175,11 +186,12 @@ namespace butane {
 
         /* texture->_resource = */ {
           const HRESULT hr = render_device->device()->CreateTexture2D(
-            &td, &srd, (ID3D11Texture2D**)&texture->_resource);
+            &td, data ? &srd : nullptr, (ID3D11Texture2D**)&texture->_resource);
           if (FAILED(hr))
             fail("ID3D11Device::CreateTexture2D failed, hr=%#08x", hr);
         }
 
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format);
         srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
         srvd.TextureCube.MostDetailedMip = 0;
         srvd.TextureCube.MipLevels = -1;

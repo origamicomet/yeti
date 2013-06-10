@@ -179,8 +179,8 @@ namespace windows {
       } break;
 
       case WM_SIZE: {
-        if ((wParam != SIZE_MINIMIZED) && (wParam != SIZE_MAXIMIZED))
-          window->butane::Window::set_dimensions(LOWORD(lParam), HIWORD(lParam));
+        if (wParam != SIZE_RESTORED)
+          window->butane::Window::set_dimensions(LOWORD(lParam) - 1, HIWORD(lParam) - 1);
         return 0;
       } break;
     }

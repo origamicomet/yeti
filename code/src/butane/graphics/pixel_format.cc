@@ -7,7 +7,7 @@ namespace butane {
   size_t PixelFormat::row_stride(
     const uint32_t width ) const
   {
-    switch (width) {
+    switch (_value) {
       case R8G8B8A8:
       case R8G8B8A8_SRGB:
         return width * 4;
@@ -27,7 +27,7 @@ namespace butane {
     const uint32_t width,
     const uint32_t height ) const
   {
-    switch (width) {
+    switch (_value) {
       case R8G8B8A8:
       case R8G8B8A8_SRGB:
         return width * height * 4;
