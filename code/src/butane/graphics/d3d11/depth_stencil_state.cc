@@ -82,7 +82,7 @@ namespace butane {
 
     D3D11_DEPTH_STENCIL_DESC dsd;
     dsd.DepthEnable = desc.tests;
-    dsd.DepthWriteMask = desc.write ?
+    dsd.DepthWriteMask = desc.writes ?
       D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
     dsd.DepthFunc = d3d11_comparison_func_from_butane(desc.func);
     dsd.StencilEnable = desc.stencil;

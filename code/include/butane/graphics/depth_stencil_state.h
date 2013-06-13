@@ -47,7 +47,7 @@ namespace butane {
 
       struct Desc {
         bool tests;
-        bool write;
+        bool writes;
         Comparison::Value func;
         bool stencil;
         struct {
