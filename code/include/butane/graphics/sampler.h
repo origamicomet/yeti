@@ -57,7 +57,7 @@ namespace butane {
       static Sampler* create(
         const Desc& desc );
 
-      virtual void destory() = 0;
+      virtual void destroy() = 0;
   };
 } // butane
 

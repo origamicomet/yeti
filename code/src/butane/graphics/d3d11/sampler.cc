@@ -104,7 +104,7 @@ namespace butane {
     return sampler;
   }
 
-  void D3D11Sampler::destory()
+  void D3D11Sampler::destroy()
   {
     make_delete(D3D11Sampler, allocator(), this);
   }

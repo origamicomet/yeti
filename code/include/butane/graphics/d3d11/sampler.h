@@ -21,7 +21,7 @@ namespace butane {
       ~D3D11Sampler();
 
     public:
-      void destory() override;
+      void destroy() override;
 
     public:
       FOUNDATION_INLINE ID3D11SamplerState* interface()
