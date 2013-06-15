@@ -17,6 +17,53 @@ namespace Application {
     va_end(ap);
   }
 
+  struct ReflectChangesOnDatabaseClosure {
+    Resource::Database* db;
+    const char* data_dir;
+    const char* source_data_dir;
+  };
+
+  static bool reflect_changes_on_database_for_each(
+    void* closure,
+    const Resource::Id id,
+    const Resource::Database::Record& record )
+  {
+    ReflectChangesOnDatabaseClosure* closure_ =
+      (ReflectChangesOnDatabaseClosure*)closure;
+    const String streams_dir =
+      String::format(Allocators::scratch(), "%s/%016" PRIx64, closure_->data_dir, (uint64_t)id);
+    if (!Directory::exists(streams_dir.raw()))
+      closure_->db->remove(id);
+    const Resource::Type* type = Resource::Type::determine(id);
+    if (type) {
+      const String source =
+        String::format(Allocators::scratch(), "%s/%s.%s", closure_->source_data_dir, record.path.raw(), type->associated_file_extension().raw());
+      if (!File::exists(source.raw())) {
+        Directory::destroy(streams_dir.raw(), true);
+        closure_->db->remove(id);
+      }
+    }
+
+    return true;
+  }
+
+  static void reflect_changes_on_database(
+    Resource::Database* db,
+    const char* data_dir,
+    const char* source_data_dir )
+  {
+    assert(db != nullptr);
+    assert(data_dir != nullptr);
+    assert(source_data_dir != nullptr);
+
+    ReflectChangesOnDatabaseClosure closure;
+    closure.db = db;
+    closure.data_dir = data_dir;
+    closure.source_data_dir = source_data_dir;
+
+    db->for_each(&reflect_changes_on_database_for_each, (void*)&closure);
+  }
+
   static Resource::Id id_from_source_path(
     const Resource::Type* type,
     const char* data_dir,
@@ -137,7 +184,7 @@ namespace Application {
     if (!database)
       database = Resource::Database::create(database_path.raw());
     else
-      database->update(args[2], args[1]);
+      reflect_changes_on_database(database, args[2], args[1]);
 
     if (!database)
       fail("Unable to open or create resource database, aka '%s'", database_path.raw());

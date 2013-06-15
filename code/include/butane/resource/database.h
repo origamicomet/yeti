@@ -72,11 +72,6 @@ class BUTANE_EXPORT Database final {
 
     void close();
 
-    // Removes entries that are missing data.
-    void update(
-      const char* data_dir,
-      const char* source_data_dir );
-
   public:
     bool insert(
       const Resource::Id id,
@@ -92,6 +87,14 @@ class BUTANE_EXPORT Database final {
 
     bool remove(
       const Resource::Id id );
+
+  public:
+    void for_each(
+      bool (*callback)(
+        void* closure,
+        const Resource::Id id,
+        const Record& record ),
+      void* closure = nullptr );
 
   private:
     HashTable<Resource::Id, Record> _entries;

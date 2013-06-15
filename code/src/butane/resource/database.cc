@@ -95,34 +95,6 @@ namespace butane {
     make_delete(Database, allocator(), this);
   }
 
-  void Resource::Database::update(
-    const char* data_dir,
-    const char* source_data_dir )
-  {
-    assert(data_dir != nullptr);
-    assert(source_data_dir != nullptr);
-
-    static const Resource::Id empty;
-    for (uint32_t e = 0; e < _entries.raw().size(); ++e) {
-      const HashTable<Resource::Id, Record>::Pair& entry = _entries.raw()[e];
-      if (entry.key == empty)
-        continue;
-      const String streams_dir =
-        String::format(Allocators::scratch(), "%s/%016" PRIx64, data_dir, (uint64_t)entry.key);
-      if (!Directory::exists(streams_dir.raw()))
-        remove(entry.key);
-      const Resource::Type* type = Resource::Type::determine(entry.key);
-      if (type) {
-        const String source =
-          String::format(Allocators::scratch(), "%s/%s.%s", source_data_dir, entry.value.path.raw(), type->associated_file_extension().raw());
-        if (!File::exists(source.raw())) {
-          Directory::destroy(streams_dir.raw(), true);
-          remove(entry.key);
-        }
-      }
-    }
-  }
-
   bool Resource::Database::insert(
     const Resource::Id id,
     const Record& record )
@@ -150,5 +122,23 @@ namespace butane {
   {
     _entries.remove(id);
     return true;
+  }
+
+  void Resource::Database::for_each(
+    bool (*callback)(
+      void* closure,
+      const Resource::Id id,
+      const Record& record ),
+    void* closure )
+  {
+    assert(callback != nullptr);
+    static const Resource::Id empty;
+    for (uint32_t e = 0; e < _entries.raw().size(); ++e) {
+      const HashTable<Resource::Id, Record>::Pair& entry = _entries.raw()[e];
+      if (entry.key == empty)
+        continue;
+      if (!callback(closure, entry.key, entry.value))
+        break;
+    }
   }
 } // butane
