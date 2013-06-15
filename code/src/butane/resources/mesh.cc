@@ -47,9 +47,7 @@ namespace butane {
 
     mesh->_vertex_declaration = mrd->vertex_declaration;
 
-    const MemoryResidentData::Material* materials =
-      ((const MemoryResidentData::Material*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData)));
-
+    const MemoryResidentData::Material* materials = mrd->materials;
     mesh->_materials.resize(mrd->num_of_materials);
     for (size_t m = 0; m < mrd->num_of_materials; ++m) {
       mesh->_materials[m].name = materials[m].name;
@@ -63,13 +61,11 @@ namespace butane {
       }
     }
 
-    const void* vertices =
-      (const void*)(((uintptr_t)materials) + mrd->num_of_materials * sizeof(MemoryResidentData::Material));
+    const void* vertices = mrd->vertices;
     const size_t vertices_len = mrd->num_of_vertices * mrd->vertex_declaration.size();
     mesh->_vertices = VertexBuffer::create(vertices, vertices_len);
 
-    const void* indicies =
-      (const void*)(((uintptr_t)vertices) + vertices_len);
+    const void* indicies = mrd->indicies;
     const size_t indicies_len = mrd->num_of_indicies * sizeof(uint32_t);
     mesh->_num_of_indicies = mrd->num_of_indicies;
     mesh->_indicies = IndexBuffer::create(indicies, indicies_len);
@@ -142,17 +138,31 @@ namespace butane {
     if (fscanf(input.data, "%u", &mrd.num_of_indicies) != 1)
       return false;
 
+    const bool use_default_material = (mrd.num_of_materials == 0);
+    if (use_default_material)
+      mrd.num_of_materials += 1;
+
+    {
+      int64_t offset = sizeof(MemoryResidentData);
+      mrd.materials = relative_ptr<MemoryResidentData::Material*>(offset - offsetof(MemoryResidentData, materials));
+      offset += mrd.num_of_materials * sizeof(MemoryResidentData::Material);
+      mrd.vertices = relative_ptr<void*>(offset - offsetof(MemoryResidentData, vertices));
+      offset += mrd.num_of_vertices * mrd.vertex_declaration.size();
+      mrd.indicies = relative_ptr<void*>(offset - offsetof(MemoryResidentData, indicies));
+      // offset += mrd.num_of_indicies * sizeof(uint32_t);
+    }
+
     if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
       return false;
 
     Array<MemoryResidentData::Material> materials(Allocators::heap());
-    materials.resize(max(mrd.num_of_materials, (size_t)1));
+    materials.resize(mrd.num_of_materials);
 
-    if (mrd.num_of_materials == 0) {
+    if (use_default_material) {
       zero(&materials[0], sizeof(MemoryResidentData::Material));
       materials[0].name = Material::Name("default");
       materials[0].shader = Resource::Id(ShaderResource::type, "shaders/mesh");
-      materials[0].textures[1] = Resource::Id(TextureResource::type, "textures/not_found");
+      materials[0].textures[0] = Resource::Id(TextureResource::type, "textures/not_found");
     } else {
       for (uint32_t m = 0; m < mrd.num_of_materials; ++m) {
         zero(&materials[m], sizeof(MemoryResidentData::Material));

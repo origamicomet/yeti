@@ -28,20 +28,19 @@ namespace butane {
 
     private:
       struct MemoryResidentData {
-        VertexDeclaration vertex_declaration;
-        uint32_t num_of_materials;
-        uint32_t num_of_vertices;
-        uint32_t num_of_indicies;
-
         struct Material {
           MeshResource::Material::Name name;
           Resource::Id shader;
           Resource::Id textures[8];
         };
 
-        // Material materials[num_of_materials];
-        // uint8_t  vertices[num_of_vertices * vertex_declaration.size()];
-        // uint32_t indicies[num_of_indicies];
+        VertexDeclaration vertex_declaration;
+        uint32_t num_of_materials;
+        relative_ptr<Material*> materials;
+        uint32_t num_of_vertices;
+        relative_ptr<void*> vertices;
+        uint32_t num_of_indicies;
+        relative_ptr<void*> indicies;
       };
 
     public:
