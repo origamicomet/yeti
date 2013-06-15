@@ -121,10 +121,17 @@ namespace Application {
     rc.clear(2, swap_chain->render_target(), Vec4f(1.0f, 0.0f, 0.5f, 1.0f));
     rc.clear(3, depth, 1.0f, 0x00000000u);
 
+    Texture* textures[8];
+    Sampler* samplers[8];
+    for (size_t i = 0; i < mesh->materials()[0].num_of_textures; ++i) {
+      textures[i] = (*mesh->materials()[0].textures[i])->texture();
+      samplers[i] = (*mesh->materials()[0].textures[i])->sampler();
+    }
+
     rc.draw(
       4, state->rasterizer_state(), state->depth_stencil_state(), state->blend_state(),
       shader->vertex_shader(), shader->pixel_shader(),
-      0 /* mesh->materials()[0].num_of_textures */, nullptr, nullptr,
+      mesh->materials()[0].num_of_textures, &samplers[0], &textures[0],
       mesh->vertex_declaration(), mesh->vertices(), mesh->indicies(),
       0, nullptr, Topology::TRIANGLES, mesh->num_of_primitives());
 
