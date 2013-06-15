@@ -48,17 +48,19 @@ namespace Application {
 
     /* Skip up to date resources: */ {
       Resource::Database::Record record;
-      if (database->find(id, record) && (last_modified <= record.last_modified))
+      if (database->find(id, record) && (last_modified <= record.compiled))
         return;
     }
 
     if (Resource::Compiler::compile(data_dir, source_data_dir, source_path, &on_compiler_log) != Resource::Compiler::Successful) {
-      // Force a recompile by marking it as out of date.
-      last_modified = 0;
+      database->remove(id);
+      return;
     }
 
     Resource::Database::Record record;
-    record.last_modified = last_modified;
+    record.path = Path::sans_extension(String(Allocators::scratch(),
+      chomp("\\", chomp("/", chomp(source_data_dir, source_path)))));
+    record.compiled = last_modified;
     database->update(id, record);
   }
 
@@ -131,6 +133,11 @@ namespace Application {
 
     Resource::Database* database =
       Resource::Database::open(database_path.raw());
+
+    if (!database)
+      database = Resource::Database::create(database_path.raw());
+    else
+      database->update(args[2], args[1]);
 
     if (!database)
       fail("Unable to open or create resource database, aka '%s'", database_path.raw());
