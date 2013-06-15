@@ -14,4 +14,7 @@ cbuffer Globals : register(b0) {
   float4x4 model_view_proj;
 };
 
+Texture2D diffuse_map : register(t0);
+SamplerState diffuse_sampler : register(s0);
+
 #endif // __SHADERS_GLOBALS_PS__
