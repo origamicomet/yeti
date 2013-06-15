@@ -35,6 +35,9 @@ class BUTANE_EXPORT Type final {
 
   public:
     static const Resource::Type* determine(
+      const Resource::Id id );
+
+    static const Resource::Type* determine(
       const char* path );
 
   public:

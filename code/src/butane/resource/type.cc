@@ -28,6 +28,16 @@ namespace butane {
   }
 
   const Resource::Type* Resource::Type::determine(
+    const Resource::Id id )
+  {
+    for (auto iter = types().begin(); iter != types().end(); ++iter) {
+      if (Hash((*iter)->_name) == id.type())
+        return *iter; }
+
+    return nullptr;
+  }
+
+  const Resource::Type* Resource::Type::determine(
     const char* path )
   {
     if (!path)
@@ -37,8 +47,6 @@ namespace butane {
     const Hash hash(ext);
 
     for (auto iter = types().begin(); iter != types().end(); ++iter) {
-      if (Hash((*iter)->_name) == hash)
-        return *iter;
       if (Hash((*iter)->_assoc_file_ext) == hash)
         return *iter; }
 
