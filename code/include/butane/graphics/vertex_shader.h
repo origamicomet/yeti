@@ -17,7 +17,7 @@ namespace butane {
       struct MemoryResidentData {
         VertexDeclaration vertex_declaration;
         uint32_t byte_code_len;
-        // uint8_t byte_code[byte_code_len];
+        relative_ptr<void*> byte_code;
       };
 
     public:

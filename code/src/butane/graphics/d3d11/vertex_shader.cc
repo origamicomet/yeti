@@ -41,16 +41,14 @@ namespace butane {
 
     vertex_shader->_vertex_declaration = mrd->vertex_declaration;
     vertex_shader->_byte_code.resize(mrd->byte_code_len);
-    const void* byte_code =
-      (const void*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData));
-    copy((void*)vertex_shader->_byte_code.raw(), byte_code, mrd->byte_code_len);
+    copy((void*)vertex_shader->_byte_code.raw(), (void*)mrd->byte_code, mrd->byte_code_len);
 
     D3D11RenderDevice* render_device =
       ((D3D11RenderDevice*)Application::render_device());
 
     /* vertex_shader->_resource */ {
       const HRESULT hr = render_device->device()->CreateVertexShader(
-        byte_code, mrd->byte_code_len, NULL, &vertex_shader->_resource);
+        (void*)mrd->byte_code, mrd->byte_code_len, NULL, &vertex_shader->_resource);
 
       if (FAILED(hr))
         fail("ID3D11Device::CreateVertexShader failed, hr=%#08x", hr);
@@ -136,6 +134,11 @@ namespace butane {
     MemoryResidentData mrd;
     mrd.vertex_declaration = 0;
     mrd.byte_code_len = blob->GetBufferSize();
+
+    {
+      int64_t offset = sizeof(MemoryResidentData);
+      mrd.byte_code = relative_ptr<void*>(offset - offsetof(MemoryResidentData, byte_code));
+    }
 
     /* mrd.vertex_declaration = */ {
       D3D11_SHADER_DESC desc; {
