@@ -52,8 +52,7 @@ namespace butane {
       mrd->pixel_format.storage_requirements(mrd->width, mrd->height, mrd->depth);
 
     void* buffer = scratch().alloc(storage_requirements);
-    if (!File::read(stream.streaming_data(), buffer, storage_requirements))
-      fail("Malformed streaming data for %016 (texture)" PRIx64);
+    File::read(stream.streaming_data(), buffer, storage_requirements);
 
     // http://stackoverflow.com/questions/6347950/programmatically-creating-directx-11-textures-pros-and-cons-of-the-three-differ
     texture->_texture = Texture::create(
@@ -89,7 +88,7 @@ namespace butane {
       if (!File::read(input.data, (void*)&magic[0], 4))
         return false;
       if (strncmp("DDS ", &magic[0], 4) != 0) {
-        log("Not a DirectDraw Surface", input.path);
+        output.log("Malformed input: not a DirectDrawSurface or DDS!", input.path);
         return false; }
     }
 
@@ -103,26 +102,28 @@ namespace butane {
       mrd.flags = 0;
 
       if (!type_from_dds(dds, mrd.type)) {
-        log("Invalid or unsupported texture type!");
+        output.log("Invalid or unsupported texture type!");
         return false; }
 
       if (!pixel_format_from_dds(dds, mrd.pixel_format)) {
-        log("Invalid or unsupported pixel format!");
+        output.log("Invalid or unsupported pixel format!");
         return false; }
 
       if (!num_of_faces_from_dds(dds, mrd.depth)) {
-        log("Invalid or unsupported number of faces!");
+        output.log("Invalid or unsupported number of faces!");
         return false; }
     }
 
     if (dds.header_flags & DDS_HEADER_FLAGS_MIPMAP)
       mrd.flags |= Texture::HAS_MIP_MAPS;
 
-    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
-      return false;
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
+      output.log("Unable to write memory-resident data!");
+      return false; }
 
-    if (!File::copy(input.data, output.streaming_data))
-      return false;
+    if (!File::copy(input.data, output.streaming_data)) {
+      output.log("Unable to write streaming data!");
+      return false; }
 
     return true;
   }

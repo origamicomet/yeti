@@ -7,14 +7,12 @@
 
 namespace butane {
 namespace Application {
-  static void on_compiler_log(
+  static void logger(
     void* closure,
-    const char* format, ... )
+    const char* format,
+    va_list ap )
   {
-    va_list ap;
-    va_start(format, ap);
     log(format, ap);
-    va_end(ap);
   }
 
   struct ReflectChangesOnDatabaseClosure {
@@ -99,7 +97,7 @@ namespace Application {
         return;
     }
 
-    if (Resource::Compiler::compile(data_dir, source_data_dir, source_path, &on_compiler_log) != Resource::Compiler::Successful) {
+    if (Resource::Compiler::compile(data_dir, source_data_dir, source_path, &logger) != Resource::Compiler::Successful) {
       database->remove(id);
       return;
     }

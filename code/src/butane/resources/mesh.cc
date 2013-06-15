@@ -90,21 +90,25 @@ namespace butane {
 
     MemoryResidentData mrd;
 
-    if (fscanf(input.data, "%u", &mrd.num_of_materials) != 1)
-      return false;
+    if (fscanf(input.data, "%u", &mrd.num_of_materials) != 1) {
+      output.log("Malformed input: expected number of materials!");
+      return false; }
 
     unsigned num_of_vertex_components = 0;
 
-    if (fscanf(input.data, "%u", &num_of_vertex_components) != 1)
-      return false;
+    if (fscanf(input.data, "%u", &num_of_vertex_components) != 1) {
+      output.log("Malformed input: expected number of vertex components!");
+      return false; }
 
-    if (num_of_vertex_components == 0)
-      return false;
+    if (num_of_vertex_components == 0) {
+      output.log("Malformed input: expected one or more vertex components!");
+      return false; }
 
     for (unsigned c = 0; c < num_of_vertex_components; ++c) {
       char component[256] = { 0, };
-      if (fscanf(input.data, "%255s", &component[0]) != 1)
-          return false;
+      if (fscanf(input.data, "%255s", &component[0]) != 1) {
+        output.log("Malformed input: expected vertex component (%u/%u)", c, num_of_vertex_components);
+        return false; }
 
       uint32_t bit = 0;
       if (strncmp("POSITION", &component[0], 8) == 0)
@@ -123,20 +127,24 @@ namespace butane {
       //   bit = VertexDeclaration::BONEINDICES;
       // else if (strncmp("BONEWEIGHTS", &component[0], 11) == 0)
       //   bit = VertexDeclaration::BONEWEIGHTS;
-      else
-        return false;
+      else {
+        output.log("Malformed input: unknown vertex component '%s'", &component[0]);
+        return false; }
 
-      if (mrd.vertex_declaration.components() > bit)
-        return false;
+      if (mrd.vertex_declaration.components() > bit) {
+        output.log("Malformed input: expected vertex components to be sequential!");
+        return false; }
 
       mrd.vertex_declaration.components() |= bit;
     }
 
-    if (fscanf(input.data, "%u", &mrd.num_of_vertices) != 1)
-      return false;
+    if (fscanf(input.data, "%u", &mrd.num_of_vertices) != 1) {
+      output.log("Malformed input: expected number of vertices!");
+      return false; }
 
-    if (fscanf(input.data, "%u", &mrd.num_of_indicies) != 1)
-      return false;
+    if (fscanf(input.data, "%u", &mrd.num_of_indicies) != 1) {
+      output.log("Malformed input: expected number of indicies!");
+      return false; }
 
     const bool use_default_material = (mrd.num_of_materials == 0);
     if (use_default_material)
@@ -152,8 +160,9 @@ namespace butane {
       // offset += mrd.num_of_indicies * sizeof(uint32_t);
     }
 
-    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
-      return false;
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
+      output.log("Unable to write to memory-resident data!");
+      return false; }
 
     Array<MemoryResidentData::Material> materials(Allocators::heap());
     materials.resize(mrd.num_of_materials);
@@ -193,54 +202,71 @@ namespace butane {
       }
     }
 
-    if (!File::write(output.memory_resident_data, materials.raw(), max(mrd.num_of_materials, (size_t)1) * sizeof(MemoryResidentData::Material)))
-      return false;
+    if (!File::write(output.memory_resident_data, materials.raw(), max(mrd.num_of_materials, (size_t)1) * sizeof(MemoryResidentData::Material))) {
+      output.log("Unable to write to materials!");
+      return false; }
 
     for (uint32_t v = 0; v < mrd.num_of_vertices; ++v) {
       if (mrd.vertex_declaration & VertexDeclaration::POSITION) {
         float xyz[3];
-        if (fscanf(input.data, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3)
-          return false;
+        if (fscanf(input.data, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3) {
+          output.log("Malformed input: expected position!");
+          return false; }
         if (!File::write(output.memory_resident_data, (const void*)&xyz[0], 12))
-          return false;
+          goto unable_to_write_vertex;
       }
 
       for (uint32_t channel = 0; channel < 8; ++channel) {
         if (mrd.vertex_declaration & (VertexDeclaration::COLOR0 << channel)) {
           float rgba[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-          if (fscanf(input.data, "%f %f %f", &rgba[0], &rgba[1], &rgba[2]) != 3)
-            return false;
-          if (!File::write(output.memory_resident_data, (const void*)&rgba[0], 16))
+          if (fscanf(input.data, "%f %f %f", &rgba[0], &rgba[1], &rgba[2]) != 3) {
+            output.log("Malformed input: expected per-vertex color!");
             return false; }
+          if (!File::write(output.memory_resident_data, (const void*)&rgba[0], 16))
+            goto unable_to_write_vertex;
+        }
       }
 
       for (uint32_t channel = 0; channel < 8; ++channel) {
         if (mrd.vertex_declaration & (VertexDeclaration::TEXCOORD0 << channel)) {
           float uvw[3];
-          if (fscanf(input.data, "%f %f %f", &uvw[0], &uvw[1], &uvw[2]) != 3)
-            return false;
-          if (!File::write(output.memory_resident_data, (const void*)&uvw[0], 12))
+          if (fscanf(input.data, "%f %f %f", &uvw[0], &uvw[1], &uvw[2]) != 3) {
+            output.log("Malformed input: expected texture coords!");
             return false; }
+          if (!File::write(output.memory_resident_data, (const void*)&uvw[0], 12))
+            goto unable_to_write_vertex;
+        }
       }
 
       for (uint32_t basis = 0; basis < 3; ++basis) {
         if (mrd.vertex_declaration & (VertexDeclaration::NORMAL << basis)) {
           float xyz[3];
-          if (fscanf(input.data, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3)
-            return false;
-          if (!File::write(output.memory_resident_data, (const void*)&xyz[0], 12))
+          if (fscanf(input.data, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3) {
+            output.log("Malformed input: expected normal, or tangent, or binormal!");
             return false; }
+          if (!File::write(output.memory_resident_data, (const void*)&xyz[0], 12))
+            goto unable_to_write_vertex;
+        }
       }
     }
 
     for (uint32_t i = 0; i < mrd.num_of_indicies; ++i) {
       uint32_t index = 0;
-      if (fscanf(input.data, "%u", &index) != 1)
-        return false;
+      if (fscanf(input.data, "%u", &index) != 1) {
+        output.log("Malformed input: expected index!");
+        return false; }
       if (!File::write(output.memory_resident_data, (const void*)&index, 4))
-        return false;
+        goto unable_to_write_index;
     }
 
     return true;
+
+  unable_to_write_vertex:
+    output.log("Unable to write vertex!");
+    return false;
+
+  unable_to_write_index:
+    output.log("Unable to write index!");
+    return false;
   }
 } // butane

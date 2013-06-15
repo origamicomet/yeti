@@ -74,6 +74,7 @@ namespace butane {
 
     if (!parser.parse(sjson, sjson_len)) {
       Allocators::heap().free((void*)sjson);
+      output.log("Malformed sjson; parsing failed.");
       return false; }
 
     Allocators::heap().free((void*)sjson);
@@ -87,7 +88,7 @@ namespace butane {
       const sjson::String* layer =
         (const sjson::String*)root->find("layer");
       if (!layer || !layer->is_string()) {
-        log("Layer not specified!");
+        output.log("Malformed input: 'layer' not specified!");
         return false; }
       mrd.layer = Hash<uint32_t, murmur_hash>(layer->raw());
     }
@@ -96,7 +97,7 @@ namespace butane {
       const sjson::String* state =
         (const sjson::String*)root->find("state");
       if (!state || !state->is_string()) {
-        log("State not specified!");
+        output.log("Malformed input: 'state' not specified!");
         return false; }
       mrd.state = Resource::Id(StateResource::type, state->raw());
     }
@@ -105,7 +106,7 @@ namespace butane {
       const sjson::String* vs =
         (const sjson::String*)root->find("vertex");
       if (!vs || !vs->is_string()) {
-        log("Vertex shader not specified!");
+        output.log("Malformed input: 'vertex' not specified!");
         return false; }
       mrd.vertex_shader = Resource::Id(VertexShader::type, vs->raw());
     }
@@ -114,13 +115,14 @@ namespace butane {
       const sjson::String* ps =
         (const sjson::String*)root->find("pixel");
       if (!ps || !ps->is_string()) {
-        log("Pixel shader not specified!");
+        output.log("Malformed input: 'pixel' not specified!");
         return false; }
       mrd.pixel_shader = Resource::Id(PixelShader::type, ps->raw());
     }
 
-    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
-      return false;
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
+      output.log("Unable to write memory-resident data!");
+      return false; }
 
     return true;
   }

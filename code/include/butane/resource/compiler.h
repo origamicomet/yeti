@@ -17,7 +17,41 @@ class BUTANE_EXPORT Compiler final {
   public:
     typedef void (*Logger)(
       void* closure,
-      const char* format, ... );
+      const char* format,
+      va_list ap );
+
+  public:
+    class Log final {
+      private:
+        friend class Compiler;
+
+      private:
+        Log()
+          : _logger(nullptr)
+          , _closure(nullptr)
+        {}
+
+        Log(
+          const Logger logger,
+          void* closure
+        ) : _logger(logger)
+          , _closure(closure)
+        {}
+
+      public:
+        FOUNDATION_INLINE void operator() (
+          const char* format, ... ) const
+        {
+          va_list ap;
+          va_start(ap, format);
+          _logger(_closure, format, ap);
+          va_end(ap);
+        }
+
+      private:
+        Logger _logger;
+        void* _closure;
+    };
 
   public:
     struct Input {
@@ -27,6 +61,7 @@ class BUTANE_EXPORT Compiler final {
     };
 
     struct Output {
+      Log log;
       const char* path;
       FILE* memory_resident_data;
       FILE* streaming_data;

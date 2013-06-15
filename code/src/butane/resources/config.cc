@@ -74,12 +74,14 @@ namespace butane {
 
     if (!parser.parse(sjson, sjson_len)) {
       Allocators::heap().free((void*)sjson);
+      output.log("Malformed sjson; parsing failed.");
       return false; }
 
     Allocators::heap().free((void*)sjson);
 
-    if (!File::write(output.memory_resident_data, (void*)&blob[0], blob.size()))
-      return false;
+    if (!File::write(output.memory_resident_data, (void*)&blob[0], blob.size())) {
+      output.log("Unable to write to memory-resident data!");
+      return false; }
 
     return true;
   }

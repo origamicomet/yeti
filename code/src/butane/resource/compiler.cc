@@ -18,12 +18,9 @@ namespace butane {
     assert(source_path != nullptr);
     assert(logger != nullptr);
 
-    if (!Directory::exists(data_dir)) {
-      if (!Directory::create(data_dir)) {
-        warn("Unable to create output directory, aka '%s'!", data_dir);
+    if (!Directory::exists(data_dir))
+      if (!Directory::create(data_dir))
         return Unsuccessful;
-      }
-    }
 
     const Resource::Type* type;
     if (!(type = Resource::Type::determine(source_path)))
@@ -41,22 +38,17 @@ namespace butane {
     const String streams_dir =
       String::format(Allocators::scratch(), "%s/%016" PRIx64, data_dir, (uint64_t)id);
 
-    if (!Directory::exists(streams_dir.raw())) {
-      if (!Directory::create(streams_dir.raw())) {
-        warn("Unable to create '%s' for '%s' (%s)!", streams_dir.raw(), path.raw(), type->name().raw());
+    if (!Directory::exists(streams_dir.raw()))
+      if (!Directory::create(streams_dir.raw()))
         return Unsuccessful;
-      }
-    }
 
     // TODO: Use a temporary file and copy over.
 
     FILE* source_data =
       File::open(source_path, "rb");
 
-    if (!source_data) {
-      warn("Unable to open source data, aka '%s'!", source_path);
+    if (!source_data)
       return Unsuccessful;
-    }
 
     const String memory_resident_data_path =
       String::format(Allocators::scratch(), "%s/memory_resident_data", streams_dir.raw());
@@ -64,10 +56,8 @@ namespace butane {
     FILE* memory_resident_data =
       File::open(memory_resident_data_path.raw(), "wb");
 
-    if (!memory_resident_data) {
-      warn("Unable to create '%s' for '%s' (%s)!", memory_resident_data_path.raw(), path.raw(), type->name().raw());
+    if (!memory_resident_data)
       return Unsuccessful;
-    }
 
     const String streaming_data_path =
       String::format(Allocators::scratch(), "%s/streaming_data", streams_dir.raw());
@@ -75,10 +65,8 @@ namespace butane {
     FILE* streaming_data =
       File::open(streaming_data_path.raw(), "wb");
 
-    if (!streaming_data) {
-      warn("Unable to create '%s' for '%s' (%s)!", streaming_data_path.raw(), path.raw(), type->name().raw());
+    if (!streaming_data)
       return Unsuccessful;
-    }
 
     Input input;
     input.root = source_data_dir;
@@ -86,6 +74,7 @@ namespace butane {
     input.data = source_data;
 
     Output output;
+    output.log = Log(logger, closure);
     output.path = path.raw();
     output.memory_resident_data = memory_resident_data;
     output.streaming_data = streaming_data;
@@ -104,12 +93,9 @@ namespace butane {
       if (no_streaming_data)
         File::remove(streaming_data_path.raw());
 
-      if (no_memory_resident_data && no_streaming_data) {
-        warn("Compilation of '%s' (%s) resulted in no output!", path.raw(), type->name().raw());
-        return Successful;
-      }
+      if (no_memory_resident_data && no_streaming_data)
+        return Unsuccessful;
 
-      log("Compilation of '%s' successful.", path.raw(), type->name().raw());
       return Successful;
     }
 
@@ -123,7 +109,6 @@ namespace butane {
 
     Directory::remove(streams_dir.raw());
 
-    log("Compilation of '%s' unsuccessful.", path.raw(), type->name().raw());
     return Unsuccessful;
   }
 } // butane
