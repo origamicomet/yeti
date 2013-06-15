@@ -41,12 +41,9 @@ namespace butane {
     D3D11RenderDevice* render_device =
       ((D3D11RenderDevice*)Application::render_device());
 
-    const void* byte_code =
-      (const void*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData));
-
     /* pixel_shader->_resource */ {
       const HRESULT hr = render_device->device()->CreatePixelShader(
-        byte_code, mrd->byte_code_len,  NULL, &pixel_shader->_resource);
+        (void*)mrd->byte_code, mrd->byte_code_len,  NULL, &pixel_shader->_resource);
 
       if (FAILED(hr))
         fail("ID3D11Device::CreatePixelShader failed, hr=%#08x", hr);
@@ -117,6 +114,11 @@ namespace butane {
 
     MemoryResidentData mrd;
     mrd.byte_code_len = blob->GetBufferSize();
+
+    {
+      int64_t offset = sizeof(MemoryResidentData);
+      mrd.byte_code = relative_ptr<void*>(offset - offsetof(MemoryResidentData, byte_code));
+    }
 
     if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
       blob->Release();
