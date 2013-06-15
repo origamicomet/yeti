@@ -7,6 +7,7 @@
 #include <butane/resource.h>
 
 #include <butane/graphics/dds.h>
+#include <butane/graphics/sampler.h>
 #include <butane/graphics/texture.h>
 
 namespace butane {
@@ -50,8 +51,12 @@ namespace butane {
       Texture* texture() const
       { return _texture; }
 
+      Sampler* sampler() const
+      { return _sampler; }
+
     private:
       Texture* _texture;
+      Sampler* _sampler;
   };
 } // butane
 
