@@ -80,7 +80,7 @@ class BUTANE_EXPORT Handle final
 
   private:
     Id _id;
-    mutable T* _resource;
+    T* _resource;
 };
 
 #endif // _BUTANE_RESOURCE_HANDLE_H_
