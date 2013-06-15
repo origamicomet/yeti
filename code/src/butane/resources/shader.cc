@@ -34,16 +34,16 @@ namespace butane {
   {
     const LogScope _("ShaderResource::load");
 
-    const MemoryResidentData& mrd =
-      *((const MemoryResidentData*)stream.memory_resident_data());
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
 
     ShaderResource* shader =
       make_new(ShaderResource, allocator())(id);
 
-    shader->_layer = mrd.layer;
-    shader->_state = mrd.state;
-    shader->_vertex_shader = mrd.vertex_shader;
-    shader->_pixel_shader = mrd.pixel_shader;
+    shader->_layer = mrd->layer;
+    shader->_state = mrd->state;
+    shader->_vertex_shader = mrd->vertex_shader;
+    shader->_pixel_shader = mrd->pixel_shader;
 
     return shader;
   }

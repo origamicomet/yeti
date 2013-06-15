@@ -33,24 +33,24 @@ namespace butane {
   {
     const LogScope _("D3D11VertexShader::load");
 
-    const MemoryResidentData& mrd =
-      *((const MemoryResidentData*)stream.memory_resident_data());
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
 
     D3D11VertexShader* vertex_shader =
       make_new(D3D11VertexShader, allocator())(id);
 
-    vertex_shader->_vertex_declaration = mrd.vertex_declaration;
-    vertex_shader->_byte_code.resize(mrd.byte_code_len);
+    vertex_shader->_vertex_declaration = mrd->vertex_declaration;
+    vertex_shader->_byte_code.resize(mrd->byte_code_len);
     const void* byte_code =
       (const void*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData));
-    copy((void*)vertex_shader->_byte_code.raw(), byte_code, mrd.byte_code_len);
+    copy((void*)vertex_shader->_byte_code.raw(), byte_code, mrd->byte_code_len);
 
     D3D11RenderDevice* render_device =
       ((D3D11RenderDevice*)Application::render_device());
 
     /* vertex_shader->_resource */ {
       const HRESULT hr = render_device->device()->CreateVertexShader(
-        byte_code, mrd.byte_code_len, NULL, &vertex_shader->_resource);
+        byte_code, mrd->byte_code_len, NULL, &vertex_shader->_resource);
 
       if (FAILED(hr))
         fail("ID3D11Device::CreateVertexShader failed, hr=%#08x", hr);

@@ -39,19 +39,19 @@ namespace butane {
   {
     const LogScope _("MeshResource::load");
 
-    const MemoryResidentData& mrd =
-      *((const MemoryResidentData*)stream.memory_resident_data());
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
 
     MeshResource* mesh =
       make_new(MeshResource, allocator())(id);
 
-    mesh->_vertex_declaration = mrd.vertex_declaration;
+    mesh->_vertex_declaration = mrd->vertex_declaration;
 
     const MemoryResidentData::Material* materials =
       ((const MemoryResidentData::Material*)((uintptr_t)stream.memory_resident_data() + sizeof(MemoryResidentData)));
 
-    mesh->_materials.resize(mrd.num_of_materials);
-    for (size_t m = 0; m < mrd.num_of_materials; ++m) {
+    mesh->_materials.resize(mrd->num_of_materials);
+    for (size_t m = 0; m < mrd->num_of_materials; ++m) {
       mesh->_materials[m].name = materials[m].name;
       mesh->_materials[m].shader = materials[m].shader;
       mesh->_materials[m].num_of_textures = 0;
@@ -64,14 +64,14 @@ namespace butane {
     }
 
     const void* vertices =
-      (const void*)(((uintptr_t)materials) + mrd.num_of_materials * sizeof(MemoryResidentData::Material));
-    const size_t vertices_len = mrd.num_of_vertices * mrd.vertex_declaration.size();
+      (const void*)(((uintptr_t)materials) + mrd->num_of_materials * sizeof(MemoryResidentData::Material));
+    const size_t vertices_len = mrd->num_of_vertices * mrd->vertex_declaration.size();
     mesh->_vertices = VertexBuffer::create(vertices, vertices_len);
 
     const void* indicies =
       (const void*)(((uintptr_t)vertices) + vertices_len);
-    const size_t indicies_len = mrd.num_of_indicies * sizeof(uint32_t);
-    mesh->_num_of_indicies = mrd.num_of_indicies;
+    const size_t indicies_len = mrd->num_of_indicies * sizeof(uint32_t);
+    mesh->_num_of_indicies = mrd->num_of_indicies;
     mesh->_indicies = IndexBuffer::create(indicies, indicies_len);
 
     return mesh;

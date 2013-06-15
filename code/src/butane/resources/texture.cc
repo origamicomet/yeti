@@ -42,14 +42,14 @@ namespace butane {
   {
     const LogScope _("TextureResource::load");
 
-    const MemoryResidentData& mrd =
-      *((const MemoryResidentData*)stream.memory_resident_data());
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
 
     TextureResource* texture =
       make_new(TextureResource, allocator())(id);
 
     const size_t storage_requirements =
-      mrd.pixel_format.storage_requirements(mrd.width, mrd.height, mrd.depth);
+      mrd->pixel_format.storage_requirements(mrd->width, mrd->height, mrd->depth);
 
     void* buffer = scratch().alloc(storage_requirements);
     if (!File::read(stream.streaming_data(), buffer, storage_requirements))
@@ -57,10 +57,10 @@ namespace butane {
 
     // http://stackoverflow.com/questions/6347950/programmatically-creating-directx-11-textures-pros-and-cons-of-the-three-differ
     texture->_texture = Texture::create(
-      mrd.type, mrd.pixel_format, mrd.width, mrd.height, mrd.depth, mrd.flags, buffer);
+      mrd->type, mrd->pixel_format, mrd->width, mrd->height, mrd->depth, mrd->flags, buffer);
 
     Sampler::Desc sd;
-    sd.filter = (mrd.flags & Texture::HAS_MIP_MAPS) ?
+    sd.filter = (mrd->flags & Texture::HAS_MIP_MAPS) ?
       Sampler::Filter::ANISOTROPIC : Sampler::Filter::MIN_MAG_MIP_POINT;
     sd.uvw[0] = sd.uvw[1] = sd.uvw[2] = Sampler::TextureAddressingMode::WRAP;
     texture->_sampler = Sampler::create(sd);

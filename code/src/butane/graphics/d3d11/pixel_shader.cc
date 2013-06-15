@@ -32,8 +32,8 @@ namespace butane {
   {
     const LogScope _("D3D11PixelShader::load");
 
-    const MemoryResidentData& mrd =
-      *((const MemoryResidentData*)stream.memory_resident_data());
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
 
     D3D11PixelShader* pixel_shader =
       make_new(D3D11PixelShader, allocator())(id);
@@ -46,7 +46,7 @@ namespace butane {
 
     /* pixel_shader->_resource */ {
       const HRESULT hr = render_device->device()->CreatePixelShader(
-        byte_code, mrd.byte_code_len,  NULL, &pixel_shader->_resource);
+        byte_code, mrd->byte_code_len,  NULL, &pixel_shader->_resource);
 
       if (FAILED(hr))
         fail("ID3D11Device::CreatePixelShader failed, hr=%#08x", hr);

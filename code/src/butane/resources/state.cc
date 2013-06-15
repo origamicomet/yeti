@@ -34,15 +34,15 @@ namespace butane {
   {
     const LogScope _("StateResource::load");
 
-    const MemoryResidentData& mrd =
-      *((const MemoryResidentData*)stream.memory_resident_data());
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
 
     StateResource* state =
       make_new(StateResource, allocator())(id);
 
-    state->_rasterizer_state = RasterizerState::create(mrd.rsd);
-    state->_depth_stencil_state = DepthStencilState::create(mrd.dssd);
-    state->_blend_state = BlendState::create(mrd.bsd);
+    state->_rasterizer_state = RasterizerState::create(mrd->rsd);
+    state->_depth_stencil_state = DepthStencilState::create(mrd->dssd);
+    state->_blend_state = BlendState::create(mrd->bsd);
 
     return state;
   }
