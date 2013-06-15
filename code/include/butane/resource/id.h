@@ -43,6 +43,13 @@ class BUTANE_EXPORT Id final
   public:
     operator uint64_t() const;
 
+  public:
+    FOUNDATION_INLINE uint32_t path() const
+    { return (uint32_t)(_hash & 0xFFFFFFFFu); }
+
+    FOUNDATION_INLINE uint32_t type() const
+    { return (uint32_t)((_hash >> 32) & 0xFFFFFFFFu); }
+
   private:
     uint64_t _hash;
 };
