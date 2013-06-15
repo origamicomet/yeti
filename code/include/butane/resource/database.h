@@ -8,8 +8,47 @@ class BUTANE_EXPORT Database final {
   __foundation_trait(Database, non_copyable);
 
   public:
-    struct Record {
-      time_t last_modified;
+    class Record {
+      public:
+        struct Serialized {
+          Resource::Id id;
+          char path[256];
+          // char properties[];
+          time_t compiled;
+        };
+
+      public:
+        Record()
+          : path(Allocators::heap())
+          , properties(Allocators::heap())
+          , compiled(0)
+        {}
+
+        ~Record()
+        {}
+
+        Record(
+          const Record& r
+        ) : path(r.path)
+          , properties(r.properties)
+          , compiled(r.compiled)
+        {}
+
+        Record& operator= (
+          const Record& r )
+        {
+          if (&r == this)
+            return *this;
+          path = r.path;
+          properties = r.properties;
+          compiled = r.compiled;
+          return *this;
+        }
+
+      public:
+        String path;
+        Array<String> properties;
+        time_t compiled;
     };
 
   private:
@@ -22,6 +61,9 @@ class BUTANE_EXPORT Database final {
     ~Database();
 
   public:
+    static Database* create(
+      const char* path );
+
     static Database* open(
       const char* path );
 
@@ -30,7 +72,16 @@ class BUTANE_EXPORT Database final {
 
     void close();
 
+    // Removes entries that are missing data.
+    void update(
+      const char* data_dir,
+      const char* source_data_dir );
+
   public:
+    bool insert(
+      const Resource::Id id,
+      const Record& record );
+
     bool find(
       const Resource::Id id,
       Record& record );
@@ -38,6 +89,9 @@ class BUTANE_EXPORT Database final {
     bool update(
       const Resource::Id id,
       const Record& record );
+
+    bool remove(
+      const Resource::Id id );
 
   private:
     HashTable<Resource::Id, Record> _entries;

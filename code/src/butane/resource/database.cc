@@ -17,30 +17,41 @@ namespace butane {
   Resource::Database::~Database()
   {}
 
+  Resource::Database* Resource::Database::create(
+    const char* path )
+  {
+    assert(path != nullptr);
+    if (File::exists(path))
+      return nullptr;
+    return make_new(Database, allocator())();
+  }
+
   Resource::Database* Resource::Database::open(
     const char* path )
   {
     assert(path != nullptr);
 
-    if (!File::exists(path))
-      return make_new(Database, allocator())();
-
     FILE* fh = File::open(path, "rb");
-
     if (!fh)
       return nullptr;
 
-    uint32_t size = 0;
-    if (!File::read_in(fh, (void*)&size, sizeof(uint32_t)) || (size == 0)) {
-      fclose(fh);
-      return nullptr; }
+    uint32_t num_of_entries = 0;
+    if (!File::read_in(fh, (void*)&num_of_entries, 4))
+      { fclose(fh); return nullptr; }
 
     Database* db =
-      make_new(Database, allocator())(size);
+      make_new(Database, allocator())();
 
-    if (!File::read_in(fh, (void*)&db->_entries.raw()[0], size * sizeof(Entry))) {
-      fclose(fh);
-      return nullptr; }
+    for (uint32_t e = 0; e < num_of_entries; ++e) {
+      Record::Serialized serialized;
+      if (!File::read_in(fh, (void*)&serialized, sizeof(Record::Serialized)))
+        { make_delete(Database, allocator(), db); fclose(fh); return nullptr; }
+      Record record;
+      record.path = &serialized.path[0];
+      // record.properties = [];
+      record.compiled = serialized.compiled;
+      db->insert(serialized.id, record);
+    }
 
     fclose(fh);
     return db;
@@ -52,20 +63,28 @@ namespace butane {
     assert(path != nullptr);
 
     FILE* fh = File::open(path, "wb");
-
     if (!fh)
-      return false;
+      return nullptr;
 
-    const uint32_t size = _entries.raw().size();
-    if (!File::write_out(fh, (const void*)&size, sizeof(uint32_t))) {
-      fclose(fh);
-      File::destroy(path);
-      return false; }
+    uint32_t num_of_entries = _entries.load();
+    if (!File::write_out(fh, (const void*)&num_of_entries, 4))
+      { fclose(fh); return false; }
 
-    if (!File::write_out(fh, (const void*)&_entries.raw()[0], size * sizeof(Entry))) {
-      fclose(fh);
-      File::destroy(path);
-      return false; }
+    static const Resource::Id empty;
+    for (uint32_t e = 0; e < _entries.raw().size(); ++e) {
+      const HashTable<Resource::Id, Record>::Pair& entry = _entries.raw()[e];
+      if (entry.key == empty)
+        continue;
+      Record::Serialized serialized;
+      serialized.id = entry.key;
+      assert(entry.value.path.size() <= 256);
+      assert(!entry.value.path.empty());
+      copy((void*)&serialized.path[0], (const void*)entry.value.path.raw(), entry.value.path.size());
+      zero((void*)&serialized.path[entry.value.path.size()], 256 - entry.value.path.size());
+      serialized.compiled = entry.value.compiled;
+      if (!File::write_out(fh, (const void*)&serialized, sizeof(Record::Serialized)))
+        { fclose(fh); return false; }
+    }
 
     fclose(fh);
     return true;
@@ -74,6 +93,41 @@ namespace butane {
   void Resource::Database::close()
   {
     make_delete(Database, allocator(), this);
+  }
+
+  void Resource::Database::update(
+    const char* data_dir,
+    const char* source_data_dir )
+  {
+    assert(data_dir != nullptr);
+    assert(source_data_dir != nullptr);
+
+    static const Resource::Id empty;
+    for (uint32_t e = 0; e < _entries.raw().size(); ++e) {
+      const HashTable<Resource::Id, Record>::Pair& entry = _entries.raw()[e];
+      if (entry.key == empty)
+        continue;
+      const String streams_dir =
+        String::format(Allocators::scratch(), "%s/%016" PRIx64, data_dir, (uint64_t)entry.key);
+      if (!Directory::exists(streams_dir.raw()))
+        remove(entry.key);
+      const Resource::Type* type = Resource::Type::determine(entry.key);
+      if (type) {
+        const String source =
+          String::format(Allocators::scratch(), "%s/%s.%s", source_data_dir, entry.value.path.raw(), type->associated_file_extension().raw());
+        if (!File::exists(source.raw())) {
+          Directory::destroy(streams_dir.raw(), true);
+          remove(entry.key);
+        }
+      }
+    }
+  }
+
+  bool Resource::Database::insert(
+    const Resource::Id id,
+    const Record& record )
+  {
+    return _entries.insert(id, record);
   }
 
   bool Resource::Database::find(
@@ -89,5 +143,12 @@ namespace butane {
   {
     _entries.remove(id);
     return _entries.insert(id, record);
+  }
+
+  bool Resource::Database::remove(
+    const Resource::Id id )
+  {
+    _entries.remove(id);
+    return true;
   }
 } // butane
