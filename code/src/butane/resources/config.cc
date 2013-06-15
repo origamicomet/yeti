@@ -65,7 +65,7 @@ namespace butane {
 
     size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(input.data, Allocators::heap(), &sjson_len);
+      (const char*)File::read(input.data, Allocators::heap(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 13 /* 8kb */);
     blob.resize(blob.reserved());
@@ -78,7 +78,7 @@ namespace butane {
 
     Allocators::heap().free((void*)sjson);
 
-    if (!File::write_out(output.memory_resident_data, (void*)&blob[0], blob.size()))
+    if (!File::write(output.memory_resident_data, (void*)&blob[0], blob.size()))
       return false;
 
     return true;

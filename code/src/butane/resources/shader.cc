@@ -65,7 +65,7 @@ namespace butane {
 
     size_t sjson_len = 0;
     const char* sjson =
-      (const char*)File::read_in(input.data, Allocators::heap(), &sjson_len);
+      (const char*)File::read(input.data, Allocators::heap(), &sjson_len);
 
     Array<uint8_t> blob(Allocators::scratch(), 1 << 12 /* 4kb */);
     blob.resize(blob.reserved());
@@ -119,7 +119,7 @@ namespace butane {
       mrd.pixel_shader = Resource::Id(PixelShader::type, ps->raw());
     }
 
-    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
       return false;
 
     return true;

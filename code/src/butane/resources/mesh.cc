@@ -142,7 +142,7 @@ namespace butane {
     if (fscanf(input.data, "%u", &mrd.num_of_indicies) != 1)
       return false;
 
-    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
       return false;
 
     Array<MemoryResidentData::Material> materials(Allocators::heap());
@@ -183,7 +183,7 @@ namespace butane {
       }
     }
 
-    if (!File::write_out(output.memory_resident_data, materials.raw(), max(mrd.num_of_materials, (size_t)1) * sizeof(MemoryResidentData::Material)))
+    if (!File::write(output.memory_resident_data, materials.raw(), max(mrd.num_of_materials, (size_t)1) * sizeof(MemoryResidentData::Material)))
       return false;
 
     for (uint32_t v = 0; v < mrd.num_of_vertices; ++v) {
@@ -191,7 +191,7 @@ namespace butane {
         float xyz[3];
         if (fscanf(input.data, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3)
           return false;
-        if (!File::write_out(output.memory_resident_data, (const void*)&xyz[0], 12))
+        if (!File::write(output.memory_resident_data, (const void*)&xyz[0], 12))
           return false;
       }
 
@@ -200,7 +200,7 @@ namespace butane {
           float rgba[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
           if (fscanf(input.data, "%f %f %f", &rgba[0], &rgba[1], &rgba[2]) != 3)
             return false;
-          if (!File::write_out(output.memory_resident_data, (const void*)&rgba[0], 16))
+          if (!File::write(output.memory_resident_data, (const void*)&rgba[0], 16))
             return false; }
       }
 
@@ -209,7 +209,7 @@ namespace butane {
           float uvw[3];
           if (fscanf(input.data, "%f %f %f", &uvw[0], &uvw[1], &uvw[2]) != 3)
             return false;
-          if (!File::write_out(output.memory_resident_data, (const void*)&uvw[0], 12))
+          if (!File::write(output.memory_resident_data, (const void*)&uvw[0], 12))
             return false; }
       }
 
@@ -218,7 +218,7 @@ namespace butane {
           float xyz[3];
           if (fscanf(input.data, "%f %f %f", &xyz[0], &xyz[1], &xyz[2]) != 3)
             return false;
-          if (!File::write_out(output.memory_resident_data, (const void*)&xyz[0], 12))
+          if (!File::write(output.memory_resident_data, (const void*)&xyz[0], 12))
             return false; }
       }
     }
@@ -227,7 +227,7 @@ namespace butane {
       uint32_t index = 0;
       if (fscanf(input.data, "%u", &index) != 1)
         return false;
-      if (!File::write_out(output.memory_resident_data, (const void*)&index, 4))
+      if (!File::write(output.memory_resident_data, (const void*)&index, 4))
         return false;
     }
 

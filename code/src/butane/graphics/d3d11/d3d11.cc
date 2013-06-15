@@ -84,7 +84,7 @@ namespace butane {
       return E_ACCESSDENIED;
 
     size_t length = 0;
-    *out_buffer = File::read_in(fh, Allocators::heap(), &length);
+    *out_buffer = File::read(fh, Allocators::heap(), &length);
     *out_buffer_len = length;
     fclose(fh);
 

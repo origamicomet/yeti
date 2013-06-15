@@ -52,7 +52,7 @@ namespace butane {
       mrd.pixel_format.storage_requirements(mrd.width, mrd.height, mrd.depth);
 
     void* buffer = scratch().alloc(storage_requirements);
-    if (!File::read_in(stream.streaming_data(), buffer, storage_requirements))
+    if (!File::read(stream.streaming_data(), buffer, storage_requirements))
       fail("Malformed streaming data for %016 (texture)" PRIx64);
 
     // http://stackoverflow.com/questions/6347950/programmatically-creating-directx-11-textures-pros-and-cons-of-the-three-differ
@@ -86,7 +86,7 @@ namespace butane {
 
     /* Determine if it is actually a DDS */ {
       char magic[4];
-      if (!File::read_in(input.data, (void*)&magic[0], 4))
+      if (!File::read(input.data, (void*)&magic[0], 4))
         return false;
       if (strncmp("DDS ", &magic[0], 4) != 0) {
         log("Not a DirectDraw Surface", input.path);
@@ -94,7 +94,7 @@ namespace butane {
     }
 
     DDS_HEADER dds;
-    if (!File::read_in(input.data, (void*)&dds, sizeof(DDS_HEADER)))
+    if (!File::read(input.data, (void*)&dds, sizeof(DDS_HEADER)))
       return false;
 
     MemoryResidentData mrd; {
@@ -118,7 +118,7 @@ namespace butane {
     if (dds.header_flags & DDS_HEADER_FLAGS_MIPMAP)
       mrd.flags |= Texture::HAS_MIP_MAPS;
 
-    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData)))
       return false;
 
     if (!File::copy(input.data, output.streaming_data))

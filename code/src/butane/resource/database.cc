@@ -36,7 +36,7 @@ namespace butane {
       return nullptr;
 
     uint32_t num_of_entries = 0;
-    if (!File::read_in(fh, (void*)&num_of_entries, 4))
+    if (!File::read(fh, (void*)&num_of_entries, 4))
       { fclose(fh); return nullptr; }
 
     Database* db =
@@ -44,7 +44,7 @@ namespace butane {
 
     for (uint32_t e = 0; e < num_of_entries; ++e) {
       Record::Serialized serialized;
-      if (!File::read_in(fh, (void*)&serialized, sizeof(Record::Serialized)))
+      if (!File::read(fh, (void*)&serialized, sizeof(Record::Serialized)))
         { make_delete(Database, allocator(), db); fclose(fh); return nullptr; }
       Record record;
       record.path = &serialized.path[0];
@@ -67,7 +67,7 @@ namespace butane {
       return nullptr;
 
     uint32_t num_of_entries = _entries.load();
-    if (!File::write_out(fh, (const void*)&num_of_entries, 4))
+    if (!File::write(fh, (const void*)&num_of_entries, 4))
       { fclose(fh); return false; }
 
     static const Resource::Id empty;
@@ -82,7 +82,7 @@ namespace butane {
       copy((void*)&serialized.path[0], (const void*)entry.value.path.raw(), entry.value.path.size());
       zero((void*)&serialized.path[entry.value.path.size()], 256 - entry.value.path.size());
       serialized.compiled = entry.value.compiled;
-      if (!File::write_out(fh, (const void*)&serialized, sizeof(Record::Serialized)))
+      if (!File::write(fh, (const void*)&serialized, sizeof(Record::Serialized)))
         { fclose(fh); return false; }
     }
 

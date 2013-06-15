@@ -98,11 +98,11 @@ namespace butane {
 
       fclose(memory_resident_data);
       if (no_memory_resident_data)
-        File::destroy(memory_resident_data_path.raw());
+        File::remove(memory_resident_data_path.raw());
 
       fclose(streaming_data);
       if (no_streaming_data)
-        File::destroy(streaming_data_path.raw());
+        File::remove(streaming_data_path.raw());
 
       if (no_memory_resident_data && no_streaming_data) {
         warn("Compilation of '%s' (%s) resulted in no output!", path.raw(), type->name().raw());
@@ -116,12 +116,12 @@ namespace butane {
     fclose(source_data);
 
     fclose(memory_resident_data);
-    File::destroy(memory_resident_data_path.raw());
+    File::remove(memory_resident_data_path.raw());
 
     fclose(streaming_data);
-    File::destroy(streaming_data_path.raw());
+    File::remove(streaming_data_path.raw());
 
-    Directory::destroy(streams_dir.raw());
+    Directory::remove(streams_dir.raw());
 
     log("Compilation of '%s' unsuccessful.", path.raw(), type->name().raw());
     return Unsuccessful;

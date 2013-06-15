@@ -40,7 +40,7 @@ namespace butane {
       fail("No streams exist in '%s'!", streams_dir.raw());
 
     _memory_resident_data =
-      File::read_in(memory_resident_data, allocator(), &_memory_resident_data_len);
+      File::read(memory_resident_data, allocator(), &_memory_resident_data_len);
 
     if (!_memory_resident_data)
       fail("Unable to load memory-resident data from '%s'!", streams_dir.raw());

@@ -93,7 +93,7 @@ namespace butane {
   #endif
 
     size_t shader_len = 0;
-    void* shader = File::read_in(input.data, Allocators::heap(), &shader_len);
+    void* shader = File::read(input.data, Allocators::heap(), &shader_len);
 
     if (!shader)
       return false;
@@ -193,11 +193,11 @@ namespace butane {
 
     shader_refl->Release();
 
-    if (!File::write_out(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
+    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
       blob->Release();
       return false; }
 
-    if (!File::write_out(output.memory_resident_data, (const void*)blob->GetBufferPointer(), blob->GetBufferSize())) {
+    if (!File::write(output.memory_resident_data, (const void*)blob->GetBufferPointer(), blob->GetBufferSize())) {
       blob->Release();
       return false; }
 

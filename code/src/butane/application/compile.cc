@@ -39,7 +39,7 @@ namespace Application {
       const String source =
         String::format(Allocators::scratch(), "%s/%s.%s", closure_->source_data_dir, record.path.raw(), type->associated_file_extension().raw());
       if (!File::exists(source.raw())) {
-        Directory::destroy(streams_dir.raw(), true);
+        Directory::remove(streams_dir.raw(), true);
         closure_->db->remove(id);
       }
     }
