@@ -12,12 +12,12 @@
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
 #include <butane/graphics/render_context.h>
-
 #include <butane/resources/shader.h>
 #include <butane/resources/state.h>
 #include <butane/resources/mesh.h>
 #include <butane/graphics/render_target.h>
 #include <butane/graphics/depth_stencil_target.h>
+#include <butane/task.h>
 
 namespace butane {
 namespace Application {
@@ -143,6 +143,25 @@ namespace Application {
 
       const RenderContext* render_contexts[1] = { &rc };
       rd->dispatch(1, &render_contexts[0]);
+
+      /* {
+        int64_t memory_usage;
+        int64_t num_of_allocations;
+        int64_t num_of_reallocations;
+        int64_t num_of_frees;
+
+        Allocators::stats(
+          memory_usage,
+          num_of_allocations,
+          num_of_reallocations,
+          num_of_frees);
+
+        log("Allocators:");
+        log("  memory_usage = %" PRIi64 " bytes", memory_usage);
+        log("  num_of_allocations = %" PRIi64, num_of_allocations);
+        log("  num_of_reallocations = %" PRIi64, num_of_reallocations);
+        log("  num_of_frees = %" PRIi64, num_of_frees);
+      } */
     }
   }
 } // Application
