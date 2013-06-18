@@ -97,9 +97,13 @@ namespace Application {
         return;
     }
 
+    log("Compiling '%s'...", source_path);
     if (Resource::Compiler::compile(data_dir, source_data_dir, source_path, &logger) != Resource::Compiler::Successful) {
+      log("Unsuccesful!");
       database->remove(id);
       return;
+    } else {
+      log("Successful!");
     }
 
     Resource::Database::Record record;
@@ -158,6 +162,12 @@ namespace Application {
       log("  Expected: compile [source data directory] [data directory] [option]");
       log("                              ^ directory doesn't exist");
       Application::quit(); }
+
+    if (!Directory::exists(args[2])) {
+      if (!Directory::create(args[2])) {
+        log("Unable to create output directory, aka '%s'", args[2]);
+        Application::quit(); }
+    }
 
     bool daemon = false;
     for (auto iter = args.begin(); iter != args.end(); ++iter) {
