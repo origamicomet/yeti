@@ -79,19 +79,21 @@ namespace butane {
       mark_for_unload();
   }
 
-  static thread_safe::Queue<Resource*>& __marked_for_unload() {
+  static thread_safe::Queue<Resource*>& __marked_for_unload_initializer() {
     static thread_safe::Queue<Resource*> marked_for_unload(
       Allocators::heap(), BUTANE_BACKGROUND_RESOURCE_UNLOADING_QUEUE_SIZE);
     return marked_for_unload;
   }
 
+  static const thread_safe::Static< thread_safe::Queue<Resource*> >
+    __ts_marked_for_unload(&__marked_for_unload_initializer);
+
   static Thread::Return __background_unloading_thread(
-    Thread& thread,
     void* closure )
   {
     while (true) {
       Resource* resource = nullptr;
-      __marked_for_unload().dequeue(resource);
+      __ts_marked_for_unload().dequeue(resource);
       resource->unload(); }
 
     __builtin_unreachable();
@@ -116,16 +118,23 @@ namespace butane {
     // finally rendered.
 
     __start_background_unloading_thread();
-    __marked_for_unload().enqueue(this);
+    __ts_marked_for_unload().enqueue(this);
   }
 } // butane
 
 namespace butane {
   namespace Resources {
-    HashTable<Resource::Id, Resource*>& loaded() {
+    static HashTable<Resource::Id, Resource*>& __loaded_initializer() {
       static HashTable<Resource::Id, Resource*> loaded(
         Allocators::heap(), BUTANE_LOADED_RESOURCES_HASH_TABLE_INITAL_SIZE);
       return loaded;
+    }
+
+    static const thread_safe::Static< HashTable<Resource::Id, Resource*> >
+      __ts_loaded(&__loaded_initializer);
+
+    HashTable<Resource::Id, Resource*>& loaded() {
+      return __ts_loaded();
     }
   } // Resources
 } // butane

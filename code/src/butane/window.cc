@@ -4,9 +4,16 @@
 #include <butane/window.h>
 
 namespace butane {
-  Allocator& Window::allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("windows", Allocators::heap());
     return allocator;
+  }
+
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  Allocator& Window::allocator() {
+    return __ts_allocator();
   }
 
   Window::Window(

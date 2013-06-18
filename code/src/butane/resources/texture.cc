@@ -4,25 +4,49 @@
 #include <butane/resources/texture.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("texture resources", Allocators::heap());
     return allocator;
   }
 
-  static Allocator& scratch() {
-    static ProxyAllocator allocator("texture resources (scratch)", Allocators::heap());
-    return allocator;
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
   }
 
-  const Resource::Type TextureResource::type(
-    "texture", "dds",
-    (Resource::Type::Load)&TextureResource::load,
-    (Resource::Type::Unload)&TextureResource::unload,
-    (Resource::Type::Compile)&TextureResource::compile);
+  static Allocator& __scratch_initializer() {
+    static ProxyAllocator scratch("texture resources (scratch)", Allocators::heap());
+    return scratch;
+  }
+
+  static const thread_safe::Static< Allocator >
+    __ts_scratch(&__scratch_initializer);
+
+  static Allocator& scratch() {
+    return __ts_scratch();
+  }
+
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "texture", "dds",
+      (Resource::Type::Load)&TextureResource::load,
+      (Resource::Type::Unload)&TextureResource::unload,
+      (Resource::Type::Compile)&TextureResource::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& TextureResource::type() {
+    return __ts_type();
+  }
 
   TextureResource::TextureResource(
     const Resource::Id id
-  ) : butane::Resource(TextureResource::type, id)
+  ) : butane::Resource(TextureResource::type(), id)
     , _texture(nullptr)
     , _sampler(nullptr)
   {

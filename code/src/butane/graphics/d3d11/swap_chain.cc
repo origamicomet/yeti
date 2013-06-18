@@ -9,9 +9,16 @@
 #include <butane/graphics/d3d11/render_target.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("swap chains", Allocators::heap());
     return allocator;
+  }
+
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
   }
 
   D3D11SwapChain::D3D11SwapChain(

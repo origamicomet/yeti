@@ -44,7 +44,7 @@ namespace butane {
       };
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     protected:
       MeshResource(
@@ -52,7 +52,7 @@ namespace butane {
 
       ~MeshResource();
 
-    private:
+    public: /* private */
       static MeshResource* load(
         const Resource::Id id,
         const Resource::Stream& stream );

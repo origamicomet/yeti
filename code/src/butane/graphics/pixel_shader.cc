@@ -4,15 +4,25 @@
 #include <butane/graphics/pixel_shader.h>
 
 namespace butane {
-  const Resource::Type PixelShader::type(
-    "pixel shader", "ps",
-    (Resource::Type::Load)&PixelShader::load,
-    (Resource::Type::Unload)&PixelShader::unload,
-    (Resource::Type::Compile)&PixelShader::compile);
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "pixel shader", "ps",
+      (Resource::Type::Load)&PixelShader::load,
+      (Resource::Type::Unload)&PixelShader::unload,
+      (Resource::Type::Compile)&PixelShader::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& PixelShader::type() {
+    return __ts_type();
+  }
 
   PixelShader::PixelShader(
     const Resource::Id id
-  ) : butane::Resource(PixelShader::type, id)
+  ) : butane::Resource(PixelShader::type(), id)
   {
   }
 

@@ -13,7 +13,7 @@ namespace butane {
     __foundation_trait(ConfigResource, non_copyable);
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     private:
       ConfigResource(
@@ -21,7 +21,7 @@ namespace butane {
 
       ~ConfigResource();
 
-    private:
+    public: /* private */
       static ConfigResource* load(
         const Resource::Id id,
         const Resource::Stream& stream );

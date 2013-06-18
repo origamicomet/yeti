@@ -4,15 +4,25 @@
 #include <butane/graphics/vertex_shader.h>
 
 namespace butane {
-  const Resource::Type VertexShader::type(
-    "vertex shader", "vs",
-    (Resource::Type::Load)&VertexShader::load,
-    (Resource::Type::Unload)&VertexShader::unload,
-    (Resource::Type::Compile)&VertexShader::compile);
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "vertex shader", "vs",
+      (Resource::Type::Load)&VertexShader::load,
+      (Resource::Type::Unload)&VertexShader::unload,
+      (Resource::Type::Compile)&VertexShader::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& VertexShader::type() {
+    return __ts_type();
+  }
 
   VertexShader::VertexShader(
     const Resource::Id id
-  ) : butane::Resource(VertexShader::type, id)
+  ) : butane::Resource(VertexShader::type(), id)
   {
   }
 

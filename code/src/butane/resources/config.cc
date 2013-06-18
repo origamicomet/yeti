@@ -9,20 +9,37 @@
 #include <butane/math/quat.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("config resources", Allocators::heap());
     return allocator;
   }
 
-  const Resource::Type ConfigResource::type(
-    "config", "config",
-    (Resource::Type::Load)&ConfigResource::load,
-    (Resource::Type::Unload)&ConfigResource::unload,
-    (Resource::Type::Compile)&ConfigResource::compile);
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
+  }
+
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "config", "config",
+      (Resource::Type::Load)&ConfigResource::load,
+      (Resource::Type::Unload)&ConfigResource::unload,
+      (Resource::Type::Compile)&ConfigResource::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& ConfigResource::type() {
+    return __ts_type();
+  }
 
   ConfigResource::ConfigResource(
     const Resource::Id id
-  ) : butane::Resource(ConfigResource::type, id)
+  ) : butane::Resource(ConfigResource::type(), id)
     , _root(nullptr)
   {
   }

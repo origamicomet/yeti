@@ -21,7 +21,7 @@ namespace butane {
       };
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     protected:
       VertexShader(
@@ -29,7 +29,7 @@ namespace butane {
 
       virtual ~VertexShader();
 
-    private:
+    public: /* private */
       static VertexShader* load(
         const Resource::Id id,
         const Resource::Stream& stream );

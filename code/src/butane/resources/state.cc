@@ -4,20 +4,37 @@
 #include <butane/resources/state.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("state resources", Allocators::heap());
     return allocator;
   }
 
-  const Resource::Type StateResource::type(
-    "state", "state",
-    (Resource::Type::Load)&StateResource::load,
-    (Resource::Type::Unload)&StateResource::unload,
-    (Resource::Type::Compile)&StateResource::compile);
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
+  }
+
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "state", "state",
+      (Resource::Type::Load)&StateResource::load,
+      (Resource::Type::Unload)&StateResource::unload,
+      (Resource::Type::Compile)&StateResource::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& StateResource::type() {
+    return __ts_type();
+  }
 
   StateResource::StateResource(
     const Resource::Id id
-  ) : butane::Resource(StateResource::type, id)
+  ) : butane::Resource(StateResource::type(), id)
     , _rasterizer_state(nullptr)
     , _depth_stencil_state(nullptr)
     , _blend_state(nullptr)

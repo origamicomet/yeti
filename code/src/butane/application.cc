@@ -3,9 +3,8 @@
 
 #include <butane/application.h>
 
-#include <butane/window.h>
+#include <butane/resources.h>
 #include <butane/graphics/render_device.h>
-#include <butane/graphics/swap_chain.h>
 
 #include <butane/application/run.h>
 #include <butane/application/compile.h>
@@ -37,6 +36,8 @@ namespace Application {
     Array<const char*> args_(Allocators::heap(), max((size_t)1, num_args) - 1);
     for (size_t i = 1; i < num_args; ++i)
       args_[i - 1] = args[i];
+
+    Resources::expose();
 
     if (args_.size() >= 1) {
       if (strcmp("compile", args_[0]) == 0)

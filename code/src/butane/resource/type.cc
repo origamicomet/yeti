@@ -14,7 +14,6 @@ namespace butane {
     , _assoc_file_ext(Allocators::heap(), assoc_file_ext)
     , _load(load), _unload(unload), _compile(compile)
   {
-    expose();
   }
 
   static Array<const Resource::Type*>& types() {

@@ -24,7 +24,7 @@ namespace butane {
       };
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     private:
       ShaderResource(
@@ -32,7 +32,7 @@ namespace butane {
 
       ~ShaderResource();
 
-    private:
+    public: /* private */
       static ShaderResource* load(
         const Resource::Id id,
         const Resource::Stream& stream );

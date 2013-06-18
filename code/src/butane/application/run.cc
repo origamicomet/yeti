@@ -43,12 +43,13 @@ namespace Application {
     const Array<const char*>& args )
   {
     const LogScope _("Application::run");
+    Task::Scheduler::initialize();
 
     ConfigResource* manifest =
-      (ConfigResource*)Resource::load(ConfigResource::type, "manifest");
+      (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
 
     manifest =
-      (ConfigResource*)Resource::load(ConfigResource::type, "manifest");
+      (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
 
     Window* window; {
       String title = String(Allocators::scratch());
@@ -97,7 +98,7 @@ namespace Application {
     DepthStencilTarget* depth = DepthStencilTarget::create(
       PixelFormat::D24S8, swap_chain->width(), swap_chain->height());
 
-    MeshResource* mesh = (MeshResource*)Resource::load(MeshResource::type, "units/splash/plane");
+    MeshResource* mesh = (MeshResource*)Resource::load(MeshResource::type(), "units/splash/plane");
     ShaderResource* shader = *(mesh->materials()[0].shader);
     StateResource* state = *(shader->state());
 

@@ -12,15 +12,25 @@ namespace butane {
     return allocator;
   }
 
-  const Resource::Type ShaderResource::type(
-    "shader", "shader",
-    (Resource::Type::Load)&ShaderResource::load,
-    (Resource::Type::Unload)&ShaderResource::unload,
-    (Resource::Type::Compile)&ShaderResource::compile);
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "shader", "shader",
+      (Resource::Type::Load)&ShaderResource::load,
+      (Resource::Type::Unload)&ShaderResource::unload,
+      (Resource::Type::Compile)&ShaderResource::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& ShaderResource::type() {
+    return __ts_type();
+  }
 
   ShaderResource::ShaderResource(
     const Resource::Id id
-  ) : butane::Resource(ShaderResource::type, id)
+  ) : butane::Resource(ShaderResource::type(), id)
   {
   }
 
@@ -99,7 +109,7 @@ namespace butane {
       if (!state || !state->is_string()) {
         output.log("Malformed input: 'state' not specified!");
         return false; }
-      mrd.state = Resource::Id(StateResource::type, state->raw());
+      mrd.state = Resource::Id(StateResource::type(), state->raw());
     }
 
     /* vertex shader = */ {
@@ -108,7 +118,7 @@ namespace butane {
       if (!vs || !vs->is_string()) {
         output.log("Malformed input: 'vertex' not specified!");
         return false; }
-      mrd.vertex_shader = Resource::Id(VertexShader::type, vs->raw());
+      mrd.vertex_shader = Resource::Id(VertexShader::type(), vs->raw());
     }
 
     /* pixel shader = */ {
@@ -117,7 +127,7 @@ namespace butane {
       if (!ps || !ps->is_string()) {
         output.log("Malformed input: 'pixel' not specified!");
         return false; }
-      mrd.pixel_shader = Resource::Id(PixelShader::type, ps->raw());
+      mrd.pixel_shader = Resource::Id(PixelShader::type(), ps->raw());
     }
 
     if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {

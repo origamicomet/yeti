@@ -27,7 +27,7 @@ namespace butane {
       };
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     private:
       StateResource(
@@ -35,7 +35,7 @@ namespace butane {
 
       ~StateResource();
 
-    private:
+    public: /* private */
       static StateResource* load(
         const Resource::Id id,
         const Resource::Stream& stream );

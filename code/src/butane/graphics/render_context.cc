@@ -4,9 +4,16 @@
 #include <butane/graphics/render_context.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("render contexts", Allocators::heap());
     return allocator;
+  }
+
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
   }
 
   RenderContext::RenderContext()

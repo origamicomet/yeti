@@ -19,9 +19,16 @@
 #include <butane/graphics/d3d11/depth_stencil_target.h>
 
 namespace butane {
-  static Allocator& allocator() {
-    static ProxyAllocator allocator("render devices", Allocators::heap());
+  static Allocator& __allocator_initializer() {
+    static ProxyAllocator allocator("render targets", Allocators::heap());
     return allocator;
+  }
+
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
   }
 
   D3D11RenderDevice::D3D11RenderDevice()

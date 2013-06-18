@@ -30,7 +30,7 @@ class BUTANE_EXPORT Type final {
       Unload unload,
       Compile compile );
 
-  private:
+  public: /* private */
     void expose() const;
 
   public:

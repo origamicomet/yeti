@@ -15,25 +15,25 @@ class BUTANE_EXPORT Handle final
     Handle(
       const Resource::Id id
     ) : _id(id)
-      , _resource((T*)Resource::load(T::type, _id))
+      , _resource((T*)Resource::load(T::type(), _id))
     {}
 
     Handle(
       const char* path
-    ) : _id(Resource::Id(T::type, path))
-      , _resource((T*)Resource::load(T::type, _id))
+    ) : _id(Resource::Id(T::type(), path))
+      , _resource((T*)Resource::load(T::type(), _id))
     {}
 
     Handle(
       const String& path
-    ) : _id(Resource::Id(T::type, path.raw()))
-      , _resource((T*)Resource::load(T::type, _id))
+    ) : _id(Resource::Id(T::type(), path.raw()))
+      , _resource((T*)Resource::load(T::type(), _id))
     {}
 
     Handle(
       const Handle<T>& hndl
     ) : _id(hndl._id)
-      , _resource((T*)Resource::load(T::type, _id))
+      , _resource((T*)Resource::load(T::type(), _id))
     {}
 
     Handle<T>& operator= (
@@ -44,7 +44,7 @@ class BUTANE_EXPORT Handle final
       if (_resource)
         _resource->dereference();
       _id = hndl._id;
-      _resource = (T*)Resource::load(T::type, _id);
+      _resource = (T*)Resource::load(T::type(), _id);
       return *this;
     }
 

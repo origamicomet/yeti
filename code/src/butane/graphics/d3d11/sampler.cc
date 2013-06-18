@@ -7,9 +7,16 @@
 #include <butane/graphics/d3d11/render_device.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("samplers", Allocators::heap());
     return allocator;
+  }
+
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
   }
 
   D3D11Sampler::D3D11Sampler()

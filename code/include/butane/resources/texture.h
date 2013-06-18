@@ -27,7 +27,7 @@ namespace butane {
       };
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     protected:
       TextureResource(
@@ -35,7 +35,7 @@ namespace butane {
 
       ~TextureResource();
 
-    private:
+    public: /* private */
       static TextureResource* load(
         const Resource::Id id,
         const Resource::Stream& stream );

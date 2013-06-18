@@ -4,20 +4,37 @@
 #include <butane/resources/mesh.h>
 
 namespace butane {
-  static Allocator& allocator() {
+  static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("mesh resources", Allocators::heap());
     return allocator;
   }
 
-  const Resource::Type MeshResource::type(
-    "mesh", "mesh",
-    (Resource::Type::Load)&MeshResource::load,
-    (Resource::Type::Unload)&MeshResource::unload,
-    (Resource::Type::Compile)&MeshResource::compile);
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
+  }
+
+  static const Resource::Type& __type_initializer() {
+    static const Resource::Type type(
+      "mesh", "mesh",
+      (Resource::Type::Load)&MeshResource::load,
+      (Resource::Type::Unload)&MeshResource::unload,
+      (Resource::Type::Compile)&MeshResource::compile);
+    return type;
+  }
+
+  static const thread_safe::Static< const Resource::Type >
+    __ts_type(&__type_initializer);
+
+  const Resource::Type& MeshResource::type() {
+    return __ts_type();
+  }
 
   MeshResource::MeshResource(
     const Resource::Id id
-  ) : butane::Resource(MeshResource::type, id)
+  ) : butane::Resource(MeshResource::type(), id)
     , _materials(allocator())
     , _vertices(nullptr)
     , _indicies(nullptr)
@@ -170,8 +187,8 @@ namespace butane {
     if (use_default_material) {
       zero(&materials[0], sizeof(MemoryResidentData::Material));
       materials[0].name = Material::Name("default");
-      materials[0].shader = Resource::Id(ShaderResource::type, "shaders/mesh");
-      materials[0].textures[0] = Resource::Id(TextureResource::type, "textures/not_found");
+      materials[0].shader = Resource::Id(ShaderResource::type(), "shaders/mesh");
+      materials[0].textures[0] = Resource::Id(TextureResource::type(), "textures/not_found");
     } else {
       for (uint32_t m = 0; m < mrd.num_of_materials; ++m) {
         zero(&materials[m], sizeof(MemoryResidentData::Material));
@@ -185,7 +202,7 @@ namespace butane {
           char shader[256] = { 0, };
           if (fscanf(input.data, "%255s", &shader[0]) != 1)
             return false;
-          materials[m].shader = Resource::Id(ShaderResource::type, &shader[0]);
+          materials[m].shader = Resource::Id(ShaderResource::type(), &shader[0]);
         }
 
         unsigned num_of_textures = 0;
@@ -197,7 +214,7 @@ namespace butane {
           const int offs = snprintf(&name[0], 256, "%s/%s/", output.path, &material[0]);
           if (fscanf(input.data, "%255s", &name[offs]) != 1)
             return false;
-          materials[m].textures[t] = Resource::Id(TextureResource::type, &name[0]);
+          materials[m].textures[t] = Resource::Id(TextureResource::type(), &name[0]);
         }
       }
     }

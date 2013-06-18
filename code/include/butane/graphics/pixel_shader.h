@@ -19,7 +19,7 @@ namespace butane {
       };
 
     public:
-      static const Resource::Type type;
+      static const Resource::Type& type();
 
     protected:
       PixelShader(
@@ -27,7 +27,7 @@ namespace butane {
 
       virtual ~PixelShader();
 
-    private:
+    public: /* private */
       static PixelShader* load(
         const Resource::Id id,
         const Resource::Stream& stream );
