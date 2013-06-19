@@ -64,7 +64,7 @@ File.open('tup.config', 'w') do |cfg|
   end
 
   if PLATFORM == 'windows'
-    WINDOWS_SDK_DIR = `"%VCINSTALLDIR%\\vcvarsall.bat" & set WindowsSdkDir`.split('WindowsSdkDir=')[1].strip
+    WINDOWS_SDK_DIR = `"%VCINSTALLDIR%\\vcvarsall.bat" & set WindowsSdkDir`.split('=')[1].strip
     cfg.write "CONFIG_WINDOWS_SDK_DIR=#{WINDOWS_SDK_DIR}\n"
   end
 end
