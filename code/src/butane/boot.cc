@@ -7,7 +7,7 @@
 
 int main( int argc, const char* argv[] ) {
   const foundation::LogScope _("Engine");
-  setlocale(LC_ALL, "en-US.UTF8");
+  setlocale(LC_ALL, "en-US.UTF-8");
   butane::Application::boot(argc, &argv[0]);
   return EXIT_FAILURE;
 }
