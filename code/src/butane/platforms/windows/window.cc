@@ -179,8 +179,9 @@ namespace windows {
       } break;
 
       case WM_SIZE: {
-        if (wParam != SIZE_RESTORED)
-          window->butane::Window::set_dimensions(LOWORD(lParam) - 1, HIWORD(lParam) - 1);
+        if ((wParam == SIZE_MAXHIDE) || (wParam == SIZE_MAXSHOW))
+          return 0;
+        window->butane::Window::set_dimensions(LOWORD(lParam), HIWORD(lParam));
         return 0;
       } break;
     }
@@ -225,8 +226,8 @@ namespace butane {
 
     HWND hwnd = CreateWindowExW(
       ex_styles, L"butane::Window", native_title, styles, 0, 0,
-      client_area.right - client_area.left + 1,
-      client_area.bottom - client_area.top + 1,
+      client_area.right - client_area.left,
+      client_area.bottom - client_area.top,
       NULL, NULL, GetModuleHandle(NULL), NULL);
 
     if (!hwnd)
