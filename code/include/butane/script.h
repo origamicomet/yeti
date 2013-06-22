@@ -24,8 +24,8 @@ namespace butane {
       typedef void (*ErrorHandler)(
         Script& script,
         void* closure
-        /* const String& error_message
-        const Callstack& callstack */ );
+        /* const String& error
+        const Script::Callstack& callstack */ );
 
     public:
       class Stack abstract {
