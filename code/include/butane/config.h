@@ -34,4 +34,13 @@
 // The maximum number of in-flight tasks the task scheduler supports.
 #define BUTANE_TASK_SCHEDULER_MAXIMUM_NUM_OF_INFLIGHT_TASKS 256
 
+// The maximum number of in-flight messages the console supports.
+#define BUTANE_CONSOLE_MAXIMUM_NUM_OF_INFLIGHT_MESSAGES 32
+
+// The default port to use for a remote console.
+#define BUTANE_CONSOLE_DEFAULT_PORT 5000
+
+// The maximum number of seconds to wait when connecting to a remote console.
+#define BUTANE_CONSOLE_TIMEOUT 10
+
 #endif // _BUTANE_CONFIG_H_

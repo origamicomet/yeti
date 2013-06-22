@@ -18,9 +18,12 @@
 #include <butane/graphics/render_target.h>
 #include <butane/graphics/depth_stencil_target.h>
 #include <butane/task.h>
+#include <butane/console.h>
 
 namespace butane {
 namespace Application {
+  static Console* _console = nullptr;
+
   Array< Pair<uint32_t, Window*> >& windows() {
     static Array< Pair<uint32_t, Window*> > windows(Allocators::heap());
     return windows;
@@ -44,6 +47,30 @@ namespace Application {
   {
     const LogScope _("Application::run");
     Task::Scheduler::initialize();
+
+    for (auto iter = args.begin(); iter != args.end(); ++iter) {
+      if (strcmp("-log-to-network", *iter) == 0) {
+        if ((++iter) == args.end()) {
+          log("Malformed command-line argument!");
+          log("  Expected: -log-to-network [address/hostname]");
+          log("                                    ^ not supplied");
+          Application::quit(); }
+
+        Network::Address addr;
+        if (!Network::Address::from_host_name((*iter), addr)) {
+          if (!Network::Address::from_string((*iter), addr)) {
+            warn("Unable to deduce address from -log-to-network %s", (*iter));
+            continue; }
+        }
+
+        if (addr.port() == 0)
+          addr.port() = BUTANE_CONSOLE_DEFAULT_PORT;
+
+        if (!(_console = Console::connect(addr))) {
+          warn("Unable to connect to remote console at %s", (*iter));
+          continue; }
+      }
+    }
 
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
