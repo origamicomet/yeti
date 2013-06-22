@@ -40,9 +40,10 @@ namespace Application {
     Resources::expose();
 
     if (args_.size() >= 1) {
-      if (strcmp("compile", args_[0]) == 0)
+      if (strcmp("compile", args_[0]) == 0) {
         compile(args_);
         return; }
+    }
 
     run(args_);
   }
