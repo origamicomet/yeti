@@ -52,7 +52,7 @@ namespace butane {
         const char* message );
 
     public: /* private */
-      static void __log(
+      static void __msg(
         Console* console,
         Network::Packet& p,
         va_list va );

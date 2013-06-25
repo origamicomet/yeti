@@ -69,6 +69,8 @@ namespace Application {
         if (!(_console = Console::connect(addr))) {
           warn("Unable to connect to remote console at %s", (*iter));
           continue; }
+
+        _console->log("Application::run", "Hello, World!");
       }
     }
 

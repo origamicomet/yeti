@@ -33,6 +33,8 @@ namespace Application {
       log("Unable to load debug symbols!");
     set_exception_handler(&foundation::crash_handler);
 
+    Network::initialize();
+
     Array<const char*> args_(Allocators::heap(), max((size_t)1, num_args) - 1);
     for (size_t i = 1; i < num_args; ++i)
       args_[i - 1] = args[i];

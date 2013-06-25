@@ -20,7 +20,7 @@ namespace butane {
 
   static const Network::Protocol& __protocol_initializer() {
     static const Network::Protocol protocol = Network::Protocol("console", 1)
-      .local_to_remote("log", (Network::Protocol::Constructor)&Console::__log)
+      .local_to_remote("msg", (Network::Protocol::Constructor)&Console::__msg)
       .remote_to_local("cmd", (Network::Protocol::Handler)&Console::__on_cmd);
     return protocol;
   }
@@ -74,7 +74,7 @@ namespace butane {
     _messages.enqueue(Message(context, message));
   }
 
-  void Console::__log(
+  void Console::__msg(
     Console* console,
     Network::Packet& p,
     va_list ap )
@@ -89,7 +89,7 @@ namespace butane {
 //     /* const String& error
 //     const Script::Callstack& callstack */ )
 //   {
-//     console->log(nullptr, error.raw());
+//     console->msg(nullptr, error.raw());
 //   }
 
   bool Console::__on_cmd(
@@ -114,7 +114,7 @@ namespace butane {
           Message msg;
           console->_messages.dequeue(msg);
           if (console->_conn)
-            console->_conn->send("log", (void*)console, msg.context.raw(), msg.msg.raw());
+            console->_conn->send("msg", (void*)console, msg.context.raw(), msg.msg.raw());
         }
 
         console->_conn->update((void*)console);
