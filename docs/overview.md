@@ -24,8 +24,8 @@ If you want to run the game or compile resources from the command line, follow t
       -log-to-file [path] logs all console output to a file
         -log-to-file butane.log
 
-      -log-to-network [address or hostname] logs all console output to a remote server over TCP
-        -log-to-network logs.voxkings.com:5001
+      -log-to-network [address or hostname] logs all console output to a remote console over TCP
+        -log-to-network logs.voxkings.com:5000
 
       -resolution -sr [width] [height] overrides config's screen resolution
         -sr 1920 1080
@@ -49,15 +49,15 @@ If you want to run the game or compile resources from the command line, follow t
         -log-to-network build.voxkings.com:5000
 ```
 
-If you want to connect a remote console to an engine instance from the command line, follow this:
+If you want to host a remote console from the command line, follow this:
 
 ```
-  usage: console [address:port] [options]
+  usage: console [options]
     connects to an engine instance and displays a Lua REPL
 
   options:
-      -timeout -t [timeout] overrides the default timeout in seconds
-        -t 10 # will stop trying to connect after ten seconds
+      -host -h [address or hostname] overrides the default hostname and port
+        -h logs.voxkings.com:5000 # listens at logs.voxkings.com on port 5000 for engines logging to network
 ```
 
 If you want to connect a profiler to an engine instance from the command line, follow this:
