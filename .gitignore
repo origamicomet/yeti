@@ -19,3 +19,4 @@ tup.config
 *.dwarf
 *.a
 *.dylib
+*.pyc
