@@ -6,7 +6,6 @@
 			"file_exclude_patterns": [
 				".gitmodules",
 				"*.sublime-workspace",
-				"*.sublime-workspace",
 				"*.log",
 				"*.o",
 				"*.obj",
