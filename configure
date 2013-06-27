@@ -65,9 +65,13 @@ File.open('tup.config', 'w') do |cfg|
 
   if PLATFORM == 'windows'
     WINDOWS_SDK_DIR = lambda {
-      path = `"%VCINSTALLDIR%\\vcvarsall.bat" & set WindowsSdkDir`.split('=')[1].strip
-      path = path.split('WindowsSdkDir_old=')[1].strip if path =~ /WindowsSdkDir_old/
-      return path
+      ARGV.each { |arg|
+        if arg =~ /--winsdk=/
+          return arg.split('=')[1]
+        end
+      }
+
+      return "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1"
     }.call
 
     cfg.write "CONFIG_WINDOWS_SDK_DIR=#{WINDOWS_SDK_DIR}\n"

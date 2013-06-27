@@ -4,10 +4,6 @@
 #ifndef _BUTANE_D3D11_H_
 #define _BUTANE_D3D11_H_
 
-#include <butane/butane.h>
-#include <butane/resource.h>
-#include <butane/graphics/pixel_format.h>
-
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
@@ -19,6 +15,10 @@
 #undef interface
 #undef min
 #undef max
+
+#include <butane/butane.h>
+#include <butane/resource.h>
+#include <butane/graphics/pixel_format.h>
 
 namespace butane {
   // Converts a butane::PixelFormat to a DXGI_FORMAT.

@@ -9,11 +9,12 @@ CFLAGS += /I"$(TUP_CWD)\code\include"
 CFLAGS += /I"$(TUP_CWD)\deps\foundation\include"
 CFLAGS += /I"$(TUP_CWD)\deps\lua\include"
 
+CFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
+
+# See http://jaewon.mine.nu/jaewon/2013/01/12/visual-studio-2012-and-directx-sdk/
 ifeq (@(RENDERER),d3d11)
 CFLAGS += /I"@(DXSDK_DIR)Include"
 endif
-
-CFLAGS += /I"@(WINDOWS_SDK_DIR)Include"
 
 LDFLAGS += /NOLOGO /LTCG
 
