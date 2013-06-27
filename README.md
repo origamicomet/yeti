@@ -45,7 +45,7 @@ Building
 Make sure you have the following:
 
   * A brain;
-  * A C++ compiler (gcc, clang, msvc);
+  * A C++ compiler (gcc, clang, msvc) as well as NASM;
   * Ruby, and Python;
   * [Tup](https://github.com/gittup/tup);
   * and the necessary dependencies.
@@ -62,7 +62,7 @@ $ butane compile data_src data
 $ butane
 ```
 
-**Note:** if you're using Windows you'll need to make sure you set `VCINSTALLDIR` to something like `C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC`.  The configure script should automagically handle the Windows SDK, if not, set `WindowsSdkDir` to something like `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A`.
+**Note:** if you're using Windows you'll need to make sure you set `VCINSTALLDIR` to something like `C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC`.  The configure script should automagically handle the Windows SDK, if not, specify --winsdk with something like `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A`.
 
 License
 ---
