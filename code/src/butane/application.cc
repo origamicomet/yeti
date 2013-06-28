@@ -3,6 +3,7 @@
 
 #include <butane/application.h>
 
+#include <butane/console.h>
 #include <butane/resources.h>
 #include <butane/graphics/render_device.h>
 
@@ -20,6 +21,11 @@ namespace Application {
     butane::RenderDevice* render_device )
   { _render_device = render_device; }
 
+  Array<Console*>& consoles() {
+    static Array<Console*> consoles(Allocators::heap());
+    return consoles;
+  }
+
   void boot(
     size_t num_args,
     const char* args[] )
@@ -34,12 +40,15 @@ namespace Application {
     set_exception_handler(&foundation::crash_handler);
 
     Network::initialize();
+    Resources::expose();
 
     Array<const char*> args_(Allocators::heap(), max((size_t)1, num_args) - 1);
     for (size_t i = 1; i < num_args; ++i)
       args_[i - 1] = args[i];
 
-    Resources::expose();
+  #if defined(BUTANE_DEBUG_BUILD) || defined(BUTANE_RELEASE_BUILD)
+    Consoles::initialize();
+  #endif
 
     if (args_.size() >= 1) {
       if (strcmp("compile", args_[0]) == 0) {

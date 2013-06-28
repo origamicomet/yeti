@@ -10,10 +10,10 @@ namespace butane {
   class BUTANE_EXPORT Console final {
     __foundation_trait(Console, non_copyable);
 
-    public:
+    public: /* private */
       static const Network::Protocol& protocol();
 
-    private:
+    public: /* private */
       class Message final {
         public:
           Message()
@@ -39,17 +39,19 @@ namespace butane {
 
       ~Console();
 
-    public:
-      static Console* connect(
-        const Network::Address& remote,
-        const size_t timeout = BUTANE_CONSOLE_TIMEOUT );
+    public: /* private */
+      static Console* connected(
+        Network::Protocol::Connection* conn );
 
-      void disconnect();
+      static void disconnected(
+        Console* console );
 
     public:
       void log(
         const char* context,
         const char* message );
+
+      void disconnect();
 
     public: /* private */
       static void __msg(
@@ -61,10 +63,6 @@ namespace butane {
         Console* console,
         Network::Packet& p );
 
-    private:
-      static Thread::Return __background_thread(
-        Console* console );
-
     public:
       FOUNDATION_INLINE bool is_connected() const
       { return (_conn != nullptr); }
@@ -73,11 +71,21 @@ namespace butane {
       { return (_conn == nullptr); }
 
     private:
-      int32_t _refs;
-      thread_safe::Queue<Message> _messages;
-      Network::Address _remote;
       Network::Protocol::Connection* _conn;
   };
+
+  namespace Consoles {
+    extern BUTANE_EXPORT void initialize(
+      const uint16_t port = BUTANE_CONSOLE_DEFAULT_PORT );
+
+    extern BUTANE_EXPORT void log(
+      void* closure,
+      const LogScope* log_scope,
+      const char* format,
+      va_list ap );
+
+    extern BUTANE_EXPORT void update();
+  } // Consoles
 } // butane
 
 #endif // _BUTANE_CONSOLE_H_

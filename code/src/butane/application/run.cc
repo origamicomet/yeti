@@ -63,14 +63,7 @@ namespace Application {
             continue; }
         }
 
-        if (addr.port() == 0)
-          addr.port() = BUTANE_CONSOLE_DEFAULT_PORT;
-
-        if (!(_console = Console::connect(addr))) {
-          warn("Unable to connect to remote console at %s", (*iter));
-          continue; }
-
-        _console->log("Application::run", "Hello, World!");
+        /* TODO: RemoteLogger */
       }
     }
 
@@ -172,6 +165,8 @@ namespace Application {
 
       const RenderContext* render_contexts[1] = { &rc };
       rd->dispatch(1, &render_contexts[0]);
+
+      log("Hello, World!");
 
       /* {
         int64_t memory_usage;
