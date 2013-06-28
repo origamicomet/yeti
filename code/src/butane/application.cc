@@ -21,9 +21,16 @@ namespace Application {
     butane::RenderDevice* render_device )
   { _render_device = render_device; }
 
-  Array<Console*>& consoles() {
+  static Array<Console*>& __consoles_initializer() {
     static Array<Console*> consoles(Allocators::heap());
     return consoles;
+  }
+
+  static const thread_safe::Static< Array<Console*> >
+    __ts_consoles(&__consoles_initializer);
+
+  Array<Console*>& consoles() {
+    return __ts_consoles();
   }
 
   void boot(
