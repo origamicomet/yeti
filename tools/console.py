@@ -101,7 +101,8 @@ conn = (network.Protocol("console", 1)
   .connect('127.0.0.1', 5000))
 
 while True:
-  conn.update()
+  if not conn.update():
+    exit()
 
 # def connected(conn):
 #   print("{} connected".format(conn.address))
