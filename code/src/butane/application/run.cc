@@ -160,15 +160,14 @@ namespace Application {
 
     rc.present(5, swap_chain);
 
+    unsigned tick = 0;
     while (true) {
       window->update();
 
       const RenderContext* render_contexts[1] = { &rc };
       rd->dispatch(1, &render_contexts[0]);
 
-      log("Hello, World!");
-
-      /* {
+      if (!((tick++) % 10000)) {
         int64_t memory_usage;
         int64_t num_of_allocations;
         int64_t num_of_reallocations;
@@ -185,7 +184,7 @@ namespace Application {
         log("  num_of_allocations = %" PRIi64, num_of_allocations);
         log("  num_of_reallocations = %" PRIi64, num_of_reallocations);
         log("  num_of_frees = %" PRIi64, num_of_frees);
-      } */
+      }
     }
   }
 } // Application
