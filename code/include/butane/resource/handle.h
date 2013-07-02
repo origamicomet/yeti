@@ -78,6 +78,9 @@ class BUTANE_EXPORT Handle final
     FOUNDATION_INLINE T* operator* () const
     { return _resource; }
 
+    FOUNDATION_INLINE T* operator ->() const
+    { return _resource; }
+
   private:
     Id _id;
     T* _resource;
