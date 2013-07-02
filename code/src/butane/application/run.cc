@@ -15,15 +15,15 @@
 #include <butane/resources/shader.h>
 #include <butane/resources/state.h>
 #include <butane/resources/mesh.h>
+#include <butane/resources/unit.h>
 #include <butane/graphics/render_target.h>
 #include <butane/graphics/depth_stencil_target.h>
 #include <butane/task.h>
 #include <butane/console.h>
+#include <butane/world.h>
 
 namespace butane {
 namespace Application {
-  static Console* _console = nullptr;
-
   Array< Pair<uint32_t, Window*> >& windows() {
     static Array< Pair<uint32_t, Window*> > windows(Allocators::heap());
     return windows;
