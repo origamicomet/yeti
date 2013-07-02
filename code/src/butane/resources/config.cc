@@ -205,9 +205,9 @@ namespace butane {
   }
 
   template <>
-  bool ConfigResource::find<Quat>(
+  bool ConfigResource::find<Quatf>(
     const char* name,
-    Quat& value )
+    Quatf& value )
   {
     assert(name != nullptr);
     const sjson::Array* obj = (const sjson::Array*)_root->find(name);
@@ -215,7 +215,7 @@ namespace butane {
       obj->at(0)->is_number() && obj->at(1)->is_number() &&
       obj->at(2)->is_number() && obj->at(3)->is_number());
     if (valid) {
-      value = Quat(
+      value = Quatf(
         ((const sjson::Number*)obj->at(0))->value(),
         ((const sjson::Number*)obj->at(1))->value(),
         ((const sjson::Number*)obj->at(2))->value(),

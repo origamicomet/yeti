@@ -10,9 +10,9 @@
 #include <math.h>
 
 namespace butane {
-  class BUTANE_EXPORT Quat final {
+  class BUTANE_EXPORT Quatf final {
     public:
-      FOUNDATION_INLINE Quat(
+      FOUNDATION_INLINE Quatf(
         const float w = 1.0f,
         const float x = 0.0f,
         const float y = 0.0f,
@@ -20,17 +20,17 @@ namespace butane {
       ) : w(w), x(x), y(y), z(z)
       {}
 
-      FOUNDATION_INLINE Quat(
-        const Quat& q
+      FOUNDATION_INLINE Quatf(
+        const Quatf& q
       ) : w(q.w), x(q.x), y(q.y), z(q.z)
       {}
 
-      FOUNDATION_INLINE Quat& operator= (
-        const Quat& q )
+      FOUNDATION_INLINE Quatf& operator= (
+        const Quatf& q )
       { w = q.w; x = q.x; y = q.y; z = q.z; return *this; }
 
     public:
-      static Quat from_axis_angle(
+      static Quatf from_axis_angle(
         const Vec3f& axis,
         const float angle_in_radians )
       {
@@ -38,57 +38,57 @@ namespace butane {
         const float sin_of_half_angle = sinf(half_angle);
         const float cos_of_half_angle = cosf(half_angle);
 
-        return Quat(
+        return Quatf(
           cos_of_half_angle,
           axis.x * sin_of_half_angle,
           axis.y * sin_of_half_angle,
           axis.z * sin_of_half_angle);
       }
 
-      static Quat from_euler_angles(
+      static Quatf from_euler_angles(
         const float x_in_radians,
         const float y_in_radians,
         const float z_in_radians )
       {
-        const Quat qx = from_axis_angle(Vec3f(1.0f, 0.0f, 0.0f), x_in_radians);
-        const Quat qy = from_axis_angle(Vec3f(0.0f, 1.0f, 0.0f), y_in_radians);
-        const Quat qz = from_axis_angle(Vec3f(0.0f, 0.0f, 1.0f), z_in_radians);
+        const Quatf qx = from_axis_angle(Vec3f(1.0f, 0.0f, 0.0f), x_in_radians);
+        const Quatf qy = from_axis_angle(Vec3f(0.0f, 1.0f, 0.0f), y_in_radians);
+        const Quatf qz = from_axis_angle(Vec3f(0.0f, 0.0f, 1.0f), z_in_radians);
         return (qx * qy * qz);
       }
 
     public:
-      FOUNDATION_INLINE Quat operator+ (
-        const Quat& q ) const
-      { return Quat(w + q.w, x + q.x, y + q.y, z + q.z); }
+      FOUNDATION_INLINE Quatf operator+ (
+        const Quatf& q ) const
+      { return Quatf(w + q.w, x + q.x, y + q.y, z + q.z); }
 
-      FOUNDATION_INLINE Quat operator- (
-        const Quat& q ) const
-      { return Quat(w - q.w, x - q.x, y - q.y, z - q.z); }
+      FOUNDATION_INLINE Quatf operator- (
+        const Quatf& q ) const
+      { return Quatf(w - q.w, x - q.x, y - q.y, z - q.z); }
 
-      FOUNDATION_INLINE Quat operator* (
-        const Quat& q ) const
+      FOUNDATION_INLINE Quatf operator* (
+        const Quatf& q ) const
       {
-        return Quat(
+        return Quatf(
           w * q.w - x * q.x - y * q.y - z * q.z,
           w * q.x + x * q.w + y * q.z - z * q.y,
           w * q.y + y * q.w + z * q.x - x * q.z,
           w * q.z + z * q.w + x * q.y - y * q.x);
       }
 
-      FOUNDATION_INLINE Quat operator/ (
-        const Quat& q ) const
+      FOUNDATION_INLINE Quatf operator/ (
+        const Quatf& q ) const
       { return (*this * q.inverse()); }
 
-      FOUNDATION_INLINE Quat& operator+= (
-        const Quat& q )
+      FOUNDATION_INLINE Quatf& operator+= (
+        const Quatf& q )
       { w += q.w; x += q.x; y += q.y; z += q.z; return *this; }
 
-      FOUNDATION_INLINE Quat& operator-= (
-        const Quat& q )
+      FOUNDATION_INLINE Quatf& operator-= (
+        const Quatf& q )
       { w -= q.w; x -= q.x; y -= q.y; z -= q.z; return *this; }
 
-      FOUNDATION_INLINE Quat& operator*= (
-        const Quat& q )
+      FOUNDATION_INLINE Quatf& operator*= (
+        const Quatf& q )
       {
         w = w * q.w - x * q.x - y * q.y - z * q.z;
         x = w * q.x + x * q.w + y * q.z - z * q.y;
@@ -97,8 +97,8 @@ namespace butane {
         return *this;
       }
 
-      FOUNDATION_INLINE Quat& operator/= (
-        const Quat& q )
+      FOUNDATION_INLINE Quatf& operator/= (
+        const Quatf& q )
       {
         (*this) *= q.inverse();
         return *this;
@@ -112,16 +112,16 @@ namespace butane {
       { return sqrtf(dot(*this)); }
 
       FOUNDATION_INLINE float dot(
-        const Quat& q ) const
+        const Quatf& q ) const
       { return (w * q.w + x * q.x + y * q.y + z); }
 
-      FOUNDATION_INLINE Quat normalize() const
+      FOUNDATION_INLINE Quatf normalize() const
       { return (*this) / magnitude(); }
 
-      FOUNDATION_INLINE Quat inverse() const
+      FOUNDATION_INLINE Quatf inverse() const
       {
         const float m = magnitude();
-        return Quat(-x/m, -y/m, -z/m, w/m);
+        return Quatf(-x/m, -y/m, -z/m, w/m);
       }
 
     public:

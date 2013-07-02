@@ -68,7 +68,7 @@ namespace butane {
       }
 
       static Mat4 rotate(
-        const Quat& q )
+        const Quatf& q )
       {
         return Mat4(
           1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z,
@@ -94,7 +94,7 @@ namespace butane {
 
       FOUNDATION_INLINE static Mat4 translate_rotate_scale(
         const Vec3f& translation,
-        const Quat& rotation,
+        const Quatf& rotation,
         const Vec3f& scale )
       { return Mat4::scale(scale) * Mat4::rotate(rotation) * Mat4::translate(translation); }
 
@@ -251,7 +251,7 @@ namespace butane {
     public:
       void decompose(
         Vec3f& translation,
-        Quat& rotation,
+        Quatf& rotation,
         Vec3f& scale ) const
       {
         translation.x = m[3];

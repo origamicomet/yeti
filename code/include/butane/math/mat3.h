@@ -65,7 +65,7 @@ namespace butane {
       }
 
       static Mat3 from_quat(
-        const Quat& q )
+        const Quatf& q )
       {
         return Mat3(
           1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z,
