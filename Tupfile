@@ -12,6 +12,7 @@ preload code/src/butane/math
 preload code/src/butane/platforms
 preload code/src/butane/resource
 preload code/src/butane/resources
+preload code/src/butane/scene_graph
 preload code/src/butane/script
 preload code/src/butane/tasks
 
@@ -23,6 +24,7 @@ OBJS += code/src/butane/math/*.o
 OBJS += code/src/butane/platforms/*.o
 OBJS += code/src/butane/resource/*.o
 OBJS += code/src/butane/resources/*.o
+OBJS += code/src/butane/scene_graph/*.o
 OBJS += code/src/butane/script/*.o
 OBJS += code/src/butane/tasks/*.o
 
