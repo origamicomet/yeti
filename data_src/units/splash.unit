@@ -1,10 +1,21 @@
 nodes = [
   {
-    type = 'MESH'
-    name = 'plane'
-    fully_qualified_name = 'plane'
+    type = "EMPTY"
+    name = "root"
+    fully_qualified_name = "root"
     parent = -1
-    transform = {
+    pose = {
+      position = [0.0 0.0 0.0]
+      rotation = [1.0 0.0 0.0 0.0]
+      scale = [1.0 1.0 1.0]
+    }
+  },
+  {
+    type = "MESH"
+    name = "plane"
+    fully_qualified_name = "root.plane"
+    parent = 0
+    pose = {
       position = [0.0 0.0 0.0]
       rotation = [1.0 0.0 0.0 0.0]
       scale = [1.0 1.0 1.0]

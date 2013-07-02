@@ -20,6 +20,7 @@ namespace Resources {
     ShaderResource::type().expose();
     StateResource::type().expose();
     TextureResource::type().expose();
+    UnitResource::type().expose();
     VertexShader::type().expose();
   }
 } // Resources
