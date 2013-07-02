@@ -3,6 +3,8 @@
 
 #include <butane/task.h>
 
+#include <butane/tasks/waitable.h>
+
 namespace butane {
   Task::Task(
     const char* name,
@@ -77,5 +79,21 @@ namespace butane {
   void Task::kick()
   {
     Scheduler::enqueue(this);
+  }
+
+  void Task::kick_and_wait()
+  {
+    Mutex m;
+    ConditionVariable cv;
+
+    _parent = make_new(Task, Allocators::scratch())(
+      derive_task_name_from_kernel(Tasks::waitable),
+      Thread::default_affinity, _parent, nullptr, 2, &Tasks::waitable, (uintptr_t)&cv);
+
+    Scheduler::enqueue(this);
+
+    m.lock();
+    Scheduler::enqueue(_parent);
+    cv.wait(m);
   }
 } // butane

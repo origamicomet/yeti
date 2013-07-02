@@ -67,18 +67,21 @@ namespace butane {
   Thread::Return Task::Scheduler::worker_thread(
     void* closure )
   {
-    const size_t id = (size_t)closure;
+    const uint id = (uint)closure;
     const Task::Affinity affinity = (1u << id);
+
+    const String name = String::format(Allocators::heap(), "Worker Thread %u", id);
+    const LogScope _(name.raw());
 
     while (true) {
       Task* task = nullptr;
       __tasks().dequeue(task);
 
-      if (task->_affinity != affinity)
+      if (!(task->_affinity & affinity))
         goto skip;
       if (task->_depends_on && task->_depends_on->_num_of_open_work_items > 0)
         goto skip;
-      if (task->_num_of_open_work_items > 0)
+      if (task->_num_of_open_work_items > 1)
         goto skip;
 
       task->_kernel(task, task->_data);
@@ -86,11 +89,12 @@ namespace butane {
       if (task->_depends_on)
         if (__sync_fetch_and_sub(&task->_depends_on->_num_of_open_dependencies, 1) == 1)
           make_delete(Task, Allocators::scratch(), task->_depends_on);
-      __sync_fetch_and_sub(&task->_num_of_open_work_items, 1);
-      if (task->_num_of_open_dependencies <= 0)
-        make_delete(Task, Allocators::scratch(), task);
+      const int32_t open_work_items =
+        __sync_fetch_and_sub(&task->_num_of_open_work_items, 1);
       if (task->_parent)
         __sync_fetch_and_sub(&task->_parent->_num_of_open_work_items, 1);
+      if ((open_work_items <= 1) && (task->_num_of_open_dependencies <= 0))
+        make_delete(Task, Allocators::scratch(), task);
 
       continue;
 

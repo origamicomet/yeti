@@ -50,6 +50,8 @@ namespace butane {
 
       void kick();
 
+      void kick_and_wait();
+
     private:
       const char* _name;
       Affinity _affinity;

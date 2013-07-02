@@ -1,0 +1,15 @@
+// This file is part of Butane. See README.md and LICENSE.md for details.
+// Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
+
+#include <butane/tasks/waitable.h>
+
+namespace butane {
+namespace Tasks {
+  void waitable(
+    Task* task,
+    uintptr_t data )
+  {
+    ((ConditionVariable*)data)->signal();
+  }
+} // Tasks
+} // butane
