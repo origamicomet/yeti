@@ -70,9 +70,6 @@ namespace Application {
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
 
-    manifest =
-      (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
-
     Window* window; {
       String title = String(Allocators::scratch());
       if (!manifest->find("application.window.title", title)) {
