@@ -22,7 +22,9 @@ namespace butane {
     const World& world
   ) : _world(world)
     , _camera_ids(allocator())
+    , _next_avail_camera_id(butane::VisualRepresentation::invalid)
     , _cameras(allocator())
+    , _next_avail_mesh_id(butane::VisualRepresentation::invalid)
     , _mesh_ids(allocator())
     , _meshes(allocator())
   {
@@ -44,17 +46,100 @@ namespace butane {
   butane::VisualRepresentation::Id World::VisualRepresentation::create(
     const VisualRepresentationStream::Requests::Create* request )
   {
-    return butane::VisualRepresentation::invalid;
+    typedef butane::VisualRepresentation::Id Id;
+
+    switch (request->vrt) {
+      case butane::VisualRepresentation::CAMERA: {
+        Id id; {
+          if (_next_avail_camera_id == butane::VisualRepresentation::invalid) {
+            id = _camera_ids.size();
+            _camera_ids.reserve(1);
+          } else {
+            id = _next_avail_camera_id;
+            _next_avail_camera_id = _camera_ids[_next_avail_camera_id];
+          }
+        }
+
+        // The first update request effectivly "creates" the visual representation.
+        _camera_ids[id] = (size_t)0xFFFFFFFFFFFFFFFFull;
+        return (((Id)id) | ((Id)butane::VisualRepresentation::CAMERA << 32ull));
+      } break;
+
+      case butane::VisualRepresentation::MESH: {
+        Id id; {
+          if (_next_avail_mesh_id == butane::VisualRepresentation::invalid) {
+            id = _mesh_ids.size();
+            _mesh_ids.reserve(1);
+          } else {
+            id = _next_avail_mesh_id;
+            _next_avail_mesh_id = _mesh_ids[_next_avail_mesh_id];
+          }
+        }
+
+        // The first update request effectivly "creates" the visual representation.
+        _mesh_ids[id] = (size_t)0xFFFFFFFFFFFFFFFFull;
+        return (((Id)id) | ((Id)butane::VisualRepresentation::MESH << 32ull));
+      } break;
+    }
+
+    __builtin_unreachable();
   }
 
   void World::VisualRepresentation::update(
-    const VisualRepresentationStream::Requests::Update* request )
+    const VisualRepresentationStream::Requests::Update* request,
+    const butane::VisualRepresentation* visual_representation )
   {
+    typedef butane::VisualRepresentation::Id Id;
+
+    const size_t id = (size_t)(request->vrid & 0xFFFFFFFFull);
+    switch (butane::VisualRepresentation::type(request->vrid)) {
+      case butane::VisualRepresentation::CAMERA: {
+        if (_camera_ids[id] == (Id)0xFFFFFFFFFFFFFFFFull) {
+          _camera_ids[id] = _cameras.size();
+          _cameras.resize(_cameras.size() + 1); }
+        _cameras[_camera_ids[id]] =
+          *((const SceneGraph::Node::Camera::VisualRepresentation*)visual_representation);
+      } break;
+
+      case butane::VisualRepresentation::MESH: {
+        if (_mesh_ids[id] == (Id)0xFFFFFFFFFFFFFFFFull) {
+          _mesh_ids[id] = _meshes.size();
+          _meshes.resize(_meshes.size() + 1); }
+        _meshes[_mesh_ids[id]] =
+          *((const SceneGraph::Node::Mesh::VisualRepresentation*)visual_representation);
+      } break;
+
+      default:
+        __builtin_unreachable();
+    }
   }
 
   void World::VisualRepresentation::destroy(
     const VisualRepresentationStream::Requests::Destroy* request )
   {
+    typedef butane::VisualRepresentation::Id Id;
+
+    const size_t id = (size_t)(request->vrid & 0xFFFFFFFFull);
+    switch (butane::VisualRepresentation::type(request->vrid)) {
+      case butane::VisualRepresentation::CAMERA: {
+        if (_camera_ids[id] != (Id)0xFFFFFFFFFFFFFFFFull) {
+          _camera_ids[_cameras[_cameras.size() - 1].id] = _camera_ids[id];
+          _cameras.swap(_camera_ids[id], _cameras.size() - 1); }
+        _camera_ids[id] = _next_avail_camera_id;
+        _next_avail_camera_id = id;
+      } break;
+
+      case butane::VisualRepresentation::MESH: {
+        if (_mesh_ids[id] != (Id)0xFFFFFFFFFFFFFFFFull) {
+          _mesh_ids[_meshes[_meshes.size() - 1].id] = _mesh_ids[id];
+          _meshes.swap(_mesh_ids[id], _meshes.size() - 1); }
+        _mesh_ids[id] = _next_avail_mesh_id;
+        _next_avail_mesh_id = id;
+      } break;
+
+      default:
+        __builtin_unreachable();
+    }
   }
 
   void World::VisualRepresentation::__requests_for_each(
@@ -74,7 +159,9 @@ namespace butane {
       case VisualRepresentationStream::Request::UPDATE: {
         VisualRepresentationStream::Requests::Update* request_ =
           (VisualRepresentationStream::Requests::Update*)request;
-        vr->update(request_);
+        butane::VisualRepresentation* visual_representation =
+          (butane::VisualRepresentation*)(request_ + sizeof(VisualRepresentationStream::Requests::Update));
+        vr->update(request_, visual_representation);
       } break;
 
       case VisualRepresentationStream::Request::DESTROY: {
@@ -92,6 +179,7 @@ namespace butane {
 namespace butane {
   World::World()
     : _visual_representation(*this)
+    , _visual_representation_stream(nullptr)
     , _spawning(allocator())
     , _despawning(allocator())
     , _next_avail_unit_id(Unit::invalid)

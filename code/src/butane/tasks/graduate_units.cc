@@ -14,6 +14,7 @@ namespace Tasks {
     GraduateUnitsData* gud = (GraduateUnitsData*)data;
 
     for (size_t unit = 0; unit < gud->world->_despawning.size(); ++unit) {
+      // TODO: fix dtor bug with copy and resize()
       const Unit::Id id = gud->world->_despawning[unit];
       void* dest = (void*)&gud->world->_units[gud->world->_unit_ids[id]];
       const void* src = (const void*)&gud->world->_units[gud->world->_units.size() - 1];

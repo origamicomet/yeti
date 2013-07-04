@@ -104,6 +104,9 @@ namespace butane {
           const Request* request ),
         void* closure ) const;
 
+      /*! */
+      void clear();
+
     private:
       void request(
         const void* request,

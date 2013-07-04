@@ -33,5 +33,4 @@ namespace butane {
 
     return 0;
   }
-
 } // butane

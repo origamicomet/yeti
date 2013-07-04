@@ -47,7 +47,8 @@ namespace butane {
             const VisualRepresentationStream::Requests::Create* request );
 
           void update(
-            const VisualRepresentationStream::Requests::Update* request );
+            const VisualRepresentationStream::Requests::Update* request,
+            const butane::VisualRepresentation* visual_representation );
 
           void destroy(
             const VisualRepresentationStream::Requests::Destroy* request );
@@ -60,9 +61,11 @@ namespace butane {
         private:
           Mutex _mutex;
           const World& _world;
-          Array<butane::VisualRepresentation::Id> _camera_ids;
+          butane::VisualRepresentation::Id _next_avail_camera_id;
+          Array<size_t> _camera_ids;
           Array<SceneGraph::Node::Camera::VisualRepresentation> _cameras;
-          Array<butane::VisualRepresentation::Id> _mesh_ids;
+          butane::VisualRepresentation::Id _next_avail_mesh_id;
+          Array<size_t> _mesh_ids;
           Array<SceneGraph::Node::Mesh::VisualRepresentation> _meshes;
       };
 
@@ -116,10 +119,11 @@ namespace butane {
 
     private:
       VisualRepresentation _visual_representation;
+      VisualRepresentationStream* _visual_representation_stream;
       Array<Unit::Id> _spawning;
       Array<Unit::Id> _despawning;
       Unit::Id _next_avail_unit_id;
-      Array<Unit::Id> _unit_ids;
+      Array<size_t> _unit_ids;
       Array<Unit> _units;
   };
 } // butane

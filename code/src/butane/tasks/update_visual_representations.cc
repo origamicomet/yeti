@@ -14,14 +14,17 @@ namespace Tasks {
     UpdateVisualRepresentationsData* uvrd =
       (UpdateVisualRepresentationsData*)data;
 
+    VisualRepresentationStream& vrs =
+      *(uvrd->world->_visual_representation_stream);
+
     for (size_t unit = 0; unit < uvrd->world->_spawning.size(); ++unit)
-      uvrd->world->_units[uvrd->world->_spawning[unit]].create_visual_representation(uvrd->vrs);
+      uvrd->world->_units[uvrd->world->_spawning[unit]].create_visual_representation(vrs);
 
     for (size_t unit = 0; unit < uvrd->world->_units.size(); ++unit)
-      uvrd->world->_units[unit].update_visual_representation(uvrd->vrs);
+      uvrd->world->_units[unit].update_visual_representation(vrs);
 
     for (size_t unit = 0; unit < uvrd->world->_despawning.size(); ++unit)
-      uvrd->world->_units[uvrd->world->_despawning[unit]].destroy_visual_representation(uvrd->vrs);
+      uvrd->world->_units[uvrd->world->_despawning[unit]].destroy_visual_representation(vrs);
   }
 } // Tasks
 } // butane

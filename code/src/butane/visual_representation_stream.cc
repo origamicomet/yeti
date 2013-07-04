@@ -80,7 +80,7 @@ namespace butane {
     assert(request != nullptr);
     assert(request_len > 0);
 
-    while ((_stream_offs + request_len) < _stream.size())
+    while ((_stream_offs + request_len) > _stream.size())
       _stream.resize(max((size_t)1, _stream.size()) * 2);
     copy((void*)&_stream[_stream_offs], (const void*)request, request_len);
     _stream_offs += request_len;
@@ -113,5 +113,11 @@ namespace butane {
           __builtin_unreachable();
       }
     }
+  }
+
+  void VisualRepresentationStream::clear()
+  {
+    _stream_offs = 0;
+    _stream.resize(0);
   }
 } // butane

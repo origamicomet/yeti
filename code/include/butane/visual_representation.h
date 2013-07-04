@@ -8,8 +8,6 @@
 
 namespace butane {
   class VisualRepresentation {
-    __foundation_trait(VisualRepresentation, non_copyable);
-
     public:
       /*! */
       typedef uint64_t Id;

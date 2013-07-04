@@ -13,7 +13,6 @@ namespace butane {
 namespace Tasks {
   struct UpdateVisualRepresentationsData {
     World* world;
-    VisualRepresentationStream& vrs;
   };
 
   extern BUTANE_EXPORT void update_visual_representations(
