@@ -32,59 +32,6 @@ namespace butane {
     }
   }
 
-  SceneGraph::Node::Node(
-    const Node& node
-  ) : _id(node._id)
-    , _type(node._type)
-  {
-    switch (node._type) {
-      case Node::EMPTY:
-      case Node::CAMERA:
-        copy((void*)&_as, (const void*)&node._as, sizeof(Node::Data));
-        break;
-      case Node::MESH:
-        new ((void*)&_as) Node::Mesh(*node.mesh());
-        break;
-      default:
-        __builtin_unreachable();
-    }
-  }
-
-  SceneGraph::Node& SceneGraph::Node::operator= (
-    const Node& node )
-  {
-    if (&node == this)
-      return *this;
-
-    switch (_type) {
-      case Node::EMPTY:
-        empty()->~Empty(); break;
-      case Node::CAMERA:
-        camera()->~Camera(); break;
-      case Node::MESH:
-        mesh()->~Mesh(); break;
-      default:
-        __builtin_unreachable();
-    }
-
-    _id = node._id;
-    _type = node._type;
-
-    switch (node._type) {
-      case Node::EMPTY:
-      case Node::CAMERA:
-        copy((void*)&_as, (const void*)&node._as, sizeof(Node::Data));
-        break;
-      case Node::MESH:
-        new ((void*)&_as) Node::Mesh(*node.mesh());
-        break;
-      default:
-        __builtin_unreachable();
-    }
-
-    return *this;
-  }
-
   SceneGraph::Node::~Node()
   {
     switch (_type) {
@@ -94,6 +41,25 @@ namespace butane {
         camera()->~Camera(); break;
       case Node::MESH:
         mesh()->~Mesh(); break;
+      default:
+        __builtin_unreachable();
+    }
+  }
+
+  void SceneGraph::Node::update_visual_representation(
+    VisualRepresentation& vr ) const
+  {
+    switch (_type) {
+      case Node::EMPTY:
+        break;
+      case Node::CAMERA:
+        camera()->update_visual_representation(
+          *((Camera::VisualRepresentation*)&vr));
+        break;
+      case Node::MESH:
+        mesh()->update_visual_representation(
+          *((Mesh::VisualRepresentation*)&vr));
+        break;
       default:
         __builtin_unreachable();
     }

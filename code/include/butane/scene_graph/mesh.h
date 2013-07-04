@@ -6,6 +6,8 @@
 
 /*! */
 class Mesh final {
+  __foundation_trait(Mesh, non_copyable);
+
   public:
     /*! */
     struct Serialized final {
@@ -13,28 +15,44 @@ class Mesh final {
       uint32_t material;
     };
 
+    /*! */
+    struct VisualRepresentation final
+      : public Node::VisualRepresentation
+    {
+      Resource::Handle<MeshResource> resource;
+      size_t material;
+    };
+
   public:
     Mesh(
       const Serialized& serialized );
 
-    Mesh(
-      const Mesh& mesh );
-
-    Mesh& operator= (
-      const Mesh& mesh );
-
     ~Mesh();
 
   public:
+    /*! */
+    void update_visual_representation(
+      VisualRepresentation& vr ) const;
+
+  public:
+    FOUNDATION_INLINE Node& node()
+    { return *((Node*)((uintptr_t)this - offsetof(Node, _as))); }
+
+    FOUNDATION_INLINE const Node& node() const
+    { return *((const Node*)((uintptr_t)this - offsetof(Node, _as))); }
+
     FOUNDATION_INLINE const Resource::Handle<MeshResource>& resource() const
     { return _resource; }
 
-    FOUNDATION_INLINE const uint material() const
+    FOUNDATION_INLINE const size_t material() const
     { return _material; }
+
+    bool set_material(
+      const MeshResource::Material::Name& name );
 
   private:
     Resource::Handle<MeshResource> _resource;
-    uint _material;
+    size_t _material;
 };
 
 #endif // _BUTANE_SCENE_GRAPH_MESH_H_

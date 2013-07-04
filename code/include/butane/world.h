@@ -6,10 +6,65 @@
 
 #include <butane/butane.h>
 #include <butane/unit.h>
+#include <butane/visual_representation.h>
+#include <butane/visual_representation_stream.h>
+#include <butane/tasks/update_world.h>
+#include <butane/tasks/update_units.h>
+#include <butane/tasks/update_scene_graphs.h>
+#include <butane/tasks/update_visual_representations.h>
+#include <butane/tasks/graduate_units.h>
 
 namespace butane {
   class BUTANE_EXPORT World final {
     __foundation_trait(World, non_copyable);
+
+    private:
+      friend void Tasks::update_world( Task*, uintptr_t );
+      friend void Tasks::update_units( Task*, uintptr_t );
+      friend void Tasks::update_scene_graphs( Task*, uintptr_t );
+      friend void Tasks::update_visual_representations( Task*, uintptr_t );
+      friend void Tasks::graduate_units( Task*, uintptr_t );
+
+    public:
+      class VisualRepresentation final
+      {
+        __foundation_trait(VisualRepresentation, non_copyable);
+
+        private:
+          friend class World;
+
+        private:
+          VisualRepresentation(
+            const World& world );
+
+          ~VisualRepresentation();
+
+        private:
+          void update(
+            const VisualRepresentationStream& vrs );
+
+          butane::VisualRepresentation::Id create(
+            const VisualRepresentationStream::Requests::Create* request );
+
+          void update(
+            const VisualRepresentationStream::Requests::Update* request );
+
+          void destroy(
+            const VisualRepresentationStream::Requests::Destroy* request );
+
+        private:
+          static void __requests_for_each(
+            void* closure,
+            const VisualRepresentationStream::Request* request );
+
+        private:
+          Mutex _mutex;
+          const World& _world;
+          Array<butane::VisualRepresentation::Id> _camera_ids;
+          Array<SceneGraph::Node::Camera::VisualRepresentation> _cameras;
+          Array<butane::VisualRepresentation::Id> _mesh_ids;
+          Array<SceneGraph::Node::Mesh::VisualRepresentation> _meshes;
+      };
 
     private:
       World();
@@ -17,23 +72,42 @@ namespace butane {
       ~World();
 
     public:
+      /*! */
       static World* create();
 
-      Unit& spawn_unit(
+      /*! */
+      Unit::Id spawn_unit(
         const Resource::Handle<UnitResource>& type,
         const Vec3f& position = Vec3f(0.0f, 0.0f, 0.0f),
         const Quatf& rotation = Quatf(1.0f, 0.0f, 0.0f, 0.0f),
         const Vec3f& scale = Vec3f(1.0f, 1.0f, 1.0f) );
 
+      /*! */
       void destroy_unit(
         const Unit::Id id );
 
+      /*! */
       void update(
         const float dt );
 
-      void destory();
+    private:
+      /*! */
+      void create_visual_representation();
+
+      /*! */
+      void update_visual_representation(
+        VisualRepresentationStream& vrs ) const;
+
+      /*! */
+      void destroy_visual_representation();
 
     public:
+      void destroy();
+
+    public:
+      FOUNDATION_INLINE const VisualRepresentation& visual_representation() const
+      { return _visual_representation; }
+
       FOUNDATION_INLINE size_t num_of_units() const
       { return _units.size(); }
 
@@ -41,7 +115,10 @@ namespace butane {
       { return _units.raw(); }
 
     private:
-      Unit::Id _next_available_unit_id;
+      VisualRepresentation _visual_representation;
+      Array<Unit::Id> _spawning;
+      Array<Unit::Id> _despawning;
+      Unit::Id _next_avail_unit_id;
       Array<Unit::Id> _unit_ids;
       Array<Unit> _units;
   };

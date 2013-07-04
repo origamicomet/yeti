@@ -6,6 +6,8 @@
 
 /*! */
 class Node final {
+  __foundation_trait(Node, non_copyable);
+
   public:
     /*! */
     typedef uint8_t Id;
@@ -30,7 +32,11 @@ class Node final {
     enum Flags {
       /*! Node::_world_transform will be updated using Node::_local_pose during
           the next SceneGraph::update(). */
-      DIRTY = (1u << 0u)
+      MOVED = (1u << 0u),
+
+      /*! The node's visual representation (Node::Renderable) will be updated
+          during the next SceneGraph::update_visual_representation(). */
+      DIRTY = (1u << 1u)
     };
 
     /*! */
@@ -40,12 +46,29 @@ class Node final {
       Vec3f scale;
     };
 
+    /*! */
+    struct VisualRepresentation
+      : public butane::VisualRepresentation
+    {
+      Mat4 transform;
+      // AxisAlignedBox bounding_box;
+    };
+
   public:
+    class Empty;
+    class Camera;
+    class Mesh;
+
+    friend class Empty;
+    friend class Camera;
+    friend class Mesh;
+
     #include <butane/scene_graph/empty.h>
     #include <butane/scene_graph/camera.h>
     #include <butane/scene_graph/mesh.h>
 
   public:
+    /*! */
     struct Serialized final {
       Node::Id id;
       Node::Type type;
@@ -65,13 +88,12 @@ class Node final {
     Node(
       const Serialized& serialized );
 
-    Node(
-      const Node& node );
-
-    Node& operator= (
-      const Node& node );
-
     ~Node();
+
+  public:
+    /*! */
+    void update_visual_representation(
+      VisualRepresentation& vr ) const;
 
   public:
     /*! */
@@ -203,9 +225,15 @@ class Node final {
 
   public:
     /*! */
+    FOUNDATION_INLINE bool has_moved() const {
+      assert(id() != invalid);
+      return (scene_graph().flags()[id()] & Node::MOVED);
+    }
+
+    /*! */
     FOUNDATION_INLINE bool is_dirty() const {
       assert(id() != invalid);
-      return (scene_graph().flags()[id()] & DIRTY);
+      return (scene_graph().flags()[id()] & Node::DIRTY);
     }
 
   private:

@@ -11,26 +11,26 @@ namespace butane {
   {
   }
 
-  SceneGraph::Node::Mesh::Mesh(
-    const Mesh& mesh
-  ) : _resource(mesh._resource)
-    , _material(mesh._material)
-  {
-  }
-
-  SceneGraph::Node::Mesh& SceneGraph::Node::Mesh::operator= (
-    const Mesh& mesh )
-  {
-    if (&mesh == this)
-      return *this;
-
-    _resource = mesh._resource;
-    _material = mesh._material;
-
-    return *this;
-  }
-
   SceneGraph::Node::Mesh::~Mesh()
   {
+  }
+
+  void SceneGraph::Node::Mesh::update_visual_representation(
+    VisualRepresentation& vr ) const
+  {
+    vr.resource = _resource;
+    vr.material = _material;
+  }
+
+  bool SceneGraph::Node::Mesh::set_material(
+    const MeshResource::Material::Name& name )
+  {
+    for (size_t material = 0; material < _resource->materials().size(); ++material) {
+      if (name != _resource->materials()[material].name)
+        continue;
+      _material = material;
+      node().scene_graph().flags()[node().id()] &= Node::DIRTY;
+      return true; }
+    return false;
   }
 } // butane

@@ -11,7 +11,7 @@
 
 namespace butane {
   class World;
-
+  class VisualRepresentationStream;
   class BUTANE_EXPORT Unit final {
     __foundation_trait(Unit, non_copyable);
 
@@ -19,7 +19,6 @@ namespace butane {
       /*! */
       typedef uint32_t Id;
 
-    public:
       /*! */
       static const Id invalid;
 
@@ -28,6 +27,7 @@ namespace butane {
 
       Unit(
         World& world,
+        const Unit::Id id,
         const Resource::Handle<UnitResource> resource,
         const Vec3f& position = Vec3f(0.0f, 0.0f, 0.0f),
         const Quatf& rotation = Quatf(1.0f, 0.0f, 0.0f, 0.0f),
@@ -36,8 +36,21 @@ namespace butane {
       ~Unit();
 
     public:
+      /*! */
       void update(
         const float dt );
+
+      /*! */
+      void create_visual_representation(
+        VisualRepresentationStream& vrs ) const;
+
+      /*! */
+      void update_visual_representation(
+        VisualRepresentationStream& vrs ) const;
+
+      /*! */
+      void destroy_visual_representation(
+        VisualRepresentationStream& vrs ) const;
 
     public:
       FOUNDATION_INLINE Unit::Id id() const
@@ -60,8 +73,8 @@ namespace butane {
       { return _scene_graph; }
 
     private:
-      Unit::Id _id;
       World& _world;
+      Unit::Id _id;
       Resource::Handle<UnitResource> _type;
       SceneGraph _scene_graph;
   };

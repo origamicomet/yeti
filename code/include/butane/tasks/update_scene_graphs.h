@@ -11,8 +11,8 @@ namespace butane {
   class SceneGraph;
 namespace Tasks {
   struct UpdateSceneGraphsData {
-    uint num_of_scene_graphs;
     SceneGraph* scene_graphs;
+    size_t num_of_scene_graphs;
     size_t stride;
   };
 

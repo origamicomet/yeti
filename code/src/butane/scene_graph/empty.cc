@@ -8,17 +8,6 @@ namespace butane {
   {
   }
 
-  SceneGraph::Node::Empty::Empty(
-    const Empty& empty )
-  {
-  }
-
-  SceneGraph::Node::Empty& SceneGraph::Node::Empty::operator= (
-    const Empty& empty )
-  {
-    return *this;
-  }
-
   SceneGraph::Node::Empty::~Empty()
   {
   }

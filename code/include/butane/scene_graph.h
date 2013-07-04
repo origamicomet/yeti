@@ -7,9 +7,14 @@
 #include <butane/butane.h>
 #include <butane/math.h>
 #include <butane/resources/mesh.h>
+#include <butane/visual_representation.h>
+#include <butane/visual_representation_stream.h>
 
 namespace butane {
+  class VisualRepresentationStream;
   class BUTANE_EXPORT SceneGraph final {
+    __foundation_trait(SceneGraph, non_copyable);
+
     public:
       #include <butane/scene_graph/node.h>
 
@@ -29,16 +34,23 @@ namespace butane {
       SceneGraph(
         const Serialized& serialized );
 
-      SceneGraph(
-        const SceneGraph& sg );
-
-      SceneGraph& operator= (
-        const SceneGraph& sg );
-
       ~SceneGraph();
 
     public:
+      /*! */
       void update();
+
+      /*! */
+      void create_visual_representations(
+        VisualRepresentationStream& vrs ) const;
+
+      /*! */
+      void update_visual_representations(
+        VisualRepresentationStream& vrs ) const;
+
+      /*! */
+      void destroy_visual_representations(
+        VisualRepresentationStream& vrs ) const;
 
     public:
       FOUNDATION_INLINE size_t num_of_nodes() const
@@ -78,10 +90,11 @@ namespace butane {
       Array<Node::Type> _types;
       Array<Node::Link> _links;
       Array<Node::Name> _names;
-      Array<uint32_t> _flags;
+      mutable Array<uint32_t> _flags;
       Array<Node::Pose> _local_poses;
       Array<Mat4> _world_transforms;
       Array<Node> _nodes;
+      mutable Array<Node::VisualRepresentation::Id> _visual_representations;
   };
 } // butane
 

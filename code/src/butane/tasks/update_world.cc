@@ -3,6 +3,8 @@
 
 #include <butane/tasks/update_world.h>
 
+#include <butane/world.h>
+
 namespace butane {
 namespace Tasks {
   void update_world(

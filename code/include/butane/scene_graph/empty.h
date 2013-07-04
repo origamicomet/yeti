@@ -6,14 +6,10 @@
 
 /*! */
 class Empty final {
+  __foundation_trait(Empty, non_copyable);
+
   public:
     Empty();
-
-    Empty(
-      const Empty& empty );
-
-    Empty& operator= (
-      const Empty& empty );
 
     ~Empty();
 };

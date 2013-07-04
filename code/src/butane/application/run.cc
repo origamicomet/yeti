@@ -143,7 +143,7 @@ namespace Application {
 
     while (true) {
       window->update();
-      //world->update(1.0f / 60.0f);
+      world->update(1.0f / 60.0f);
     }
 
     // MeshResource* mesh = (MeshResource*)Resource::load(MeshResource::type(), "units/splash/plane");
