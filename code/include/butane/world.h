@@ -90,6 +90,14 @@ namespace butane {
         const Unit::Id id );
 
       /*! */
+      Unit& unit(
+        const Unit::Id id );
+
+      /*! */
+      const Unit& unit(
+        const Unit::Id id ) const;
+
+      /*! */
       void update(
         const float dt );
 

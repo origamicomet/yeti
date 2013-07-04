@@ -3,6 +3,64 @@
 
 #include <butane/unit.h>
 
+#include <butane/world.h>
+
+namespace butane {
+  Unit::Reference::Reference()
+    : _world(nullptr)
+    , _unit(Unit::invalid)
+    , _node(SceneGraph::Node::invalid)
+  {}
+
+  Unit::Reference::Reference(
+    World& world,
+    const Unit::Id id,
+    const SceneGraph::Node::Id node
+  ) : _world(&world)
+    , _unit(id)
+    , _node(node)
+  {}
+
+  Unit::Reference::Reference(
+    const Unit& unit,
+    const SceneGraph::Node::Id node
+  ) : _world(&unit._world)
+    , _unit(unit._id)
+    , _node(node)
+  {}
+
+  Unit::Reference::Reference(
+    const Reference& ref
+  ) : _world(ref._world)
+    , _unit(ref._unit)
+    , _node(ref._node)
+  {}
+
+  Unit::Reference& Unit::Reference::operator= (
+    const Reference& ref )
+  {
+    if (&ref == this)
+      return *this;
+    _world = ref._world;
+    _unit = ref._unit;
+    _node = ref._node;
+    return *this;
+  }
+
+  Unit::Reference::~Reference()
+  {}
+
+  Unit& Unit::Reference::to_unit() const
+  { return _world->unit(_unit); }
+
+  SceneGraph::Node& Unit::Reference::to_node() const
+  {
+    Unit& unit = _world->unit(_unit);
+    assert(_node < unit._scene_graph.num_of_nodes());
+    return unit._scene_graph.nodes()[_node];
+  }
+} // butane
+
 namespace butane {
   const Unit::Id Unit::invalid = (Id)0xFFFFFFFFFFFFFFFF;
 

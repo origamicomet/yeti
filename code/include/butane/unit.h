@@ -23,6 +23,58 @@ namespace butane {
       static const Id invalid;
 
     public:
+      class Reference;
+      friend class Reference;
+
+      /*! */
+      class Reference {
+        public:
+          Reference();
+
+          Reference(
+            World& world,
+            const Unit::Id id,
+            const SceneGraph::Node::Id node = SceneGraph::Node::invalid );
+
+          Reference(
+            const Unit& unit,
+            const SceneGraph::Node::Id node = SceneGraph::Node::invalid );
+
+          Reference(
+            const Reference& ref );
+
+          Reference& operator= (
+            const Reference& ref );
+
+          ~Reference();
+
+        public:
+          /*! */
+          Unit& to_unit() const;
+
+          /*! */
+          SceneGraph::Node& to_node() const;
+
+        public:
+          /*! */
+          FOUNDATION_INLINE bool valid() const
+          { return (_world && (_unit != Unit::invalid)); }
+
+          /*! */
+          FOUNDATION_INLINE bool is_unit() const
+          { return (_node == SceneGraph::Node::invalid); }
+
+          /*! */
+          FOUNDATION_INLINE bool is_node() const
+          { return (_node != SceneGraph::Node::invalid); }
+
+        private:
+          World* _world;
+          Unit::Id _unit;
+          SceneGraph::Node::Id _node;
+      };
+
+    public:
       Unit();
 
       Unit(

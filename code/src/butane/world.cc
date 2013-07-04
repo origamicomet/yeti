@@ -228,6 +228,20 @@ namespace butane {
     _despawning += id;
   }
 
+  Unit& World::unit(
+    const Unit::Id id )
+  {
+    assert(id < _unit_ids.size());
+    return _units[_unit_ids[id]];
+  }
+
+  const Unit& World::unit(
+    const Unit::Id id ) const
+  {
+    assert(id < _unit_ids.size());
+    return _units[_unit_ids[id]];
+  }
+
   void World::update(
     const float dt )
   {
