@@ -8,14 +8,17 @@ namespace butane {
   const SceneGraph::Node::Id SceneGraph::Node::unlinked = invalid;
 
   SceneGraph::Node::Node()
-    : _id(Node::invalid)
+    : _scene_graph(nullptr)
+    , _id(Node::invalid)
     , _type(Node::EMPTY)
   {
   }
 
   SceneGraph::Node::Node(
+    SceneGraph& sg,
     const Serialized& serialized
-  ) : _id((Id)serialized.id)
+  ) : _scene_graph(&sg)
+    , _id((Id)serialized.id)
     , _type(serialized.type)
   {
     switch (serialized.type) {

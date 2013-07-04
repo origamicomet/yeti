@@ -83,6 +83,9 @@ namespace butane {
       FOUNDATION_INLINE const Mat4* world_transforms() const
       { return _world_transforms.raw(); }
 
+      FOUNDATION_INLINE Node* nodes()
+      { return _nodes.raw(); }
+
       FOUNDATION_INLINE const Node* nodes() const
       { return _nodes.raw(); }
 

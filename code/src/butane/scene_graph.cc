@@ -55,7 +55,7 @@ namespace butane {
       _flags[node] = Node::MOVED;
       _local_poses[node] = serialized.nodes[node].pose;
       _world_transforms[node] = Mat4::identity();
-      new ((void*)&_nodes[node]) Node(serialized.nodes[node]);
+      new ((void*)&_nodes[node]) Node(*this, serialized.nodes[node]);
       _visual_representations[node] = VisualRepresentation::invalid;
     }
   }

@@ -89,6 +89,7 @@ class Node final {
     Node();
 
     Node(
+      SceneGraph& sg,
       const Serialized& serialized );
 
     ~Node();
@@ -101,14 +102,14 @@ class Node final {
   public:
     /*! */
     SceneGraph& scene_graph() {
-      assert(id() != invalid);
-      return *((SceneGraph*)((this - sizeof(Node) * id()) - offsetof(SceneGraph, _nodes)));
+      assert(_scene_graph != nullptr);
+      return *_scene_graph;
     }
 
     /*! */
     const SceneGraph& scene_graph() const {
-      assert(id() != invalid);
-      return *((const SceneGraph*)((this - sizeof(Node) * id()) - offsetof(SceneGraph, _nodes)));
+      assert(_scene_graph != nullptr);
+      return *((const SceneGraph*)_scene_graph);
     }
 
     /*! */
@@ -255,6 +256,7 @@ class Node final {
     }
 
   private:
+    SceneGraph* _scene_graph;
     Node::Id _id;
     Node::Type _type;
     uint8_t __padding[2];
