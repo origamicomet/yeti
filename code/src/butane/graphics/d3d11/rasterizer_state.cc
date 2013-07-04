@@ -86,7 +86,7 @@ namespace butane {
     return rasterizer_state;
   }
 
-  void D3D11RasterizerState::destory()
+  void D3D11RasterizerState::destroy()
   {
     make_delete(D3D11RasterizerState, allocator(), this);
   }

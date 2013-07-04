@@ -117,7 +117,7 @@ namespace butane {
     return depth_stencil_state;
   }
 
-  void D3D11DepthStencilState::destory()
+  void D3D11DepthStencilState::destroy()
   {
     make_delete(D3D11DepthStencilState, allocator(), this);
   }

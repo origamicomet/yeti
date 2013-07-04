@@ -48,7 +48,7 @@ namespace butane {
       static RasterizerState* create(
         const Desc& desc );
 
-      virtual void destory() = 0;
+      virtual void destroy() = 0;
   };
 } // butane
 

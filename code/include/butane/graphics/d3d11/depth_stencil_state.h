@@ -21,7 +21,7 @@ namespace butane {
       ~D3D11DepthStencilState();
 
     public:
-      void destory() override;
+      void destroy() override;
 
     public:
       FOUNDATION_INLINE ID3D11DepthStencilState* interface()

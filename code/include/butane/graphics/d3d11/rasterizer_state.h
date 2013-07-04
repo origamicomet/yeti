@@ -21,7 +21,7 @@ namespace butane {
       ~D3D11RasterizerState();
 
     public:
-      void destory() override;
+      void destroy() override;
 
     public:
       FOUNDATION_INLINE ID3D11RasterizerState* interface()

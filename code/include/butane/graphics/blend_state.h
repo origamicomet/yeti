@@ -67,7 +67,7 @@ namespace butane {
       static BlendState* create(
         const Desc& desc );
 
-      virtual void destory() = 0;
+      virtual void destroy() = 0;
   };
 } // butane
 

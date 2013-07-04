@@ -112,7 +112,7 @@ namespace butane {
     return blend_state;
   }
 
-  void D3D11BlendState::destory()
+  void D3D11BlendState::destroy()
   {
     make_delete(D3D11BlendState, allocator(), this);
   }
