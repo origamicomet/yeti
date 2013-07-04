@@ -132,6 +132,18 @@ namespace Application {
     World* world = World::create();
     worlds() += world;
 
+    Unit::Reference camera; {
+      const Resource::Id id = Resource::Id(UnitResource::type(), "foundation/units/camera");
+      Resource::Handle<UnitResource> type = id;
+      Unit& unit = world->unit(world->spawn_unit(type));
+      SceneGraph::Node::Camera* camera_ = unit.scene_graph().nodes()[0].camera();
+      camera_->set_type(SceneGraph::Node::Camera::ORTHOGRAPHIC);
+      camera_->set_near(-1.0f);
+      camera_->set_far(1.0f);
+      camera_->set_view(Vec2f(-1.0f, -1.0f), Vec2f(1.0f, 1.0f));
+      camera = Unit::Reference(unit, 0);
+    }
+
     {
       const Resource::Id id = Resource::Id(UnitResource::type(), "units/splash");
       Resource::Handle<UnitResource> type = id;
@@ -144,74 +156,8 @@ namespace Application {
     while (true) {
       window->update();
       world->update(1.0f / 60.0f);
+      // world->render();
     }
-
-    // MeshResource* mesh = (MeshResource*)Resource::load(MeshResource::type(), "units/splash/plane");
-    // ShaderResource* shader = *(mesh->materials()[0].shader);
-    // StateResource* state = *(shader->state());
-
-    // window->set_on_closed_handler(&on_window_closed);
-    // window->show();
-
-    // manifest->dereference();
-
-    // RenderContext rc;
-
-    // RenderTarget* render_targets[1] = { swap_chain->render_target() };
-    // rc.set_render_and_depth_stencil_targets(
-    //   0, 1, &render_targets[0], depth);
-
-    // const Viewport viewports[1] = {
-    //   Viewport(0, 0, 720, 1280)
-    // };
-
-    // rc.set_viewports(1, 1, &viewports[0]);
-
-    // rc.clear(2, swap_chain->render_target(), Vec4f(1.0f, 0.0f, 0.5f, 1.0f));
-    // rc.clear(3, depth, 1.0f, 0x00000000u);
-
-    // Texture* textures[8];
-    // Sampler* samplers[8];
-    // for (size_t i = 0; i < mesh->materials()[0].num_of_textures; ++i) {
-    //   textures[i] = (*mesh->materials()[0].textures[i])->texture();
-    //   samplers[i] = (*mesh->materials()[0].textures[i])->sampler();
-    // }
-
-    // rc.draw(
-    //   4, state->rasterizer_state(), state->depth_stencil_state(), state->blend_state(),
-    //   shader->vertex_shader(), shader->pixel_shader(),
-    //   mesh->materials()[0].num_of_textures, &samplers[0], &textures[0],
-    //   mesh->vertex_declaration(), mesh->vertices(), mesh->indicies(),
-    //   0, nullptr, Topology::TRIANGLES, mesh->num_of_primitives());
-
-    // rc.present(5, swap_chain);
-
-    // unsigned tick = 0;
-    // while (true) {
-    //   window->update();
-
-    //   const RenderContext* render_contexts[1] = { &rc };
-    //   rd->dispatch(1, &render_contexts[0]);
-
-    //   if (!((tick++) % 10000)) {
-    //     int64_t memory_usage;
-    //     int64_t num_of_allocations;
-    //     int64_t num_of_reallocations;
-    //     int64_t num_of_frees;
-
-    //     Allocators::stats(
-    //       memory_usage,
-    //       num_of_allocations,
-    //       num_of_reallocations,
-    //       num_of_frees);
-
-    //     log("Allocators:");
-    //     log("  memory_usage = %" PRIi64 " bytes", memory_usage);
-    //     log("  num_of_allocations = %" PRIi64, num_of_allocations);
-    //     log("  num_of_reallocations = %" PRIi64, num_of_reallocations);
-    //     log("  num_of_frees = %" PRIi64, num_of_frees);
-    //   }
-    // }
   }
 } // Application
 } // butane

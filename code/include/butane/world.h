@@ -101,6 +101,10 @@ namespace butane {
       void update(
         const float dt );
 
+      /*! */
+      void render(
+        const Unit::Reference& camera );
+
     private:
       /*! */
       void create_visual_representation();

@@ -316,6 +316,15 @@ namespace butane {
     update_world_task->kick_and_wait();
   }
 
+  void World::render(
+    const Unit::Reference& camera )
+  {
+    const LogScope _("World::render");
+
+    if (!camera.is_node())
+      fail("Specified Unit as camera, expected a Node!");
+  }
+
   void World::destroy()
   {
     make_delete(World, allocator(), this);
