@@ -52,11 +52,11 @@ namespace butane {
       _types[node] = (Node::Type)serialized.nodes[node].type;
       _links[node] = (Node::Link)serialized.nodes[node].link;
       _names[node] = (Node::Name)serialized.nodes[node].name;
-      _flags[node] = Node::MOVED | Node::DIRTY;
+      _flags[node] = Node::MOVED;
       _local_poses[node] = serialized.nodes[node].pose;
       _world_transforms[node] = Mat4::identity();
       new ((void*)&_nodes[node]) Node(serialized.nodes[node]);
-      // _visual_representations[node] = VisualRepresentation::invalid;
+      _visual_representations[node] = VisualRepresentation::invalid;
     }
   }
 
@@ -77,7 +77,7 @@ namespace butane {
         _local_poses[node].scale);
       _world_transforms[node] = parent * transform;
       _flags[node] &= ~Node::MOVED;
-      _flags[node] |= Node::DIRTY;
+      _flags[node] |= (_flags[node] & Node::HAS_VISUAL_REPRESENTATION) ? Node::DIRTY : 0;
     }
   }
 
@@ -91,11 +91,15 @@ namespace butane {
         case Node::CAMERA:
           vrs.create(
             VisualRepresentation::CAMERA,
-            &_visual_representations[node]); break;
+            &_visual_representations[node]);
+          _flags[node] |= Node::DIRTY;
+          _flags[node] |= Node::HAS_VISUAL_REPRESENTATION; break;
         case Node::MESH:
           vrs.create(
             VisualRepresentation::MESH,
-            &_visual_representations[node]); break;
+            &_visual_representations[node]);
+          _flags[node] |= Node::DIRTY;
+          _flags[node] |= Node::HAS_VISUAL_REPRESENTATION; break;
         default:
           __builtin_unreachable();
       }

@@ -149,64 +149,66 @@ namespace butane {
       update_world_task = Task::prepare(
         Thread::default_affinity,
         &Tasks::update_world,
-        (uintptr_t)&uwd);
+        (uintptr_t)uwd);
     }
 
-    // Task* update_units_task; {
-    //   Tasks::UpdateUnitsData* uud =
-    //     (Tasks::UpdateUnitsData*)alloca(sizeof(Tasks::UpdateUnitsData));
-    //   uud->world = this;
-    //   uud->dt = dt;
-    //   update_units_task = update_world_task->child(
-    //     Thread::default_affinity,
-    //     &Tasks::update_units,
-    //     (uintptr_t)uud);
-    // }
+    Task* update_units_task; {
+      Tasks::UpdateUnitsData* uud =
+        (Tasks::UpdateUnitsData*)alloca(sizeof(Tasks::UpdateUnitsData));
+      uud->world = this;
+      uud->dt = dt;
+      update_units_task = update_world_task->child(
+        Thread::default_affinity,
+        &Tasks::update_units,
+        (uintptr_t)uud);
+    }
 
-    // Task* update_scene_graphs_task; {
-    //   Tasks::UpdateSceneGraphsData* usgd =
-    //     (Tasks::UpdateSceneGraphsData*)alloca(sizeof(Tasks::UpdateSceneGraphsData));
-    //   usgd->scene_graphs = (num_of_units() > 0) ? &_units[0].scene_graph() : nullptr;
-    //   usgd->num_of_scene_graphs = num_of_units();
-    //   usgd->stride = sizeof(Unit);
-    //   update_scene_graphs_task = update_world_task->child(
-    //     Thread::default_affinity,
-    //     &Tasks::update_scene_graphs,
-    //     (uintptr_t)usgd,
-    //     update_units_task);
-    // }
+    Task* update_scene_graphs_task; {
+      Tasks::UpdateSceneGraphsData* usgd =
+        (Tasks::UpdateSceneGraphsData*)alloca(sizeof(Tasks::UpdateSceneGraphsData));
+      usgd->scene_graphs = (num_of_units() > 0) ? &_units[0].scene_graph() : nullptr;
+      usgd->num_of_scene_graphs = num_of_units();
+      usgd->stride = sizeof(Unit);
+      update_scene_graphs_task = update_world_task->child(
+        Thread::default_affinity,
+        &Tasks::update_scene_graphs,
+        (uintptr_t)usgd,
+        update_units_task);
+    }
 
-    // VisualRepresentationStream vrs;
+    if (!_visual_representation_stream) {
+      _visual_representation_stream =
+        make_new(VisualRepresentationStream, Allocators::scratch())();
+    }
 
-    // // TODO: Go wide. Use n VisualRepresentationStreams and then apply all with
-    // //       one task.
-    // Task* update_visual_representations_task; {
-    //   Tasks::UpdateVisualRepresentationsData* uvrd =
-    //     (Tasks::UpdateVisualRepresentationsData*)alloca(sizeof(Tasks::UpdateVisualRepresentationsData));
-    //   uvrd->world = this;
-    //   uvrd->vrs = vrs;
-    //   update_visual_representations_task = update_world_task->child(
-    //     Thread::default_affinity,
-    //     &Tasks::update_visual_representations,
-    //     (uintptr_t)&uvrd,
-    //     update_scene_graphs_task);
-    // }
+    // TODO: Go wide. Use n VisualRepresentationStreams and then apply all with
+    //       one task.
+    Task* update_visual_representations_task; {
+      Tasks::UpdateVisualRepresentationsData* uvrd =
+        (Tasks::UpdateVisualRepresentationsData*)alloca(sizeof(Tasks::UpdateVisualRepresentationsData));
+      uvrd->world = this;
+      update_visual_representations_task = update_world_task->child(
+        Thread::default_affinity,
+        &Tasks::update_visual_representations,
+        (uintptr_t)uvrd,
+        update_scene_graphs_task);
+    }
 
-    // Task* graduate_units_task; {
-    //   Tasks::GraduateUnitsData* gud =
-    //     (Tasks::GraduateUnitsData*)alloca(sizeof(Tasks::GraduateUnitsData));
-    //   gud->world = this;
-    //   graduate_units_task = update_world_task->child(
-    //     Thread::default_affinity,
-    //     &Taks::graduate_units,
-    //     (uintptr_t)&uvrd,
-    //     update_visual_representations_task);
-    // }
+    Task* graduate_units_task; {
+      Tasks::GraduateUnitsData* gud =
+        (Tasks::GraduateUnitsData*)alloca(sizeof(Tasks::GraduateUnitsData));
+      gud->world = this;
+      graduate_units_task = update_world_task->child(
+        Thread::default_affinity,
+        &Tasks::graduate_units,
+        (uintptr_t)gud,
+        update_visual_representations_task);
+    }
 
-    // graduate_units_task->kick();
-    // update_visual_representations_task->kick();
-    // update_scene_graphs_task->kick();
-    //update_units_task->kick();
+    graduate_units_task->kick();
+    update_visual_representations_task->kick();
+    update_scene_graphs_task->kick();
+    update_units_task->kick();
     update_world_task->kick_and_wait();
   }
 

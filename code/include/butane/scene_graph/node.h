@@ -36,7 +36,10 @@ class Node final {
 
       /*! The node's visual representation (Node::Renderable) will be updated
           during the next SceneGraph::update_visual_representation(). */
-      DIRTY = (1u << 1u)
+      DIRTY = (1u << 1u),
+
+      /*! The node has a visual representation. */
+      HAS_VISUAL_REPRESENTATION = (1u << 2u),
     };
 
     /*! */
@@ -231,9 +234,24 @@ class Node final {
     }
 
     /*! */
+    FOUNDATION_INLINE void set_moved( const bool moved ) {
+      assert(id() != invalid);
+      if (moved) scene_graph().flags()[id()] |= Node::MOVED;
+      else scene_graph().flags()[id()] &= ~Node::MOVED;
+    }
+
+    /*! */
     FOUNDATION_INLINE bool is_dirty() const {
       assert(id() != invalid);
       return (scene_graph().flags()[id()] & Node::DIRTY);
+    }
+
+    /*! */
+    FOUNDATION_INLINE void set_dirty( const bool dirty ) {
+      assert(id() != invalid);
+      if (!(scene_graph().flags()[id()] & Node::HAS_VISUAL_REPRESENTATION)) return;
+      if (dirty) scene_graph().flags()[id()] |= Node::DIRTY;
+      else scene_graph().flags()[id()] &= ~Node::DIRTY;
     }
 
   private:
