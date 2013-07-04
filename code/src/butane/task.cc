@@ -83,17 +83,16 @@ namespace butane {
 
   void Task::kick_and_wait()
   {
-    Mutex m;
-    ConditionVariable cv;
+    int32_t finished = 0;
 
-    _parent = make_new(Task, Allocators::scratch())(
+    Task* waitable = make_new(Task, Allocators::scratch())(
       derive_task_name_from_kernel(Tasks::waitable),
-      Thread::default_affinity, _parent, nullptr, 2, &Tasks::waitable, (uintptr_t)&cv);
+      Thread::default_affinity, nullptr, this, 1, &Tasks::waitable, (uintptr_t)&finished);
+    _num_of_open_dependencies += 1;
 
+    Scheduler::enqueue(waitable);
     Scheduler::enqueue(this);
 
-    m.lock();
-    Scheduler::enqueue(_parent);
-    cv.wait(m);
+    while (!__sync_bool_compare_and_swap(&finished, 1, 1));
   }
 } // butane

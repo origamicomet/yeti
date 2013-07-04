@@ -79,9 +79,12 @@ namespace butane {
 
       if (!(task->_affinity & affinity))
         goto skip;
-      if (task->_depends_on && task->_depends_on->_num_of_open_work_items > 0)
-        goto skip;
-      if (task->_num_of_open_work_items > 1)
+
+      if (task->_depends_on)
+        if (!__sync_bool_compare_and_swap(&task->_depends_on->_num_of_open_work_items, 0, 0))
+          goto skip;
+
+      if (!__sync_bool_compare_and_swap(&task->_num_of_open_work_items, 1, 1))
         goto skip;
 
       task->_kernel(task, task->_data);
@@ -89,12 +92,14 @@ namespace butane {
       if (task->_depends_on)
         if (__sync_fetch_and_sub(&task->_depends_on->_num_of_open_dependencies, 1) == 1)
           make_delete(Task, Allocators::scratch(), task->_depends_on);
-      const int32_t open_work_items =
-        __sync_fetch_and_sub(&task->_num_of_open_work_items, 1);
+
       if (task->_parent)
         __sync_fetch_and_sub(&task->_parent->_num_of_open_work_items, 1);
-      if ((open_work_items <= 1) && (task->_num_of_open_dependencies <= 0))
+
+      if (__sync_bool_compare_and_swap(&task->_num_of_open_dependencies, 0, 0))
         make_delete(Task, Allocators::scratch(), task);
+      else
+        __sync_fetch_and_sub(&task->_num_of_open_work_items, 1);
 
       continue;
 

@@ -9,7 +9,7 @@ namespace Tasks {
     Task* task,
     uintptr_t data )
   {
-    ((ConditionVariable*)data)->signal();
+    __sync_val_compare_and_swap(((int32_t*)data), 0, 1);
   }
 } // Tasks
 } // butane
