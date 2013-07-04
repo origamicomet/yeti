@@ -124,7 +124,8 @@ namespace butane {
       case butane::VisualRepresentation::CAMERA: {
         if (_camera_ids[id] != (Id)0xFFFFFFFFFFFFFFFFull) {
           _camera_ids[_cameras[_cameras.size() - 1].id] = _camera_ids[id];
-          _cameras.swap(_camera_ids[id], _cameras.size() - 1); }
+          _cameras.swap(_camera_ids[id], _cameras.size() - 1);
+          _cameras.resize(_cameras.size() - 1); }
         _camera_ids[id] = _next_avail_camera_id;
         _next_avail_camera_id = id;
       } break;
@@ -132,7 +133,8 @@ namespace butane {
       case butane::VisualRepresentation::MESH: {
         if (_mesh_ids[id] != (Id)0xFFFFFFFFFFFFFFFFull) {
           _mesh_ids[_meshes[_meshes.size() - 1].id] = _mesh_ids[id];
-          _meshes.swap(_mesh_ids[id], _meshes.size() - 1); }
+          _meshes.swap(_mesh_ids[id], _meshes.size() - 1);
+          _meshes.resize(_meshes.size() - 1); }
         _mesh_ids[id] = _next_avail_mesh_id;
         _next_avail_mesh_id = id;
       } break;
