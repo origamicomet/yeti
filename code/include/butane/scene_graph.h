@@ -89,6 +89,9 @@ namespace butane {
       FOUNDATION_INLINE const Node* nodes() const
       { return _nodes.raw(); }
 
+      FOUNDATION_INLINE const butane::VisualRepresentation::Id* visual_representations() const
+      { return _visual_representations.raw(); }
+
     private:
       Array<Node::Type> _types;
       Array<Node::Link> _links;
@@ -97,7 +100,7 @@ namespace butane {
       Array<Node::Pose> _local_poses;
       Array<Mat4> _world_transforms;
       Array<Node> _nodes;
-      mutable Array<Node::VisualRepresentation::Id> _visual_representations;
+      mutable Array<butane::VisualRepresentation::Id> _visual_representations;
   };
 } // butane
 

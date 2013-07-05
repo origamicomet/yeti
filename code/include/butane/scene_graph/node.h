@@ -8,6 +8,9 @@
 class Node final {
   __foundation_trait(Node, non_copyable);
 
+  private:
+    friend class SceneGraph;
+
   public:
     /*! */
     typedef uint8_t Id;
@@ -176,6 +179,12 @@ class Node final {
     FOUNDATION_INLINE const Mat4& world_transform() const {
       assert(id() != invalid);
       return scene_graph().world_transforms()[id()];
+    }
+
+    /*! */
+    FOUNDATION_INLINE const butane::VisualRepresentation::Id visual_representation() const {
+      assert(id () != invalid);
+      return scene_graph().visual_representations()[id()];
     }
 
   public:
