@@ -246,6 +246,8 @@ namespace butane {
   void World::update(
     const float dt )
   {
+    const LogScope _("World::update");
+
     Task* update_world_task; {
       Tasks::UpdateWorldData* uwd =
         (Tasks::UpdateWorldData*)alloca(sizeof(Tasks::UpdateWorldData));
@@ -268,6 +270,9 @@ namespace butane {
         (uintptr_t)uud);
     }
 
+    // TODO: Go wide. Use n update_scene_graph tasks. Introducing unit linking
+    //       will introduce ordering problems, so linked units will have to be
+    //       handled seperately.
     Task* update_scene_graphs_task; {
       Tasks::UpdateSceneGraphsData* usgd =
         (Tasks::UpdateSceneGraphsData*)alloca(sizeof(Tasks::UpdateSceneGraphsData));
@@ -316,19 +321,35 @@ namespace butane {
   }
 
   void World::render(
-    const Unit::Reference& camera )
+    const Unit::Reference& camera ) const
   {
     const LogScope _("World::render");
 
-    {
-      if (!camera.is_node())
-        fail("Specified Unit as camera, expected a Node!");
-      const SceneGraph::Node& node = camera.to_node();
-      if (!node.is_camera())
-        fail("Specified a non-Camera node as camera, expected a Camera!");
-      const butane::VisualRepresentation::Id visual_representation =
-        node.visual_representation();
+    Task* render_world_task; {
+      Tasks::RenderWorldData* rwd =
+        (Tasks::RenderWorldData*)Allocators::scratch().alloc(sizeof(Tasks::RenderWorldData));
+      rwd->world = this;
+      render_world_task = Task::prepare(
+        Thread::default_affinity,
+        &Tasks::render_world,
+        (uintptr_t)rwd);
     }
+
+    Task* apply_visual_representation_stream; {
+      Tasks::ApplyVisualRepresentationStreamData* avrsd =
+        (Tasks::ApplyVisualRepresentationStreamData*)Allocators::scratch().alloc(sizeof(Tasks::ApplyVisualRepresentationStreamData));
+      avrsd->world = this;
+      avrsd->vrs = _visual_representation_stream;
+      apply_visual_representation_stream = render_world_task->child(
+        Thread::default_affinity,
+        &Tasks::apply_visual_representation_stream,
+        (uintptr_t)avrsd);
+    }
+
+    _visual_representation_stream = nullptr;
+
+    apply_visual_representation_stream->kick();
+    render_world_task->kick();
   }
 
   void World::destroy()

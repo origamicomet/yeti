@@ -13,6 +13,8 @@
 #include <butane/tasks/update_scene_graphs.h>
 #include <butane/tasks/update_visual_representations.h>
 #include <butane/tasks/graduate_units.h>
+#include <butane/tasks/render_world.h>
+#include <butane/tasks/apply_visual_representation_stream.h>
 
 namespace butane {
   class BUTANE_EXPORT World final {
@@ -24,6 +26,8 @@ namespace butane {
       friend void Tasks::update_scene_graphs( Task*, uintptr_t );
       friend void Tasks::update_visual_representations( Task*, uintptr_t );
       friend void Tasks::graduate_units( Task*, uintptr_t );
+      friend void Tasks::render_world( Task*, uintptr_t );
+      friend void Tasks::apply_visual_representation_stream( Task*, uintptr_t );
 
     public:
       class VisualRepresentation final
@@ -32,6 +36,10 @@ namespace butane {
 
         private:
           friend class World;
+
+        private:
+          friend void Tasks::render_world( Task*, uintptr_t );
+          friend void Tasks::apply_visual_representation_stream( Task*, uintptr_t );
 
         private:
           VisualRepresentation(
@@ -104,18 +112,7 @@ namespace butane {
 
       /*! */
       void render(
-        const Unit::Reference& camera );
-
-    private:
-      /*! */
-      void create_visual_representation();
-
-      /*! */
-      void update_visual_representation(
-        VisualRepresentationStream& vrs ) const;
-
-      /*! */
-      void destroy_visual_representation();
+        const Unit::Reference& camera ) const;
 
     public:
       void destroy();
@@ -131,8 +128,8 @@ namespace butane {
       { return _units.raw(); }
 
     private:
-      VisualRepresentation _visual_representation;
-      VisualRepresentationStream* _visual_representation_stream;
+      mutable VisualRepresentation _visual_representation;
+      mutable VisualRepresentationStream* _visual_representation_stream;
       Array<Unit::Id> _spawning;
       Array<Unit::Id> _despawning;
       Unit::Id _next_avail_unit_id;
