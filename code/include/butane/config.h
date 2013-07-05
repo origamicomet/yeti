@@ -29,7 +29,11 @@
 #define BUTANE_RESOURCE_DATABASE_HASH_TABLE_INITAL_SIZE 4096
 
 // The maximum number of worker threads the task scheduler can use.
-#define BUTANE_TASK_SCHEDULER_MAXIMUM_NUM_OF_WORKER_THREADS 8
+#if defined(BUTANE_DEBUG_BUILD)
+  #define BUTANE_TASK_SCHEDULER_MAXIMUM_NUM_OF_WORKER_THREADS 1
+#else
+  #define BUTANE_TASK_SCHEDULER_MAXIMUM_NUM_OF_WORKER_THREADS 8
+#endif
 
 // The maximum number of in-flight tasks the task scheduler supports.
 #define BUTANE_TASK_SCHEDULER_MAXIMUM_NUM_OF_INFLIGHT_TASKS 256
