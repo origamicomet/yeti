@@ -40,7 +40,7 @@ namespace butane {
           ~VisualRepresentation();
 
         private:
-          void update(
+          void apply(
             const VisualRepresentationStream& vrs );
 
         private:

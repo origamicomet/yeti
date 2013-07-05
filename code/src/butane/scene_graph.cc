@@ -115,6 +115,7 @@ namespace butane {
       Node::VisualRepresentation* vr =
         (Node::VisualRepresentation*)vrs.update(_visual_representations[node]);
       if (vr) {
+        vr->id = _visual_representations[node];
         vr->transform = _world_transforms[node];
         // vr->bounding_box = _bounding_boxs[node];
         _nodes[node].update_visual_representation(*vr);

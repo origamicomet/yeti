@@ -52,11 +52,12 @@ namespace butane {
     const size_t visual_representation_len =
       VisualRepresentation::length(VisualRepresentation::type(id));
 
-    while ((_stream_offs + visual_representation_len) < _stream.size())
+    while ((_stream_offs + visual_representation_len) > _stream.size())
       _stream.resize(max((size_t)1, _stream.size()) * 2);
 
     VisualRepresentation* visual_representation =
       (VisualRepresentation*)&_stream[_stream_offs];
+    zero((void*)visual_representation, visual_representation_len);
     _stream_offs += visual_representation_len;
 
     return visual_representation;

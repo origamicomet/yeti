@@ -34,7 +34,7 @@ namespace butane {
   {
   }
 
-  void World::VisualRepresentation::update(
+  void World::VisualRepresentation::apply(
     const VisualRepresentationStream& vrs )
   {
     const Mutex::ScopedLock lock(_mutex);
@@ -94,7 +94,7 @@ namespace butane {
     const size_t id = (size_t)(request->vrid & 0xFFFFFFFFull);
     switch (butane::VisualRepresentation::type(request->vrid)) {
       case butane::VisualRepresentation::CAMERA: {
-        if (_camera_ids[id] == (Id)0xFFFFFFFFFFFFFFFFull) {
+        if (_camera_ids[id] == (size_t)0xFFFFFFFFFFFFFFFFull) {
           _camera_ids[id] = _cameras.size();
           _cameras.resize(_cameras.size() + 1); }
         _cameras[_camera_ids[id]] =
@@ -102,7 +102,7 @@ namespace butane {
       } break;
 
       case butane::VisualRepresentation::MESH: {
-        if (_mesh_ids[id] == (Id)0xFFFFFFFFFFFFFFFFull) {
+        if (_mesh_ids[id] == (size_t)0xFFFFFFFFFFFFFFFFull) {
           _mesh_ids[id] = _meshes.size();
           _meshes.resize(_meshes.size() + 1); }
         _meshes[_mesh_ids[id]] =
@@ -122,7 +122,7 @@ namespace butane {
     const size_t id = (size_t)(request->vrid & 0xFFFFFFFFull);
     switch (butane::VisualRepresentation::type(request->vrid)) {
       case butane::VisualRepresentation::CAMERA: {
-        if (_camera_ids[id] != (Id)0xFFFFFFFFFFFFFFFFull) {
+        if (_camera_ids[id] != (size_t)0xFFFFFFFFFFFFFFFFull) {
           _camera_ids[_cameras[_cameras.size() - 1].id] = _camera_ids[id];
           _cameras.swap(_camera_ids[id], _cameras.size() - 1);
           _cameras.resize(_cameras.size() - 1); }
@@ -131,7 +131,7 @@ namespace butane {
       } break;
 
       case butane::VisualRepresentation::MESH: {
-        if (_mesh_ids[id] != (Id)0xFFFFFFFFFFFFFFFFull) {
+        if (_mesh_ids[id] != (size_t)0xFFFFFFFFFFFFFFFFull) {
           _mesh_ids[_meshes[_meshes.size() - 1].id] = _mesh_ids[id];
           _meshes.swap(_mesh_ids[id], _meshes.size() - 1);
           _meshes.resize(_meshes.size() - 1); }
@@ -162,7 +162,7 @@ namespace butane {
         VisualRepresentationStream::Requests::Update* request_ =
           (VisualRepresentationStream::Requests::Update*)request;
         butane::VisualRepresentation* visual_representation =
-          (butane::VisualRepresentation*)(request_ + sizeof(VisualRepresentationStream::Requests::Update));
+          (butane::VisualRepresentation*)(((uintptr_t)request) + sizeof(VisualRepresentationStream::Requests::Update));
         vr->update(request_, visual_representation);
       } break;
 
