@@ -43,6 +43,7 @@ namespace butane {
           void update(
             const VisualRepresentationStream& vrs );
 
+        private:
           butane::VisualRepresentation::Id create(
             const VisualRepresentationStream::Requests::Create* request );
 
@@ -126,7 +127,7 @@ namespace butane {
       FOUNDATION_INLINE size_t num_of_units() const
       { return _units.size(); }
 
-      FOUNDATION_INLINE const Unit* units() const
+      FOUNDATION_INLINE Unit* const * units() const
       { return _units.raw(); }
 
     private:
@@ -136,7 +137,7 @@ namespace butane {
       Array<Unit::Id> _despawning;
       Unit::Id _next_avail_unit_id;
       Array<size_t> _unit_ids;
-      Array<Unit> _units;
+      Array<Unit*> _units;
   };
 } // butane
 

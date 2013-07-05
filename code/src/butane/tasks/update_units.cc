@@ -13,7 +13,7 @@ namespace Tasks {
   {
     UpdateUnitsData* uud = (UpdateUnitsData*)data;
     for (size_t unit = 0; unit < uud->world->_units.size(); ++unit)
-      uud->world->_units[unit].update(uud->dt);
+      uud->world->_units[unit]->update(uud->dt);
   }
 } // Tasks
 } // butane

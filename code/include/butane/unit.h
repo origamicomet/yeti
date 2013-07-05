@@ -75,6 +75,9 @@ namespace butane {
       };
 
     public:
+      static Allocator& allocator();
+
+    public:
       Unit();
 
       Unit(

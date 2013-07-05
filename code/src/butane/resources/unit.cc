@@ -172,6 +172,8 @@ namespace butane {
         output.log("Malformed input: the node %u not an object!", id);
         goto failure; }
 
+      sn.id = (SceneGraph::Node::Id)id;
+
       /* sn.type = */ {
         const sjson::String* value = (const sjson::String*)node->find("type");
         if (!value) {

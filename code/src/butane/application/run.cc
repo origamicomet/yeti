@@ -156,7 +156,7 @@ namespace Application {
     while (true) {
       window->update();
       world->update(1.0f / 60.0f);
-      // world->render();
+      world->render(camera);
     }
   }
 } // Application

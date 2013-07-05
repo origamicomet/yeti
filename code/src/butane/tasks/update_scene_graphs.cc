@@ -3,7 +3,7 @@
 
 #include <butane/tasks/update_scene_graphs.h>
 
-#include <butane/scene_graph.h>
+#include <butane/world.h>
 
 namespace butane {
 namespace Tasks {
@@ -12,13 +12,8 @@ namespace Tasks {
     uintptr_t data )
   {
     UpdateSceneGraphsData* usgd = (UpdateSceneGraphsData*)data;
-    SceneGraph* scene_graph = usgd->scene_graphs;
-    SceneGraph* last_scene_graph =
-    usgd->scene_graphs + (sizeof(SceneGraph) + usgd->stride) * usgd->num_of_scene_graphs;
-    while (scene_graph < last_scene_graph) {
-      scene_graph->update();
-      scene_graph += (sizeof(SceneGraph) + usgd->stride);
-    }
+    for (size_t unit = 0; unit < usgd->world->_units.size(); ++unit)
+      usgd->world->_units[unit]->scene_graph().update();
   }
 } // Tasks
 } // butane

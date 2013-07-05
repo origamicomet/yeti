@@ -15,7 +15,7 @@ namespace Tasks {
 
     for (size_t unit = 0; unit < gud->world->_despawning.size(); ++unit) {
       const Unit::Id id = gud->world->_despawning[unit];
-      gud->world->_unit_ids[gud->world->_units[gud->world->_units.size() - 1].id()] = gud->world->_unit_ids[id];
+      gud->world->_unit_ids[gud->world->_units[gud->world->_units.size() - 1]->id()] = gud->world->_unit_ids[id];
       gud->world->_units.swap(
         gud->world->_unit_ids[id],
         gud->world->_units.size() - 1);

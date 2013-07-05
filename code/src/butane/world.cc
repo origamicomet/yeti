@@ -217,7 +217,8 @@ namespace butane {
 
     _unit_ids[id] = _units.size();
     _units.resize(_units.size() + 1);
-    new ((void*)&_units[_unit_ids[id]]) Unit(*this, id, type, position, rotation, scale);
+    _units[_unit_ids[id]] =
+      make_new(Unit, Unit::allocator())(*this, id, type, position, rotation, scale);
     _spawning += id;
     return id;
   }
@@ -232,14 +233,14 @@ namespace butane {
     const Unit::Id id )
   {
     assert(id < _unit_ids.size());
-    return _units[_unit_ids[id]];
+    return *_units[_unit_ids[id]];
   }
 
   const Unit& World::unit(
     const Unit::Id id ) const
   {
     assert(id < _unit_ids.size());
-    return _units[_unit_ids[id]];
+    return *_units[_unit_ids[id]];
   }
 
   void World::update(
@@ -270,9 +271,7 @@ namespace butane {
     Task* update_scene_graphs_task; {
       Tasks::UpdateSceneGraphsData* usgd =
         (Tasks::UpdateSceneGraphsData*)alloca(sizeof(Tasks::UpdateSceneGraphsData));
-      usgd->scene_graphs = (num_of_units() > 0) ? &_units[0].scene_graph() : nullptr;
-      usgd->num_of_scene_graphs = num_of_units();
-      usgd->stride = sizeof(Unit);
+      usgd->world = this;
       update_scene_graphs_task = update_world_task->child(
         Thread::default_affinity,
         &Tasks::update_scene_graphs,
@@ -321,8 +320,15 @@ namespace butane {
   {
     const LogScope _("World::render");
 
-    if (!camera.is_node())
-      fail("Specified Unit as camera, expected a Node!");
+    {
+      if (!camera.is_node())
+        fail("Specified Unit as camera, expected a Node!");
+      const SceneGraph::Node& node = camera.to_node();
+      if (!node.is_camera())
+        fail("Specified a non-Camera node as camera, expected a Camera!");
+      const butane::VisualRepresentation::Id visual_representation =
+        node.visual_representation();
+    }
   }
 
   void World::destroy()

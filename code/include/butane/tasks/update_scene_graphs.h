@@ -8,12 +8,10 @@
 #include <butane/task.h>
 
 namespace butane {
-  class SceneGraph;
+  class World;
 namespace Tasks {
   struct UpdateSceneGraphsData {
-    SceneGraph* scene_graphs;
-    size_t num_of_scene_graphs;
-    size_t stride;
+    World* world;
   };
 
   extern BUTANE_EXPORT void update_scene_graphs(
