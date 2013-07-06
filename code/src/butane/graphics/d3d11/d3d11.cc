@@ -12,6 +12,8 @@ namespace butane {
         return DXGI_FORMAT_R8G8B8A8_UNORM;
       case PixelFormat::R8G8B8A8_SRGB:
         return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+      case PixelFormat::R16FG16F:
+        return DXGI_FORMAT_R16G16_FLOAT;
       case PixelFormat::DXT1:
         return DXGI_FORMAT_BC1_UNORM;
       case PixelFormat::DXT3:
@@ -32,6 +34,8 @@ namespace butane {
       case PixelFormat::R8G8B8A8:
       case PixelFormat::R8G8B8A8_SRGB:
         return DXGI_FORMAT_R8G8B8A8_TYPELESS;
+      case PixelFormat::R16FG16F:
+        return DXGI_FORMAT_R16G16_TYPELESS;
       case PixelFormat::DXT1:
         return DXGI_FORMAT_BC1_TYPELESS;
       case PixelFormat::DXT3:
@@ -52,6 +56,8 @@ namespace butane {
       case PixelFormat::R8G8B8A8:
       case PixelFormat::R8G8B8A8_SRGB:
         return DXGI_FORMAT_R8G8B8A8_UNORM;
+      case PixelFormat::R16FG16F:
+        return DXGI_FORMAT_R16G16_FLOAT;
       case PixelFormat::DXT1:
         return DXGI_FORMAT_BC1_UNORM;
       case PixelFormat::DXT3:

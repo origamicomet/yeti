@@ -12,6 +12,7 @@ namespace butane {
     static const Pair<const char*, PixelFormat> _str_to_pf[] = {
       Pair<const char*, PixelFormat>("R8G8B8A8", PixelFormat::R8G8B8A8),
       Pair<const char*, PixelFormat>("R8G8B8A8_SRGB", PixelFormat::R8G8B8A8_SRGB),
+      Pair<const char*, PixelFormat>("R16FG16F", PixelFormat::R16FG16F),
       Pair<const char*, PixelFormat>("DXT1", PixelFormat::DXT1),
       Pair<const char*, PixelFormat>("DXT3", PixelFormat::DXT3),
       Pair<const char*, PixelFormat>("DXT5", PixelFormat::DXT5),
@@ -34,6 +35,8 @@ namespace butane {
       case R8G8B8A8:
       case R8G8B8A8_SRGB:
         return width * 4;
+      case R16FG16F:
+        return width * 4;
       case DXT1:
         return ((width + 3) / 4) * 4;
       case DXT3:
@@ -53,6 +56,8 @@ namespace butane {
     switch (_value) {
       case R8G8B8A8:
       case R8G8B8A8_SRGB:
+        return width * height * 4;
+      case R16FG16F:
         return width * height * 4;
       case DXT1:
         return ((width + 3) / 4) * ((height + 3) / 4) * 8;

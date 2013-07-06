@@ -24,6 +24,9 @@ namespace butane {
         R8G8B8A8_SRGB =
           0x00000002u | ColorBit,
 
+        R16FG16F =
+          0x00000003u | ColorBit,
+
         DXT1 =
           0x00000003u | ColorBit | CompressedBit,
 
