@@ -6,6 +6,7 @@
 
 #include <butane/resource.h>
 #include <butane/resources/state.h>
+#include <butane/resources/render_config.h>
 #include <butane/graphics/vertex_shader.h>
 #include <butane/graphics/pixel_shader.h>
 
@@ -17,7 +18,7 @@ namespace butane {
 
     private:
       struct MemoryResidentData {
-        Hash<uint32_t, murmur_hash> layer;
+        RenderConfigResource::Layer::Name layer;
         Resource::Id state;
         Resource::Id vertex_shader;
         Resource::Id pixel_shader;
@@ -58,7 +59,7 @@ namespace butane {
       { return _pixel_shader; }
 
     private:
-      Hash<uint32_t, murmur_hash> _layer;
+      RenderConfigResource::Layer::Name _layer;
       Resource::Handle<StateResource> _state;
       Resource::Handle<VertexShader> _vertex_shader;
       Resource::Handle<PixelShader> _pixel_shader;

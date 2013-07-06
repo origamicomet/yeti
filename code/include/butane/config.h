@@ -47,4 +47,7 @@
 // The maximum number of seconds to wait when connecting to a remote console.
 #define BUTANE_CONSOLE_TIMEOUT 10
 
+// The minimum number of scene graphs to update per update_scene_graphs task.
+#define BUTANE_MINIMUM_NUM_OF_SCENE_GRAPHS_TO_UPDATE_PER_TASK 256
+
 #endif // _BUTANE_CONFIG_H_
