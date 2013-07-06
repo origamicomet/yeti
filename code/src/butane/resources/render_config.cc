@@ -42,7 +42,7 @@ namespace butane {
   ) : butane::Resource(RenderConfigResource::type(), id)
     , _globals(allocator())
     , _layers(allocator())
-    , _name_to_layer(allocator())
+    , _name_to_layer(allocator(), 256)
   {
   }
 
@@ -56,8 +56,27 @@ namespace butane {
   {
     const LogScope _("RenderConfigResource::load");
 
+    const MemoryResidentData* mrd =
+      ((const MemoryResidentData*)stream.memory_resident_data());
+
     RenderConfigResource* cfg =
       make_new(RenderConfigResource, allocator())(id);
+
+    cfg->_globals.resize(mrd->num_of_globals);
+    cfg->_layers.resize(mrd->num_of_layers);
+
+    copy(
+      (void*)cfg->_globals.raw(),
+      (const void*)mrd->globals,
+      mrd->num_of_globals * sizeof(Resource));
+
+    copy(
+      (void*)cfg->_layers.raw(),
+      (const void*)mrd->layers,
+      mrd->num_of_layers * sizeof(Layer));
+
+    for (size_t i = 0; i < mrd->num_of_layers; ++i)
+      cfg->_name_to_layer.insert(cfg->_layers[i].name, &cfg->_layers[i]);
 
     return cfg;
   }
@@ -143,12 +162,17 @@ namespace butane {
       else
         mrd->globals = relative_ptr<Resource*>();
 
+      offset += globals->size() * sizeof(Resource);
+
       if (layers->size() > 0)
         mrd->layers = relative_ptr<Layer*>(offset - offsetof(MemoryResidentData, layers));
       else
         mrd->layers = relative_ptr<Layer*>();
+
+      // offset += layers->size() * sizeof(Layer);
     }
 
+    mrd->num_of_globals = globals->size();
     for (size_t id = 0; id < globals->size(); ++id) {
       Resource& sr = mrd->globals[id];
       const sjson::Object* resource = (const sjson::Object*)globals->at(id);
@@ -225,6 +249,130 @@ namespace butane {
             }
           }
         } break;
+      }
+    }
+
+    mrd->num_of_layers = layers->size();
+    for (size_t id = 0; id < layers->size(); ++id) {
+      Layer& sl = mrd->layers[id];
+      const sjson::Object* layer = (const sjson::Object*)layers->at(id);
+      if (!layer->is_object()) {
+        output.log("Malformed input: the layer %u not an object!", id);
+        goto failure; }
+
+      sl.id = (Layer::Id)id;
+
+      /* sl.name = */ {
+        const sjson::String* value = (const sjson::String*)layer->find("name");
+        if (!value) {
+          output.log("Malformed input: the layer %u is missing 'name'!", id);
+          goto failure; }
+        if (!value->is_string()) {
+          output.log("Malformed input: 'name' in the layer %u is not a string!", id);
+          goto failure; }
+        sl.name = value->raw();
+      }
+
+      /* sl.samplers = */ {
+        const sjson::Array* samplers =
+          (const sjson::Array*)layer->find("samplers");
+        if (samplers) {
+          if (!samplers->is_array()) {
+            output.log("Malformed input: 'samplers' in the layer %u is not an array!", id);
+            goto failure; }
+          if (samplers->size() > Layer::maximum_num_of_samplers) {
+            output.log("Malformed input: expected less than %u samplers in the layer %u!", Layer::maximum_num_of_samplers, id);
+            goto failure; }
+          sl.num_of_samplers = samplers->size();
+          for (size_t sampler = 0; sampler < samplers->size(); ++sampler) {
+            const sjson::String* value = (const sjson::String*)samplers->at(sampler);
+            if (!value->is_string()) {
+              output.log("Malformed input: the sampler %u in the layer %u is not a string!", sampler, id);
+              goto failure; }
+            const Resource::Name name = value->raw();
+            for (size_t i = 0; i < mrd->num_of_globals; ++i) {
+              if (name != mrd->globals[i].name)
+                continue;
+              switch (mrd->globals[i].type) {
+                case Resource::RENDER_TARGET:
+                case Resource::DEPTH_STENCIL_TARGET:
+                  break;
+                default:
+                  output.log("Malformed input: the sampler %u in the layer %u references a non-samplable resource!", sampler, id);
+                  goto failure; }
+              sl.samplers[sampler] = mrd->globals[i].id;
+              goto found_sampler; }
+            output.log("Malformed input: the sampler %u in the layer %u references an undefined global resource `%s`!", sampler, id, value->raw());
+            goto failure;
+          found_sampler:
+            continue;
+          }
+        } else {
+          sl.num_of_samplers = 0;
+        }
+      }
+
+      /* sl.render_targets = */ {
+        const sjson::Array* render_targets =
+          (const sjson::Array*)layer->find("render_targets");
+        if (render_targets) {
+          if (!render_targets->is_array()) {
+            output.log("Malformed input: 'render_targets' in the layer %u is not an array!", id);
+            goto failure; }
+          if (render_targets->size() > Layer::maximum_num_of_render_targets) {
+            output.log("Malformed input: expected less than %u render targets in the layer %u!", Layer::maximum_num_of_render_targets, id);
+            goto failure; }
+          sl.num_of_render_targets = render_targets->size();
+          for (size_t render_target = 0; render_target < render_targets->size(); ++render_target) {
+            const sjson::String* value = (const sjson::String*)render_targets->at(render_target);
+            if (!value->is_string()) {
+              output.log("Malformed input: the render target %u in the layer %u is not a string!", render_target, id);
+              goto failure; }
+            const Resource::Name name = value->raw();
+            for (size_t i = 0; i < mrd->num_of_globals; ++i) {
+              if (name != mrd->globals[i].name)
+                continue;
+              if (mrd->globals[i].type != Resource::RENDER_TARGET) {
+                output.log("Malformed input: the render target %u in the layer %u does not reference a render target!", render_target, id);
+                goto failure; }
+              sl.render_targets[render_target] = mrd->globals[i].id;
+              goto found_render_target; }
+            output.log("Malformed input: the render target %u in the layer %u references an undefined global resource `%s`!", render_target, id, value->raw());
+            goto failure;
+          found_render_target:
+            continue;
+          }
+        } else {
+          sl.num_of_render_targets = 0;
+        }
+      }
+
+      /* sl.depth_stencil_target = */ {
+        const sjson::String* depth_stencil_target =
+          (const sjson::String*)layer->find("depth_stencil_target");
+        if (depth_stencil_target) {
+          if (!depth_stencil_target->is_string()) {
+            output.log("Malformed input: the depth-stencil target in the layer %u is not a string!", id);
+            goto failure; }
+          const Resource::Name name = depth_stencil_target->raw();
+          for (size_t i = 0; i < mrd->num_of_globals; ++i) {
+            if (name != mrd->globals[i].name)
+              continue;
+            if (mrd->globals[i].type != Resource::DEPTH_STENCIL_TARGET) {
+              output.log("Malformed input: the depth-stencil target in the layer %u does not reference a depth-stencil target!", layer);
+              goto failure; }
+            sl.depth_stencil_target = mrd->globals[i].id;
+            goto found_depth_stencil_target; }
+          output.log("Malformed input: the depth-stencil target in the layer %u references an undefined global resource `%s`!", id, depth_stencil_target->raw());
+          goto failure;
+        found_depth_stencil_target:
+          __builtin_nop();
+        } else {
+          sl.depth_stencil_target = Resource::invalid;
+        }
+      }
+
+      /* sl.generator = */ {
       }
     }
 

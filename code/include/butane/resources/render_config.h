@@ -77,13 +77,19 @@ namespace butane {
           size_t num_of_samplers;
 
           /*! */
-          Resource::Id samplers[8];
+          static const size_t maximum_num_of_samplers = 8;
+
+          /*! */
+          Resource::Id samplers[maximum_num_of_samplers];
 
           /*! */
           size_t num_of_render_targets;
 
           /*! */
-          Resource::Id render_targets;
+          static const size_t maximum_num_of_render_targets = 8;
+
+          /*! */
+          Resource::Id render_targets[maximum_num_of_render_targets];
 
           /*! */
           Resource::Id depth_stencil_target;
