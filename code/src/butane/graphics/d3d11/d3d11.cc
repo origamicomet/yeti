@@ -7,7 +7,7 @@ namespace butane {
   DXGI_FORMAT dxgi_format_from_pixel_format(
     const PixelFormat pixel_format )
   {
-    switch (pixel_format) {
+    switch ((PixelFormat::Value)pixel_format) {
       case PixelFormat::R8G8B8A8:
         return DXGI_FORMAT_R8G8B8A8_UNORM;
       case PixelFormat::R8G8B8A8_SRGB:
@@ -28,7 +28,7 @@ namespace butane {
   DXGI_FORMAT dxgi_typeless_format_from_pixel_format(
     const PixelFormat pixel_format )
   {
-    switch (pixel_format) {
+    switch ((PixelFormat::Value)pixel_format) {
       case PixelFormat::R8G8B8A8:
       case PixelFormat::R8G8B8A8_SRGB:
         return DXGI_FORMAT_R8G8B8A8_TYPELESS;
@@ -48,7 +48,7 @@ namespace butane {
   DXGI_FORMAT dxgi_samplable_format_from_pixel_format(
     const PixelFormat pixel_format )
   {
-    switch (pixel_format) {
+    switch ((PixelFormat::Value)pixel_format) {
       case PixelFormat::R8G8B8A8:
       case PixelFormat::R8G8B8A8_SRGB:
         return DXGI_FORMAT_R8G8B8A8_UNORM;

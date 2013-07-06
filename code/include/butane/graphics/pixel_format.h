@@ -53,8 +53,15 @@ namespace butane {
       { _value = pf._value; return *this; }
 
     public:
+      FOUNDATION_INLINE operator Value() const
+      { return (Value)_value; }
+
       FOUNDATION_INLINE operator uint32_t() const
       { return _value; }
+
+    public:
+      static PixelFormat from_str(
+        const char* str );
 
     public:
       size_t row_stride(
@@ -81,13 +88,6 @@ namespace butane {
 
       FOUNDATION_INLINE bool is_compressed() const
       { return ((_value & CompressedBit) == CompressedBit); }
-
-    public:
-      FOUNDATION_INLINE uint32_t& value()
-      { return _value; }
-
-      FOUNDATION_INLINE const uint32_t& value() const
-      { return _value; }
 
     private:
       uint32_t _value;

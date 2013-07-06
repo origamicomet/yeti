@@ -4,6 +4,29 @@
 #include <butane/graphics/pixel_format.h>
 
 namespace butane {
+  PixelFormat PixelFormat::from_str(
+    const char* str )
+  {
+    assert(str != nullptr);
+
+    static const Pair<const char*, PixelFormat> _str_to_pf[] = {
+      Pair<const char*, PixelFormat>("R8G8B8A8", PixelFormat::R8G8B8A8),
+      Pair<const char*, PixelFormat>("R8G8B8A8_SRGB", PixelFormat::R8G8B8A8_SRGB),
+      Pair<const char*, PixelFormat>("DXT1", PixelFormat::DXT1),
+      Pair<const char*, PixelFormat>("DXT3", PixelFormat::DXT3),
+      Pair<const char*, PixelFormat>("DXT5", PixelFormat::DXT5),
+      Pair<const char*, PixelFormat>("D24S8", PixelFormat::D24S8)
+    };
+
+    for (size_t i = 0; i < (sizeof(_str_to_pf) / sizeof(_str_to_pf[0])); ++i) {
+      if (strcmp(_str_to_pf[i].key, str) != 0)
+        continue;
+      return _str_to_pf[i].value;
+    }
+
+    return PixelFormat(PixelFormat::INVALID);
+  }
+
   size_t PixelFormat::row_stride(
     const uint32_t width ) const
   {
