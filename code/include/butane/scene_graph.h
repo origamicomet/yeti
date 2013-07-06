@@ -20,7 +20,7 @@ namespace butane {
 
     public:
       /*! */
-      static const uint maximum_num_of_nodes = 254;
+      static const size_t maximum_num_of_nodes = 254;
 
     public:
       struct Serialized final {
