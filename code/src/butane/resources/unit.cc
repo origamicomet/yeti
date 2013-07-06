@@ -148,8 +148,9 @@ namespace butane {
       return false; }
 
     const size_t mrd_len =
-      sizeof(MemoryResidentData) + sizeof(SceneGraph::Serialized) +
-      sizeof(SceneGraph::Node::Serialized) * nodes->size();
+      sizeof(MemoryResidentData) +
+      sizeof(SceneGraph::Serialized) +
+      nodes->size() * sizeof(SceneGraph::Node::Serialized);
 
     MemoryResidentData* mrd =
       (MemoryResidentData*)Allocators::heap().alloc(mrd_len);
