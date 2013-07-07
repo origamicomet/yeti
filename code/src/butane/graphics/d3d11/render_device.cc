@@ -19,24 +19,12 @@
 #include <butane/graphics/d3d11/depth_stencil_target.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("render targets", Allocators::heap());
-    return allocator;
-  }
-
-  static const thread_safe::Static< Allocator >
-    __ts_allocator(&__allocator_initializer);
-
-  static Allocator& allocator() {
-    return __ts_allocator();
-  }
-
   D3D11RenderDevice::D3D11RenderDevice()
     : _factory(nullptr)
     , _adapter(nullptr)
     , _device(nullptr)
     , _context(nullptr)
-    , _input_layout_cache(allocator(), 4096)
+    , _input_layout_cache(RenderDevice::allocator(), 4096)
   {
   }
 
@@ -58,7 +46,7 @@ namespace butane {
     const LogScope _("D3D11RenderDevice::create");
 
     D3D11RenderDevice* render_device =
-      make_new(D3D11RenderDevice, allocator())();
+      make_new(D3D11RenderDevice, RenderDevice::allocator())();
 
     /* render_device->_factory = */ {
       const HRESULT hr = CreateDXGIFactory(
@@ -93,11 +81,6 @@ namespace butane {
     return render_device;
   }
 
-  void D3D11RenderDevice::destroy()
-  {
-    make_delete(D3D11RenderDevice, allocator(), this);
-  }
-
   void D3D11RenderDevice::dispatch(
     size_t num_render_contexts,
     const RenderContext** render_contexts )
@@ -106,7 +89,7 @@ namespace butane {
     assert(render_contexts != nullptr);
 
     // 1: Gather and Merge
-    Array<RenderContext::Command> commands(allocator());
+    Array<RenderContext::Command> commands(RenderDevice::allocator());
     for (size_t context = 0; context < num_render_contexts; ++context) {
       const size_t offset = commands.size();
       const size_t num_of_cmds = render_contexts[context]->num_of_commands();
@@ -120,7 +103,7 @@ namespace butane {
     // 2: Sort
     sort(commands.raw(), commands.size());
 
-    // 3: Build
+    // 3: Dispatch
     for (auto iter = commands.begin(); iter != commands.end(); ++iter)
       dispatch(*((const Command*)(*iter).offset));
   }
@@ -189,6 +172,11 @@ namespace butane {
     }
 
     __builtin_unreachable();
+  }
+
+  void D3D11RenderDevice::destroy()
+  {
+    make_delete(D3D11RenderDevice, RenderDevice::allocator(), this);
   }
 
   ID3D11InputLayout* D3D11RenderDevice::find_or_create_input_layout(

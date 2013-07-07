@@ -8,6 +8,7 @@
 #include <butane/script/lua.h>
 #include <butane/resource.h>
 #include <butane/resources/config.h>
+#include <butane/resources/render_config.h>
 #include <butane/window.h>
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
@@ -105,6 +106,15 @@ namespace Application {
       Application::set_render_device(rd);
     }
 
+    Resource::Handle<RenderConfigResource> render_config; {
+      const char* config;
+      if (!manifest->find("application.graphics.config", config))
+        fail("Expected `application.graphics.config` to be specified!");
+      const Resource::Id id = Resource::Id(RenderConfigResource::type(), config);
+      render_config = id;
+      rd->set_render_config(render_config);
+    }
+
     SwapChain* swap_chain; {
       Vec2f res;
       if (!manifest->find("application.graphics.resolution", res))
@@ -125,9 +135,6 @@ namespace Application {
 
       swap_chains() += Pair<uint32_t, SwapChain*>(0, swap_chain);
     }
-
-    DepthStencilTarget* depth = DepthStencilTarget::create(
-      PixelFormat::D24S8, swap_chain->width(), swap_chain->height());
 
     World* world = World::create();
     worlds() += world;

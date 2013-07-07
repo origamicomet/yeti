@@ -3,6 +3,9 @@
 
 #include <butane/graphics/swap_chain.h>
 
+#include <butane/application.h>
+#include <butane/graphics/render_device.h>
+
 namespace butane {
   SwapChain::SwapChain(
     Window* window,
@@ -22,12 +25,16 @@ namespace butane {
   {
     _on_resized.handler = nullptr;
     _on_resized.closure = nullptr;
+
+    Application::render_device()->on_swap_chain_created(this);
   }
 
   SwapChain::~SwapChain()
   {
     if (_render_target)
       _render_target->destroy();
+
+    Application::render_device()->on_swap_chain_destroyed(this);
   }
 
   // void SwapChain::set_window(
@@ -47,6 +54,8 @@ namespace butane {
 
     if (_on_resized.handler)
       _on_resized.handler(_on_resized.closure, this);
+
+    Application::render_device()->on_swap_chain_resized(this);
   }
 
   void SwapChain::set_fullscreen(

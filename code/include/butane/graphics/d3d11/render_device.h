@@ -144,9 +144,6 @@ namespace butane {
       ~D3D11RenderDevice();
 
     public:
-      void destroy() override;
-
-    public:
       void dispatch(
         size_t num_render_contexts,
         const RenderContext** render_contexts ) override;
@@ -154,6 +151,9 @@ namespace butane {
     private:
       void dispatch(
         const Command& command );
+
+    public:
+      void destroy() override;
 
     public: /* private */
       ID3D11InputLayout* find_or_create_input_layout(
