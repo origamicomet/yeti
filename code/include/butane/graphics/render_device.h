@@ -66,6 +66,9 @@ namespace butane {
       void set_render_config(
         const Resource::Handle<RenderConfigResource>& render_config );
 
+      FOUNDATION_INLINE const Array<void*>& globals() const
+      { return _globals; }
+
     private:
       Resource::Handle<RenderConfigResource> _render_config;
       Array<void*> _globals;
