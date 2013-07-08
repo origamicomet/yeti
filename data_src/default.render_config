@@ -1,10 +1,10 @@
 resources = {
   globals = [
-    { name="depth_stencil_buffer" type="depth_stencil_target" scale=[1, 1] format="D24S8" clear=true },
-    { name="albedo" type="render_target" scale=[1, 1] format="R8G8B8A8" clear=true },
-    { name="normal" type="render_target" scale=[1, 1] format="R16FG16F" clear=true },
-    // { name="depth" type="render_target" scale=[1, 1] format="R32F" clear=true },
-    { name="properties" type="render_target" scale=[1, 1] format="R8G8B8A8" clear=true }
+    { name="depth_stencil_buffer" type="depth_stencil_target" scale=[1, 1] format="D24S8" },
+    { name="albedo" type="render_target" scale=[1, 1] format="R8G8B8A8" },
+    { name="normal" type="render_target" scale=[1, 1] format="R16FG16F" },
+    // { name="depth" type="render_target" scale=[1, 1] format="R32F" },
+    { name="properties" type="render_target" scale=[1, 1] format="R8G8B8A8" }
   ]
 }
 
@@ -13,7 +13,8 @@ generators = [
 ]
 
 layers = [
-  { name="depth" depth_stencil_target="depth_stencil_buffer" sort="FRONT_BACK" },
-  { name="gbuffer" render_targets=["albedo", "normal", "properties"] depth_stencil_target="depth_stencil_buffer" sort="FRONT_BACK" },
+  // { name="depth" depth_stencil_target="depth_stencil_buffer" sort="FRONT_BACK" },
+  // { name="gbuffer" render_targets=["albedo", "normal", "properties"] depth_stencil_target="depth_stencil_buffer" sort="FRONT_BACK" },
   // { name="linearize_depth" samplers=["depth_stencil_buffer"] render_targets=["depth"] generator="linearize_depth" }
+  { name="opaque" render_targets=["back_buffer"] depth_stencil_buffer="depth_stencil_buffer" sort="FRONT_BACK" }
 ]
