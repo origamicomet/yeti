@@ -46,10 +46,14 @@ namespace butane {
     if (!_render_config.valid())
       return;
 
-    uint32_t minumum_width_to_support, minumum_height_to_support; {
+    // TODO: Make RenderTargetViews reference a smaller section of shared
+    //       buffers. Expose the functionality to do so through Textures and
+    //       RenderTarget::create(texture, bounds).
+
+    uint32_t minimum_width_to_support, minimum_height_to_support; {
       minimum_dimensions_to_support(
-        minumum_width_to_support,
-        minumum_height_to_support); }
+        minimum_width_to_support,
+        minimum_height_to_support); }
 
     _globals.resize(_render_config->globals().size());
     for (size_t idx = 0; idx < _render_config->globals().size(); ++idx) {
@@ -62,8 +66,8 @@ namespace butane {
           if (!_swap_chains.empty()) {
             _globals[idx] = (void*)RenderTarget::create(
               resource.render_or_depth_stencil_target.format,
-              minumum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
-              minumum_height_to_support * resource.render_or_depth_stencil_target.scale.y); }
+              minimum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
+              minimum_height_to_support * resource.render_or_depth_stencil_target.scale.y); }
           break;
         case RenderConfigResource::Resource::DEPTH_STENCIL_TARGET:
           if (_globals[idx])
@@ -71,8 +75,8 @@ namespace butane {
           if (!_swap_chains.empty()) {
             _globals[idx] = (void*)DepthStencilTarget::create(
               resource.render_or_depth_stencil_target.format,
-              minumum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
-              minumum_height_to_support * resource.render_or_depth_stencil_target.scale.y); }
+              minimum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
+              minimum_height_to_support * resource.render_or_depth_stencil_target.scale.y); }
           break;
         default:
           __builtin_unreachable();
