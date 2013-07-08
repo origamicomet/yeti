@@ -5,6 +5,7 @@
 #define _BUTANE_VISUAL_REPRESENTATION_H_
 
 #include <butane/butane.h>
+#include <butane/math.h>
 
 namespace butane {
   class VisualRepresentation {
@@ -24,6 +25,12 @@ namespace butane {
         CAMERA  = 1u | NODE,
         /*! A SceneGraph::Node::Mesh. */
         MESH    = 2u | NODE
+      };
+
+      /*! */
+      struct Culled {
+        uint32_t visible;
+        VisualRepresentation::Id id;
       };
 
     public:
@@ -49,6 +56,8 @@ namespace butane {
 
     public:
       VisualRepresentation::Id id;
+      Mat4 transform;
+      // AxisAlignedBox bounding_box;
   };
 } // butane
 

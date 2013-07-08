@@ -56,8 +56,6 @@ class Node final {
     struct VisualRepresentation
       : public butane::VisualRepresentation
     {
-      Mat4 transform;
-      // AxisAlignedBox bounding_box;
     };
 
   public:
