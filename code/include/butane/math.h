@@ -11,5 +11,7 @@
 #include <butane/math/vec2.h>
 #include <butane/math/vec3.h>
 #include <butane/math/vec4.h>
+#include <butane/math/plane.h>
+#include <butane/math/frustum.h>
 
 #endif // _BUTANE_MATH_H_

@@ -275,6 +275,11 @@ namespace butane {
         rotation.z = sqrtf(max(0.0f, aq2 - m[0] - m[5] + m[10])) / 2.0f;
       }
 
+      Vec3f translation() const
+      {
+        return Vec3f(m[3], m[7], m[11]);
+      }
+
     public:
       float m[16];
   };
