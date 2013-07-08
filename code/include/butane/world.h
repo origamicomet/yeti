@@ -15,8 +15,12 @@
 #include <butane/tasks/graduate_units.h>
 #include <butane/tasks/render_world.h>
 #include <butane/tasks/apply_visual_representation_stream.h>
+#include <butane/tasks/frustum_cull.h>
+#include <butane/tasks/generate_render_commands.h>
+#include <butane/tasks/dispatch.h>
 
 namespace butane {
+  class SwapChain;
   class BUTANE_EXPORT World final {
     __foundation_trait(World, non_copyable);
 
@@ -28,6 +32,7 @@ namespace butane {
       friend void Tasks::graduate_units( Task*, uintptr_t );
       friend void Tasks::render_world( Task*, uintptr_t );
       friend void Tasks::apply_visual_representation_stream( Task*, uintptr_t );
+      friend void Tasks::generate_render_commands( Task*, uintptr_t );
 
     public:
       class VisualRepresentation final
@@ -40,12 +45,17 @@ namespace butane {
         private:
           friend void Tasks::render_world( Task*, uintptr_t );
           friend void Tasks::apply_visual_representation_stream( Task*, uintptr_t );
+          friend void Tasks::generate_render_commands( Task*, uintptr_t );
 
         private:
           VisualRepresentation(
             const World& world );
 
           ~VisualRepresentation();
+
+        private:
+          const butane::VisualRepresentation* visual_representation_from_id(
+            const butane::VisualRepresentation::Id id );
 
         private:
           void apply(
@@ -112,7 +122,8 @@ namespace butane {
 
       /*! */
       void render(
-        const Unit::Reference& camera ) const;
+        const Unit::Reference& camera,
+        SwapChain* swap_chain ) const;
 
     public:
       void destroy();

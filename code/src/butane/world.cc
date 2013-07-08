@@ -3,6 +3,10 @@
 
 #include <butane/world.h>
 
+#include <butane/application.h>
+#include <butane/graphics/render_device.h>
+#include <butane/graphics/render_context.h>
+
 namespace butane {
   static Allocator& __allocator_initializer() {
     static ProxyAllocator allocator("worlds", Allocators::heap());
@@ -32,6 +36,30 @@ namespace butane {
 
   World::VisualRepresentation::~VisualRepresentation()
   {
+  }
+
+  const butane::VisualRepresentation* World::VisualRepresentation::visual_representation_from_id(
+    const butane::VisualRepresentation::Id id )
+  {
+    typedef butane::VisualRepresentation::Id Id;
+
+    const size_t id_ = (size_t)(id & 0xFFFFFFFFull);
+    switch (butane::VisualRepresentation::type(id)) {
+      case butane::VisualRepresentation::CAMERA: {
+        if (_camera_ids[id] == (size_t)0xFFFFFFFFFFFFFFFFull)
+          return nullptr;
+        return &_cameras[_camera_ids[id]];
+      } break;
+
+      case butane::VisualRepresentation::MESH: {
+        if (_mesh_ids[id] == (size_t)0xFFFFFFFFFFFFFFFFull)
+          return nullptr;
+        return &_meshes[_mesh_ids[id]];
+      } break;
+
+      default:
+        return nullptr;
+    }
   }
 
   void World::VisualRepresentation::apply(
@@ -321,7 +349,8 @@ namespace butane {
   }
 
   void World::render(
-    const Unit::Reference& camera ) const
+    const Unit::Reference& camera,
+    SwapChain* swap_chain ) const
   {
     const LogScope _("World::render");
 
@@ -335,20 +364,70 @@ namespace butane {
         (uintptr_t)rwd);
     }
 
-    Task* apply_visual_representation_stream; {
+    Task* apply_visual_representation_stream_task; {
       Tasks::ApplyVisualRepresentationStreamData* avrsd =
         (Tasks::ApplyVisualRepresentationStreamData*)Allocators::scratch().alloc(sizeof(Tasks::ApplyVisualRepresentationStreamData));
       avrsd->world = this;
       avrsd->vrs = _visual_representation_stream;
-      apply_visual_representation_stream = render_world_task->child(
+      apply_visual_representation_stream_task = render_world_task->child(
         Thread::default_affinity,
         &Tasks::apply_visual_representation_stream,
         (uintptr_t)avrsd);
     }
 
+    typedef Array<butane::VisualRepresentation::Culled> Culled;
+    Culled* culled = make_new(Culled, Allocators::scratch())(Allocators::heap());
+
+    Task* frustum_cull_task; {
+      Tasks::FrustumCullData* fcd =
+        (Tasks::FrustumCullData*)Allocators::scratch().alloc(sizeof(Tasks::FrustumCullData));
+      fcd->objects = _visual_representation._meshes.raw();
+      fcd->num_of_objects = _visual_representation._meshes.size();
+      zero((void*)&fcd->frustums[0], 1 /* 32 */ * sizeof(Mat4));
+      fcd->culled = culled;
+      frustum_cull_task = render_world_task->child(
+        Thread::default_affinity,
+        &Tasks::frustum_cull,
+        (uintptr_t)fcd,
+        apply_visual_representation_stream_task);
+    }
+
+    RenderContext* render_context = make_new(RenderContext, Allocators::scratch())();
+
+    Task* generate_render_commands_task; {
+      Tasks::GenerateRenderCommandsData* grcd =
+        (Tasks::GenerateRenderCommandsData*)Allocators::scratch().alloc(sizeof(Tasks::GenerateRenderCommandsData));
+      grcd->world = this;
+      grcd->swap_chain = swap_chain;
+      grcd->camera = _visual_representation.visual_representation_from_id(camera.to_node().visual_representation());
+      grcd->viewport = Viewport(0, 0, 720, 1280);
+      grcd->render_context = render_context;
+      grcd->culled = culled;
+      generate_render_commands_task = render_world_task->child(
+        Thread::default_affinity,
+        &Tasks::generate_render_commands,
+        (uintptr_t)grcd,
+        frustum_cull_task);
+    }
+
+    Task* dispatch_task; {
+      Tasks::DispatchData* dd =
+        (Tasks::DispatchData*)Allocators::scratch().alloc(sizeof(Tasks::DispatchData));
+      dd->num_of_render_contexts = 1;
+      dd->render_contexts[0] = render_context;
+      dispatch_task = render_world_task->child(
+        Thread::default_affinity,
+        &Tasks::dispatch,
+        (uintptr_t)dd,
+        generate_render_commands_task);
+    }
+
     _visual_representation_stream = nullptr;
 
-    apply_visual_representation_stream->kick();
+    dispatch_task->kick();
+    generate_render_commands_task->kick();
+    frustum_cull_task->kick();
+    apply_visual_representation_stream_task->kick();
     render_world_task->kick();
   }
 

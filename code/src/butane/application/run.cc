@@ -163,7 +163,7 @@ namespace Application {
     while (true) {
       window->update();
       world->update(1.0f / 60.0f);
-      world->render(camera);
+      world->render(camera, swap_chain);
     }
   }
 } // Application

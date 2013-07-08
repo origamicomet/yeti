@@ -50,4 +50,7 @@
 // The minimum number of scene graphs to update per update_scene_graphs task.
 #define BUTANE_MINIMUM_NUM_OF_SCENE_GRAPHS_TO_UPDATE_PER_TASK 256
 
+// The maximum number of render contexts accepted by a dispatch task.
+#define BUTANE_MAXIMUM_NUM_OF_DISPATCHABLE_RENDER_CONTEXTS 1
+
 #endif // _BUTANE_CONFIG_H_
