@@ -122,7 +122,7 @@ namespace butane {
       { return _commands; }
 
       FOUNDATION_INLINE size_t num_of_commands() const
-      { return max(_commands_offset, (size_t)1); }
+      { return _commands_offset; }
 
       FOUNDATION_INLINE const void* stream() const
       { return _stream.raw(); }
