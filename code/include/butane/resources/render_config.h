@@ -33,6 +33,9 @@ namespace butane {
           /*! */
           static const Id invalid = (Id)0xFFFFFFFFFFFFFFFFull;
 
+          /*! */
+          static const Id back_buffer = (Id)0x7FFFFFFFFFFFFFFFull;
+
         public:
           /*! */
           Resource::Id id;

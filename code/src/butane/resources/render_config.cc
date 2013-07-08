@@ -329,6 +329,10 @@ namespace butane {
               output.log("Malformed input: the render target %u in the layer %u is not a string!", render_target, id);
               goto failure; }
             const Resource::Name name = value->raw();
+            static const Resource::Name back_buffer = "back_buffer";
+            if (name == back_buffer) {
+              sl.render_targets[render_target] = Resource::back_buffer;
+              goto found_render_target; }
             for (size_t i = 0; i < mrd->num_of_globals; ++i) {
               if (name != mrd->globals[i].name)
                 continue;

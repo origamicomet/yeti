@@ -5,6 +5,7 @@
 
 #include <butane/world.h>
 #include <butane/application.h>
+#include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
 #include <butane/graphics/render_context.h>
 
@@ -44,13 +45,22 @@ namespace Tasks {
     const Mat4 view_proj = proj * view;
     const Frustum frustum = Frustum(view);
 
+    // 1: Clear the back-buffer
+    grcd->render_context->clear(
+      (RenderContext::Command::Key)0x0000000000000000ull /* first */,
+      grcd->swap_chain->render_target(),
+      Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
+
     for (size_t idx = 0; idx < render_config->layers().size(); ++idx) {
       const RenderConfigResource::Layer& layer = render_config->layers()[idx];
 
-      // 1: Set Render and Depth-Stencil Targets (and clear if requested)
+      // 2: Set Render and Depth-Stencil Targets (and clear if requested)
       RenderTarget* render_targets[8];
 
       for (size_t rt = 0; rt < layer.num_of_render_targets; ++rt) {
+        if (layer.render_targets[rt] == RenderConfigResource::Resource::back_buffer) {
+          render_targets[rt] = grcd->swap_chain->render_target();
+          continue; }
         const RenderConfigResource::Resource& resource =
           render_config->globals()[layer.render_targets[rt]];
         render_targets[rt] = (RenderTarget*)rd->globals()[layer.render_targets[rt]];
@@ -81,13 +91,13 @@ namespace Tasks {
         &render_targets[0],
         depth_stencil_target);
 
-      // 2: Set Viewport(s)
+      // 3: Set Viewport(s)
       grcd->render_context->set_viewports(
         key(layer.id, 2),
         1, &grcd->viewport);
     }
 
-    // 3: Generate commands for visible objects
+    // 4: Generate commands for visible objects
     // TODO: Go wide.
     for (size_t idx = 0; idx < grcd->culled->size(); ++idx) {
       const VisualRepresentation::Culled& culled = (*grcd->culled)[idx];
@@ -123,7 +133,7 @@ namespace Tasks {
             // const bool front_to_back =
             //   (layer->sort == RenderConfigResource::Layer::FRONT_TO_BACK);
             grcd->render_context->draw(
-              key(layer->id, 3, depth /* front_to_back ? inv_depth : depth */),
+              key(layer->id, 3, depth /* front_to_back ? depth : inv_depth */),
               material.shader->state()->rasterizer_state(),
               material.shader->state()->depth_stencil_state(),
               material.shader->state()->blend_state(),
@@ -143,7 +153,7 @@ namespace Tasks {
     }
 
     grcd->render_context->present(
-      (RenderContext::Command::Key)0x0000000000000000ull /* last */,
+      (RenderContext::Command::Key)0xFFFFFFFFFFFFFFFFull /* last */,
       grcd->swap_chain);
 
     grcd->world->_visual_representation._mutex.unlock();
