@@ -51,6 +51,27 @@ namespace Tasks {
       grcd->swap_chain->render_target(),
       Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
 
+    for (size_t idx = 0; idx < render_config->globals().size(); ++idx) {
+      const RenderConfigResource::Resource& resource =
+        render_config->globals()[idx];
+      switch (resource.type) {
+        case RenderConfigResource::Resource::RENDER_TARGET:
+          if (!resource.render_or_depth_stencil_target.clear) {
+            grcd->render_context->clear(
+              (RenderContext::Command::Key)0x0000000000000000ull /* first */,
+              (RenderTarget*)rd->globals()[idx],
+              Vec4f(0.0f, 0.0f, 0.0f, 0.0f)); }
+          break;
+        case RenderConfigResource::Resource::DEPTH_STENCIL_TARGET:
+          if (!resource.render_or_depth_stencil_target.clear) {
+            grcd->render_context->clear(
+              (RenderContext::Command::Key)0x0000000000000000ull /* first */,
+              (DepthStencilTarget*)rd->globals()[idx],
+              1.0f, 0xFFFFFFFFu); }
+          break;
+      }
+    }
+
     for (size_t idx = 0; idx < render_config->layers().size(); ++idx) {
       const RenderConfigResource::Layer& layer = render_config->layers()[idx];
 
