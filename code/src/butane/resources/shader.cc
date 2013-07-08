@@ -31,6 +31,7 @@ namespace butane {
   ShaderResource::ShaderResource(
     const Resource::Id id
   ) : butane::Resource(ShaderResource::type(), id)
+    , _layers(allocator())
   {
   }
 
@@ -50,7 +51,13 @@ namespace butane {
     ShaderResource* shader =
       make_new(ShaderResource, allocator())(id);
 
-    shader->_layer = mrd->layer;
+    shader->_layers.resize(mrd->num_of_layers);
+
+    copy(
+      (void*)shader->_layers.raw(),
+      (const void*)&mrd->layers[0],
+      mrd->num_of_layers * sizeof(RenderConfigResource::Layer::Name));
+
     shader->_state = mrd->state;
     shader->_vertex_shader = mrd->vertex_shader;
     shader->_pixel_shader = mrd->pixel_shader;
@@ -92,15 +99,48 @@ namespace butane {
     const sjson::Object* root =
       (const sjson::Object*)&blob[0];
 
-    MemoryResidentData mrd;
+    const sjson::String* layer =
+      (const sjson::String*)root->find("layer");
+    const sjson::Array* layers =
+      (const sjson::Array*)root->find("layers");
+    if (!layer && !layers) {
+      output.log("Malformed input: 'layer' or 'layers' not specified!");
+      return false; }
+    if (layer && layers) {
+      output.log("Malformed input: expected 'layer' or 'layers', not both!");
+      return false; }
+    if (layer && !layer->is_string()) {
+      output.log("Malformed input: 'layer' is not a string!");
+      return false; }
+    if (layers && !layers->is_array()) {
+      output.log("Malformed input 'layers' is not an array!");
+      return false; }
 
-    /* layer = */ {
-      const sjson::String* layer =
-        (const sjson::String*)root->find("layer");
-      if (!layer || !layer->is_string()) {
-        output.log("Malformed input: 'layer' not specified!");
-        return false; }
-      mrd.layer = Hash<uint32_t, murmur_hash>(layer->raw());
+    const size_t mrd_len =
+      sizeof(MemoryResidentData) +
+      (layers ? layers->size() : 1) * sizeof(RenderConfigResource::Layer::Name);
+
+    MemoryResidentData* mrd =
+      (MemoryResidentData*)Allocators::heap().alloc(mrd_len);
+
+    {
+      int64_t offset = sizeof(MemoryResidentData);
+      mrd->layers = relative_ptr<RenderConfigResource::Layer::Name*>(offset - offsetof(MemoryResidentData, layers));
+    }
+
+    /* layers = */ {
+      mrd->num_of_layers = (layers ? layers->size() : 1);
+      if (layer) {
+        mrd->layers[0] = RenderConfigResource::Layer::Name(layer->raw());
+      } else {
+        for (size_t i = 0; i < layers->size(); ++i) {
+          const sjson::String* layer = (const sjson::String*)layers->at(i);
+          if (!layer->is_string()) {
+            output.log("Malformed input: the %u layer in 'layers' is not a string!", i);
+            goto failure; }
+          mrd->layers[i] = RenderConfigResource::Layer::Name(layer->raw());
+        }
+      }
     }
 
     /* state = */ {
@@ -108,8 +148,8 @@ namespace butane {
         (const sjson::String*)root->find("state");
       if (!state || !state->is_string()) {
         output.log("Malformed input: 'state' not specified!");
-        return false; }
-      mrd.state = Resource::Id(StateResource::type(), state->raw());
+        goto failure; }
+      mrd->state = Resource::Id(StateResource::type(), state->raw());
     }
 
     /* vertex shader = */ {
@@ -117,8 +157,8 @@ namespace butane {
         (const sjson::String*)root->find("vertex");
       if (!vs || !vs->is_string()) {
         output.log("Malformed input: 'vertex' not specified!");
-        return false; }
-      mrd.vertex_shader = Resource::Id(VertexShader::type(), vs->raw());
+        goto failure; }
+      mrd->vertex_shader = Resource::Id(VertexShader::type(), vs->raw());
     }
 
     /* pixel shader = */ {
@@ -126,14 +166,19 @@ namespace butane {
         (const sjson::String*)root->find("pixel");
       if (!ps || !ps->is_string()) {
         output.log("Malformed input: 'pixel' not specified!");
-        return false; }
-      mrd.pixel_shader = Resource::Id(PixelShader::type(), ps->raw());
+        goto failure; }
+      mrd->pixel_shader = Resource::Id(PixelShader::type(), ps->raw());
     }
 
-    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
+    if (!File::write(output.memory_resident_data, (const void*)mrd, mrd_len)) {
       output.log("Unable to write memory-resident data!");
-      return false; }
+      goto failure; }
 
+    Allocators::heap().free((void*)mrd);
     return true;
+
+  failure:
+    Allocators::heap().free((void*)mrd);
+    return false;
   }
 } // butane

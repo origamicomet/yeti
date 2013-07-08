@@ -18,10 +18,11 @@ namespace butane {
 
     private:
       struct MemoryResidentData {
-        RenderConfigResource::Layer::Name layer;
         Resource::Id state;
         Resource::Id vertex_shader;
         Resource::Id pixel_shader;
+        size_t num_of_layers;
+        relative_ptr<RenderConfigResource::Layer::Name*> layers;
       };
 
     public:
@@ -46,8 +47,8 @@ namespace butane {
         const Resource::Compiler::Output& output );
 
     public:
-      FOUNDATION_INLINE Hash<uint32_t, murmur_hash> layer() const
-      { return _layer; }
+      FOUNDATION_INLINE const Array<RenderConfigResource::Layer::Name>& layers() const
+      { return _layers; }
 
       FOUNDATION_INLINE Resource::Handle<StateResource> state() const
       { return _state; }
@@ -59,7 +60,7 @@ namespace butane {
       { return _pixel_shader; }
 
     private:
-      RenderConfigResource::Layer::Name _layer;
+      Array<RenderConfigResource::Layer::Name> _layers;
       Resource::Handle<StateResource> _state;
       Resource::Handle<VertexShader> _vertex_shader;
       Resource::Handle<PixelShader> _pixel_shader;
