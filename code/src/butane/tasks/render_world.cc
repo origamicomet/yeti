@@ -12,6 +12,7 @@ namespace Tasks {
     uintptr_t data )
   {
     RenderWorldData* rwd = (RenderWorldData*)data;
+    Allocators::scratch().free((void*)rwd);
   }
 } // Tasks
 } // butane
