@@ -27,6 +27,12 @@ namespace butane {
       ~D3D11Texture();
 
     public:
+      Texture* alias(
+        const uint32_t width,
+        const uint32_t height,
+        const uint32_t depth,
+        const uint32_t flags ) override;
+
       void destroy() override;
 
     public:

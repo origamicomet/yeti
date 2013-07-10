@@ -48,6 +48,12 @@ namespace butane {
         const uint32_t flags,
         const void* data = nullptr );
 
+      virtual Texture* alias(
+        const uint32_t width,
+        const uint32_t height,
+        const uint32_t depth,
+        const uint32_t flags ) = 0;
+
       virtual void destroy() = 0;
 
     public:

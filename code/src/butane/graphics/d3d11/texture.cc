@@ -240,6 +240,73 @@ namespace butane {
     return texture;
   }
 
+  Texture* D3D11Texture::alias(
+    const uint32_t width,
+    const uint32_t height,
+    const uint32_t depth,
+    const uint32_t flags )
+  {
+    D3D11RenderDevice* render_device =
+      ((D3D11RenderDevice*)Application::render_device());
+
+    D3D11Texture* texture = make_new(D3D11Texture, allocator())(
+      type(), pixel_format(), width, height, depth);
+
+    texture->_resource = this->_resource;
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvd;
+    switch (type()) {
+      case Texture::TEXTURE_1D: {
+        if (height != 1)
+          fail("Unexpected height (%u) for one dimensional texture!", height);
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format());
+        srvd.ViewDimension = (depth > 1) ?
+          D3D11_SRV_DIMENSION_TEXTURE1DARRAY :
+          D3D11_SRV_DIMENSION_TEXTURE1D;
+        srvd.Texture1DArray.MostDetailedMip = 0;
+        srvd.Texture1DArray.MipLevels = -1;
+        srvd.Texture1DArray.FirstArraySlice = 0;
+        srvd.Texture1DArray.ArraySize = depth;
+      } break;
+
+      case Texture::TEXTURE_2D: {
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format());
+        srvd.ViewDimension = (depth > 1) ?
+          D3D11_SRV_DIMENSION_TEXTURE2DARRAY :
+          D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvd.Texture2DArray.MostDetailedMip = 0;
+        srvd.Texture2DArray.MipLevels = -1;
+        srvd.Texture2DArray.FirstArraySlice = 0;
+        srvd.Texture2DArray.ArraySize = depth;
+      } break;
+
+      case Texture::TEXTURE_3D: {
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format());
+        srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
+        srvd.Texture3D.MostDetailedMip = 0;
+        srvd.Texture3D.MipLevels = -1;
+      } break;
+
+      case Texture::CUBE_MAP: {
+        if (depth != 6)
+          fail("Unexpected depth (%u) for a cube map!", depth);
+        srvd.Format = dxgi_samplable_format_from_pixel_format(pixel_format());
+        srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+        srvd.TextureCube.MostDetailedMip = 0;
+        srvd.TextureCube.MipLevels = -1;
+      } break;
+    }
+
+    /* texture->_srv = */ {
+      const HRESULT hr = render_device->device()->CreateShaderResourceView(
+        texture->_resource, &srvd, &texture->_srv);
+      if (FAILED(hr))
+        fail("ID3D11Device::CreateShaderResourceView failed, hr=%#08x", hr);
+    }
+
+    return texture;
+  }
+
   void D3D11Texture::destroy()
   {
     make_delete(D3D11Texture, allocator(), this);
