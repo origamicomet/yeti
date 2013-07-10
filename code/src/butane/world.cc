@@ -416,7 +416,7 @@ namespace butane {
       dd->num_of_render_contexts = 1;
       dd->render_contexts[0] = render_context;
       dispatch_task = render_world_task->child(
-        Thread::default_affinity,
+        RenderDevice::affinity(),
         &Tasks::dispatch,
         (uintptr_t)dd,
         generate_render_commands_task);

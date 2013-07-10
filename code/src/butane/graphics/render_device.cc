@@ -140,4 +140,9 @@ namespace butane {
     _render_config = render_config;
     create_or_update_global_resources();
   }
+
+  Task::Affinity RenderDevice::affinity()
+  {
+    return ((Task::Affinity)1u << (Task::Scheduler::num_of_worker_treads() - 1));
+  }
 } // butane

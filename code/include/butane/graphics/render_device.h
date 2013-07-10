@@ -5,6 +5,7 @@
 #define _BUTANE_RENDER_DEVICE_H_
 
 #include <butane/butane.h>
+#include <butane/task.h>
 #include <butane/resources/render_config.h>
 
 namespace butane {
@@ -60,6 +61,8 @@ namespace butane {
       virtual void destroy() = 0;
 
     public:
+      static Task::Affinity affinity();
+
       FOUNDATION_INLINE const Resource::Handle<RenderConfigResource>& render_config() const
       { return _render_config; }
 
