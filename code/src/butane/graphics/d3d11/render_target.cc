@@ -68,6 +68,40 @@ namespace butane {
     return render_target;
   }
 
+  RenderTarget* RenderTarget::create(
+    Texture* texture )
+  {
+    assert(texture != nullptr);
+
+    if (texture->type() != Texture::TEXTURE_2D)
+      fail("Invalid texture (invalid type, expected a 2D texture).");
+
+    if (!(texture->pixel_format() & PixelFormat::ColorBit))
+      fail("Invalid texture (invalid pixel format, expected a color format).");
+
+    D3D11RenderTarget* render_target =
+      make_new(D3D11RenderTarget, allocator())(texture);
+
+    D3D11_RENDER_TARGET_VIEW_DESC rtvd;
+    rtvd.Format             = dxgi_format_from_pixel_format(texture->pixel_format());
+    rtvd.ViewDimension      = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtvd.Texture2D.MipSlice = 0;
+
+    D3D11Texture* texture_ = (D3D11Texture*)texture;
+
+    D3D11RenderDevice* render_device =
+      ((D3D11RenderDevice*)Application::render_device());
+
+    /* render_target->_view = */ {
+      const HRESULT hr = render_device->device()->CreateRenderTargetView(
+        texture_->resource(), &rtvd, &render_target->_view);
+      if (FAILED(hr))
+        fail("ID3D11Device::CreateRenderTargetView failed, hr=%#08x", hr);
+    }
+
+    return render_target;
+  }
+
   void D3D11RenderTarget::destroy()
   {
     make_delete(D3D11RenderTarget, allocator(), this);

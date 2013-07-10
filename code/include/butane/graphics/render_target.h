@@ -23,6 +23,9 @@ namespace butane {
         const uint32_t width,
         const uint32_t height );
 
+      static RenderTarget* create(
+        Texture* texture );
+
       virtual void destroy() = 0;
 
     public:
