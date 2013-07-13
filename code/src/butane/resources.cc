@@ -5,7 +5,7 @@
 #include <butane/resources/config.h>
 #include <butane/resources/mesh.h>
 #include <butane/graphics/pixel_shader.h>
-#include <butane/resources/render_config.h>
+#include <butane/render_config.h>
 #include <butane/resources/shader.h>
 #include <butane/resources/state.h>
 #include <butane/resources/texture.h>
@@ -18,7 +18,7 @@ namespace Resources {
     ConfigResource::type().expose();
     MeshResource::type().expose();
     PixelShader::type().expose();
-    RenderConfigResource::type().expose();
+    RenderConfig::type().expose();
     ShaderResource::type().expose();
     StateResource::type().expose();
     TextureResource::type().expose();

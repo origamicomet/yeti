@@ -8,7 +8,7 @@
 #include <butane/script/lua.h>
 #include <butane/resource.h>
 #include <butane/resources/config.h>
-#include <butane/resources/render_config.h>
+#include <butane/render_config.h>
 #include <butane/window.h>
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
@@ -106,11 +106,11 @@ namespace Application {
       Application::set_render_device(rd);
     }
 
-    Resource::Handle<RenderConfigResource> render_config; {
+    Resource::Handle<RenderConfig> render_config; {
       const char* config;
       if (!manifest->find("application.graphics.config", config))
         fail("Expected `application.graphics.config` to be specified!");
-      const Resource::Id id = Resource::Id(RenderConfigResource::type(), config);
+      const Resource::Id id = Resource::Id(RenderConfig::type(), config);
       render_config = id;
       rd->set_render_config(render_config);
     }

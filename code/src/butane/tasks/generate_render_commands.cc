@@ -12,7 +12,7 @@
 namespace butane {
 namespace Tasks {
   static RenderContext::Command::Key key(
-    const RenderConfigResource::Layer::Id layer,
+    const RenderConfig::Layer::Id layer,
     const uint8_t pass,
     const uint32_t depth = 0xFFFFFFFFu )
   {
@@ -27,7 +27,7 @@ namespace Tasks {
   {
     GenerateRenderCommandsData* grcd = (GenerateRenderCommandsData*)data;
     RenderDevice* rd = Application::render_device();
-    const RenderConfigResource* render_config = rd->render_config();
+    const RenderConfig* render_config = rd->render_config();
     const SceneGraph::Node::Camera::VisualRepresentation* camera =
       (const SceneGraph::Node::Camera::VisualRepresentation*)grcd->camera;
     if (!render_config || !camera) {
@@ -52,17 +52,17 @@ namespace Tasks {
       Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
 
     for (size_t idx = 0; idx < render_config->globals().size(); ++idx) {
-      const RenderConfigResource::Resource& resource =
+      const RenderConfig::Resource& resource =
         render_config->globals()[idx];
       switch (resource.type) {
-        case RenderConfigResource::Resource::RENDER_TARGET:
+        case RenderConfig::Resource::RENDER_TARGET:
           if (!resource.render_or_depth_stencil_target.clear) {
             grcd->render_context->clear(
               (RenderContext::Command::Key)0x0000000000000000ull /* first */,
               (RenderTarget*)rd->globals()[idx],
               Vec4f(0.0f, 0.0f, 0.0f, 0.0f)); }
           break;
-        case RenderConfigResource::Resource::DEPTH_STENCIL_TARGET:
+        case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
           if (!resource.render_or_depth_stencil_target.clear) {
             grcd->render_context->clear(
               (RenderContext::Command::Key)0x0000000000000000ull /* first */,
@@ -73,16 +73,16 @@ namespace Tasks {
     }
 
     for (size_t idx = 0; idx < render_config->layers().size(); ++idx) {
-      const RenderConfigResource::Layer& layer = render_config->layers()[idx];
+      const RenderConfig::Layer& layer = render_config->layers()[idx];
 
       // 2: Set Render and Depth-Stencil Targets (and clear if requested)
       RenderTarget* render_targets[8];
 
       for (size_t rt = 0; rt < layer.num_of_render_targets; ++rt) {
-        if (layer.render_targets[rt] == RenderConfigResource::Resource::back_buffer) {
+        if (layer.render_targets[rt] == RenderConfig::Resource::Special::back_buffer) {
           render_targets[rt] = grcd->swap_chain->render_target();
           continue; }
-        const RenderConfigResource::Resource& resource =
+        const RenderConfig::Resource& resource =
           render_config->globals()[layer.render_targets[rt]];
         render_targets[rt] = (RenderTarget*)rd->globals()[layer.render_targets[rt]];
         if (resource.render_or_depth_stencil_target.clear) {
@@ -93,11 +93,11 @@ namespace Tasks {
       }
 
       DepthStencilTarget* depth_stencil_target =
-        (layer.depth_stencil_target != RenderConfigResource::Resource::invalid) ?
+        (layer.depth_stencil_target != RenderConfig::Resource::invalid) ?
         (DepthStencilTarget*)rd->globals()[layer.depth_stencil_target] : nullptr;
 
       if (depth_stencil_target) {
-        const RenderConfigResource::Resource& resource =
+        const RenderConfig::Resource& resource =
           render_config->globals()[layer.depth_stencil_target];
         if (resource.render_or_depth_stencil_target.clear) {
           grcd->render_context->clear(
@@ -147,12 +147,12 @@ namespace Tasks {
             textures[i] = material.textures[i]->texture(); }
 
           for (size_t i = 0; i < material.shader->layers().size(); ++i) {
-            const RenderConfigResource::Layer* layer =
+            const RenderConfig::Layer* layer =
               render_config->find_layer_by_name(material.shader->layers()[i]);
             if (!layer)
               continue;
             // const bool front_to_back =
-            //   (layer->sort == RenderConfigResource::Layer::FRONT_TO_BACK);
+            //   (layer->sort == RenderConfig::Layer::FRONT_TO_BACK);
             grcd->render_context->draw(
               key(layer->id, 3, depth /* front_to_back ? depth : inv_depth */),
               material.shader->state()->rasterizer_state(),

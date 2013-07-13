@@ -6,7 +6,7 @@
 
 #include <butane/resource.h>
 #include <butane/resources/state.h>
-#include <butane/resources/render_config.h>
+#include <butane/render_config.h>
 #include <butane/graphics/vertex_shader.h>
 #include <butane/graphics/pixel_shader.h>
 
@@ -22,7 +22,7 @@ namespace butane {
         Resource::Id vertex_shader;
         Resource::Id pixel_shader;
         size_t num_of_layers;
-        relative_ptr<RenderConfigResource::Layer::Name*> layers;
+        relative_ptr<RenderConfig::Layer::Name*> layers;
       };
 
     public:
@@ -47,7 +47,7 @@ namespace butane {
         const Resource::Compiler::Output& output );
 
     public:
-      FOUNDATION_INLINE const Array<RenderConfigResource::Layer::Name>& layers() const
+      FOUNDATION_INLINE const Array<RenderConfig::Layer::Name>& layers() const
       { return _layers; }
 
       FOUNDATION_INLINE Resource::Handle<StateResource> state() const
@@ -60,7 +60,7 @@ namespace butane {
       { return _pixel_shader; }
 
     private:
-      Array<RenderConfigResource::Layer::Name> _layers;
+      Array<RenderConfig::Layer::Name> _layers;
       Resource::Handle<StateResource> _state;
       Resource::Handle<VertexShader> _vertex_shader;
       Resource::Handle<PixelShader> _pixel_shader;

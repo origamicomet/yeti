@@ -57,10 +57,10 @@ namespace butane {
 
     _globals.resize(_render_config->globals().size());
     for (size_t idx = 0; idx < _render_config->globals().size(); ++idx) {
-      const RenderConfigResource::Resource& resource =
+      const RenderConfig::Resource& resource =
         _render_config->globals()[idx];
       switch (resource.type) {
-        case RenderConfigResource::Resource::RENDER_TARGET:
+        case RenderConfig::Resource::RENDER_TARGET:
           if (_globals[idx])
             ((RenderTarget*)_globals[idx])->destroy();
           if (!_swap_chains.empty()) {
@@ -69,7 +69,7 @@ namespace butane {
               minimum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
               minimum_height_to_support * resource.render_or_depth_stencil_target.scale.y); }
           break;
-        case RenderConfigResource::Resource::DEPTH_STENCIL_TARGET:
+        case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
           if (_globals[idx])
             ((DepthStencilTarget*)_globals[idx])->destroy();
           if (!_swap_chains.empty()) {
@@ -90,14 +90,14 @@ namespace butane {
       return;
 
     for (size_t idx = 0; idx < _render_config->globals().size(); ++idx) {
-      const RenderConfigResource::Resource& resource =
+      const RenderConfig::Resource& resource =
         _render_config->globals()[idx];
       switch (resource.type) {
-        case RenderConfigResource::Resource::RENDER_TARGET:
+        case RenderConfig::Resource::RENDER_TARGET:
           if (_globals[idx])
             ((RenderTarget*)_globals[idx])->destroy();
           break;
-        case RenderConfigResource::Resource::DEPTH_STENCIL_TARGET:
+        case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
           if (_globals[idx])
             ((DepthStencilTarget*)_globals[idx])->destroy();
           break;
@@ -134,7 +134,7 @@ namespace butane {
   }
 
   void RenderDevice::set_render_config(
-    const Resource::Handle<RenderConfigResource>& render_config )
+    const Resource::Handle<RenderConfig>& render_config )
   {
     destroy_global_resources();
     _render_config = render_config;

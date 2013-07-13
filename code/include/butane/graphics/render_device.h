@@ -6,7 +6,7 @@
 
 #include <butane/butane.h>
 #include <butane/task.h>
-#include <butane/resources/render_config.h>
+#include <butane/render_config.h>
 
 namespace butane {
   class SwapChain;
@@ -63,17 +63,17 @@ namespace butane {
     public:
       static Task::Affinity affinity();
 
-      FOUNDATION_INLINE const Resource::Handle<RenderConfigResource>& render_config() const
+      FOUNDATION_INLINE const Resource::Handle<RenderConfig>& render_config() const
       { return _render_config; }
 
       void set_render_config(
-        const Resource::Handle<RenderConfigResource>& render_config );
+        const Resource::Handle<RenderConfig>& render_config );
 
       FOUNDATION_INLINE const Array<void*>& globals() const
       { return _globals; }
 
     private:
-      Resource::Handle<RenderConfigResource> _render_config;
+      Resource::Handle<RenderConfig> _render_config;
       Array<void*> _globals;
       Array<const SwapChain*> _swap_chains;
   };

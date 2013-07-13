@@ -56,7 +56,7 @@ namespace butane {
     copy(
       (void*)shader->_layers.raw(),
       (const void*)&mrd->layers[0],
-      mrd->num_of_layers * sizeof(RenderConfigResource::Layer::Name));
+      mrd->num_of_layers * sizeof(RenderConfig::Layer::Name));
 
     shader->_state = mrd->state;
     shader->_vertex_shader = mrd->vertex_shader;
@@ -118,27 +118,27 @@ namespace butane {
 
     const size_t mrd_len =
       sizeof(MemoryResidentData) +
-      (layers ? layers->size() : 1) * sizeof(RenderConfigResource::Layer::Name);
+      (layers ? layers->size() : 1) * sizeof(RenderConfig::Layer::Name);
 
     MemoryResidentData* mrd =
       (MemoryResidentData*)Allocators::heap().alloc(mrd_len);
 
     {
       int64_t offset = sizeof(MemoryResidentData);
-      mrd->layers = relative_ptr<RenderConfigResource::Layer::Name*>(offset - offsetof(MemoryResidentData, layers));
+      mrd->layers = relative_ptr<RenderConfig::Layer::Name*>(offset - offsetof(MemoryResidentData, layers));
     }
 
     /* layers = */ {
       mrd->num_of_layers = (layers ? layers->size() : 1);
       if (layer) {
-        mrd->layers[0] = RenderConfigResource::Layer::Name(layer->raw());
+        mrd->layers[0] = RenderConfig::Layer::Name(layer->raw());
       } else {
         for (size_t i = 0; i < layers->size(); ++i) {
           const sjson::String* layer = (const sjson::String*)layers->at(i);
           if (!layer->is_string()) {
             output.log("Malformed input: the %u layer in 'layers' is not a string!", i);
             goto failure; }
-          mrd->layers[i] = RenderConfigResource::Layer::Name(layer->raw());
+          mrd->layers[i] = RenderConfig::Layer::Name(layer->raw());
         }
       }
     }

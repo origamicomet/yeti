@@ -53,4 +53,10 @@
 // The maximum number of render contexts accepted by a dispatch task.
 #define BUTANE_MAXIMUM_NUM_OF_DISPATCHABLE_RENDER_CONTEXTS 1
 
+// The maximum number of bound textures/smaplers accepted by RenderConfig::Layers.
+#define BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS 8
+
+// The maximum number of bound render targets accepted by RenderConfig::Layers.
+#define BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS 8
+
 #endif // _BUTANE_CONFIG_H_

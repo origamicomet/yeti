@@ -1,16 +1,11 @@
 // This file is part of Butane. See README.md and LICENSE.md for details.
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
-#include <butane/resources/render_config.h>
-
-#include <butane/math/vec2.h>
-#include <butane/math/vec3.h>
-#include <butane/math/vec4.h>
-#include <butane/math/quat.h>
+#include <butane/render_config.h>
 
 namespace butane {
   static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("render config resources", Allocators::heap());
+    static ProxyAllocator allocator("render configurations", Allocators::heap());
     return allocator;
   }
 
@@ -24,43 +19,44 @@ namespace butane {
   static const Resource::Type& __type_initializer() {
     static const Resource::Type type(
       "render_config", "render_config",
-      (Resource::Type::Load)&RenderConfigResource::load,
-      (Resource::Type::Unload)&RenderConfigResource::unload,
-      (Resource::Type::Compile)&RenderConfigResource::compile);
+      (Resource::Type::Load)&RenderConfig::load,
+      (Resource::Type::Unload)&RenderConfig::unload,
+      (Resource::Type::Compile)&RenderConfig::compile);
     return type;
   }
 
   static const thread_safe::Static< const Resource::Type >
     __ts_type(&__type_initializer);
 
-  const Resource::Type& RenderConfigResource::type() {
+  const Resource::Type& RenderConfig::type() {
     return __ts_type();
   }
 
-  RenderConfigResource::RenderConfigResource(
+  RenderConfig::RenderConfig(
     const butane::Resource::Id id
-  ) : butane::Resource(RenderConfigResource::type(), id)
+  ) : butane::Resource(RenderConfig::type(), id)
     , _globals(allocator())
+    , _name_to_global(allocator(), 256)
     , _layers(allocator())
     , _name_to_layer(allocator(), 256)
   {
   }
 
-  RenderConfigResource::~RenderConfigResource()
+  RenderConfig::~RenderConfig()
   {
   }
 
-  RenderConfigResource* RenderConfigResource::load(
+  RenderConfig* RenderConfig::load(
     const butane::Resource::Id id,
     const butane::Resource::Stream& stream )
   {
-    const LogScope _("RenderConfigResource::load");
+    const LogScope _("RenderConfig::load");
 
     const MemoryResidentData* mrd =
       ((const MemoryResidentData*)stream.memory_resident_data());
 
-    RenderConfigResource* cfg =
-      make_new(RenderConfigResource, allocator())(id);
+    RenderConfig* cfg =
+      make_new(RenderConfig, allocator())(id);
 
     cfg->_globals.resize(mrd->num_of_globals);
     cfg->_layers.resize(mrd->num_of_layers);
@@ -69,6 +65,9 @@ namespace butane {
       (void*)cfg->_globals.raw(),
       (const void*)mrd->globals,
       mrd->num_of_globals * sizeof(Resource));
+
+    for (size_t i = 0; i < mrd->num_of_globals; ++i)
+      cfg->_name_to_global.insert(cfg->_globals[i].name, &cfg->_globals[i]);
 
     copy(
       (void*)cfg->_layers.raw(),
@@ -81,33 +80,33 @@ namespace butane {
     return cfg;
   }
 
-  void RenderConfigResource::unload(
-    RenderConfigResource* render_config )
+  void RenderConfig::unload(
+    RenderConfig* render_config )
   {
-    const LogScope _("RenderConfigResource::unload");
+    const LogScope _("RenderConfig::unload");
 
     assert(render_config != nullptr);
-    make_delete(RenderConfigResource, allocator(), render_config);
+    make_delete(RenderConfig, allocator(), render_config);
   }
 
   static bool resource_type_from_string(
     const char* str,
-    RenderConfigResource::Resource::Type& type )
+    RenderConfig::Resource::Type& type )
   {
     if (strcmp("render_target", str) == 0) {
-      type = RenderConfigResource::Resource::RENDER_TARGET;
+      type = RenderConfig::Resource::RENDER_TARGET;
       return true;
     } else if (strcmp("depth_stencil_target", str) == 0) {
-      type = RenderConfigResource::Resource::DEPTH_STENCIL_TARGET;
+      type = RenderConfig::Resource::DEPTH_STENCIL_TARGET;
       return true; }
     return false;
   }
 
-  bool RenderConfigResource::compile(
+  bool RenderConfig::compile(
     const butane::Resource::Compiler::Input& input,
     const butane::Resource::Compiler::Output& output )
   {
-    const LogScope _("RenderConfigResource::compile");
+    const LogScope _("RenderConfig::compile");
 
     size_t sjson_len = 0;
     const char* sjson =
@@ -280,8 +279,8 @@ namespace butane {
           if (!samplers->is_array()) {
             output.log("Malformed input: 'samplers' in the layer %u is not an array!", id);
             goto failure; }
-          if (samplers->size() > Layer::maximum_num_of_samplers) {
-            output.log("Malformed input: expected less than %u samplers in the layer %u!", Layer::maximum_num_of_samplers, id);
+          if (samplers->size() > BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS) {
+            output.log("Malformed input: expected less than %u samplers in the layer %u!", BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS, id);
             goto failure; }
           sl.num_of_samplers = samplers->size();
           for (size_t sampler = 0; sampler < samplers->size(); ++sampler) {
@@ -319,8 +318,8 @@ namespace butane {
           if (!render_targets->is_array()) {
             output.log("Malformed input: 'render_targets' in the layer %u is not an array!", id);
             goto failure; }
-          if (render_targets->size() > Layer::maximum_num_of_render_targets) {
-            output.log("Malformed input: expected less than %u render targets in the layer %u!", Layer::maximum_num_of_render_targets, id);
+          if (render_targets->size() > BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS) {
+            output.log("Malformed input: expected less than %u render targets in the layer %u!", BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS, id);
             goto failure; }
           sl.num_of_render_targets = render_targets->size();
           for (size_t render_target = 0; render_target < render_targets->size(); ++render_target) {
@@ -329,9 +328,8 @@ namespace butane {
               output.log("Malformed input: the render target %u in the layer %u is not a string!", render_target, id);
               goto failure; }
             const Resource::Name name = value->raw();
-            static const Resource::Name back_buffer = "back_buffer";
-            if (name == back_buffer) {
-              sl.render_targets[render_target] = Resource::back_buffer;
+            if (name == Resource::Name("back_buffer")) {
+              sl.render_targets[render_target] = Resource::Special::back_buffer;
               goto found_render_target; }
             for (size_t i = 0; i < mrd->num_of_globals; ++i) {
               if (name != mrd->globals[i].name)

@@ -319,6 +319,7 @@ namespace butane {
 
     // TODO: Go wide. Use n VisualRepresentationStreams and then apply all with
     //       one task.
+    // TODO: Move this into World::render()?
     Task* update_visual_representations_task; {
       Tasks::UpdateVisualRepresentationsData* uvrd =
         (Tasks::UpdateVisualRepresentationsData*)alloca(sizeof(Tasks::UpdateVisualRepresentationsData));
