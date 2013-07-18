@@ -146,8 +146,11 @@ namespace butane {
     /* state = */ {
       const sjson::String* state =
         (const sjson::String*)root->find("state");
-      if (!state || !state->is_string()) {
+      if (!state) {
         output.log("Malformed input: 'state' not specified!");
+        goto failure; }
+      if (!state->is_string()) {
+        output.log("Malformed input: 'state' is not a string!");
         goto failure; }
       mrd->state = Resource::Id(StateResource::type(), state->raw());
     }
@@ -155,8 +158,11 @@ namespace butane {
     /* vertex shader = */ {
       const sjson::String* vs =
         (const sjson::String*)root->find("vertex");
-      if (!vs || !vs->is_string()) {
+      if (!vs) {
         output.log("Malformed input: 'vertex' not specified!");
+        goto failure; }
+      if (!vs->is_string()) {
+        output.log("Malformed input: 'vertex' is not a string!");
         goto failure; }
       mrd->vertex_shader = Resource::Id(VertexShader::type(), vs->raw());
     }
@@ -164,8 +170,11 @@ namespace butane {
     /* pixel shader = */ {
       const sjson::String* ps =
         (const sjson::String*)root->find("pixel");
-      if (!ps || !ps->is_string()) {
+      if (!ps) {
         output.log("Malformed input: 'pixel' not specified!");
+        goto failure; }
+      if (!ps->is_string()) {
+        output.log("Malformed input: 'pixel' is not a string!");
         goto failure; }
       mrd->pixel_shader = Resource::Id(PixelShader::type(), ps->raw());
     }
