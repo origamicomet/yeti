@@ -27,6 +27,10 @@ namespace butane {
         /* const String& error
         const Script::Callstack& callstack */ );
 
+      // Called when a script is being destroyed.
+      typedef void (*Destructor)(
+        const Script& script );
+
     public:
       class Stack abstract {
         __foundation_trait(Stack, non_copyable);
@@ -254,9 +258,17 @@ namespace butane {
         _error_handler_closure = closure;
       }
 
+      FOUNDATION_INLINE void on_destruction(
+        Destructor destructor )
+      {
+        assert(destructor != nullptr);
+        _destructors += destructor;
+      }
+
     protected:
       ErrorHandler _error_handler;
       void* _error_handler_closure;
+      Array<Destructor> _destructors;
   };
 } // butane
 

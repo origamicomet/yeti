@@ -7,11 +7,14 @@ namespace butane {
   Script::Script()
     : _error_handler(nullptr)
     , _error_handler_closure(nullptr)
+    , _destructors(Allocators::heap())
   {
   }
 
   Script::~Script()
   {
+    for (auto iter = _destructors.begin(); iter != _destructors.end(); ++iter)
+      (*iter)(*this);
   }
 
   void Script::error(
