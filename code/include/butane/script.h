@@ -22,7 +22,7 @@ namespace butane {
 
       // Called when a script encounters an error.
       typedef void (*ErrorHandler)(
-        Script& script,
+        const Script& script,
         void* closure
         /* const String& error
         const Script::Callstack& callstack */ );
@@ -183,9 +183,64 @@ namespace butane {
         const String& name,
         Function function ) = 0;
 
+      virtual void set(
+        const char* name ) const = 0;
+
+      virtual void set(
+        const char* name,
+        void* ptr ) const = 0;
+
+      virtual void get(
+        const char* name,
+        void*& ptr ) const = 0;
+
+      virtual void set(
+        const char* name,
+        bool boolean ) const = 0;
+
+      virtual void get(
+        const char* name,
+        bool& boolean ) const = 0;
+
+      virtual void set(
+        const char* name,
+        int integer ) const = 0;
+
+      virtual void get(
+        const char* name,
+        int& integer ) const = 0;
+
+      virtual void set(
+        const char* name,
+        float number ) const = 0;
+
+      virtual void get(
+        const char* name,
+        float& number ) const = 0;
+
+      virtual void set(
+        const char* name,
+        double number ) const = 0;
+
+      virtual void get(
+        const char* name,
+        double& number ) const = 0;
+
+      virtual void set(
+        const char* name,
+        const char* string ) const = 0;
+
+      virtual void set(
+        const char* name,
+        const String& string ) const = 0;
+
+      virtual void get(
+        const char* name,
+        String& string ) const = 0;
+
     public:
       void error(
-        const char* message );
+        const char* format, ... ) const;
 
     public:
       virtual const Stack& stack() = 0;

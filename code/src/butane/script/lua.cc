@@ -428,7 +428,7 @@ namespace Lua {
       Script::__qualified_name(_state, name);
 
     if (!qn) {
-      warn("Unable to expose '%s', unable to qualify name!", name);
+      error("Unable to expose '%s' (unable to qualify name!)", name);
       return; }
 
     lua_pushstring(_state, qn);
@@ -444,6 +444,265 @@ namespace Lua {
     Function function )
   {
     return expose(name.raw(), function);
+  }
+
+  void Script::set(
+    const char* name ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+  }
+
+  void Script::set(
+    const char* name,
+    void* ptr ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushnil(_state);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::get(
+    const char* name,
+    void*& ptr ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to get '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_getfield(_state, -1, qn);
+    if(!lua_islightuserdata(_state, -1))
+      error("Trying to get non-pointer value!");
+    ptr = lua_touserdata(_state, -1);
+    lua_pop(_state, 2);
+  }
+
+  void Script::set(
+    const char* name,
+    bool boolean ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushboolean(_state, boolean);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::get(
+    const char* name,
+    bool& boolean ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to get '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_getfield(_state, -1, qn);
+    if (!lua_isboolean(_state, -1))
+      error("Trying to get non-boolean value!");
+    boolean = lua_toboolean(_state, -1);
+    lua_pop(_state, 2);
+  }
+
+  void Script::set(
+    const char* name,
+    int integer ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushinteger(_state, integer);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::get(
+    const char* name,
+    int& integer ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to get '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_getfield(_state, -1, qn);
+    if (!lua_isnumber(_state, -1))
+      error("Trying to get non-integer value!");
+    integer = lua_tointeger(_state, -1);
+    lua_pop(_state, 2);
+  }
+
+  void Script::set(
+    const char* name,
+    float number ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushnumber(_state, number);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::get(
+    const char* name,
+    float& number ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to get '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_getfield(_state, -1, qn);
+    if (!lua_isnumber(_state, -1))
+      error("Trying to get non-number value!");
+    number = lua_tonumber(_state, -1);
+    lua_pop(_state, 2);
+  }
+
+  void Script::set(
+    const char* name,
+    double number ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushnumber(_state, number);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::get(
+    const char* name,
+    double& number ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to get '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_getfield(_state, -1, qn);
+    if (!lua_isnumber(_state, -1))
+      error("Trying to get non-number value!");
+    number = lua_tonumber(_state, -1);
+    lua_pop(_state, 2);
+  }
+
+  void Script::set(
+    const char* name,
+    const char* string ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushstring(_state, string);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::set(
+    const char* name,
+    const String& string ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to set '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_pushstring(_state, string.raw());
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
+  }
+
+  void Script::get(
+    const char* name,
+    String& string ) const
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(_state, name);
+
+    if (!qn) {
+      error("Unable to get '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_getfield(_state, -1, qn);
+    if (!lua_isstring(_state, -1))
+      error("Trying to get non- value!");
+    string = lua_tostring(_state, -1);
+    lua_pop(_state, 2);
   }
 
   const butane::Script::Stack& Script::stack()

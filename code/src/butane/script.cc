@@ -15,11 +15,20 @@ namespace butane {
   }
 
   void Script::error(
-    const char* message )
+    const char* format, ... ) const
   {
+    const char* msg; {
+      va_list ap;
+      va_start(ap, format);
+      const size_t len = vsnprintf(nullptr, 0, format, ap) + 1;
+      msg = (const char*)alloca(len);
+      vsnprintf((char*)msg, len, format, ap);
+      va_end(ap);
+    }
+
     if (_error_handler)
       _error_handler(*this, _error_handler_closure);
     else
-      fail("Unhandled script error: %s", message);
+      fail("Unhandled script error: %s", msg);
   }
 } // butane

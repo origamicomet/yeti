@@ -188,6 +188,61 @@ namespace Lua {
         const String& name,
         Function function ) override;
 
+      void set(
+        const char* name ) const override;
+
+      void set(
+        const char* name,
+        void* ptr ) const override;
+
+      void get(
+        const char* name,
+        void*& ptr ) const override;
+
+      void set(
+        const char* name,
+        bool boolean ) const override;
+
+      void get(
+        const char* name,
+        bool& boolean ) const override;
+
+      void set(
+        const char* name,
+        int integer ) const override;
+
+      void get(
+        const char* name,
+        int& integer ) const override;
+
+      void set(
+        const char* name,
+        float number ) const override;
+
+      void get(
+        const char* name,
+        float& number ) const override;
+
+      void set(
+        const char* name,
+        double number ) const override;
+
+      void get(
+        const char* name,
+        double& number ) const override;
+
+      void set(
+        const char* name,
+        const char* string ) const override;
+
+      void set(
+        const char* name,
+        const String& string ) const override;
+
+      void get(
+        const char* name,
+        String& string ) const override;
+
     public:
       const butane::Script::Stack& stack() override;
 
