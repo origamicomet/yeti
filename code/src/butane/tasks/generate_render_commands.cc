@@ -5,6 +5,7 @@
 
 #include <butane/world.h>
 #include <butane/application.h>
+#include <butane/tied_resources.h>
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
 #include <butane/graphics/render_context.h>
@@ -27,7 +28,7 @@ namespace Tasks {
   {
     GenerateRenderCommandsData* grcd = (GenerateRenderCommandsData*)data;
     RenderDevice* rd = Application::render_device();
-    const RenderConfig* render_config = rd->render_config();
+    const Resource::Handle<RenderConfig>& render_config = Application::render_config();
     const SceneGraph::Node::Camera::VisualRepresentation* camera =
       (const SceneGraph::Node::Camera::VisualRepresentation*)grcd->camera;
     if (!render_config || !camera) {
@@ -48,7 +49,7 @@ namespace Tasks {
     // 1: Clear the back-buffer
     grcd->render_context->clear(
       (RenderContext::Command::Key)0x0000000000000000ull /* first */,
-      grcd->swap_chain->render_target(),
+      grcd->swap_chain_and_resources->swap_chain()->render_target(),
       Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
 
     for (size_t idx = 0; idx < render_config->globals().size(); ++idx) {
@@ -59,14 +60,14 @@ namespace Tasks {
           if (!resource.render_or_depth_stencil_target.clear) {
             grcd->render_context->clear(
               (RenderContext::Command::Key)0x0000000000000000ull /* first */,
-              (RenderTarget*)rd->globals()[idx],
+              (RenderTarget*)grcd->swap_chain_and_resources->globals()[idx],
               Vec4f(0.0f, 0.0f, 0.0f, 0.0f)); }
           break;
         case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
           if (!resource.render_or_depth_stencil_target.clear) {
             grcd->render_context->clear(
               (RenderContext::Command::Key)0x0000000000000000ull /* first */,
-              (DepthStencilTarget*)rd->globals()[idx],
+              (DepthStencilTarget*)grcd->swap_chain_and_resources->globals()[idx],
               1.0f, 0xFFFFFFFFu); }
           break;
       }
@@ -80,11 +81,11 @@ namespace Tasks {
 
       for (size_t rt = 0; rt < layer.num_of_render_targets; ++rt) {
         if (layer.render_targets[rt] == RenderConfig::Resource::Special::back_buffer) {
-          render_targets[rt] = grcd->swap_chain->render_target();
+          render_targets[rt] = grcd->swap_chain_and_resources->swap_chain()->render_target();
           continue; }
         const RenderConfig::Resource& resource =
           render_config->globals()[layer.render_targets[rt]];
-        render_targets[rt] = (RenderTarget*)rd->globals()[layer.render_targets[rt]];
+        render_targets[rt] = (RenderTarget*)grcd->swap_chain_and_resources->globals()[layer.render_targets[rt]];
         if (resource.render_or_depth_stencil_target.clear) {
           grcd->render_context->clear(
             key(layer.id, 0),
@@ -94,7 +95,7 @@ namespace Tasks {
 
       DepthStencilTarget* depth_stencil_target =
         (layer.depth_stencil_target != RenderConfig::Resource::invalid) ?
-        (DepthStencilTarget*)rd->globals()[layer.depth_stencil_target] : nullptr;
+        (DepthStencilTarget*)grcd->swap_chain_and_resources->globals()[layer.depth_stencil_target] : nullptr;
 
       if (depth_stencil_target) {
         const RenderConfig::Resource& resource =
@@ -175,7 +176,7 @@ namespace Tasks {
 
     grcd->render_context->present(
       (RenderContext::Command::Key)0xFFFFFFFFFFFFFFFFull /* last */,
-      grcd->swap_chain);
+      grcd->swap_chain_and_resources->swap_chain());
 
     grcd->world->_visual_representation._mutex.unlock();
     typedef Array<butane::VisualRepresentation::Culled> Culled;

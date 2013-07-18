@@ -12,12 +12,12 @@
 
 namespace butane {
   class World;
-  class SwapChain;
+  class TiedResources;
   class RenderContext;
 namespace Tasks {
   struct GenerateRenderCommandsData {
     const World* world;
-    SwapChain* swap_chain;
+    const TiedResources* swap_chain_and_resources;
     const VisualRepresentation* camera;
     Viewport viewport;
     RenderContext* render_context;

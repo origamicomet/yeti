@@ -12,15 +12,6 @@
 
 namespace butane {
 namespace Application {
-  static butane::RenderDevice* _render_device = nullptr;
-
-  butane::RenderDevice* render_device()
-  { return _render_device; }
-
-  void set_render_device(
-    butane::RenderDevice* render_device )
-  { _render_device = render_device; }
-
   static Array<Console*>& __consoles_initializer() {
     static Array<Console*> consoles(Allocators::heap());
     return consoles;

@@ -9,6 +9,7 @@
 #include <butane/resource.h>
 #include <butane/resources/config.h>
 #include <butane/render_config.h>
+#include <butane/tied_resources.h>
 #include <butane/window.h>
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
@@ -25,26 +26,149 @@
 
 namespace butane {
 namespace Application {
-  Array< Pair<uint32_t, Window*> >& windows() {
-    static Array< Pair<uint32_t, Window*> > windows(Allocators::heap());
-    return windows;
+  static RenderDevice* _render_device = nullptr;
+
+  RenderDevice* render_device()
+  { return _render_device; }
+
+  void set_render_device(
+    RenderDevice* render_device )
+  { _render_device = render_device; }
+
+  static Resource::Handle<RenderConfig> _render_config;
+
+  Resource::Handle<RenderConfig>& render_config()
+  { return _render_config; }
+
+  static void create_or_update_global_resources();
+  static void destroy_global_resources();
+
+  void set_render_config(
+    Resource::Handle<RenderConfig>& render_config )
+  {
+    if (_render_config.valid())
+      destroy_global_resources();
+    _render_config = render_config;
+    create_or_update_global_resources();
   }
 
-  Array< Pair<uint32_t, SwapChain*> >& swap_chains() {
+  static Array<void*>& __globals_initializer() {
+    static Array<void*> globals(Allocators::heap());
+    return globals; }
+
+  static const thread_safe::Static< Array<void*> >
+    __ts_globals(&__globals_initializer);
+
+  Array<void*>& globals()
+  { return __ts_globals(); }
+
+  static Array< Pair<uint32_t, Window*> >& __windows_initializer() {
+    static Array< Pair<uint32_t, Window*> > windows(Allocators::heap());
+    return windows; }
+
+  static const thread_safe::Static< Array< Pair<uint32_t, Window*> > >
+    __ts_windows(&__windows_initializer);
+
+  Array< Pair<uint32_t, Window*> >& windows()
+  { return __ts_windows(); }
+
+  static Array< Pair<uint32_t, SwapChain*> >& __swap_chains_initializer() {
     static Array< Pair<uint32_t, SwapChain*> > swap_chains(Allocators::heap());
-    return swap_chains;
-  }
+    return swap_chains; }
+
+  static const thread_safe::Static< Array< Pair<uint32_t, SwapChain*> > >
+    __ts_swap_chains(&__swap_chains_initializer);
+
+  Array< Pair<uint32_t, SwapChain*> >& swap_chains()
+  { return __ts_swap_chains(); }
+
+  static Array<TiedResources*>& __tied_resources_initializer() {
+    static Array<TiedResources*> tied_resources(Allocators::heap());
+    return tied_resources; }
+
+  static const thread_safe::Static< Array<TiedResources*> >
+    __ts_tied_resources(&__tied_resources_initializer);
+
+  Array<TiedResources*>& tied_resources()
+  { return __ts_tied_resources(); }
 
   static Array<World*>& __worlds_initializer() {
     static Array<World*> worlds(Allocators::heap());
-    return worlds;
-  }
+    return worlds; }
 
   static const thread_safe::Static< Array<World*> >
     __ts_worlds(&__worlds_initializer);
 
-  Array<World*>& worlds() {
-    return __ts_worlds();
+  Array<World*>& worlds()
+  { return __ts_worlds(); }
+
+  static void create_or_update_global_resources()
+  {
+    assert(_render_config.valid());
+
+    uint32_t minimum_width_to_support, minimum_height_to_support; {
+      minimum_width_to_support = minimum_height_to_support = 0;
+      for (auto iter = swap_chains().begin(); iter != swap_chains().end(); ++iter) {
+        minimum_width_to_support = max(minimum_width_to_support, (*iter).value->width());
+        minimum_height_to_support = max(minimum_height_to_support, (*iter).value->height()); }
+    }
+
+    globals().resize(_render_config->globals().size());
+    for (size_t idx = 0; idx < _render_config->globals().size(); ++idx) {
+      const RenderConfig::Resource& resource =
+        _render_config->globals()[idx];
+      switch (resource.type) {
+        case RenderConfig::Resource::RENDER_TARGET:
+          if (globals()[idx])
+            ((Texture*)globals()[idx])->destroy();
+          if (!swap_chains().empty()) {
+            globals()[idx] = (void*)Texture::create(
+              Texture::TEXTURE_2D,
+              resource.render_or_depth_stencil_target.format,
+              minimum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
+              minimum_height_to_support * resource.render_or_depth_stencil_target.scale.y,
+              1, Texture::RENDER_TARGETABLE); }
+          break;
+        case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
+          if (globals()[idx])
+            ((Texture*)globals()[idx])->destroy();
+          if (!swap_chains().empty()) {
+            globals()[idx] = (void*)Texture::create(
+              Texture::TEXTURE_2D,
+              resource.render_or_depth_stencil_target.format,
+              minimum_width_to_support * resource.render_or_depth_stencil_target.scale.x,
+              minimum_height_to_support * resource.render_or_depth_stencil_target.scale.y,
+              1, Texture::DEPTH_STENCIL_TARGETABLE); }
+          break;
+        default:
+          __builtin_unreachable();
+      }
+    }
+
+    for (auto iter = tied_resources().begin(); iter != tied_resources().end(); ++iter)
+      (*iter)->create_or_update_global_resources();
+  }
+
+  static void destroy_global_resources()
+  {
+    assert(_render_config.valid());
+
+    for (size_t idx = 0; idx < _render_config->globals().size(); ++idx) {
+      const RenderConfig::Resource& resource =
+        _render_config->globals()[idx];
+      switch (resource.type) {
+        case RenderConfig::Resource::RENDER_TARGET:
+        case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
+          if (globals()[idx])
+            ((Texture*)globals()[idx])->destroy();
+          globals()[idx] = nullptr;
+        default:
+          __builtin_unreachable();
+      }
+    }
+
+    for (auto iter = tied_resources().begin(); iter != tied_resources().end(); ++iter)
+      (*iter)->destroy_global_resources();
   }
 
   static void on_window_closed(
@@ -112,7 +236,7 @@ namespace Application {
         fail("Expected `application.graphics.config` to be specified!");
       const Resource::Id id = Resource::Id(RenderConfig::type(), config);
       render_config = id;
-      rd->set_render_config(render_config);
+      Application::set_render_config(render_config);
     }
 
     SwapChain* swap_chain; {
@@ -134,6 +258,8 @@ namespace Application {
         fullscreen, vertical_sync);
 
       swap_chains() += Pair<uint32_t, SwapChain*>(0, swap_chain);
+      tied_resources() += TiedResources::create(swap_chain);
+      create_or_update_global_resources();
     }
 
     World* world = World::create();
@@ -163,7 +289,7 @@ namespace Application {
     while (true) {
       window->update();
       world->update(1.0f / 60.0f);
-      world->render(camera, swap_chain);
+      world->render(camera, tied_resources()[0]);
     }
   }
 } // Application

@@ -20,7 +20,7 @@
 #include <butane/tasks/dispatch.h>
 
 namespace butane {
-  class SwapChain;
+  class TiedResources;
   class BUTANE_EXPORT World final {
     __foundation_trait(World, non_copyable);
 
@@ -123,7 +123,7 @@ namespace butane {
       /*! */
       void render(
         const Unit::Reference& camera,
-        SwapChain* swap_chain ) const;
+        const TiedResources* swap_chain_and_resources ) const;
 
     public:
       void destroy();

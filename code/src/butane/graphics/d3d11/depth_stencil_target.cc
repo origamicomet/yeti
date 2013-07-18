@@ -86,7 +86,7 @@ namespace butane {
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvd;
     dsvd.Format             = dxgi_format_from_pixel_format(texture->pixel_format());
     dsvd.ViewDimension      = D3D11_DSV_DIMENSION_TEXTURE2D;
-    dsvd.Flags = 0;
+    dsvd.Flags              = 0;
     dsvd.Texture2D.MipSlice = 0;
 
     D3D11Texture* texture_ = (D3D11Texture*)texture;

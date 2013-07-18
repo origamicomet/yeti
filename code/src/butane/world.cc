@@ -351,7 +351,7 @@ namespace butane {
 
   void World::render(
     const Unit::Reference& camera,
-    SwapChain* swap_chain ) const
+    const TiedResources* swap_chain_and_resources ) const
   {
     const LogScope _("World::render");
 
@@ -399,7 +399,7 @@ namespace butane {
       Tasks::GenerateRenderCommandsData* grcd =
         (Tasks::GenerateRenderCommandsData*)Allocators::scratch().alloc(sizeof(Tasks::GenerateRenderCommandsData));
       grcd->world = this;
-      grcd->swap_chain = swap_chain;
+      grcd->swap_chain_and_resources = swap_chain_and_resources;
       grcd->camera = _visual_representation.visual_representation_from_id(camera.to_node().visual_representation());
       grcd->viewport = Viewport(0, 0, 720, 1280);
       grcd->render_context = render_context;
