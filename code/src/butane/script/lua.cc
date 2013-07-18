@@ -447,7 +447,7 @@ namespace Lua {
   }
 
   void Script::set(
-    const char* name ) const
+    const char* name )
   {
     assert(name != nullptr);
 
@@ -461,7 +461,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    void* ptr ) const
+    void* ptr )
   {
     assert(name != nullptr);
 
@@ -499,7 +499,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    bool boolean ) const
+    bool boolean )
   {
     assert(name != nullptr);
 
@@ -537,7 +537,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    int integer ) const
+    int integer )
   {
     assert(name != nullptr);
 
@@ -575,7 +575,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    float number ) const
+    float number )
   {
     assert(name != nullptr);
 
@@ -613,7 +613,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    double number ) const
+    double number )
   {
     assert(name != nullptr);
 
@@ -651,7 +651,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    const char* string ) const
+    const char* string )
   {
     assert(name != nullptr);
 
@@ -669,7 +669,7 @@ namespace Lua {
 
   void Script::set(
     const char* name,
-    const String& string ) const
+    const String& string )
   {
     assert(name != nullptr);
 

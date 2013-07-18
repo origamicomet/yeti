@@ -184,11 +184,11 @@ namespace butane {
         Function function ) = 0;
 
       virtual void set(
-        const char* name ) const = 0;
+        const char* name ) = 0;
 
       virtual void set(
         const char* name,
-        void* ptr ) const = 0;
+        void* ptr ) = 0;
 
       virtual void get(
         const char* name,
@@ -196,7 +196,7 @@ namespace butane {
 
       virtual void set(
         const char* name,
-        bool boolean ) const = 0;
+        bool boolean ) = 0;
 
       virtual void get(
         const char* name,
@@ -204,7 +204,7 @@ namespace butane {
 
       virtual void set(
         const char* name,
-        int integer ) const = 0;
+        int integer ) = 0;
 
       virtual void get(
         const char* name,
@@ -212,7 +212,7 @@ namespace butane {
 
       virtual void set(
         const char* name,
-        float number ) const = 0;
+        float number ) = 0;
 
       virtual void get(
         const char* name,
@@ -220,7 +220,7 @@ namespace butane {
 
       virtual void set(
         const char* name,
-        double number ) const = 0;
+        double number ) = 0;
 
       virtual void get(
         const char* name,
@@ -228,11 +228,11 @@ namespace butane {
 
       virtual void set(
         const char* name,
-        const char* string ) const = 0;
+        const char* string ) = 0;
 
       virtual void set(
         const char* name,
-        const String& string ) const = 0;
+        const String& string ) = 0;
 
       virtual void get(
         const char* name,

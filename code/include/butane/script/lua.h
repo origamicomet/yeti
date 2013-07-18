@@ -189,11 +189,11 @@ namespace Lua {
         Function function ) override;
 
       void set(
-        const char* name ) const override;
+        const char* name ) override;
 
       void set(
         const char* name,
-        void* ptr ) const override;
+        void* ptr ) override;
 
       void get(
         const char* name,
@@ -201,7 +201,7 @@ namespace Lua {
 
       void set(
         const char* name,
-        bool boolean ) const override;
+        bool boolean ) override;
 
       void get(
         const char* name,
@@ -209,7 +209,7 @@ namespace Lua {
 
       void set(
         const char* name,
-        int integer ) const override;
+        int integer ) override;
 
       void get(
         const char* name,
@@ -217,7 +217,7 @@ namespace Lua {
 
       void set(
         const char* name,
-        float number ) const override;
+        float number ) override;
 
       void get(
         const char* name,
@@ -225,7 +225,7 @@ namespace Lua {
 
       void set(
         const char* name,
-        double number ) const override;
+        double number ) override;
 
       void get(
         const char* name,
@@ -233,11 +233,11 @@ namespace Lua {
 
       void set(
         const char* name,
-        const char* string ) const override;
+        const char* string ) override;
 
       void set(
         const char* name,
-        const String& string ) const override;
+        const String& string ) override;
 
       void get(
         const char* name,
