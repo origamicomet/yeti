@@ -452,3 +452,89 @@ namespace Lua {
   }
 } // Lua
 } // butane
+
+namespace butane {
+  namespace Lua {
+    static void* __compiler_alloc(
+      void* /* ud */,
+      void* ptr,
+      size_t old_size,
+      size_t new_size )
+    {
+      return Allocators::heap().realloc(ptr, new_size);
+    }
+
+    struct Writer {
+      bool (*write)(
+        void* closure,
+        const void* bytes,
+        size_t num_of_bytes );
+      void* closure;
+    };
+
+    static int __compiler_writer(
+      lua_State* state,
+      const void* p,
+      size_t sz,
+      void* ud )
+    {
+      const Writer* writer = (const Writer*)ud;
+      return (writer->write(writer->closure, p, sz) ? 0 : 1);
+    }
+
+    bool Script::compile(
+      const char* name,
+      const char* code,
+      size_t code_len,
+      bool (*write)(
+        void* closure,
+        const void* bytes,
+        size_t num_of_bytes ),
+      void (*error)(
+        void* closure,
+        const char* error ),
+      void* closure )
+    {
+      assert(name != nullptr);
+      assert(code != nullptr);
+      assert(code_len != 0);
+      assert(write != nullptr);
+      assert(error != nullptr);
+
+      lua_State* state = lua_newstate((lua_Alloc)&__compiler_alloc, nullptr);
+
+      if (luaL_loadbuffer(state, (const char*)code, code_len, name) != 0) {
+        error(closure, lua_tostring(state, -1));
+        lua_pop(state, 1);
+        lua_close(state);
+        return false; }
+
+      Writer writer;
+      writer.write = write;
+      writer.closure = closure;
+
+      if (lua_dump(state, &__compiler_writer, (void*)&writer)) {
+        lua_close(state);
+        return false; }
+
+      lua_close(state);
+      return true;
+    }
+  } // Lua
+
+  bool Script::compile(
+    const char* name,
+    const char* code,
+    size_t code_len,
+    bool (*write)(
+      void* closure,
+      const void* bytes,
+      size_t num_of_bytes ),
+    void (*error)(
+      void* closure,
+      const char* error ),
+    void* closure )
+  {
+    return Lua::Script::compile(name, code, code_len, write, error, closure);
+  }
+} // butane

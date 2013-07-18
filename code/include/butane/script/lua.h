@@ -147,6 +147,19 @@ namespace Lua {
         const char* name );
 
     public:
+      static bool compile(
+        const char* name,
+        const char* code,
+        size_t code_len,
+        bool (*write)(
+          void* closure,
+          const void* bytes,
+          size_t num_of_bytes ),
+        void (*error)(
+          void* closure,
+          const char* error ),
+        void* closure = nullptr );
+
       bool load(
         const char* name,
         const void* code,
