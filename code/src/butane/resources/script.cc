@@ -44,18 +44,15 @@ namespace butane {
   {
     const LogScope _("ScriptResource::load");
 
-    const MemoryResidentData* mrd =
-      ((const MemoryResidentData*)stream.memory_resident_data());
-
     ScriptResource* script =
       make_new(ScriptResource, allocator())(id);
 
-    script->_byte_code.resize(mrd->byte_code_len);
+    script->_byte_code.resize(stream.memory_resident_data_len());
 
     copy(
       script->_byte_code.raw(),
-      (const void*)script->_byte_code.raw(),
-      mrd->byte_code_len);
+      stream.memory_resident_data(),
+      stream.memory_resident_data_len());
 
     return script;
   }
@@ -100,15 +97,6 @@ namespace butane {
     size_t code_len = 0;
     const char* code =
       (const char*)File::read(input.data, Allocators::heap(), &code_len);
-
-    MemoryResidentData mrd; {
-      int64_t offset = sizeof(MemoryResidentData);
-      mrd.byte_code = relative_ptr<const char*>(offset - offsetof(MemoryResidentData, byte_code));
-    }
-
-    if (!File::write(output.memory_resident_data, (const void*)&mrd, sizeof(MemoryResidentData))) {
-      output.log("Unable to write memory-resident data!");
-      goto failure; }
 
     const CompiliationInfo ci = { input, output };
     if (!Script::compile(output.path, code, code_len, &__write_to_memory_resident_data, &__on_compilation_error, (void*)&ci))

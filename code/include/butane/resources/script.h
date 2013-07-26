@@ -12,12 +12,6 @@ namespace butane {
   {
     __foundation_trait(ScriptResource, non_copyable);
 
-    private:
-      struct MemoryResidentData {
-        relative_ptr<const char*> byte_code;
-        size_t byte_code_len;
-      };
-
     public:
       static const Resource::Type& type();
 
