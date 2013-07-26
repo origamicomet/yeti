@@ -147,6 +147,25 @@ namespace Lua {
     function = (Script::Function)lua_touserdata(script._state, -1);
     lua_pop(script._state, 2);
   }
+
+  void Script::Stack::push(
+    const char* type,
+    void* ptr ) const
+  {
+    Script& script = ((Script&)_script);
+    assert(type != nullptr);
+
+    const char* qt /* qualified_type */ =
+      Script::__qualified_name(script._state, type);
+
+    if (!qt)
+      fail("Unable to create a '%s' (unable to qualify type!)", type);
+
+    *((void**)lua_newuserdata(script._state, sizeof(void*))) = ptr;
+    lua_getfield(script._state, -2, qt);
+    lua_remove(script._state, -3);
+    lua_setmetatable(script._state, -2);
+  }
 } // Lua
 } // butane
 
@@ -171,9 +190,9 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_islightuserdata(script._state, arg))
+    if (!lua_islightuserdata(script._state, arg + 1))
       script.error("Trying to access non-pointer argument!");
-    ptr = lua_touserdata(script._state, arg);
+    ptr = lua_touserdata(script._state, arg + 1);
   }
 
   void Script::Arguments::to(
@@ -182,9 +201,9 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_isboolean(script._state, arg))
+    if (!lua_isboolean(script._state, arg + 1))
       script.error("Trying to access non-boolean argument!");
-    boolean = (lua_toboolean(script._state, arg) != 0) ? true : false;
+    boolean = (lua_toboolean(script._state, arg + 1) != 0) ? true : false;
   }
 
   void Script::Arguments::to(
@@ -193,9 +212,9 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_isnumber(script._state, arg))
+    if (!lua_isnumber(script._state, arg + 1))
       script.error("Trying to access non-integer argument!");
-    integer = lua_tointeger(script._state, arg);
+    integer = lua_tointeger(script._state, arg + 1);
   }
 
   void Script::Arguments::to(
@@ -204,9 +223,9 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_isnumber(script._state, arg))
+    if (!lua_isnumber(script._state, arg + 1))
       script.error("Trying to access non-number argument!");
-    number = lua_tonumber(script._state, arg);
+    number = lua_tonumber(script._state, arg + 1);
   }
 
   void Script::Arguments::to(
@@ -215,9 +234,9 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_isnumber(script._state, arg))
+    if (!lua_isnumber(script._state, arg + 1))
       script.error("Trying to access non-number argument!");
-    number = lua_tonumber(script._state, arg);
+    number = lua_tonumber(script._state, arg + 1);
   }
 
   void Script::Arguments::to(
@@ -226,9 +245,9 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_isstring(script._state, arg))
+    if (!lua_isstring(script._state, arg + 1))
       script.error("Trying to access non-string argument!");
-    string = lua_tostring(script._state, arg);
+    string = lua_tostring(script._state, arg + 1);
   }
 
   void Script::Arguments::to(
@@ -237,12 +256,201 @@ namespace Lua {
     Script& script = ((Script&)_script);
     if (arg > lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
-    if (!lua_isstring(script._state, arg))
+    if (!lua_isstring(script._state, arg + 1))
       script.error("Trying to access non-string argument!");
-    string = String(Allocators::scratch(), lua_tostring(script._state, arg));
+    string = String(Allocators::scratch(), lua_tostring(script._state, arg + 1));
+  }
+
+  void Script::Arguments::to(
+    size_t arg, const char* type, void*& ptr ) const
+  {
+    assert(type != nullptr);
+    Script& script = ((Script&)_script);
+    if (arg > lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    if (!lua_isuserdata(script._state, arg + 1))
+      script.error("Trying to access non-%s argument!", type);
+    ptr = *((void**)lua_touserdata(script._state, arg + 1));
   }
 } // Lua
 } // butane
+
+namespace butane {
+namespace Lua {
+  Script::Type::Type(
+    Script& script
+  ) : butane::Script::Type(script)
+  {
+  }
+
+  Script::Type::~Type()
+  {
+  }
+
+  int Script::Type::__ctor(
+    lua_State* state )
+  {
+    Script& script =
+      (*(Script*)lua_touserdata(state, lua_upvalueindex(1)));
+    Constructor ctor =
+      (Constructor)lua_touserdata(state, lua_upvalueindex(2));
+    lua_remove(state, 1);
+    *((void**)lua_newuserdata(state, sizeof(void*))) =
+      ctor(script, Script::Arguments(script));
+    lua_pushvalue(state, lua_upvalueindex(3));
+    lua_setmetatable(state, -2);
+    return 1;
+  }
+
+  int Script::Type::__dtor(
+    lua_State* state )
+  {
+    Script& script =
+      (*(Script*)lua_touserdata(state, lua_upvalueindex(1)));
+    Destructor dtor =
+      (Destructor)lua_touserdata(state, lua_upvalueindex(2));
+    dtor(script, lua_touserdata(state, 1));
+    return 0;
+  }
+
+  int Script::Type::__forwarding_closure(
+    lua_State* state )
+  {
+    Script& script =
+      (*(Script*)lua_touserdata(state, lua_upvalueindex(1)));
+    Method method =
+      (Method)lua_touserdata(state, lua_upvalueindex(2));
+    void* self = *((void**)lua_touserdata(state, 1));
+    lua_remove(state, 1);
+    return (int)method(script, self, Script::Arguments(script));
+  }
+
+  int Script::Type::__get(
+    lua_State* state )
+  {
+    Script& script =
+      (*(Script*)lua_touserdata(state, lua_upvalueindex(1)));
+    lua_pushfstring(state, "__get_%s", lua_tostring(state, 2));
+    lua_rawget(state, lua_upvalueindex(2));
+    Getter getter = (Getter)lua_touserdata(state, -1);
+    if (!getter)
+      script.error("Unable to get '%s' (no getter!)", lua_tostring(state, 2));
+    lua_pop(state, 1);
+    void* self = *((void**)lua_touserdata(state, 1));
+    lua_remove(state, 1);
+    return (int)getter(script, self, Script::Arguments(script));
+  }
+
+  int Script::Type::__set(
+    lua_State* state )
+  {
+    Script& script =
+      (*(Script*)lua_touserdata(state, lua_upvalueindex(1)));
+    lua_pushfstring(state, "__set_%s", lua_tostring(state, 2));
+    lua_rawget(state, lua_upvalueindex(2));
+    Setter setter = (Setter)lua_touserdata(state, -1);
+    if (!setter)
+      script.error("Unable to set '%s' (no setter!)", lua_tostring(state, 2));
+    lua_pop(state, 1);
+    void* self = *((void**)lua_touserdata(state, 1));
+    lua_insert(state, 1);
+    lua_pop(state, 2);
+    return (int)setter(script, self, Script::Arguments(script));
+  }
+
+  butane::Script::Type& Script::Type::getter(
+    const char* member,
+    Getter getter )
+  {
+    assert(member != nullptr);
+    assert(getter != nullptr);
+
+    lua_pushfstring(((Script&)_script)._state, "__get_%s", member);
+    lua_pushlightuserdata(((Script&)_script)._state, (void*)getter);
+    lua_settable(((Script&)_script)._state, -3);
+
+    return *this;
+  }
+
+  butane::Script::Type& Script::Type::setter(
+    const char* member,
+    Setter setter )
+  {
+    assert(member != nullptr);
+    assert(setter != nullptr);
+
+    lua_pushfstring(((Script&)_script)._state, "__set_%s", member);
+    lua_pushlightuserdata(((Script&)_script)._state, (void*)setter);
+    lua_settable(((Script&)_script)._state, -3);
+
+    return *this;
+  }
+
+  butane::Script::Type& Script::Type::accessors(
+    const char* member,
+    Getter getter,
+    Setter setter )
+  {
+    return this->getter(member, getter).setter(member, setter);
+  }
+
+  butane::Script::Type& Script::Type::operation(
+    const char* operation,
+    Operator method )
+  {
+    assert(operation != nullptr);
+    assert(method != nullptr);
+
+    if (strcmp("add", operation) == 0)
+      return this->method("__add", method);
+    if (strcmp("sub", operation) == 0)
+      return this->method("__sub", method);
+    if (strcmp("mul", operation) == 0)
+      return this->method("__mul", method);
+    if (strcmp("div", operation) == 0)
+      return this->method("__div", method);
+
+    fail("Unable to expose operation '%s' (unknown or unsupported operation!)", operation);
+    return *this;
+  }
+
+  butane::Script::Type& Script::Type::method(
+    const char* name,
+    Method method )
+  {
+    assert(name != nullptr);
+    assert(method != nullptr);
+
+    lua_pushlightuserdata(((Script&)_script)._state, (void*)&_script);
+    lua_pushlightuserdata(((Script&)_script)._state, (void*)method);
+    lua_pushcclosure(((Script&)_script)._state, &Type::__forwarding_closure, 2);
+    lua_setfield(((Script&)_script)._state, -2, name);
+
+    return *this;
+  }
+
+  void Script::Type::expose(
+    const char* name )
+  {
+    assert(name != nullptr);
+
+    const char* qn /* qualified_name */ =
+      Script::__qualified_name(((Script&)_script)._state, name);
+
+    if (!qn) {
+      fail("Unable to expose '%s' (unable to qualify name!)", name);
+      return; }
+
+    lua_insert(((Script&)_script)._state, -2);
+    lua_pushvalue(((Script&)_script)._state, -1);
+    lua_setmetatable(((Script&)_script)._state, -1);
+    lua_setfield(((Script&)_script)._state, -2, name);
+    lua_pop(((Script&)_script)._state, 1);
+
+    make_delete(Type, Allocators::heap(), this);
+  }
+} // Lua
+} // butanes
 
 namespace butane {
 namespace Lua {
@@ -267,9 +475,8 @@ namespace Lua {
     };
 
     for (const luaL_Reg* lib = &libs[0]; lib->func; ++lib) {
-      lua_pushcfunction(_state, lib->func);
-      lua_pushstring(_state, lib->name);
-      lua_call(_state, 1, 0);
+      luaL_requiref(_state, lib->name, lib->func, 1);
+      lua_pop(_state, 1);
     }
   }
 
@@ -354,7 +561,7 @@ namespace Lua {
     assert(code_len != 0);
 
     if (luaL_loadbuffer(_state, (const char*)code, code_len, name) != 0) {
-      warn("luaL_loadbuffer failed: %s\n", lua_tostring(_state, -1));
+      warn("luaL_loadbuffer failed:\n\n%s\n", lua_tostring(_state, -1));
       lua_pop(_state, 1);
       return false; }
 
@@ -417,6 +624,39 @@ namespace Lua {
     return call(name.raw(), num_of_arguments, num_of_returns);
   }
 
+  butane::Script::Type& Script::type(
+    Type::Constructor ctor,
+    Type::Destructor dtor )
+  {
+    assert(ctor != nullptr);
+    assert(dtor != nullptr);
+
+    lua_createtable(_state, 0, 4);
+
+    lua_pushlightuserdata(_state, (void*)this);
+    lua_pushlightuserdata(_state, (void*)ctor);
+    lua_pushvalue(_state, -3);
+    lua_pushcclosure(_state, &Type::__ctor, 3);
+    lua_setfield(_state, -2, "__call");
+
+    lua_pushlightuserdata(_state, (void*)this);
+    lua_pushlightuserdata(_state, (void*)dtor);
+    lua_pushcclosure(_state, &Type::__dtor, 2);
+    lua_setfield(_state, -2, "__gc");
+
+    lua_pushlightuserdata(_state, (void*)this);
+    lua_pushvalue(_state, -2);
+    lua_pushcclosure(_state, &Type::__get, 2);
+    lua_setfield(_state, -2, "__index");
+
+    lua_pushlightuserdata(_state, (void*)this);
+    lua_pushvalue(_state, -2);
+    lua_pushcclosure(_state, &Type::__set, 2);
+    lua_setfield(_state, -2, "__newindex");
+
+    return *(make_new(Type, Allocators::heap())(*this));
+  }
+
   void Script::expose(
     const char* name,
     Function function )
@@ -428,7 +668,7 @@ namespace Lua {
       Script::__qualified_name(_state, name);
 
     if (!qn) {
-      error("Unable to expose '%s' (unable to qualify name!)", name);
+      fail("Unable to expose '%s' (unable to qualify name!)", name);
       return; }
 
     lua_pushstring(_state, qn);
@@ -457,6 +697,10 @@ namespace Lua {
     if (!qn) {
       error("Unable to set '%s' (unable to qualify name!)", name);
       return; }
+
+    lua_pushnil(_state);
+    lua_setfield(_state, -2, qn);
+    lua_pop(_state, 1);
   }
 
   void Script::set(
@@ -472,7 +716,7 @@ namespace Lua {
       error("Unable to set '%s' (unable to qualify name!)", name);
       return; }
 
-    lua_pushnil(_state);
+    lua_pushlightuserdata(_state, ptr);
     lua_setfield(_state, -2, qn);
     lua_pop(_state, 1);
   }

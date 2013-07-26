@@ -22,6 +22,7 @@ namespace Lua {
     private:
       friend class Stack;
       friend class Arguments;
+      friend class Type;
 
     private:
       class Stack final
@@ -86,6 +87,10 @@ namespace Lua {
 
           void pop(
             Function& function ) const override;
+
+          void push(
+            const char* type,
+            void* ptr ) const override;
       };
 
       class Arguments final
@@ -123,6 +128,62 @@ namespace Lua {
 
           void to(
             size_t arg, String& string ) const override;
+
+          void to(
+            size_t arg, const char* type, void*& ptr ) const override;
+      };
+
+      class Type final
+        : public butane::Script::Type
+      {
+        __foundation_trait(Type, non_copyable);
+
+        public:
+          Type(
+            Script& script );
+
+          ~Type();
+
+        public:
+          static int __ctor(
+            lua_State* state );
+
+          static int __dtor(
+            lua_State* state );
+
+          static int __forwarding_closure(
+            lua_State* state );
+
+          static int __get(
+            lua_State* state );
+
+          static int __set(
+            lua_State* state );
+
+        public:
+          butane::Script::Type& getter(
+            const char* member,
+            Getter getter ) override;
+
+          butane::Script::Type& setter(
+            const char* member,
+            Setter setter ) override;
+
+          butane::Script::Type& accessors(
+            const char* member,
+            Getter getter,
+            Setter setter ) override;
+
+          butane::Script::Type& operation(
+            const char* operation,
+            Operator method ) override;
+
+          butane::Script::Type& method(
+            const char* name,
+            Method method ) override;
+
+          void expose(
+            const char* name ) override;
       };
 
     public:
@@ -179,6 +240,10 @@ namespace Lua {
         const String& name,
         size_t num_of_arguments,
         size_t& num_of_returns ) override;
+
+      butane::Script::Type& type(
+        Type::Constructor ctor,
+        Type::Destructor dtor ) override;
 
       void expose(
         const char* name,

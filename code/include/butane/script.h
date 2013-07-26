@@ -13,6 +13,7 @@ namespace butane {
     public:
       class Stack;
       class Arguments;
+      class Type;
 
     public:
       // A C/C++ function that can be exposed to the script.
@@ -96,6 +97,10 @@ namespace butane {
           virtual void pop(
             Function& function ) const = 0;
 
+          virtual void push(
+            const char* type,
+            void* ptr ) const = 0;
+
         protected:
           Script& _script;
       };
@@ -136,6 +141,71 @@ namespace butane {
 
           virtual void to(
             size_t arg, String& string ) const = 0;
+
+          virtual void to(
+            size_t arg, const char* type, void*& ptr ) const = 0;
+
+        protected:
+          Script& _script;
+      };
+
+      class Type abstract {
+        __foundation_trait(Type, non_copyable);
+
+        public:
+          // A C/C++ function that is used to construct an instance a type.
+          typedef void* (*Constructor)(
+            Script& script,
+            const Script::Arguments& arguments );
+
+          // A C/C++ function that is used to destruct an instance of a type.
+          typedef void (*Destructor)(
+            Script& script,
+            void* self );
+
+          // A C/C++ funcation that operates on an instance.
+          typedef size_t (*Method)(
+            Script& script,
+            void* self,
+            const Script::Arguments& arguments );
+
+          typedef Method Operator;
+          typedef Method Getter;
+          typedef Method Setter;
+
+        protected:
+          Type(
+            Script& script
+          ) : _script(script)
+          {}
+
+          virtual ~Type()
+          {}
+
+        public:
+          virtual Type& getter(
+            const char* member,
+            Getter getter ) = 0;
+
+          virtual Type& setter(
+            const char* member,
+            Setter setter ) = 0;
+
+          virtual Type& accessors(
+            const char* member,
+            Getter getter,
+            Setter setter ) = 0;
+
+          virtual Type& operation(
+            const char* operation,
+            Operator method ) = 0;
+
+          virtual Type& method(
+            const char* name,
+            Method method ) = 0;
+
+          virtual void expose(
+            const char* name ) = 0;
 
         protected:
           Script& _script;
@@ -178,6 +248,10 @@ namespace butane {
         const String& name,
         size_t num_of_arguments,
         size_t& num_of_returns ) = 0;
+
+      virtual Type& type(
+        Type::Constructor ctor,
+        Type::Destructor dtor ) = 0;
 
       virtual void expose(
         const char* name,
