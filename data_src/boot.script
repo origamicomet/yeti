@@ -12,3 +12,31 @@ end
 
 function render()
 end
+
+epsilon = 2 ^ -52
+
+zero = Vec2()
+assert(math.abs(0 - zero.x) <= epsilon)
+assert(math.abs(0 - zero.y) <= epsilon)
+one = Vec2(1, 1)
+sum = zero + one
+assert(math.abs(1 - sum.x) <= epsilon)
+assert(math.abs(1 - sum.y) <= epsilon)
+diff = zero - one
+assert(math.abs(-1 - diff.x) <= epsilon)
+assert(math.abs(-1 - diff.y) <= epsilon)
+product = zero * one
+assert(math.abs(0 - product.x) <= epsilon)
+assert(math.abs(0 - product.y) <= epsilon)
+quotient = zero / one
+assert(math.abs(0 - quotient.x) <= epsilon)
+assert(math.abs(0 - quotient.y) <= epsilon)
+x_axis = Vec2()
+x_axis.x = 1.0
+assert(math.abs(1 - x_axis.x) <= epsilon)
+assert(math.abs(0 - x_axis.y) <= epsilon)
+y_axis = Vec2()
+y_axis.y = 1.0
+assert(math.abs(0 - y_axis.x) <= epsilon)
+assert(math.abs(1 - y_axis.y) <= epsilon)
+log("Vec2: pass")

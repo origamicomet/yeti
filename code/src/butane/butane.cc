@@ -5,6 +5,7 @@
 
 #include <butane/script.h>
 #include <butane/application_if.h>
+#include <butane/math_if.h>
 
 namespace butane {
   namespace script_interface {
@@ -16,7 +17,7 @@ namespace butane {
       if (arguments == 0)
         return 0;
       const char* msg;
-        arguments.to(1, msg);
+        arguments.to(0, msg);
       LogScope log_scope("Script");
       foundation::log("%s", msg);
       return 0;
@@ -30,7 +31,7 @@ namespace butane {
       if (arguments == 0)
         return 0;
       const char* msg;
-        arguments.to(1, msg);
+        arguments.to(0, msg);
       LogScope log_scope("Script");
       butane::warn("%s", msg);
       return 0;
@@ -44,7 +45,7 @@ namespace butane {
       if (arguments == 0)
         butane::fail("Unspecified failure.");
       const char* msg;
-        arguments.to(1, msg);
+        arguments.to(0, msg);
       LogScope log_scope("Script");
       butane::fail("%s", msg);
       __builtin_unreachable();
@@ -62,5 +63,6 @@ namespace butane {
     script.expose("fail", &script_interface::fail);
 
     Application::expose(script);
+    Math::expose(script);
   }
 } // butane

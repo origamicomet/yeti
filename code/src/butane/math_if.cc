@@ -1,0 +1,235 @@
+// This file is part of Butane. See README.md and LICENSE.md for details.
+// Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
+
+#include <butane/math_if.h>
+#include <butane/math.h>
+
+namespace butane {
+namespace Math {
+  struct Temporary {
+    private:
+      static Allocator& __allocator_initializer();
+      static const thread_safe::Static< Allocator > __ts_allocator;
+
+    public:
+      static Allocator& allocator();
+
+    public:
+      FOUNDATION_INLINE Vec2f& vec2()
+      { return *((Vec2f*)&as.vec2[0]); }
+
+      FOUNDATION_INLINE Vec3f& vec3()
+      { return *((Vec3f*)&as.vec3[0]); }
+
+      FOUNDATION_INLINE Vec4f& vec4()
+      { return *((Vec4f*)&as.vec4[0]); }
+
+      FOUNDATION_INLINE Quatf& quat()
+      { return *((Quatf*)&as.quat[0]); }
+
+    private:
+      union {
+        uint8_t vec2[sizeof(Vec2f)];
+        uint8_t vec3[sizeof(Vec3f)];
+        uint8_t vec4[sizeof(Vec4f)];
+        uint8_t quat[sizeof(Quatf)];
+      } as;
+  };
+
+  Allocator& Temporary::__allocator_initializer() {
+    static ProxyAllocator allocator("math temporaries", Allocators::heap());
+    return allocator;
+  }
+
+  const thread_safe::Static< Allocator >
+    Temporary::__ts_allocator(__allocator_initializer);
+
+  Allocator& Temporary::allocator() {
+    return __ts_allocator();
+  }
+} // Math
+} // butane
+
+namespace butane {
+  namespace script_interface {
+    static Array<Math::Temporary>& temporaries(
+      const Script& script )
+    {
+      void* temporaries; {
+        script.get("__math_if__temporaries", temporaries); }
+      return *((Array<Math::Temporary>*)temporaries);
+    }
+
+    static Math::Temporary* temporary(
+      const Script& script )
+    {
+      if (temporaries(script).size() == temporaries(script).reserved())
+        script.error("Reached maximum number of temporaries (%u).", BT_SCRIPT_MAXIMUM_NUM_OF_TEMPORARY_MATH_OBJECTS);
+      return &temporaries(script)[temporaries(script).size()];
+    }
+
+    namespace Vec2 {
+      static void* ctor(
+        Script& script,
+        const Script::Arguments& arguments )
+      {
+        float x, y;
+        switch ((size_t)arguments) {
+          case 0:
+            x = y = 0.0f;
+            break;
+          case 2:
+            arguments.to(0, x);
+            arguments.to(1, y);
+            break;
+          default:
+            script.error("Expected zero or two arguments ([x : Number, y : Number]).");
+        }
+
+        Math::Temporary* v = temporary(script);
+        v->vec2().x = x;
+        v->vec2().y = y;
+        return (void*)v;
+      }
+
+      static void dtor(
+        Script& script,
+        void* self )
+      {
+      }
+
+      static size_t add(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (addend : Vec2).");
+        Math::Temporary* addend;
+        arguments.to(0, "Vec2", (void*&)addend);
+        Math::Temporary* sum = temporary(script);
+        sum->vec2() = ((Math::Temporary*)self)->vec2() + addend->vec2();
+        script.stack().push("Vec2", (void*)sum);
+        return 1;
+      }
+
+      static size_t sub(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (subtrahend : Vec2).");
+        Math::Temporary* subtrahend;
+        arguments.to(0, "Vec2", (void*&)subtrahend);
+        Math::Temporary* difference = temporary(script);
+        difference->vec2() = ((Math::Temporary*)self)->vec2() - subtrahend->vec2();
+        script.stack().push("Vec2", (void*)difference);
+        return 1;
+      }
+
+      static size_t mul(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (factor : Vec2).");
+        Math::Temporary* factor;
+        arguments.to(0, "Vec2", (void*&)factor);
+        Math::Temporary* product = temporary(script);
+        product->vec2() = ((Math::Temporary*)self)->vec2() * factor->vec2();
+        script.stack().push("Vec2", (void*)product);
+        return 1;
+      }
+
+      static size_t div(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (divisor : Vec2).");
+        Math::Temporary* divisor;
+        arguments.to(0, "Vec2", (void*&)divisor);
+        Math::Temporary* quotient = temporary(script);
+        quotient->vec2() = ((Math::Temporary*)self)->vec2() / divisor->vec2();
+        script.stack().push("Vec2", (void*)quotient);
+        return 1;
+      }
+
+      static size_t x(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec2().x);
+        return 1;
+      }
+
+      static size_t set_x(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->vec2().x);
+        return 1;
+      }
+
+      static size_t y(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec2().y);
+        return 1;
+      }
+
+      static size_t set_y(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->vec2().y);
+        return 1;
+      }
+    } // Vec2
+
+    static void on_destruction(
+      const Script& script )
+    {
+      void* temporaries; {
+        script.get("__math_if__temporaries", temporaries); }
+      make_delete(Array, Math::Temporary::allocator(), ((Array<Math::Temporary>*)temporaries));
+    }
+  } // script_interface
+} // butane
+
+namespace butane {
+namespace Math {
+  void expose(
+    butane::Script& script )
+  {
+    script.set(
+      "__math_if__temporaries",
+      (void*)(make_new(Array<Math::Temporary>, Math::Temporary::allocator())(
+        Math::Temporary::allocator(),
+        BT_SCRIPT_MAXIMUM_NUM_OF_TEMPORARY_MATH_OBJECTS)));
+
+    script.on_destruction(&script_interface::on_destruction);
+
+    script.type(&script_interface::Vec2::ctor, &script_interface::Vec2::dtor)
+      .operation("add", &script_interface::Vec2::add)
+      .operation("sub", &script_interface::Vec2::sub)
+      .operation("mul", &script_interface::Vec2::mul)
+      .operation("div", &script_interface::Vec2::div)
+      // .getter("length", &script_interface::Vec2::length)
+      // .getter("magnitude", &script_interface::Vec2::magnitude)
+      // .method("dot", &script_interface::Vec2::dot)
+      // .method("normalize", &script_interface::Vec2::normalize)
+      .accessors("x", &script_interface::Vec2::x, &script_interface::Vec2::set_x)
+      .accessors("y", &script_interface::Vec2::y, &script_interface::Vec2::set_y)
+    .expose("Vec2");
+  }
+} // Math
+} // butane
