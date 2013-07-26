@@ -8,6 +8,7 @@
 #include <butane/script/lua.h>
 #include <butane/resource.h>
 #include <butane/resources/config.h>
+#include <butane/resources/script.h>
 #include <butane/render_config.h>
 #include <butane/tied_resources.h>
 #include <butane/window.h>
@@ -206,6 +207,17 @@ namespace Application {
 
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
+
+    Lua::Script script; {
+      const char* path;
+      if (!manifest->find("application.boot.script", path))
+        fail("Expected `application.boot.script` to be specified!");
+      const Resource::Id id = Resource::Id(ScriptResource::type(), path);
+      Resource::Handle<ScriptResource> resource = id;
+      butane::expose(script);
+      if (!script.load(path, resource->byte_code().raw(), resource->byte_code().size()))
+        fail("Failed to load boot script!");
+    }
 
     Window* window; {
       String title = String(Allocators::scratch());
