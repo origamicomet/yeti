@@ -18,7 +18,11 @@ epsilon = 2 ^ -52
 zero = Vec2()
 assert(math.abs(0 - zero.x) <= epsilon)
 assert(math.abs(0 - zero.y) <= epsilon)
+assert(math.abs(0 - zero.length) <= epsilon)
+assert(math.abs(0 - zero.magnitude) <= epsilon)
 one = Vec2(1, 1)
+assert(((one.length > 1.41) and (one.length < 1.42)))
+assert(((one.magnitude > 1.41) and (one.length < 1.42)))
 sum = zero + one
 assert(math.abs(1 - sum.x) <= epsilon)
 assert(math.abs(1 - sum.y) <= epsilon)

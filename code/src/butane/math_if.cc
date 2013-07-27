@@ -158,6 +158,51 @@ namespace butane {
         return 1;
       }
 
+      static size_t length(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec2().length());
+        return 1;
+      }
+
+      static size_t magnitude(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec2().magnitude());
+        return 1;
+      }
+
+      static size_t dot(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (term : Vec2).");
+        Math::Temporary* term;
+        arguments.to(0, "Vec2", (void*&)term);
+        Math::Temporary* dp = temporary(script);
+        script.stack().push(((Math::Temporary*)self)->vec2().dot(term->vec2()));
+        return 1;
+      }
+
+      static size_t normalize(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 0)
+          script.error("Expected no arguments.");
+        Math::Temporary* normalized = temporary(script);
+        normalized->vec2() = ((Math::Temporary*)self)->vec2().normalize();
+        script.stack().push("Vec2", (void*)normalized);
+        return 1;
+      }
+
       static size_t x(
         Script& script,
         void* self,
@@ -223,10 +268,10 @@ namespace Math {
       .operation("sub", &script_interface::Vec2::sub)
       .operation("mul", &script_interface::Vec2::mul)
       .operation("div", &script_interface::Vec2::div)
-      // .getter("length", &script_interface::Vec2::length)
-      // .getter("magnitude", &script_interface::Vec2::magnitude)
-      // .method("dot", &script_interface::Vec2::dot)
-      // .method("normalize", &script_interface::Vec2::normalize)
+      .getter("length", &script_interface::Vec2::length)
+      .getter("magnitude", &script_interface::Vec2::magnitude)
+      .method("dot", &script_interface::Vec2::dot)
+      .method("normalize", &script_interface::Vec2::normalize)
       .accessors("x", &script_interface::Vec2::x, &script_interface::Vec2::set_x)
       .accessors("y", &script_interface::Vec2::y, &script_interface::Vec2::set_y)
     .expose("Vec2");
