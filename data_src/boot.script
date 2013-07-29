@@ -91,6 +91,63 @@ function unit_tests.Vec3()
   assert(math.abs(1 - z_axis.z) <= epsilon)
 end
 
+function unit_tests.Vec4()
+  zero = Vec4()
+  assert(math.abs(0 - zero.x) <= epsilon)
+  assert(math.abs(0 - zero.y) <= epsilon)
+  assert(math.abs(0 - zero.z) <= epsilon)
+  assert(math.abs(0 - zero.w) <= epsilon)
+  assert(math.abs(0 - zero.length) <= epsilon)
+  assert(math.abs(0 - zero.magnitude) <= epsilon)
+  one = Vec4(1, 1, 1, 1)
+  assert(math.abs(2 - one.length) <= epsilon)
+  assert(math.abs(2 - one.magnitude) <= epsilon)
+  sum = zero + one
+  assert(math.abs(1 - sum.x) <= epsilon)
+  assert(math.abs(1 - sum.y) <= epsilon)
+  assert(math.abs(1 - sum.z) <= epsilon)
+  assert(math.abs(1 - sum.w) <= epsilon)
+  diff = zero - one
+  assert(math.abs(-1 - diff.x) <= epsilon)
+  assert(math.abs(-1 - diff.y) <= epsilon)
+  assert(math.abs(-1 - diff.z) <= epsilon)
+  assert(math.abs(-1 - diff.w) <= epsilon)
+  product = zero * one
+  assert(math.abs(0 - product.x) <= epsilon)
+  assert(math.abs(0 - product.y) <= epsilon)
+  assert(math.abs(0 - product.z) <= epsilon)
+  assert(math.abs(0 - product.w) <= epsilon)
+  quotient = zero / one
+  assert(math.abs(0 - quotient.x) <= epsilon)
+  assert(math.abs(0 - quotient.y) <= epsilon)
+  assert(math.abs(0 - quotient.z) <= epsilon)
+  assert(math.abs(0 - quotient.w) <= epsilon)
+  x_axis = Vec4()
+  x_axis.x = 1.0
+  assert(math.abs(1 - x_axis.x) <= epsilon)
+  assert(math.abs(0 - x_axis.y) <= epsilon)
+  assert(math.abs(0 - x_axis.z) <= epsilon)
+  assert(math.abs(0 - x_axis.w) <= epsilon)
+  y_axis = Vec4()
+  y_axis.y = 1.0
+  assert(math.abs(0 - y_axis.x) <= epsilon)
+  assert(math.abs(1 - y_axis.y) <= epsilon)
+  assert(math.abs(0 - y_axis.z) <= epsilon)
+  assert(math.abs(0 - y_axis.w) <= epsilon)
+  z_axis = Vec4()
+  z_axis.z = 1.0
+  assert(math.abs(0 - z_axis.x) <= epsilon)
+  assert(math.abs(0 - z_axis.y) <= epsilon)
+  assert(math.abs(1 - z_axis.z) <= epsilon)
+  assert(math.abs(0 - z_axis.w) <= epsilon)
+  w_axis = Vec4()
+  w_axis.w = 1.0
+  assert(math.abs(0 - w_axis.x) <= epsilon)
+  assert(math.abs(0 - w_axis.y) <= epsilon)
+  assert(math.abs(0 - w_axis.z) <= epsilon)
+  assert(math.abs(1 - w_axis.w) <= epsilon)
+end
+
 for name, test in pairs(unit_tests) do
   local status, err = pcall(test)
   if status then

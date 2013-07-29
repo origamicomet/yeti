@@ -445,6 +445,217 @@ namespace butane {
       }
     } // Vec3
 
+    namespace Vec4 {
+      static void* ctor(
+        Script& script,
+        const Script::Arguments& arguments )
+      {
+        float x, y, z, w;
+        switch ((size_t)arguments) {
+          case 0:
+            x = y = z = w = 0.0f;
+            break;
+          case 4:
+            arguments.to(0, x);
+            arguments.to(1, y);
+            arguments.to(2, z);
+            arguments.to(3, w);
+            break;
+          default:
+            script.error("Expected zero or four arguments ([x : Number, y : Number, z : Number, w : Number]).");
+        }
+
+        Math::Temporary* v = temporary(script);
+        v->vec4().x = x;
+        v->vec4().y = y;
+        v->vec4().z = z;
+        v->vec4().w = w;
+        return (void*)v;
+      }
+
+      static void dtor(
+        Script& script,
+        void* self )
+      {
+      }
+
+      static size_t add(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (addend : Vec4).");
+        Math::Temporary* addend;
+        arguments.to(0, "Vec4", (void*&)addend);
+        Math::Temporary* sum = temporary(script);
+        sum->vec4() = ((Math::Temporary*)self)->vec4() + addend->vec4();
+        script.stack().push("Vec4", (void*)sum);
+        return 1;
+      }
+
+      static size_t sub(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (subtrahend : Vec4).");
+        Math::Temporary* subtrahend;
+        arguments.to(0, "Vec4", (void*&)subtrahend);
+        Math::Temporary* difference = temporary(script);
+        difference->vec4() = ((Math::Temporary*)self)->vec4() - subtrahend->vec4();
+        script.stack().push("Vec4", (void*)difference);
+        return 1;
+      }
+
+      static size_t mul(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (factor : Vec4).");
+        Math::Temporary* factor;
+        arguments.to(0, "Vec4", (void*&)factor);
+        Math::Temporary* product = temporary(script);
+        product->vec4() = ((Math::Temporary*)self)->vec4() * factor->vec4();
+        script.stack().push("Vec4", (void*)product);
+        return 1;
+      }
+
+      static size_t div(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (divisor : Vec4).");
+        Math::Temporary* divisor;
+        arguments.to(0, "Vec4", (void*&)divisor);
+        Math::Temporary* quotient = temporary(script);
+        quotient->vec4() = ((Math::Temporary*)self)->vec4() / divisor->vec4();
+        script.stack().push("Vec4", (void*)quotient);
+        return 1;
+      }
+
+      static size_t length(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec4().length());
+        return 1;
+      }
+
+      static size_t magnitude(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec4().magnitude());
+        return 1;
+      }
+
+      static size_t dot(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (term : Vec4).");
+        Math::Temporary* term;
+        arguments.to(0, "Vec4", (void*&)term);
+        script.stack().push(((Math::Temporary*)self)->vec4().dot(term->vec4()));
+        return 1;
+      }
+
+      static size_t normalize(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 0)
+          script.error("Expected no arguments.");
+        Math::Temporary* normalized = temporary(script);
+        normalized->vec4() = ((Math::Temporary*)self)->vec4().normalize();
+        script.stack().push("Vec4", (void*)normalized);
+        return 1;
+      }
+
+      static size_t x(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec4().x);
+        return 1;
+      }
+
+      static size_t set_x(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->vec4().x);
+        return 1;
+      }
+
+      static size_t y(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec4().y);
+        return 1;
+      }
+
+      static size_t set_y(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->vec4().y);
+        return 1;
+      }
+
+      static size_t z(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec4().z);
+        return 1;
+      }
+
+      static size_t set_z(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->vec4().z);
+        return 1;
+      }
+
+      static size_t w(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->vec4().w);
+        return 1;
+      }
+
+      static size_t set_w(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->vec4().w);
+        return 1;
+      }
+    } // Vec4
+
     static void on_destruction(
       const Script& script )
     {
@@ -495,6 +706,21 @@ namespace Math {
       .accessors("y", &script_interface::Vec3::y, &script_interface::Vec3::set_y)
       .accessors("z", &script_interface::Vec3::z, &script_interface::Vec3::set_z)
     .expose("Vec3");
+
+    script.type(&script_interface::Vec4::ctor, &script_interface::Vec4::dtor)
+      .operation("add", &script_interface::Vec4::add)
+      .operation("sub", &script_interface::Vec4::sub)
+      .operation("mul", &script_interface::Vec4::mul)
+      .operation("div", &script_interface::Vec4::div)
+      .getter("length", &script_interface::Vec4::length)
+      .getter("magnitude", &script_interface::Vec4::magnitude)
+      .method("dot", &script_interface::Vec4::dot)
+      .method("normalize", &script_interface::Vec4::normalize)
+      .accessors("x", &script_interface::Vec4::x, &script_interface::Vec4::set_x)
+      .accessors("y", &script_interface::Vec4::y, &script_interface::Vec4::set_y)
+      .accessors("z", &script_interface::Vec4::z, &script_interface::Vec4::set_z)
+      .accessors("w", &script_interface::Vec4::w, &script_interface::Vec4::set_w)
+    .expose("Vec4");
   }
 } // Math
 } // butane
