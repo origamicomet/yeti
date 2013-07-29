@@ -15,6 +15,7 @@ namespace butane {
   class SwapChain;
   class TiedResources;
   class World;
+  class TimeStepPolicy;
 namespace Application {
   /*! */
   extern BUTANE_EXPORT RenderDevice* render_device();
@@ -47,6 +48,13 @@ namespace Application {
 
   /*! */
   extern BUTANE_EXPORT Array<World*>& worlds();
+
+  /*! */
+  extern BUTANE_EXPORT TimeStepPolicy& time_step_policy();
+
+  /*! */
+  extern BUTANE_EXPORT void set_time_step_policy(
+    TimeStepPolicy& time_step_policy );
 
   /*! */
   extern BUTANE_EXPORT void boot(

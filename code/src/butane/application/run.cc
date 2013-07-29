@@ -24,6 +24,7 @@
 #include <butane/task.h>
 #include <butane/console.h>
 #include <butane/world.h>
+#include <butane/time_step_policy.h>
 
 namespace butane {
 namespace Application {
@@ -102,6 +103,17 @@ namespace Application {
 
   Array<World*>& worlds()
   { return __ts_worlds(); }
+
+  static TimeStepPolicy _time_step_policy = TimeStepPolicy::variable();
+
+  TimeStepPolicy& time_step_policy()
+  { return _time_step_policy; }
+
+  void set_time_step_policy(
+    TimeStepPolicy& time_step_policy )
+  {
+    _time_step_policy = time_step_policy;
+  }
 
   static void create_or_update_global_resources()
   {
@@ -298,9 +310,20 @@ namespace Application {
     window->set_on_closed_handler(&on_window_closed);
     window->show();
 
+    Timer timer;
     while (true) {
-      window->update();
-      world->update(1.0f / 60.0f);
+      size_t num_of_steps;
+      float delta_time_per_step;
+      time_step_policy().frame(
+        timer.microseconds() / 1000000.0f,
+        num_of_steps,
+        delta_time_per_step);
+      timer.reset();
+      log("num_of_steps = %u, delta_time_per_step = %f", num_of_steps, delta_time_per_step);
+      for (auto iter = windows().begin(); iter != windows().end(); ++iter)
+        (*iter).value->update();
+      for (size_t step = 0; step < num_of_steps; ++step)
+        world->update(delta_time_per_step);
       world->render(camera, tied_resources()[0]);
     }
   }
