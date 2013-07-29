@@ -121,6 +121,29 @@ namespace butane {
           virtual operator size_t() const = 0;
 
         public:
+          virtual bool is_nil(
+            size_t arg ) const = 0;
+
+          virtual bool is_pointer(
+            size_t arg ) const = 0;
+
+          virtual bool is_boolean(
+            size_t arg ) const = 0;
+
+          virtual bool is_integer(
+            size_t arg ) const = 0;
+
+          virtual bool is_number(
+            size_t arg ) const = 0;
+
+          virtual bool is_string(
+            size_t arg ) const = 0;
+
+          virtual bool is_type(
+            size_t arg,
+            const char* type ) const = 0;
+
+        public:
           virtual void to(
             size_t arg, void*& ptr ) const = 0;
 

@@ -184,6 +184,71 @@ namespace Lua {
     return (size_t)lua_gettop(((Script&)_script)._state);
   }
 
+  bool Script::Arguments::is_nil(
+    size_t arg ) const
+  {
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_isnil(script._state, arg + 1);
+  }
+
+  bool Script::Arguments::is_pointer(
+    size_t arg ) const
+  {
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_islightuserdata(script._state, arg + 1);
+  }
+
+  bool Script::Arguments::is_boolean(
+    size_t arg ) const
+  {
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_isboolean(script._state, arg + 1);
+  }
+
+  bool Script::Arguments::is_integer(
+    size_t arg ) const
+  {
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_isnumber(script._state, arg + 1);
+  }
+
+  bool Script::Arguments::is_number(
+    size_t arg ) const
+  {
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_isnumber(script._state, arg + 1);
+  }
+
+  bool Script::Arguments::is_string(
+    size_t arg ) const
+  {
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_isstring(script._state, arg + 1);
+  }
+
+  bool Script::Arguments::is_type(
+    size_t arg,
+    const char* type ) const
+  {
+    assert(type != nullptr);
+    Script& script = ((Script&)_script);
+    if (arg >= lua_gettop(script._state))
+      script.error("Trying to access undefined argument!");
+    return lua_isuserdata(script._state, arg + 1);
+  }
+
   void Script::Arguments::to(
     size_t arg, void*& ptr ) const
   {

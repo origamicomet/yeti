@@ -108,6 +108,29 @@ namespace Lua {
           operator size_t() const override;
 
         public:
+          bool is_nil(
+            size_t arg ) const override;
+
+          bool is_pointer(
+            size_t arg ) const override;
+
+          bool is_boolean(
+            size_t arg ) const override;
+
+          bool is_integer(
+            size_t arg ) const override;
+
+          bool is_number(
+            size_t arg ) const override;
+
+          bool is_string(
+            size_t arg ) const override;
+
+          bool is_type(
+            size_t arg,
+            const char* type ) const override;
+
+        public:
           void to(
             size_t arg, void*& ptr ) const override;
 
