@@ -134,13 +134,22 @@ namespace butane {
         const Script::Arguments& arguments )
       {
         if (arguments != 1)
-          script.error("Expected one argument (factor : Vec2).");
-        Math::Temporary* factor;
-        arguments.to(0, "Vec2", (void*&)factor);
+          goto invalid_arguments;
         Math::Temporary* product = temporary(script);
-        product->vec2() = ((Math::Temporary*)self)->vec2() * factor->vec2();
+        if (arguments.is_type(0, "Vec2")) {
+          Math::Temporary* factor;
+          arguments.to(0, "Vec2", (void*&)factor);
+          product->vec2() = ((Math::Temporary*)self)->vec2() * factor->vec2();
+        } else if(arguments.is_number(0)) {
+          float factor;
+          arguments.to(0, factor);
+          product->vec2() = ((Math::Temporary*)self)->vec2() * factor;
+        } else
+          goto invalid_arguments;
         script.stack().push("Vec2", (void*)product);
         return 1;
+      invalid_arguments:
+        script.error("Expected one argument (factor : Number, Vec2).");
       }
 
       static size_t div(
@@ -149,13 +158,23 @@ namespace butane {
         const Script::Arguments& arguments )
       {
         if (arguments != 1)
-          script.error("Expected one argument (divisor : Vec2).");
-        Math::Temporary* divisor;
-        arguments.to(0, "Vec2", (void*&)divisor);
+          goto invalid_arguments;
         Math::Temporary* quotient = temporary(script);
-        quotient->vec2() = ((Math::Temporary*)self)->vec2() / divisor->vec2();
+
+        if (arguments.is_type(0, "Vec2")) {
+          Math::Temporary* divisor;
+          arguments.to(0, "Vec2", (void*&)divisor);
+          quotient->vec2() = ((Math::Temporary*)self)->vec2() / divisor->vec2();
+        } else if(arguments.is_number(0)) {
+          float divisor;
+          arguments.to(0, divisor);
+          quotient->vec2() = ((Math::Temporary*)self)->vec2() / divisor;
+        } else
+          goto invalid_arguments;
         script.stack().push("Vec2", (void*)quotient);
         return 1;
+      invalid_arguments:
+        script.error("Expected one argument (divisor : Number, Vec2).");
       }
 
       static size_t length(
@@ -307,13 +326,22 @@ namespace butane {
         const Script::Arguments& arguments )
       {
         if (arguments != 1)
-          script.error("Expected one argument (factor : Vec3).");
-        Math::Temporary* factor;
-        arguments.to(0, "Vec3", (void*&)factor);
+          goto invalid_arguments;
         Math::Temporary* product = temporary(script);
-        product->vec3() = ((Math::Temporary*)self)->vec3() * factor->vec3();
+        if (arguments.is_type(0, "Vec3")) {
+          Math::Temporary* factor;
+          arguments.to(0, "Vec3", (void*&)factor);
+          product->vec3() = ((Math::Temporary*)self)->vec3() * factor->vec3();
+        } else if(arguments.is_number(0)) {
+          float factor;
+          arguments.to(0, factor);
+          product->vec3() = ((Math::Temporary*)self)->vec3() * factor;
+        } else
+          goto invalid_arguments;
         script.stack().push("Vec3", (void*)product);
         return 1;
+      invalid_arguments:
+        script.error("Expected one argument (factor : Number, Vec3).");
       }
 
       static size_t div(
@@ -322,13 +350,23 @@ namespace butane {
         const Script::Arguments& arguments )
       {
         if (arguments != 1)
-          script.error("Expected one argument (divisor : Vec3).");
-        Math::Temporary* divisor;
-        arguments.to(0, "Vec3", (void*&)divisor);
+          goto invalid_arguments;
         Math::Temporary* quotient = temporary(script);
-        quotient->vec3() = ((Math::Temporary*)self)->vec3() / divisor->vec3();
+
+        if (arguments.is_type(0, "Vec3")) {
+          Math::Temporary* divisor;
+          arguments.to(0, "Vec3", (void*&)divisor);
+          quotient->vec3() = ((Math::Temporary*)self)->vec3() / divisor->vec3();
+        } else if(arguments.is_number(0)) {
+          float divisor;
+          arguments.to(0, divisor);
+          quotient->vec3() = ((Math::Temporary*)self)->vec3() / divisor;
+        } else
+          goto invalid_arguments;
         script.stack().push("Vec3", (void*)quotient);
         return 1;
+      invalid_arguments:
+        script.error("Expected one argument (divisor : Number, Vec3).");
       }
 
       static size_t length(
@@ -515,13 +553,22 @@ namespace butane {
         const Script::Arguments& arguments )
       {
         if (arguments != 1)
-          script.error("Expected one argument (factor : Vec4).");
-        Math::Temporary* factor;
-        arguments.to(0, "Vec4", (void*&)factor);
+          goto invalid_arguments;
         Math::Temporary* product = temporary(script);
-        product->vec4() = ((Math::Temporary*)self)->vec4() * factor->vec4();
+        if (arguments.is_type(0, "Vec4")) {
+          Math::Temporary* factor;
+          arguments.to(0, "Vec4", (void*&)factor);
+          product->vec4() = ((Math::Temporary*)self)->vec4() * factor->vec4();
+        } else if(arguments.is_number(0)) {
+          float factor;
+          arguments.to(0, factor);
+          product->vec4() = ((Math::Temporary*)self)->vec4() * factor;
+        } else
+          goto invalid_arguments;
         script.stack().push("Vec4", (void*)product);
         return 1;
+      invalid_arguments:
+        script.error("Expected one argument (factor : Number, Vec4).");
       }
 
       static size_t div(
@@ -530,13 +577,23 @@ namespace butane {
         const Script::Arguments& arguments )
       {
         if (arguments != 1)
-          script.error("Expected one argument (divisor : Vec4).");
-        Math::Temporary* divisor;
-        arguments.to(0, "Vec4", (void*&)divisor);
+          goto invalid_arguments;
         Math::Temporary* quotient = temporary(script);
-        quotient->vec4() = ((Math::Temporary*)self)->vec4() / divisor->vec4();
+
+        if (arguments.is_type(0, "Vec4")) {
+          Math::Temporary* divisor;
+          arguments.to(0, "Vec4", (void*&)divisor);
+          quotient->vec4() = ((Math::Temporary*)self)->vec4() / divisor->vec4();
+        } else if(arguments.is_number(0)) {
+          float divisor;
+          arguments.to(0, divisor);
+          quotient->vec4() = ((Math::Temporary*)self)->vec4() / divisor;
+        } else
+          goto invalid_arguments;
         script.stack().push("Vec4", (void*)quotient);
         return 1;
+      invalid_arguments:
+        script.error("Expected one argument (divisor : Number, Vec4).");
       }
 
       static size_t length(
