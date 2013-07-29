@@ -15,14 +15,12 @@ namespace butane {
   { return TimeStepPolicy(); }
 
   void TimeStepPolicy::frame(
-    const float delta_time,
-    size_t& num_of_steps,
-    float& delta_time_per_step )
+    const float delta_time )
   {
     switch (_policy) {
       case VARIABLE:
-        num_of_steps = 1;
-        delta_time_per_step = delta_time;
+        _num_of_steps = 1;
+        _delta_time_per_step = delta_time;
         break;
       default:
         __builtin_unreachable();

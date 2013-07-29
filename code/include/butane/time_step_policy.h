@@ -22,9 +22,14 @@ namespace butane {
 
     public:
       void frame(
-        const float delta_time,
-        size_t& num_of_steps,
-        float& delta_time_per_step );
+        const float delta_time );
+
+    public:
+      FOUNDATION_INLINE size_t num_of_steps() const
+      { return _num_of_steps; }
+
+      FOUNDATION_INLINE float delta_time_per_step() const
+      { return _delta_time_per_step; }
 
     private:
       Policy _policy;
@@ -32,6 +37,8 @@ namespace butane {
         struct {
         } variable;
       } _settings;
+      size_t _num_of_steps;
+      float _delta_time_per_step;
   };
 } // butane
 

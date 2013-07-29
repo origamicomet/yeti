@@ -312,18 +312,12 @@ namespace Application {
 
     Timer timer;
     while (true) {
-      size_t num_of_steps;
-      float delta_time_per_step;
-      time_step_policy().frame(
-        timer.microseconds() / 1000000.0f,
-        num_of_steps,
-        delta_time_per_step);
+      time_step_policy().frame(timer.microseconds() / 1000000.0f);
       timer.reset();
-      log("num_of_steps = %u, delta_time_per_step = %f", num_of_steps, delta_time_per_step);
       for (auto iter = windows().begin(); iter != windows().end(); ++iter)
         (*iter).value->update();
-      for (size_t step = 0; step < num_of_steps; ++step)
-        world->update(delta_time_per_step);
+      for (size_t step = 0; step < time_step_policy().num_of_steps(); ++step)
+        world->update(time_step_policy().delta_time_per_step());
       world->render(camera, tied_resources()[0]);
     }
   }
