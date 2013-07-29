@@ -5,14 +5,15 @@
 #include <butane/application.h>
 
 namespace butane {
-  namespace script_interface {
+namespace script_interface {
+  namespace Application {
     static size_t platform(
       Script& script,
       const Script::Arguments& arguments )
     {
       if (arguments > 0)
         log("Superfluous arguments ignored in call to Application.platform");
-      script.stack().push(Application::platform());
+      script.stack().push(butane::Application::platform());
       return 1;
     }
 
@@ -22,7 +23,7 @@ namespace butane {
     {
       if (arguments > 0)
         log("Superfluous arguments ignored in call to Application.architecture");
-      script.stack().push(Application::architecture());
+      script.stack().push(butane::Application::architecture());
       return 1;
     }
 
@@ -32,7 +33,7 @@ namespace butane {
     {
       if (arguments > 0)
         log("Superfluous arguments ignored in call to Application.build");
-      script.stack().push(Application::build());
+      script.stack().push(butane::Application::build());
       return 1;
     }
 
@@ -43,7 +44,7 @@ namespace butane {
       (void)script;
       if (arguments > 0)
         log("Superfluous arguments ignored in call to Application.pause");
-      Application::pause();
+      butane::Application::pause();
       return 0;
     }
 
@@ -54,7 +55,7 @@ namespace butane {
       (void)script;
       if (arguments > 0)
         log("Superfluous arguments ignored in call to Application.unpause");
-      Application::unpause();
+      butane::Application::unpause();
       return 0;
     }
 
@@ -65,24 +66,27 @@ namespace butane {
       (void)script;
       if (arguments > 0)
         log("Superfluous arguments ignored in call to Application.quit");
-      Application::quit();
+      butane::Application::quit();
       __builtin_unreachable();
       return 0;
     }
-  } // script_interface
+  } // Application
+} // script_interface
 } // butane
 
 namespace butane {
+namespace script_interface {
 namespace Application {
   void expose(
     butane::Script& script )
   {
-    script.expose("Application.platform", &script_interface::platform);
-    script.expose("Application.architecture", &script_interface::architecture);
-    script.expose("Application.build", &script_interface::build);
-    script.expose("Application.pause", &script_interface::pause);
-    script.expose("Application.unpause", &script_interface::unpause);
-    script.expose("Application.quit", &script_interface::quit);
+    script.expose("Application.platform", &platform);
+    script.expose("Application.architecture", &architecture);
+    script.expose("Application.build", &build);
+    script.expose("Application.pause", &pause);
+    script.expose("Application.unpause", &unpause);
+    script.expose("Application.quit", &quit);
   }
 } // Application
+} // script_interface
 } // butane

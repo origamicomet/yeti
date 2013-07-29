@@ -8,53 +8,54 @@
 #include <butane/math_if.h>
 
 namespace butane {
-  namespace script_interface {
-    static size_t log(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      (void)script;
-      if (arguments == 0)
-        return 0;
-      const char* msg;
-        arguments.to(0, msg);
-      LogScope log_scope("Script");
-      foundation::log("%s", msg);
+namespace script_interface {
+  static size_t log(
+    Script& script,
+    const Script::Arguments& arguments )
+  {
+    (void)script;
+    if (arguments == 0)
       return 0;
-    }
+    const char* msg;
+      arguments.to(0, msg);
+    LogScope log_scope("Script");
+    foundation::log("%s", msg);
+    return 0;
+  }
 
-    static size_t warn(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      (void)script;
-      if (arguments == 0)
-        return 0;
-      const char* msg;
-        arguments.to(0, msg);
-      LogScope log_scope("Script");
-      butane::warn("%s", msg);
+  static size_t warn(
+    Script& script,
+    const Script::Arguments& arguments )
+  {
+    (void)script;
+    if (arguments == 0)
       return 0;
-    }
+    const char* msg;
+      arguments.to(0, msg);
+    LogScope log_scope("Script");
+    butane::warn("%s", msg);
+    return 0;
+  }
 
-    static size_t fail(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      (void)script;
-      if (arguments == 0)
-        butane::fail("Unspecified failure.");
-      const char* msg;
-        arguments.to(0, msg);
-      LogScope log_scope("Script");
-      butane::fail("%s", msg);
-      __builtin_unreachable();
-      return 0;
-    }
-  } // script_interface
+  static size_t fail(
+    Script& script,
+    const Script::Arguments& arguments )
+  {
+    (void)script;
+    if (arguments == 0)
+      butane::fail("Unspecified failure.");
+    const char* msg;
+      arguments.to(0, msg);
+    LogScope log_scope("Script");
+    butane::fail("%s", msg);
+    __builtin_unreachable();
+    return 0;
+  }
+} // script_interface
 } // butane
 
 namespace butane {
+namespace script_interface {
   void expose(
     butane::Script& script )
   {
@@ -65,4 +66,5 @@ namespace butane {
     Application::expose(script);
     Math::expose(script);
   }
+} // script_interface
 } // butane

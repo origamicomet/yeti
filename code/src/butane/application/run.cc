@@ -226,7 +226,7 @@ namespace Application {
         fail("Expected `application.boot.script` to be specified!");
       const Resource::Id id = Resource::Id(ScriptResource::type(), path);
       Resource::Handle<ScriptResource> resource = id;
-      butane::expose(script);
+      script_interface::expose(script);
       if (!script.load(path, resource->byte_code().raw(), resource->byte_code().size()))
         fail("Failed to load boot script!");
     }

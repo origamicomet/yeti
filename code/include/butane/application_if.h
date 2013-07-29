@@ -8,10 +8,12 @@
 #include <butane/script.h>
 
 namespace butane {
+namespace script_interface {
 namespace Application {
   extern BUTANE_EXPORT void expose(
     butane::Script& script );
 } // Application
+} // script_interface
 } // butane
 
 #endif // _BUTANE_APPLICATION_INTERFACE_H_
