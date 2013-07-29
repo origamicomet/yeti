@@ -182,6 +182,10 @@ namespace Lua {
             const char* name,
             Method method ) override;
 
+          butane::Script::Type& method(
+            const char* name,
+            Function function ) override;
+
           void expose(
             const char* name ) override;
       };

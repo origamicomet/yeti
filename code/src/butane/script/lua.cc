@@ -429,6 +429,21 @@ namespace Lua {
     return *this;
   }
 
+  butane::Script::Type& Script::Type::method(
+    const char* name,
+    Function function )
+  {
+    assert(name != nullptr);
+    assert(function != nullptr);
+
+    lua_pushlightuserdata(((Script&)_script)._state, (void*)&_script);
+    lua_pushlightuserdata(((Script&)_script)._state, (void*)function);
+    lua_pushcclosure(((Script&)_script)._state, &Script::__forwarding_closure, 2);
+    lua_setfield(((Script&)_script)._state, -2, name);
+
+    return *this;
+  }
+
   void Script::Type::expose(
     const char* name )
   {

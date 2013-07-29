@@ -204,6 +204,10 @@ namespace butane {
             const char* name,
             Method method ) = 0;
 
+          virtual Type& method(
+            const char* name,
+            Function function ) = 0;
+
           virtual void expose(
             const char* name ) = 0;
 
