@@ -188,7 +188,7 @@ namespace Lua {
     size_t arg, void*& ptr ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_islightuserdata(script._state, arg + 1))
       script.error("Trying to access non-pointer argument!");
@@ -199,7 +199,7 @@ namespace Lua {
     size_t arg, bool& boolean ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isboolean(script._state, arg + 1))
       script.error("Trying to access non-boolean argument!");
@@ -210,7 +210,7 @@ namespace Lua {
     size_t arg, int& integer ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isnumber(script._state, arg + 1))
       script.error("Trying to access non-integer argument!");
@@ -221,7 +221,7 @@ namespace Lua {
     size_t arg, float& number ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isnumber(script._state, arg + 1))
       script.error("Trying to access non-number argument!");
@@ -232,7 +232,7 @@ namespace Lua {
     size_t arg, double& number ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isnumber(script._state, arg + 1))
       script.error("Trying to access non-number argument!");
@@ -243,7 +243,7 @@ namespace Lua {
     size_t arg, const char*& string ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isstring(script._state, arg + 1))
       script.error("Trying to access non-string argument!");
@@ -254,7 +254,7 @@ namespace Lua {
     size_t arg, String& string ) const
   {
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isstring(script._state, arg + 1))
       script.error("Trying to access non-string argument!");
@@ -266,7 +266,7 @@ namespace Lua {
   {
     assert(type != nullptr);
     Script& script = ((Script&)_script);
-    if (arg > lua_gettop(script._state))
+    if (arg >= lua_gettop(script._state))
       script.error("Trying to access undefined argument!");
     if (!lua_isuserdata(script._state, arg + 1))
       script.error("Trying to access non-%s argument!", type);
