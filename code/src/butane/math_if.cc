@@ -656,6 +656,263 @@ namespace butane {
       }
     } // Vec4
 
+    namespace Quat {
+      static void* ctor(
+        Script& script,
+        const Script::Arguments& arguments )
+      {
+        float w, x, y, z;
+        switch ((size_t)arguments) {
+          case 0:
+            w = 1.0f;
+            x = y = z = 0.0f;
+            break;
+          case 4:
+            arguments.to(0, x);
+            arguments.to(1, y);
+            arguments.to(2, z);
+            arguments.to(3, w);
+            break;
+          default:
+            script.error("Expected zero or four arguments ([w : Number, x : Number, y : Number, z : Number]).");
+        }
+
+        Math::Temporary* q = temporary(script);
+        q->quat().w = w;
+        q->quat().x = x;
+        q->quat().y = y;
+        q->quat().z = z;
+        return (void*)q;
+      }
+
+      static void dtor(
+        Script& script,
+        void* self )
+      {
+      }
+
+      static size_t from_axis_angle(
+        Script& script,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 2)
+          script.error("Expected two arguments (axis : Vec3, angle_in_radians : Number).");
+        Math::Temporary* axis;
+        arguments.to(0, "Quat", (void*&)axis);
+        float angle_in_radians;
+        arguments.to(1, angle_in_radians);
+        Math::Temporary* q = temporary(script);
+        q->quat() = Quatf::from_axis_angle(axis->vec3(), angle_in_radians);
+        script.stack().push("Quat", (void*)q);
+        return 1;
+      }
+
+      static size_t from_euler_angles(
+        Script& script,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 2)
+          script.error("Expected three arguments (x_in_radians : Number, y_in_radians : Number, z_in_radians : Number).");
+        float x_in_radians, y_in_radians, z_in_radians;
+        arguments.to(0, x_in_radians);
+        arguments.to(1, y_in_radians);
+        arguments.to(2, z_in_radians);
+        Math::Temporary* q = temporary(script);
+        q->quat() = Quatf::from_euler_angles(x_in_radians, y_in_radians, z_in_radians);
+        script.stack().push("Quat", (void*)q);
+        return 1;
+      }
+
+      static size_t add(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (addend : Quat).");
+        Math::Temporary* addend;
+        arguments.to(0, "Quat", (void*&)addend);
+        Math::Temporary* sum = temporary(script);
+        sum->quat() = ((Math::Temporary*)self)->quat() + addend->quat();
+        script.stack().push("Quat", (void*)sum);
+        return 1;
+      }
+
+      static size_t sub(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (subtrahend : Quat).");
+        Math::Temporary* subtrahend;
+        arguments.to(0, "Quat", (void*&)subtrahend);
+        Math::Temporary* difference = temporary(script);
+        difference->quat() = ((Math::Temporary*)self)->quat() - subtrahend->quat();
+        script.stack().push("Quat", (void*)difference);
+        return 1;
+      }
+
+      static size_t mul(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (factor : Quat).");
+        Math::Temporary* factor;
+        arguments.to(0, "Quat", (void*&)factor);
+        Math::Temporary* product = temporary(script);
+        product->quat() = ((Math::Temporary*)self)->quat() * factor->quat();
+        script.stack().push("Quat", (void*)product);
+        return 1;
+      }
+
+      static size_t div(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (divisor : Quat).");
+        Math::Temporary* divisor;
+        arguments.to(0, "Quat", (void*&)divisor);
+        Math::Temporary* quotient = temporary(script);
+        quotient->quat() = ((Math::Temporary*)self)->quat() / divisor->quat();
+        script.stack().push("Quat", (void*)quotient);
+        return 1;
+      }
+
+      static size_t length(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->quat().length());
+        return 1;
+      }
+
+      static size_t magnitude(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->quat().magnitude());
+        return 1;
+      }
+
+      static size_t dot(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 1)
+          script.error("Expected one argument (term : Quat).");
+        Math::Temporary* term;
+        arguments.to(0, "Quat", (void*&)term);
+        script.stack().push(((Math::Temporary*)self)->quat().dot(term->quat()));
+        return 1;
+      }
+
+      static size_t normalize(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 0)
+          script.error("Expected no arguments.");
+        Math::Temporary* normalized = temporary(script);
+        normalized->quat() = ((Math::Temporary*)self)->quat().normalize();
+        script.stack().push("Quat", (void*)normalized);
+        return 1;
+      }
+
+      static size_t inverse(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        if (arguments != 0)
+          script.error("Expected no arguments.");
+        Math::Temporary* inversed = temporary(script);
+        inversed->quat() = ((Math::Temporary*)self)->quat().inverse();
+        script.stack().push("Quat", (void*)inversed);
+        return 1;
+      }
+
+      static size_t w(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->quat().w);
+        return 1;
+      }
+
+      static size_t set_w(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->quat().w);
+        return 1;
+      }
+
+      static size_t x(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->quat().x);
+        return 1;
+      }
+
+      static size_t set_x(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->quat().x);
+        return 1;
+      }
+
+      static size_t y(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->quat().y);
+        return 1;
+      }
+
+      static size_t set_y(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->quat().y);
+        return 1;
+      }
+
+      static size_t z(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        script.stack().push(((Math::Temporary*)self)->quat().z);
+        return 1;
+      }
+
+      static size_t set_z(
+        Script& script,
+        void* self,
+        const Script::Arguments& arguments )
+      {
+        arguments.to(0, ((Math::Temporary*)self)->quat().z);
+        return 1;
+      }
+    } // Quat
+
     static void on_destruction(
       const Script& script )
     {
@@ -721,6 +978,25 @@ namespace Math {
       .accessors("z", &script_interface::Vec4::z, &script_interface::Vec4::set_z)
       .accessors("w", &script_interface::Vec4::w, &script_interface::Vec4::set_w)
     .expose("Vec4");
+
+    script.type(&script_interface::Quat::ctor, &script_interface::Quat::dtor)
+      .method("from_axis_angle", &script_interface::Quat::from_axis_angle)
+      .method("from_euler_angles", &script_interface::Quat::from_euler_angles)
+      .operation("add", &script_interface::Quat::add)
+      .operation("sub", &script_interface::Quat::sub)
+      .operation("mul", &script_interface::Quat::mul)
+      .operation("div", &script_interface::Quat::div)
+      .getter("length", &script_interface::Quat::length)
+      .getter("magnitude", &script_interface::Quat::magnitude)
+      .method("dot", &script_interface::Quat::dot)
+      .method("normalize", &script_interface::Quat::normalize)
+      .method("inverse", &script_interface::Quat::inverse)
+      .accessors("w", &script_interface::Quat::w, &script_interface::Quat::set_w)
+      .accessors("x", &script_interface::Quat::x, &script_interface::Quat::set_x)
+      .accessors("y", &script_interface::Quat::y, &script_interface::Quat::set_y)
+      .accessors("z", &script_interface::Quat::z, &script_interface::Quat::set_z)
+    .expose("Quat");
+
   }
 } // Math
 } // butane
