@@ -61,7 +61,7 @@ namespace butane {
         const uint32_t right )
       {
         _top = top; _left = left;
-        _bottom = bottom; _right = _right;
+        _bottom = bottom; _right = right;
       }
 
     private:
