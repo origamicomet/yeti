@@ -318,7 +318,7 @@ namespace Application {
         (*iter).value->update();
       for (size_t step = 0; step < time_step_policy().num_of_steps(); ++step)
         world->update(time_step_policy().delta_time_per_step());
-      world->render(camera, Viewport(0, 0, 720, 1280), tied_resources()[0]);
+      world->render(camera, Viewport(0, 0, swap_chain->height(), swap_chain->width()), tied_resources()[0]);
     }
   }
 } // Application
