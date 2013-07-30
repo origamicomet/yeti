@@ -20,6 +20,7 @@
 #include <butane/tasks/dispatch.h>
 
 namespace butane {
+  class Viewport;
   class TiedResources;
   class BUTANE_EXPORT World final {
     __foundation_trait(World, non_copyable);
@@ -123,6 +124,7 @@ namespace butane {
       /*! */
       void render(
         const Unit::Reference& camera,
+        const Viewport& viewport,
         const TiedResources* swap_chain_and_resources ) const;
 
     public:
@@ -134,6 +136,9 @@ namespace butane {
 
       FOUNDATION_INLINE size_t num_of_units() const
       { return _units.size(); }
+
+      FOUNDATION_INLINE Unit** units()
+      { return _units.raw(); }
 
       FOUNDATION_INLINE Unit* const * units() const
       { return _units.raw(); }
