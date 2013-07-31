@@ -100,6 +100,20 @@ namespace Application {
     create_or_update_global_resources();
   }
 
+  static void on_main_window_closed(
+    void* /* unused */,
+    Window* window )
+  {
+    Application::quit();
+  }
+
+  static void on_window_closed(
+    void* /* unused */,
+    Window* window )
+  {
+    destroy_window_and_swap_chain_and_resources(window);
+  }
+
   void create_window_and_swap_chain_and_resources(
     const char* title,
     const uint32_t width,
@@ -109,6 +123,7 @@ namespace Application {
     TiedResources*& swap_chain_and_resources )
   {
     window = Window::open(title, width, height);
+    window->set_on_closed_handler(&on_window_closed);
     Application::windows() += window;
     swap_chain = SwapChain::create(window, PixelFormat::R8G8B8A8, width, height, false, false);
     swap_chain->set_on_resized_handler(&on_swap_chain_resized);
@@ -244,14 +259,6 @@ namespace Application {
       (*iter)->destroy_global_resources();
   }
 
-  static void on_window_closed(
-    void* closure,
-    Window* window )
-  {
-    window->close();
-    Application::quit();
-  }
-
   void run(
     const Array<const char*>& args )
   {
@@ -291,6 +298,7 @@ namespace Application {
         dims = Vec2f(1280.0f, 720.0f);
 
       window = Window::open(title.raw(), (uint32_t)dims.x, (uint32_t)dims.y);
+      window->set_on_closed_handler(&on_main_window_closed);
       windows() += window;
     }
 
@@ -366,7 +374,6 @@ namespace Application {
       world->spawn_unit(type);
     }
 
-    window->set_on_closed_handler(&on_window_closed);
     window->show();
 
     Timer timer;
