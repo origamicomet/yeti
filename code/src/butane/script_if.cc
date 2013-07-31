@@ -544,6 +544,24 @@ namespace butane {
       fail(luaL_checkstring(L, 1));
       return 0;
     }
+
+    static int lua_script_num_of_temporaries( lua_State* L ) {
+      lua_pushlightuserdata(L, (void*)&__lua_temporaries_key);
+      lua_rawget(L, LUA_REGISTRYINDEX);
+      Array<lua_Temporary>& temporaries = *((Array<lua_Temporary>*)luaL_checkuserdata(L, -1));
+      lua_pop(L, 1);
+      lua_pushinteger(L, temporaries.size());
+      return 1;
+    }
+
+    static int lua_script_set_num_of_temporaries( lua_State* L ) {
+      lua_pushlightuserdata(L, (void*)&__lua_temporaries_key);
+      lua_rawget(L, LUA_REGISTRYINDEX);
+      Array<lua_Temporary>& temporaries = *((Array<lua_Temporary>*)luaL_checkuserdata(L, -1));
+      lua_pop(L, 1);
+      temporaries.resize(luaL_checkinteger(L, 1));
+      return 0;
+    }
   }
 } // butane
 
@@ -691,6 +709,10 @@ namespace butane {
     lua_setfield(L, -2, "warn");
     lua_pushcfunction(L, &lua_script_fail);
     lua_setfield(L, -2, "fail");
+    lua_pushcfunction(L, &lua_script_num_of_temporaries);
+    lua_setfield(L, -2, "num_of_temporaries");
+    lua_pushcfunction(L, &lua_script_set_num_of_temporaries);
+    lua_setfield(L, -2, "set_num_of_temporaries");
     return 1;
   }
 } // butane
