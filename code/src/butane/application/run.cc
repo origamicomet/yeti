@@ -219,16 +219,6 @@ namespace Application {
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
 
-    Script script; {
-      const char* path;
-      if (!manifest->find("application.boot.script", path))
-        fail("Expected `application.boot.script` to be specified!");
-      const Resource::Id id = Resource::Id(ScriptResource::type(), path);
-      Resource::Handle<ScriptResource> resource = id;
-      if (!script.load(path, resource->byte_code().raw(), resource->byte_code().size()))
-        fail("Failed to load boot script!");
-    }
-
     Window* window; {
       String title = String(Allocators::scratch());
       if (!manifest->find("application.window.title", title)) {
@@ -282,6 +272,16 @@ namespace Application {
       swap_chains() += swap_chain;
       tied_resources() += TiedResources::create(swap_chain);
       create_or_update_global_resources();
+    }
+
+    Script script; {
+      const char* path;
+      if (!manifest->find("application.boot.script", path))
+        fail("Expected `application.boot.script` to be specified!");
+      const Resource::Id id = Resource::Id(ScriptResource::type(), path);
+      Resource::Handle<ScriptResource> resource = id;
+      if (!script.load(path, resource->byte_code().raw(), resource->byte_code().size()))
+        fail("Failed to load boot script!");
     }
 
     World* world = World::create();
