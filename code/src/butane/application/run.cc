@@ -63,24 +63,24 @@ namespace Application {
   Array<void*>& globals()
   { return __ts_globals(); }
 
-  static Array< Pair<uint32_t, Window*> >& __windows_initializer() {
-    static Array< Pair<uint32_t, Window*> > windows(Allocators::heap());
+  static Array<Window*>& __windows_initializer() {
+    static Array<Window*> windows(Allocators::heap());
     return windows; }
 
-  static const thread_safe::Static< Array< Pair<uint32_t, Window*> > >
+  static const thread_safe::Static< Array<Window*> >
     __ts_windows(&__windows_initializer);
 
-  Array< Pair<uint32_t, Window*> >& windows()
+  Array<Window*>& windows()
   { return __ts_windows(); }
 
-  static Array< Pair<uint32_t, SwapChain*> >& __swap_chains_initializer() {
-    static Array< Pair<uint32_t, SwapChain*> > swap_chains(Allocators::heap());
+  static Array<SwapChain*>& __swap_chains_initializer() {
+    static Array<SwapChain*> swap_chains(Allocators::heap());
     return swap_chains; }
 
-  static const thread_safe::Static< Array< Pair<uint32_t, SwapChain*> > >
+  static const thread_safe::Static< Array<SwapChain*> >
     __ts_swap_chains(&__swap_chains_initializer);
 
-  Array< Pair<uint32_t, SwapChain*> >& swap_chains()
+  Array<SwapChain*>& swap_chains()
   { return __ts_swap_chains(); }
 
   static Array<TiedResources*>& __tied_resources_initializer() {
@@ -121,8 +121,8 @@ namespace Application {
     uint32_t minimum_width_to_support, minimum_height_to_support; {
       minimum_width_to_support = minimum_height_to_support = 0;
       for (auto iter = swap_chains().begin(); iter != swap_chains().end(); ++iter) {
-        minimum_width_to_support = max(minimum_width_to_support, (*iter).value->width());
-        minimum_height_to_support = max(minimum_height_to_support, (*iter).value->height()); }
+        minimum_width_to_support = max(minimum_width_to_support, (*iter)->width());
+        minimum_height_to_support = max(minimum_height_to_support, (*iter)->height()); }
     }
 
     globals().resize(_render_config->globals().size());
@@ -240,7 +240,7 @@ namespace Application {
         dims = Vec2f(1280.0f, 720.0f);
 
       window = Window::open(title.raw(), (uint32_t)dims.x, (uint32_t)dims.y);
-      windows() += Pair<uint32_t, Window*>(0, window);
+      windows() += window;
     }
 
     RenderDevice* rd; {
@@ -279,7 +279,7 @@ namespace Application {
         (uint32_t)res.x, (uint32_t)res.y,
         fullscreen, vertical_sync);
 
-      swap_chains() += Pair<uint32_t, SwapChain*>(0, swap_chain);
+      swap_chains() += swap_chain;
       tied_resources() += TiedResources::create(swap_chain);
       create_or_update_global_resources();
     }
@@ -313,7 +313,7 @@ namespace Application {
       time_step_policy().frame(timer.microseconds() / 1000000.0f);
       timer.reset();
       for (auto iter = windows().begin(); iter != windows().end(); ++iter)
-        (*iter).value->update();
+        (*iter)->update();
       for (size_t step = 0; step < time_step_policy().num_of_steps(); ++step)
         world->update(time_step_policy().delta_time_per_step());
       world->render(camera, Viewport(0, 0, swap_chain->height(), swap_chain->width()), tied_resources()[0]);

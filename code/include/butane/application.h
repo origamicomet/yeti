@@ -38,10 +38,10 @@ namespace Application {
   extern BUTANE_EXPORT Array<Console*>& consoles();
 
   /*! */
-  extern BUTANE_EXPORT Array< Pair<uint32_t, Window*> >& windows();
+  extern BUTANE_EXPORT Array<Window*>& windows();
 
   /*! */
-  extern BUTANE_EXPORT Array< Pair<uint32_t, SwapChain*> >& swap_chains();
+  extern BUTANE_EXPORT Array<SwapChain*>& swap_chains();
 
   /*! */
   extern BUTANE_EXPORT Array<TiedResources*>& tied_resources();
