@@ -148,30 +148,30 @@ function unit_tests.Vec4()
   assert(math.abs(1 - w_axis.w) <= epsilon)
 end
 
--- function unit_tests.Quat()
---   rawset(Quat, "__eq", function (q1, q2)
---     if (math.abs(q1.w - q2.w) > epsilon) then return false end
---     if (math.abs(q1.x - q2.x) > epsilon) then return false end
---     if (math.abs(q1.y - q2.y) > epsilon) then return false end
---     if (math.abs(q1.z - q2.z) > epsilon) then return false end
---     return true
---   end)
+function unit_tests.Quat()
+  rawset(Quat, "__eq", function (q1, q2)
+    if (math.abs(q1.w - q2.w) > epsilon) then return false end
+    if (math.abs(q1.x - q2.x) > epsilon) then return false end
+    if (math.abs(q1.y - q2.y) > epsilon) then return false end
+    if (math.abs(q1.z - q2.z) > epsilon) then return false end
+    return true
+  end)
 
---   identity = Quat()
---   assert(math.abs(1 - identity.w) <= epsilon)
---   assert(math.abs(0 - identity.x) <= epsilon)
---   assert(math.abs(0 - identity.y) <= epsilon)
---   assert(math.abs(0 - identity.z) <= epsilon)
---   assert(math.abs(1 - identity:length()) <= epsilon)
---   assert(math.abs(1 - identity:magnitude()) <= epsilon)
---   x_rotate_10 = Quat.from_axis_angle(Vec3(1, 0, 0), math.rad(10))
---   x_rotate_20 = Quat.from_axis_angle(Vec3(1, 0, 0), math.rad(20))
---   x_rotate_10_x_2 = x_rotate_10 * x_rotate_10
---   assert(x_rotate_10_x_2 == x_rotate_20)
---   x_rotate_10_then_20 = x_rotate_10 * x_rotate_20
---   x_rotate_20_then_10 = x_rotate_20 * x_rotate_10
---   assert(x_rotate_10_then_20 == x_rotate_20_then_10)
--- end
+  identity = Quat()
+  assert(math.abs(1 - identity.w) <= epsilon)
+  assert(math.abs(0 - identity.x) <= epsilon)
+  assert(math.abs(0 - identity.y) <= epsilon)
+  assert(math.abs(0 - identity.z) <= epsilon)
+  assert(math.abs(1 - identity:length()) <= epsilon)
+  assert(math.abs(1 - identity:magnitude()) <= epsilon)
+  x_rotate_10 = Quat.from_axis_angle(Vec3(1, 0, 0), math.rad(10))
+  x_rotate_20 = Quat.from_axis_angle(Vec3(1, 0, 0), math.rad(20))
+  x_rotate_10_x_2 = x_rotate_10 * x_rotate_10
+  assert(x_rotate_10_x_2 == x_rotate_20)
+  x_rotate_10_then_20 = x_rotate_10 * x_rotate_20
+  x_rotate_20_then_10 = x_rotate_20 * x_rotate_10
+  assert(x_rotate_10_then_20 == x_rotate_20_then_10)
+end
 
 for name, test in pairs(unit_tests) do
   local status, err = pcall(test)

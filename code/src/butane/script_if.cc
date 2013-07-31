@@ -387,6 +387,146 @@ namespace butane {
   }
 
   namespace {
+    static Quatf* lua_newquat( lua_State* L ) {
+      Quatf* v = ((Quatf*)lua_newtemporary(L));
+      luaL_getmetatable(L, "Quat");
+      lua_setmetatable(L, -2);
+      return v;
+    }
+
+    static Quatf* lua_checkquat( lua_State* L, int idx ) {
+      return *((Quatf**)luaL_checkuserdata2(L, idx, "Quat"));
+    }
+
+    static int lua_quat__call( lua_State* L ) {
+      switch (lua_gettop(L)) {
+        case 1: {
+          *lua_newquat(L) = Quatf();
+        } break;
+        case 5:
+          *lua_newquat(L) = Quatf(
+            luaL_checknumber(L, 2),
+            luaL_checknumber(L, 3),
+            luaL_checknumber(L, 4),
+            luaL_checknumber(L, 5));
+          break;
+        default:
+          return luaL_error(L, "expected zero or four arguments"); }
+      return 1;
+    }
+
+    static int lua_quat_from_axis_angle( lua_State* L ) {
+      *lua_newquat(L) = Quatf::from_axis_angle(
+        *lua_checkvec3(L, 1),
+        luaL_checknumber(L, 2));
+      return 1;
+    }
+
+    static int lua_quat_from_euler_angles( lua_State* L ) {
+      *lua_newquat(L) = Quatf::from_euler_angles(
+        luaL_checknumber(L, 1),
+        luaL_checknumber(L, 2),
+        luaL_checknumber(L, 3));
+      return 1;
+    }
+
+    static int lua_quat__gc( lua_State* L ) {
+      return 0;
+    }
+
+    static int lua_quat__add( lua_State* L ) {
+      const Quatf& lhs = *lua_checkquat(L, 1);
+      const Quatf& rhs = *lua_checkquat(L, 2);
+      *lua_newquat(L) = lhs + rhs;
+      return 1;
+    }
+
+    static int lua_quat__sub( lua_State* L ) {
+      const Quatf& lhs = *lua_checkquat(L, 1);
+      const Quatf& rhs = *lua_checkquat(L, 2);
+      *lua_newquat(L) = lhs - rhs;
+      return 1;
+    }
+
+    static int lua_quat__mul( lua_State* L ) {
+      const Quatf& lhs = *lua_checkquat(L, 1);
+      const Quatf& rhs = *lua_checkquat(L, 2);
+      *lua_newquat(L) = lhs * rhs;
+      return 1;
+    }
+
+    static int lua_quat__div( lua_State* L ) {
+      const Quatf& lhs = *lua_checkquat(L, 1);
+      const Quatf& rhs = *lua_checkquat(L, 2);
+      *lua_newquat(L) = lhs / rhs;
+      return 1;
+    }
+
+    static int lua_quat_length( lua_State* L ) {
+      const Quatf& self = *lua_checkquat(L, 1);
+      lua_pushnumber(L, self.length());
+      return 1;
+    }
+
+    static int lua_quat_magnitude( lua_State* L ) {
+      const Quatf& self = *lua_checkquat(L, 1);
+      lua_pushnumber(L, self.magnitude());
+      return 1;
+    }
+
+    static int lua_quat_dot( lua_State* L ) {
+      const Quatf& lhs = *lua_checkquat(L, 1);
+      const Quatf& rhs = *lua_checkquat(L, 2);
+      lua_pushnumber(L, lhs.dot(rhs));
+      return 1;
+    }
+
+    static int lua_quat_normalize( lua_State* L ) {
+      const Quatf& self = *lua_checkquat(L, 1);
+      *lua_newquat(L) = self.normalize();
+      return 1;
+    }
+
+    static int lua_quat_inverse( lua_State* L ) {
+      const Quatf& self = *lua_checkquat(L, 1);
+      *lua_newquat(L) = self.inverse();
+      return 1;
+    }
+
+    static int lua_quat__index( lua_State* L ) {
+      const Quatf& self = *lua_checkquat(L, 1);
+      if (strcmp("w", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.w);
+      else if (strcmp("x", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.x);
+      else if (strcmp("y", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.y);
+      else if (strcmp("z", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.z);
+      else {
+        luaL_getmetatable(L, "Quat");
+        lua_pushvalue(L, 2);
+        lua_rawget(L, -2);
+        lua_remove(L, -2);
+        return 1; }
+      return 1;
+    }
+
+    static int lua_quat__newindex( lua_State* L ) {
+      Quatf& self = *((Quatf*)lua_checkquat(L, 1));
+      if (strcmp("w", luaL_checkstring(L, 2)) == 0)
+        self.w = luaL_checknumber(L, 3);
+      else if (strcmp("x", luaL_checkstring(L, 2)) == 0)
+        self.x = luaL_checknumber(L, 3);
+      else if (strcmp("y", luaL_checkstring(L, 2)) == 0)
+        self.y = luaL_checknumber(L, 3);
+      else if (strcmp("z", luaL_checkstring(L, 2)) == 0)
+        self.z = luaL_checknumber(L, 3);
+      return 0;
+    }
+  }
+
+  namespace {
     static int lua_script_log( lua_State* L ) {
       const LogScope _("Script");
       log(luaL_checkstring(L, 1));
@@ -507,6 +647,41 @@ namespace butane {
       lua_pushvalue(L, -1);
       lua_setmetatable(L, -2);
       lua_setfield(L, -2, "Vec4");
+
+      luaL_newmetatable(L, "Quat");
+      lua_pushcfunction(L, &lua_quat__call);
+      lua_setfield(L, -2, "__call");
+      lua_pushcfunction(L, &lua_quat_from_axis_angle);
+      lua_setfield(L, -2, "from_axis_angle");
+      lua_pushcfunction(L, &lua_quat_from_euler_angles);
+      lua_setfield(L, -2, "from_euler_angles");
+      lua_pushcfunction(L, &lua_quat__gc);
+      lua_setfield(L, -2, "__gc");
+      lua_pushcfunction(L, &lua_quat__add);
+      lua_setfield(L, -2, "__add");
+      lua_pushcfunction(L, &lua_quat__sub);
+      lua_setfield(L, -2, "__sub");
+      lua_pushcfunction(L, &lua_quat__mul);
+      lua_setfield(L, -2, "__mul");
+      lua_pushcfunction(L, &lua_quat__div);
+      lua_setfield(L, -2, "__div");
+      lua_pushcfunction(L, &lua_quat_length);
+      lua_setfield(L, -2, "length");
+      lua_pushcfunction(L, &lua_quat_magnitude);
+      lua_setfield(L, -2, "magnitude");
+      lua_pushcfunction(L, &lua_quat_dot);
+      lua_setfield(L, -2, "dot");
+      lua_pushcfunction(L, &lua_quat_normalize);
+      lua_setfield(L, -2, "normalize");
+      lua_pushcfunction(L, &lua_quat_inverse);
+      lua_setfield(L, -2, "inverse");
+      lua_pushcfunction(L, &lua_quat__index);
+      lua_setfield(L, -2, "__index");
+      lua_pushcfunction(L, &lua_quat__newindex);
+      lua_setfield(L, -2, "__newindex");
+      lua_pushvalue(L, -1);
+      lua_setmetatable(L, -2);
+      lua_setfield(L, -2, "Quat");
     } lua_pop(L, 1);
 
     lua_createtable(L, 0, 3);
