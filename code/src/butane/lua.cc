@@ -4,6 +4,11 @@
 #include <butane/lua.h>
 
 extern "C" {
+  int luaL_checkboolean(lua_State *L, int idx) {
+    luaL_checktype(L, idx, LUA_TBOOLEAN);
+    return lua_toboolean(L, idx);
+  }
+
   void *luaL_checkuserdata(lua_State *L, int ud) {
     luaL_checktype(L, ud, LUA_TUSERDATA);
     return lua_touserdata(L, ud);

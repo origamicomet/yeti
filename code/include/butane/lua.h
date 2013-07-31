@@ -11,6 +11,7 @@ extern "C" {
   #include <lualib.h>
   #include <lauxlib.h>
 
+  extern BUTANE_EXPORT int luaL_checkboolean(lua_State *L, int idx);
   extern BUTANE_EXPORT void *luaL_checkuserdata(lua_State *L, int ud);
   extern BUTANE_EXPORT void *luaL_checkuserdata2(lua_State *L, int ud, const char* tname);
   extern BUTANE_EXPORT void *luaL_checklightuserdata(lua_State *L, int lud);
