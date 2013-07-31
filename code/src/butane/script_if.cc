@@ -268,6 +268,125 @@ namespace butane {
   }
 
   namespace {
+    static Vec4f* lua_newvec4( lua_State* L ) {
+      Vec4f* v = ((Vec4f*)lua_newtemporary(L));
+      luaL_getmetatable(L, "Vec4");
+      lua_setmetatable(L, -2);
+      return v;
+    }
+
+    static Vec4f* lua_checkvec4( lua_State* L, int idx ) {
+      return *((Vec4f**)luaL_checkuserdata2(L, idx, "Vec4"));
+    }
+
+    static int lua_vec4__call( lua_State* L ) {
+      switch (lua_gettop(L)) {
+        case 1: {
+          *lua_newvec4(L) = Vec4f();
+        } break;
+        case 5:
+          *lua_newvec4(L) = Vec4f(
+            luaL_checknumber(L, 2),
+            luaL_checknumber(L, 3),
+            luaL_checknumber(L, 4),
+            luaL_checknumber(L, 5));
+          break;
+        default:
+          return luaL_error(L, "expected zero or four arguments"); }
+      return 1;
+    }
+
+    static int lua_vec4__gc( lua_State* L ) {
+      return 0;
+    }
+
+    static int lua_vec4__add( lua_State* L ) {
+      const Vec4f& lhs = *lua_checkvec4(L, 1);
+      const Vec4f& rhs = *lua_checkvec4(L, 2);
+      *lua_newvec4(L) = lhs + rhs;
+      return 1;
+    }
+
+    static int lua_vec4__sub( lua_State* L ) {
+      const Vec4f& lhs = *lua_checkvec4(L, 1);
+      const Vec4f& rhs = *lua_checkvec4(L, 2);
+      *lua_newvec4(L) = lhs - rhs;
+      return 1;
+    }
+
+    static int lua_vec4__mul( lua_State* L ) {
+      const Vec4f& lhs = *lua_checkvec4(L, 1);
+      const Vec4f& rhs = *lua_checkvec4(L, 2);
+      *lua_newvec4(L) = lhs * rhs;
+      return 1;
+    }
+
+    static int lua_vec4__div( lua_State* L ) {
+      const Vec4f& lhs = *lua_checkvec4(L, 1);
+      const Vec4f& rhs = *lua_checkvec4(L, 2);
+      *lua_newvec4(L) = lhs / rhs;
+      return 1;
+    }
+
+    static int lua_vec4_length( lua_State* L ) {
+      const Vec4f& self = *lua_checkvec4(L, 1);
+      lua_pushnumber(L, self.length());
+      return 1;
+    }
+
+    static int lua_vec4_magnitude( lua_State* L ) {
+      const Vec4f& self = *lua_checkvec4(L, 1);
+      lua_pushnumber(L, self.magnitude());
+      return 1;
+    }
+
+    static int lua_vec4_dot( lua_State* L ) {
+      const Vec4f& lhs = *lua_checkvec4(L, 1);
+      const Vec4f& rhs = *lua_checkvec4(L, 2);
+      lua_pushnumber(L, lhs.dot(rhs));
+      return 1;
+    }
+
+    static int lua_vec4_normalize( lua_State* L ) {
+      const Vec4f& self = *lua_checkvec4(L, 1);
+      *lua_newvec4(L) = self.normalize();
+      return 1;
+    }
+
+    static int lua_vec4__index( lua_State* L ) {
+      const Vec4f& self = *lua_checkvec4(L, 1);
+      if (strcmp("x", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.x);
+      else if (strcmp("y", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.y);
+      else if (strcmp("z", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.z);
+      else if (strcmp("w", luaL_checkstring(L, 2)) == 0)
+        lua_pushnumber(L, self.w);
+      else {
+        luaL_getmetatable(L, "Vec4");
+        lua_pushvalue(L, 2);
+        lua_rawget(L, -2);
+        lua_remove(L, -2);
+        return 1; }
+      return 1;
+    }
+
+    static int lua_vec4__newindex( lua_State* L ) {
+      Vec4f& self = *((Vec4f*)lua_checkvec4(L, 1));
+      if (strcmp("x", luaL_checkstring(L, 2)) == 0)
+        self.x = luaL_checknumber(L, 3);
+      else if (strcmp("y", luaL_checkstring(L, 2)) == 0)
+        self.y = luaL_checknumber(L, 3);
+      else if (strcmp("z", luaL_checkstring(L, 2)) == 0)
+        self.z = luaL_checknumber(L, 3);
+      else if (strcmp("w", luaL_checkstring(L, 2)) == 0)
+        self.w = luaL_checknumber(L, 3);
+      return 0;
+    }
+  }
+
+  namespace {
     static int lua_script_log( lua_State* L ) {
       const LogScope _("Script");
       log(luaL_checkstring(L, 1));
@@ -359,6 +478,35 @@ namespace butane {
       lua_pushvalue(L, -1);
       lua_setmetatable(L, -2);
       lua_setfield(L, -2, "Vec3");
+
+      luaL_newmetatable(L, "Vec4");
+      lua_pushcfunction(L, &lua_vec4__call);
+      lua_setfield(L, -2, "__call");
+      lua_pushcfunction(L, &lua_vec4__gc);
+      lua_setfield(L, -2, "__gc");
+      lua_pushcfunction(L, &lua_vec4__add);
+      lua_setfield(L, -2, "__add");
+      lua_pushcfunction(L, &lua_vec4__sub);
+      lua_setfield(L, -2, "__sub");
+      lua_pushcfunction(L, &lua_vec4__mul);
+      lua_setfield(L, -2, "__mul");
+      lua_pushcfunction(L, &lua_vec4__div);
+      lua_setfield(L, -2, "__div");
+      lua_pushcfunction(L, &lua_vec4_length);
+      lua_setfield(L, -2, "length");
+      lua_pushcfunction(L, &lua_vec4_magnitude);
+      lua_setfield(L, -2, "magnitude");
+      lua_pushcfunction(L, &lua_vec4_dot);
+      lua_setfield(L, -2, "dot");
+      lua_pushcfunction(L, &lua_vec4_normalize);
+      lua_setfield(L, -2, "normalize");
+      lua_pushcfunction(L, &lua_vec4__index);
+      lua_setfield(L, -2, "__index");
+      lua_pushcfunction(L, &lua_vec4__newindex);
+      lua_setfield(L, -2, "__newindex");
+      lua_pushvalue(L, -1);
+      lua_setmetatable(L, -2);
+      lua_setfield(L, -2, "Vec4");
     } lua_pop(L, 1);
 
     lua_createtable(L, 0, 3);
