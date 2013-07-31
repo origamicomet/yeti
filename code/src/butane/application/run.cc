@@ -5,7 +5,6 @@
 
 #include <butane/math.h>
 #include <butane/script.h>
-#include <butane/script/lua.h>
 #include <butane/resource.h>
 #include <butane/resources/config.h>
 #include <butane/resources/script.h>
@@ -220,13 +219,12 @@ namespace Application {
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
 
-    Lua::Script script; {
+    Script script; {
       const char* path;
       if (!manifest->find("application.boot.script", path))
         fail("Expected `application.boot.script` to be specified!");
       const Resource::Id id = Resource::Id(ScriptResource::type(), path);
       Resource::Handle<ScriptResource> resource = id;
-      script_interface::expose(script);
       if (!script.load(path, resource->byte_code().raw(), resource->byte_code().size()))
         fail("Failed to load boot script!");
     }

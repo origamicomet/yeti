@@ -7,12 +7,4 @@
 #include <butane/foundation.h>
 #include <butane/config.h>
 
-namespace butane {
-  class Script;
-namespace script_interface {
-  extern BUTANE_EXPORT void expose(
-    butane::Script& script );
-} // script_interface
-} // butane
-
 #endif // _BUTANE_H_

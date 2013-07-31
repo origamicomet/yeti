@@ -5,88 +5,55 @@
 #include <butane/application.h>
 
 namespace butane {
-namespace script_interface {
-  namespace Application {
-    static size_t platform(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.platform");
-      script.stack().push(butane::Application::platform());
+  namespace {
+    static int lua_application_platform( lua_State* L ) {
+      lua_pushstring(L, Application::platform());
       return 1;
     }
 
-    static size_t architecture(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.architecture");
-      script.stack().push(butane::Application::architecture());
+    static int lua_application_architecture( lua_State* L ) {
+      lua_pushstring(L, Application::architecture());
       return 1;
     }
 
-    static size_t build(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.build");
-      script.stack().push(butane::Application::build());
+    static int lua_application_build( lua_State* L ) {
+      lua_pushstring(L, Application::build());
       return 1;
     }
 
-    static size_t pause(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      (void)script;
-      if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.pause");
-      butane::Application::pause();
+    static int lua_application_pause( lua_State* L ) {
+      Application::pause();
       return 0;
     }
 
-    static size_t unpause(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      (void)script;
-      if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.unpause");
-      butane::Application::unpause();
+    static int lua_application_unpause( lua_State* L ) {
+      Application::unpause();
       return 0;
     }
 
-    static size_t quit(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      (void)script;
-      if (arguments > 0)
-        log("Superfluous arguments ignored in call to Application.quit");
-      butane::Application::quit();
-      __builtin_unreachable();
+    static int lua_application_quit( lua_State* L ) {
+      Application::quit();
       return 0;
     }
-  } // Application
-} // script_interface
+  }
 } // butane
 
 namespace butane {
-namespace script_interface {
-namespace Application {
-  void expose(
-    butane::Script& script )
+  int luaopen_application( lua_State* L )
   {
-    script.expose("Application.platform", &platform);
-    script.expose("Application.architecture", &architecture);
-    script.expose("Application.build", &build);
-    script.expose("Application.pause", &pause);
-    script.expose("Application.unpause", &unpause);
-    script.expose("Application.quit", &quit);
+    lua_createtable(L, 0, 6);
+    lua_pushcfunction(L, &lua_application_platform);
+    lua_setfield(L, -2, "platform");
+    lua_pushcfunction(L, &lua_application_architecture);
+    lua_setfield(L, -2, "architecture");
+    lua_pushcfunction(L, &lua_application_build);
+    lua_setfield(L, -2, "build");
+    lua_pushcfunction(L, &lua_application_pause);
+    lua_setfield(L, -2, "pause");
+    lua_pushcfunction(L, &lua_application_unpause);
+    lua_setfield(L, -2, "unpause");
+    lua_pushcfunction(L, &lua_application_quit);
+    lua_setfield(L, -2, "quit");
+    return 1;
   }
-} // Application
-} // script_interface
 } // butane

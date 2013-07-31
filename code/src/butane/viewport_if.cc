@@ -5,71 +5,52 @@
 #include <butane/graphics/viewport.h>
 
 namespace butane {
-namespace script_interface {
-  namespace Viewport {
-    static size_t create(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      if (arguments != 4)
-        script.error("Expected four arguments (top : Number, left : Number, bottom : Number, right : Number).");
-      int top, left, bottom, right;
-      arguments.to(0, top);
-      arguments.to(1, left);
-      arguments.to(2, bottom);
-      arguments.to(3, right);
-      if ((top < 0) || (left < 0) || (bottom < 0) || (right < 0))
-        script.error("Expected top, left, bottom, and right to be non-negative.");
-      butane::Viewport* viewport =
-        make_new(butane::Viewport, Allocators::heap())(top, left, bottom, right);
-      script.stack().push((void*)viewport);
+  namespace {
+    static int lua_viewport_create( lua_State* L ) {
+      float* viewport = (float*)Allocators::heap().alloc(sizeof(float[4]));
+      viewport[0] = luaL_checknumber(L, 1);
+      luaL_argcheck(L, ((viewport[0] >= -1.0f) && (viewport[0] <= 1.0f)), 1, "expected viewport bounds in normalized device coordinates");
+      viewport[1] = luaL_checknumber(L, 2);
+      luaL_argcheck(L, ((viewport[1] >= -1.0f) && (viewport[1] <= 1.0f)), 2, "expected viewport bounds in normalized device coordinates");
+      viewport[2] = luaL_checknumber(L, 3);
+      luaL_argcheck(L, ((viewport[2] >= -1.0f) && (viewport[2] <= 1.0f)), 3, "expected viewport bounds in normalized device coordinates");
+      viewport[3] = luaL_checknumber(L, 4);
+      luaL_argcheck(L, ((viewport[3] >= -1.0f) && (viewport[3] <= 1.0f)), 4, "expected viewport bounds in normalized device coordinates");
+      lua_pushlightuserdata(L, (void*)viewport);
       return 1;
     }
 
-    static size_t destroy(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      if (arguments != 1)
-        script.error("Expected one argument (viewport : Viewport).");
-      butane::Viewport* viewport;
-      arguments.to(0, (void*&)viewport);
-      make_delete(Viewport, Allocators::heap(), viewport);
+    static int lua_viewport_destroy( lua_State* L ) {
+      float* viewport = (float*)luaL_checklightuserdata(L, 0);
+      Allocators::heap().free((void*)viewport);
       return 0;
     }
 
-    static size_t update(
-      Script& script,
-      const Script::Arguments& arguments )
-    {
-      if (arguments != 5)
-        script.error("Expected five arguments (viewport : Viewport, top : Number, left : Number, bottom : Number, right : Number).");
-      butane::Viewport* viewport;
-      int top, left, bottom, right;
-      arguments.to(0, (void*&)viewport);
-      arguments.to(1, top);
-      arguments.to(2, left);
-      arguments.to(3, bottom);
-      arguments.to(4, right);
-      if ((top < 0) || (left < 0) || (bottom < 0) || (right < 0))
-        script.error("Expected top, left, bottom, and right to be non-negative.");
-      viewport->update(top, left, bottom, right);
+    static int lua_viewport_update( lua_State* L ) {
+      float* viewport = (float*)luaL_checklightuserdata(L, 1);
+      viewport[0] = luaL_checknumber(L, 2);
+      luaL_argcheck(L, ((viewport[0] >= -1.0f) && (viewport[0] <= 1.0f)), 2, "expected viewport bounds in normalized device coordinates");
+      viewport[1] = luaL_checknumber(L, 3);
+      luaL_argcheck(L, ((viewport[1] >= -1.0f) && (viewport[1] <= 1.0f)), 3, "expected viewport bounds in normalized device coordinates");
+      viewport[2] = luaL_checknumber(L, 4);
+      luaL_argcheck(L, ((viewport[2] >= -1.0f) && (viewport[2] <= 1.0f)), 4, "expected viewport bounds in normalized device coordinates");
+      viewport[3] = luaL_checknumber(L, 5);
+      luaL_argcheck(L, ((viewport[3] >= -1.0f) && (viewport[3] <= 1.0f)), 5, "expected viewport bounds in normalized device coordinates");
       return 0;
     }
-  } // Viewport
-} // script_interface
+  }
 } // butane
 
 namespace butane {
-namespace script_interface {
-namespace Viewport {
-  void expose(
-    butane::Script& script )
+  int luaopen_viewport( lua_State* L )
   {
-    script.expose("Viewport.create", &create);
-    script.expose("Viewport.destroy", &destroy);
-    script.expose("Viewport.update", &update);
+    lua_createtable(L, 0, 3);
+    lua_pushcfunction(L, &lua_viewport_create);
+    lua_setfield(L, -2, "create");
+    lua_pushcfunction(L, &lua_viewport_destroy);
+    lua_setfield(L, -2, "destroy");
+    lua_pushcfunction(L, &lua_viewport_update);
+    lua_setfield(L, -2, "update");
+    return 1;
   }
-} // Viewport
-} // script_interface
 } // butane

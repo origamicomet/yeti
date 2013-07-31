@@ -8,12 +8,7 @@
 #include <butane/script.h>
 
 namespace butane {
-namespace script_interface {
-namespace Viewport {
-  extern BUTANE_EXPORT void expose(
-    butane::Script& script );
-} // Viewport
-} // script_interface
+  extern BUTANE_EXPORT int luaopen_viewport( lua_State* L );
 } // butane
 
 #endif // _BUTANE_VIEWPORT_INTERFACE_H_
