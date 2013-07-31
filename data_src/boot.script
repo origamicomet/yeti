@@ -181,3 +181,6 @@ for name, test in pairs(unit_tests) do
     Script.log(string.format("'%s' failed (%s)", name, err))
   end
 end
+
+win = Window.open("another window", 640, 480)
+Window.show(win)

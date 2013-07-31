@@ -5,6 +5,7 @@
 
 #include <butane/script_if.h>
 #include <butane/application_if.h>
+#include <butane/window_if.h>
 #include <butane/viewport_if.h>
 #include <butane/swap_chain_if.h>
 #include <butane/world_if.h>
@@ -28,6 +29,7 @@ namespace butane {
     #endif
       { "Script", &luaopen_script },
       { "Application", &luaopen_application },
+      { "Window", &luaopen_window },
       { "Viewport", &luaopen_viewport },
       { "SwapChain", &luaopen_swap_chain },
       { "World", &luaopen_world },
