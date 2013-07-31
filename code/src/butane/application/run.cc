@@ -93,6 +93,67 @@ namespace Application {
   Array<TiedResources*>& tied_resources()
   { return __ts_tied_resources(); }
 
+  static void on_swap_chain_resized(
+    void* /* unused */,
+    const SwapChain* swap_chain )
+  {
+    create_or_update_global_resources();
+  }
+
+  void create_window_and_swap_chain_and_resources(
+    const char* title,
+    const uint32_t width,
+    const uint32_t height,
+    Window*& window,
+    SwapChain*& swap_chain,
+    TiedResources*& swap_chain_and_resources )
+  {
+    window = Window::open(title, width, height);
+    Application::windows() += window;
+    swap_chain = SwapChain::create(window, PixelFormat::R8G8B8A8, width, height, false, false);
+    swap_chain->set_on_resized_handler(&on_swap_chain_resized);
+    Application::swap_chains() += swap_chain;
+    swap_chain_and_resources = TiedResources::create(swap_chain);
+    Application::tied_resources() += swap_chain_and_resources;
+  }
+
+  static const Array<Window*>::Iterator find_window( const Window* window ) {
+    for (auto iter = Application::windows().begin(); iter != Application::windows().end(); ++iter)
+      if ((*iter) == window)
+        return iter;
+    return Application::windows().end();
+  }
+
+  static const Array<SwapChain*>::Iterator find_swap_chain( const Window* window ) {
+    for (auto iter = Application::swap_chains().begin(); iter != Application::swap_chains().end(); ++iter)
+      if ((*iter)->window() == window)
+        return iter;
+    return Application::swap_chains().end();
+  }
+
+  static const Array<TiedResources*>::Iterator find_swap_chain_and_resources( const SwapChain* swap_chain ) {
+    for (auto iter = Application::tied_resources().begin(); iter != Application::tied_resources().end(); ++iter)
+      if ((*iter)->swap_chain() == swap_chain)
+        return iter;
+    return Application::tied_resources().end();
+  }
+
+  void destroy_window_and_swap_chain_and_resources(
+    Window* window )
+  {
+    assert(window != nullptr);
+    auto window_iter = find_window(window);
+    auto swap_chain_iter = find_swap_chain(*window_iter);
+    auto swap_chain_and_resources_iter = find_swap_chain_and_resources(*swap_chain_iter);
+    (*swap_chain_and_resources_iter)->destroy_global_resources();
+    (*swap_chain_and_resources_iter)->destroy();
+    Application::tied_resources().remove(swap_chain_and_resources_iter);
+    (*swap_chain_iter)->destroy();
+    Application::swap_chains().remove(swap_chain_iter);
+    (*window_iter)->close();
+    Application::windows().remove(window_iter);
+  }
+
   static Array<World*>& __worlds_initializer() {
     static Array<World*> worlds(Allocators::heap());
     return worlds; }

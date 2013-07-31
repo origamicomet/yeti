@@ -47,6 +47,19 @@ namespace Application {
   extern BUTANE_EXPORT Array<TiedResources*>& tied_resources();
 
   /*! */
+  extern BUTANE_EXPORT void create_window_and_swap_chain_and_resources(
+    const char* title,
+    const uint32_t width,
+    const uint32_t height,
+    Window*& window,
+    SwapChain*& swap_chain,
+    TiedResources*& swap_chain_and_resources );
+
+  /*! */
+  extern BUTANE_EXPORT void destroy_window_and_swap_chain_and_resources(
+    Window* window );
+
+  /*! */
   extern BUTANE_EXPORT Array<World*>& worlds();
 
   /*! */

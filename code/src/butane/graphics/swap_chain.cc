@@ -59,4 +59,12 @@ namespace butane {
   void SwapChain::set_vertical_sync(
     bool vertical_sync )
   { _vertical_sync = vertical_sync; }
+
+  void SwapChain::set_on_resized_handler(
+    OnResizedHandler handler,
+    void* closure )
+  {
+    _on_resized.handler = handler;
+    _on_resized.closure = closure;
+  }
 } // butane
