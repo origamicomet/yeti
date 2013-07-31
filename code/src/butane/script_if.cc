@@ -2,7 +2,10 @@
 // Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
 #include <butane/script_if.h>
+
 #include <butane/math.h>
+#include <butane/resource.h>
+#include <butane/resources/script.h>
 
 namespace butane {
   namespace {
@@ -562,6 +565,24 @@ namespace butane {
       temporaries.resize(luaL_checkinteger(L, 1));
       return 0;
     }
+
+    static int lua_require( lua_State* L ) {
+      const char* path = luaL_checkstring(L, 1);
+      luaL_getsubtable(L, LUA_REGISTRYINDEX, "_LOADED");
+      lua_getfield(L, -1, path);
+      if (!lua_isnil(L, -1)) {
+        lua_remove(L, -2);
+        return 1; }
+      lua_pop(L, 1);
+      const Resource::Handle<ScriptResource> resource =
+        Resource::Id(ScriptResource::type(), path);
+      if (luaL_loadbuffer(L, (const char*)resource->byte_code().raw(), resource->byte_code().size(), path) != 0)
+        return luaL_error(L, lua_tostring(L, -1));
+      lua_call(L, 0, 1);
+      lua_pushvalue(L, -1);
+      lua_setfield(L, -3, path);
+      return 1;
+    }
   }
 } // butane
 
@@ -700,6 +721,9 @@ namespace butane {
       lua_pushvalue(L, -1);
       lua_setmetatable(L, -2);
       lua_setfield(L, -2, "Quat");
+
+      lua_pushcfunction(L, &lua_require);
+      lua_setfield(L, -2, "require");
     } lua_pop(L, 1);
 
     lua_createtable(L, 0, 3);
