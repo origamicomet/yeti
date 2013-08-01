@@ -167,16 +167,17 @@ namespace butane {
     assert(name != nullptr);
     assert(num_of_arguments >= 0);
 
+    const int top_prior_to_pcall = lua_gettop(L);
+
     lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
     lua_getfield(L, -1, name);
-    lua_insert(L, -num_of_arguments - 1);
+    lua_insert(L, -num_of_arguments - 2);
     lua_pop(L, 1);
     lua_pushlightuserdata(L, (void*)this);
     lua_pushcclosure(L, &Script::__error_handler, 1);
-    lua_insert(L, -num_of_arguments - 2);
+    lua_insert(L, -num_of_arguments - 3);
 
-    const int top_prior_to_pcall = lua_gettop(L);
-    if (lua_pcall(L, num_of_arguments, LUA_MULTRET, -num_of_arguments - 2) != 0) {
+    if (lua_pcall(L, num_of_arguments, LUA_MULTRET, -num_of_arguments - 3) != 0) {
       lua_pop(L, 1);
       return -1; }
 
