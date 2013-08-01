@@ -92,6 +92,14 @@ namespace butane {
       FOUNDATION_INLINE const butane::VisualRepresentation::Id* visual_representations() const
       { return _visual_representations.raw(); }
 
+      /*! */
+      const Node::Id find_node_by_name( const Node::Name name ) const {
+        for (Node::Id id = 0; id < _names.size(); ++id)
+          if (_names[id] == name)
+            return id;
+        return Node::invalid;
+      }
+
     private:
       Array<Node::Type> _types;
       Array<Node::Link> _links;
