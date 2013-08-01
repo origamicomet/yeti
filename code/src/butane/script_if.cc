@@ -42,18 +42,51 @@ namespace butane {
     }
   }
 
+  Vec2f* lua_newvec2( lua_State* L ) {
+    Vec2f* v = ((Vec2f*)lua_newtemporary(L));
+    luaL_getmetatable(L, "Vec2");
+    lua_setmetatable(L, -2);
+    return v;
+  }
+
+  Vec2f* lua_checkvec2( lua_State* L, int idx ) {
+    return *((Vec2f**)luaL_checkuserdata2(L, idx, "Vec2"));
+  }
+
+  Vec3f* lua_newvec3( lua_State* L ) {
+    Vec3f* v = ((Vec3f*)lua_newtemporary(L));
+    luaL_getmetatable(L, "Vec3");
+    lua_setmetatable(L, -2);
+    return v;
+  }
+
+  Vec3f* lua_checkvec3( lua_State* L, int idx ) {
+    return *((Vec3f**)luaL_checkuserdata2(L, idx, "Vec3"));
+  }
+
+  Vec4f* lua_newvec4( lua_State* L ) {
+    Vec4f* v = ((Vec4f*)lua_newtemporary(L));
+    luaL_getmetatable(L, "Vec4");
+    lua_setmetatable(L, -2);
+    return v;
+  }
+
+  Vec4f* lua_checkvec4( lua_State* L, int idx ) {
+    return *((Vec4f**)luaL_checkuserdata2(L, idx, "Vec4"));
+  }
+
+  Quatf* lua_newquat( lua_State* L ) {
+    Quatf* v = ((Quatf*)lua_newtemporary(L));
+    luaL_getmetatable(L, "Quat");
+    lua_setmetatable(L, -2);
+    return v;
+  }
+
+  Quatf* lua_checkquat( lua_State* L, int idx ) {
+    return *((Quatf**)luaL_checkuserdata2(L, idx, "Quat"));
+  }
+
   namespace {
-    static Vec2f* lua_newvec2( lua_State* L ) {
-      Vec2f* v = ((Vec2f*)lua_newtemporary(L));
-      luaL_getmetatable(L, "Vec2");
-      lua_setmetatable(L, -2);
-      return v;
-    }
-
-    static Vec2f* lua_checkvec2( lua_State* L, int idx ) {
-      return *((Vec2f**)luaL_checkuserdata2(L, idx, "Vec2"));
-    }
-
     static int lua_vec2__call( lua_State* L ) {
       switch (lua_gettop(L)) {
         case 1: {
@@ -150,17 +183,6 @@ namespace butane {
   }
 
   namespace {
-    static Vec3f* lua_newvec3( lua_State* L ) {
-      Vec3f* v = ((Vec3f*)lua_newtemporary(L));
-      luaL_getmetatable(L, "Vec3");
-      lua_setmetatable(L, -2);
-      return v;
-    }
-
-    static Vec3f* lua_checkvec3( lua_State* L, int idx ) {
-      return *((Vec3f**)luaL_checkuserdata2(L, idx, "Vec3"));
-    }
-
     static int lua_vec3__call( lua_State* L ) {
       switch (lua_gettop(L)) {
         case 1: {
@@ -271,17 +293,6 @@ namespace butane {
   }
 
   namespace {
-    static Vec4f* lua_newvec4( lua_State* L ) {
-      Vec4f* v = ((Vec4f*)lua_newtemporary(L));
-      luaL_getmetatable(L, "Vec4");
-      lua_setmetatable(L, -2);
-      return v;
-    }
-
-    static Vec4f* lua_checkvec4( lua_State* L, int idx ) {
-      return *((Vec4f**)luaL_checkuserdata2(L, idx, "Vec4"));
-    }
-
     static int lua_vec4__call( lua_State* L ) {
       switch (lua_gettop(L)) {
         case 1: {
@@ -390,17 +401,6 @@ namespace butane {
   }
 
   namespace {
-    static Quatf* lua_newquat( lua_State* L ) {
-      Quatf* v = ((Quatf*)lua_newtemporary(L));
-      luaL_getmetatable(L, "Quat");
-      lua_setmetatable(L, -2);
-      return v;
-    }
-
-    static Quatf* lua_checkquat( lua_State* L, int idx ) {
-      return *((Quatf**)luaL_checkuserdata2(L, idx, "Quat"));
-    }
-
     static int lua_quat__call( lua_State* L ) {
       switch (lua_gettop(L)) {
         case 1: {
