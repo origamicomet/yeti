@@ -3,7 +3,6 @@
 
 #include <butane/script_if.h>
 
-#include <butane/math.h>
 #include <butane/resource.h>
 #include <butane/resources/script.h>
 

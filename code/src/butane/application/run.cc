@@ -263,7 +263,6 @@ namespace Application {
     const Array<const char*>& args )
   {
     const LogScope _("Application::run");
-    Task::Scheduler::initialize();
 
     for (auto iter = args.begin(); iter != args.end(); ++iter) {
       if (strcmp("-log-to-network", *iter) == 0) {
@@ -284,6 +283,8 @@ namespace Application {
       }
     }
 
+    Task::Scheduler::initialize();
+
     ConfigResource* manifest =
       (ConfigResource*)Resource::load(ConfigResource::type(), "manifest");
 
@@ -299,6 +300,7 @@ namespace Application {
 
       window = Window::open(title.raw(), (uint32_t)dims.x, (uint32_t)dims.y);
       window->set_on_closed_handler(&on_main_window_closed);
+      window->show();
       windows() += window;
     }
 
@@ -353,38 +355,33 @@ namespace Application {
         fail("Failed to load boot script!");
     }
 
-    World* world = World::create();
-    worlds() += world;
-
-    Unit::Reference camera; {
-      const Resource::Id id = Resource::Id(UnitResource::type(), "foundation/units/camera");
-      Resource::Handle<UnitResource> type = id;
-      Unit& unit = world->unit(world->spawn_unit(type));
-      SceneGraph::Node::Camera* camera_ = unit.scene_graph().nodes()[0].camera();
-      camera_->set_type(SceneGraph::Node::Camera::ORTHOGRAPHIC);
-      camera_->set_near(-1.0f);
-      camera_->set_far(1.0f);
-      camera_->set_view(Vec2f(-1.0f, -1.0f), Vec2f(1.0f, 1.0f));
-      camera = Unit::Reference(unit, 0);
+    /* init */ {
+      const int r = script.call("init", 0);
+      if (r < 0) Application::quit();
+      else lua_pop(script.state(), r);
     }
-
-    {
-      const Resource::Id id = Resource::Id(UnitResource::type(), "units/splash");
-      Resource::Handle<UnitResource> type = id;
-      world->spawn_unit(type);
-    }
-
-    window->show();
 
     Timer timer;
     while (true) {
       time_step_policy().frame(timer.microseconds() / 1000000.0f);
       timer.reset();
+
       for (auto iter = windows().begin(); iter != windows().end(); ++iter)
         (*iter)->update();
-      for (size_t step = 0; step < time_step_policy().num_of_steps(); ++step)
-        world->update(time_step_policy().delta_time_per_step());
-      world->render(camera, Viewport(0, 0, swap_chain->height(), swap_chain->width()), tied_resources()[0]);
+
+      /* update */ {
+        for (size_t step = 0; step < time_step_policy().num_of_steps(); ++step) {
+          lua_pushnumber(script.state(), time_step_policy().delta_time_per_step());
+          const int r = script.call("update", 1);
+          if (r < 0) Application::pause();
+          else lua_pop(script.state(), r); }
+      }
+
+      /* render */ {
+        const int r = script.call("render", 0);
+        if (r < 0) Application::pause();
+        else lua_pop(script.state(), r);
+      }
     }
   }
 } // Application
