@@ -10,6 +10,7 @@
 #include <butane/swap_chain_if.h>
 #include <butane/world_if.h>
 #include <butane/unit_if.h>
+#include <butane/scene_graph_if.h>
 
 namespace butane {
   Script::Script()
@@ -35,6 +36,9 @@ namespace butane {
       { "SwapChain", &luaopen_swap_chain },
       { "World", &luaopen_world },
       { "Unit", &luaopen_unit },
+      { "Node", &luaopen_node },
+      { "Camera", &luaopen_camera },
+      { "Mesh", &luaopen_mesh },
       { NULL, NULL }
     };
 
