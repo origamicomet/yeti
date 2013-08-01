@@ -85,6 +85,10 @@ class BUTANE_EXPORT Handle final
     FOUNDATION_INLINE bool valid() const
     { return (_resource != nullptr); }
 
+  public:
+    FOUNDATION_INLINE Id id() const
+    { return _id; }
+
   private:
     Id _id;
     T* _resource;
