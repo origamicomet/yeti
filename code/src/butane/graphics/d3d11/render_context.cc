@@ -35,14 +35,19 @@ namespace butane {
 
     cmd.num_of_render_target_views = num_of_render_targets;
 
-    for (size_t i = 0; i < num_of_render_targets; ++i)
+    for (size_t i = 0; i < num_of_render_targets; ++i) {
       cmd.render_target_views[i] = render_targets_[i]->view();
+      cmd.render_target_views[i]->AddRef();
+    }
 
     D3D11DepthStencilTarget* depth_stencil_target_ =
       ((D3D11DepthStencilTarget*)depth_stencil_target);
 
     cmd.depth_stencil_view =
       depth_stencil_target_ ? depth_stencil_target_->view() : nullptr;
+
+    if (cmd.depth_stencil_view)
+      cmd.depth_stencil_view->AddRef();
 
     command(key, (const void*)&cmd, sizeof(cmd));
   }
@@ -80,6 +85,7 @@ namespace butane {
 
     D3D11RenderDevice::Commands::ClearRenderTargetView cmd;
     cmd.view = ((D3D11RenderTarget*)render_target)->view();
+    cmd.view->AddRef();
     copy((void*)cmd.rgba, (const void*)&to_color, 16);
 
     command(key, (const void*)&cmd, sizeof(cmd));
@@ -95,6 +101,7 @@ namespace butane {
 
     D3D11RenderDevice::Commands::ClearDepthStencilView cmd;
     cmd.view = ((D3D11DepthStencilTarget*)depth_stencil_target)->view();
+    cmd.view->AddRef();
     cmd.depth = to_depth;
     cmd.stencil = to_stencil;
 
@@ -137,18 +144,25 @@ namespace butane {
 
     D3D11RenderDevice::Commands::Draw cmd;
     cmd.rasterizer_state = ((D3D11RasterizerState*)rasterizer_state)->interface();
+    cmd.rasterizer_state->AddRef();
     cmd.depth_stencil_state = ((D3D11DepthStencilState*)depth_stencil_state)->interface();
+    cmd.depth_stencil_state->AddRef();
     cmd.blend_state = ((D3D11BlendState*)blend_state)->interface();
+    cmd.blend_state->AddRef();
 
     cmd.num_of_samplers_and_textures = num_of_samplers_and_textures;
     D3D11Sampler** samplers_ = ((D3D11Sampler**)samplers);
     D3D11Texture** textures_ = ((D3D11Texture**)textures);
     for (size_t i = 0; i < num_of_samplers_and_textures; ++i) {
       cmd.samplers[i] = samplers_[i]->interface();
-      cmd.textures[i] = textures_[i]->srv(); }
+      cmd.samplers[i]->AddRef();
+      cmd.textures[i] = textures_[i]->srv();
+      cmd.textures[i]->AddRef(); }
 
     cmd.vertex_shader = ((D3D11VertexShader*)vertex_shader)->resource();
+    cmd.vertex_shader->AddRef();
     cmd.pixel_shader = ((D3D11PixelShader*)pixel_shader)->resource();
+    cmd.pixel_shader->AddRef();
 
     cmd.stride = vertex_declaration.size();
 
@@ -157,14 +171,18 @@ namespace butane {
 
     cmd.input_layout = render_device->find_or_create_input_layout(
       vertex_declaration, vertex_shader);
+    cmd.input_layout->AddRef();
 
     cmd.index_buffer = ((D3D11IndexBuffer*)indicies)->resource();
+    cmd.index_buffer->AddRef();
     cmd.vertex_buffer = ((D3D11VertexBuffer*)verticies)->resource();
+    cmd.vertex_buffer->AddRef();
 
     cmd.num_of_constant_buffers = num_of_constants;
     D3D11ConstantBuffer** constants_ = ((D3D11ConstantBuffer**)constants);
-    for (size_t i = 0; i < num_of_constants; ++i)
+    for (size_t i = 0; i < num_of_constants; ++i) {
       cmd.constant_buffers[i] = constants_[i]->resource();
+      cmd.constant_buffers[i]->AddRef(); }
 
     switch (topology) {
       case Topology::TRIANGLES:
@@ -184,6 +202,7 @@ namespace butane {
 
     D3D11RenderDevice::Commands::Present cmd;
     cmd.swap_chain = ((D3D11SwapChain*)swap_chain)->interface();
+    cmd.swap_chain->AddRef();
     cmd.interval = swap_chain->vertical_sync() ? 1 : 0;
 
     command(key, (const void*)&cmd, sizeof(cmd));

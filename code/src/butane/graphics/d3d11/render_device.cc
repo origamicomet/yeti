@@ -118,6 +118,7 @@ namespace butane {
         const Commands::ClearRenderTargetView& cmd =
           *((const Commands::ClearRenderTargetView*)&command);
         _context->ClearRenderTargetView(cmd.view, &cmd.rgba[0]);
+        cmd.view->Release();
       } return;
 
       case Command::CLEAR_DEPTH_STENCIL_VIEW: {
@@ -125,6 +126,7 @@ namespace butane {
         const Commands::ClearDepthStencilView& cmd =
           *((const Commands::ClearDepthStencilView*)&command);
         _context->ClearDepthStencilView(cmd.view, clear_flags, cmd.depth, cmd.stencil);
+        cmd.view->Release();
       } return;
 
       case Command::BIND_RENDER_AND_DEPTH_STENCIL_VIEWS: {
@@ -134,6 +136,8 @@ namespace butane {
           cmd.num_of_render_target_views,
           &cmd.render_target_views[0],
           cmd.depth_stencil_view);
+        for (UINT i = 0; i < cmd.num_of_render_target_views; ++i)
+          cmd.render_target_views[i]->Release();
       } return;
 
       case Command::SET_VIEWPORTS: {
@@ -147,20 +151,33 @@ namespace butane {
           *((const Commands::Draw*)&command);
         const UINT offsets[1] = { 0, };
         _context->RSSetState(cmd.rasterizer_state);
+        cmd.rasterizer_state->Release();
         _context->OMSetBlendState(cmd.blend_state, NULL, 0xFFFFFFFFu);
+        cmd.blend_state->Release();
         _context->OMSetDepthStencilState(cmd.depth_stencil_state, /* TODO */ 0);
+        cmd.depth_stencil_state->Release();
         _context->VSSetShader(cmd.vertex_shader, NULL, 0);
+        cmd.vertex_shader->Release();
         _context->PSSetShader(cmd.pixel_shader, NULL, 0);
+        cmd.pixel_shader->Release();
         _context->VSSetSamplers(0, cmd.num_of_samplers_and_textures, &cmd.samplers[0]);
         _context->VSSetShaderResources(0, cmd.num_of_samplers_and_textures, &cmd.textures[0]);
         _context->PSSetSamplers(0, cmd.num_of_samplers_and_textures, &cmd.samplers[0]);
         _context->PSSetShaderResources(0, cmd.num_of_samplers_and_textures, &cmd.textures[0]);
+        for (UINT i = 0; i < cmd.num_of_samplers_and_textures; ++i) {
+          cmd.samplers[i]->Release();
+          cmd.textures[i]->Release(); }
         _context->IASetInputLayout(cmd.input_layout);
+        cmd.input_layout->Release();
         _context->IASetPrimitiveTopology(cmd.topology);
         _context->IASetIndexBuffer(cmd.index_buffer, DXGI_FORMAT_R32_UINT, 0);
+        cmd.index_buffer->Release();
         _context->IASetVertexBuffers(0, 1, &cmd.vertex_buffer, &cmd.stride, &offsets[0]);
+        cmd.vertex_buffer->Release();
         _context->VSSetConstantBuffers(0, cmd.num_of_constant_buffers, &cmd.constant_buffers[0]);
         _context->PSSetConstantBuffers(0, cmd.num_of_constant_buffers, &cmd.constant_buffers[0]);
+        for (UINT i = 0; i < cmd.num_of_constant_buffers; ++i)
+          cmd.constant_buffers[i]->Release();
         _context->DrawIndexed(cmd.num_of_indicies, 0, 0);
       } return;
 
