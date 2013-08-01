@@ -7,18 +7,25 @@
 #include <butane/script_if.h>
 
 namespace butane {
+  Unit::Reference* lua_newunitref( lua_State* L ) {
+    return ((Unit::Reference*)lua_newuserdata(L, sizeof(Unit::Reference)));
+  }
+
+  Unit& lua_checkunit( lua_State* L, int idx ) {
+    const Unit::Reference& ref = *((Unit::Reference*)luaL_checkuserdata(L, idx));
+    luaL_argcheck(L, ref.valid(), idx, "invalid unit reference");
+    luaL_argcheck(L, ref.is_unit(), idx, "expected a unit--not node--reference");
+    return ref.to_unit();
+  }
+
+  SceneGraph::Node& lua_checknode( lua_State* L, int idx ) {
+    const Unit::Reference& ref = *((Unit::Reference*)luaL_checkuserdata(L, idx));
+    luaL_argcheck(L, ref.valid(), idx, "invalid unit reference");
+    luaL_argcheck(L, ref.is_node(), idx, "expected a node--not unit--reference");
+    return ref.to_node();
+  }
+
   namespace {
-    static Unit::Reference* lua_newunitref( lua_State* L ) {
-      return ((Unit::Reference*)lua_newuserdata(L, sizeof(Unit::Reference)));
-    }
-
-    static Unit& lua_checkunit( lua_State* L, int idx ) {
-      const Unit::Reference& ref = *((Unit::Reference*)luaL_checkuserdata(L, idx));
-      luaL_argcheck(L, ref.valid(), idx, "invalid unit reference");
-      luaL_argcheck(L, ref.is_unit(), idx, "expected a unit--not node--reference");
-      return ref.to_unit();
-    }
-
     static int lua_unit_node( lua_State* L ) {
       const Unit& unit = lua_checkunit(L, 1);
       switch (lua_type(L, 2)) {
