@@ -72,6 +72,7 @@ namespace butane {
     lua_State* L )
   {
     const Script& script = *((Script*)lua_touserdata(L, lua_upvalueindex(1)));
+    log("lua error: %s", lua_tostring(L, 1));
     if (script._on_error.handler)
       script._on_error.handler(script, script._on_error.closure, lua_tostring(L, 1));
     return 0;
