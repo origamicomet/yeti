@@ -9,6 +9,7 @@
 #include <butane/viewport_if.h>
 #include <butane/swap_chain_if.h>
 #include <butane/world_if.h>
+#include <butane/unit_if.h>
 
 namespace butane {
   Script::Script()
@@ -33,6 +34,7 @@ namespace butane {
       { "Viewport", &luaopen_viewport },
       { "SwapChain", &luaopen_swap_chain },
       { "World", &luaopen_world },
+      { "Unit", &luaopen_unit },
       { NULL, NULL }
     };
 
