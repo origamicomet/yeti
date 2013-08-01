@@ -65,6 +65,10 @@ namespace butane {
         OnErrorHandler handler,
         void* closure = nullptr );
 
+    public:
+      FOUNDATION_INLINE lua_State* state() const
+      { return L; }
+
     private:
       struct {
         void* closure;
