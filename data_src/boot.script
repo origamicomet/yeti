@@ -15,6 +15,7 @@ function init()
   Camera.set_view(camera, -1.0, -1.0, 1.0, 1.0)
   World.spawn_unit(world, "units/splash")
   viewport = Viewport.create(-1, -1, 1, 1)
+  Window.set_title(string.format("butane (platform=%s, architecture=%s, build=%s)", Application.platform(), Application.architecture(), Application.build()))
 end
 
 function shutdown()
