@@ -18,6 +18,7 @@ namespace butane {
     static int lua_node_set_local_position( lua_State* L ) {
       SceneGraph::Node& node = lua_checknode(L, 1);
       node.local_pose().position = *lua_checkvec3(L, 2);
+      node.set_moved(true);
       return 0;
     }
 
@@ -30,6 +31,7 @@ namespace butane {
     static int lua_node_set_local_rotation( lua_State* L ) {
       SceneGraph::Node& node = lua_checknode(L, 1);
       node.local_pose().rotation = *lua_checkquat(L, 2);
+      node.set_moved(true);
       return 0;
     }
 
@@ -42,6 +44,7 @@ namespace butane {
     static int lua_node_set_local_scale( lua_State* L ) {
       SceneGraph::Node& node = lua_checknode(L, 1);
       node.local_pose().scale = *lua_checkvec3(L, 2);
+      node.set_moved(true);
       return 0;
     }
   }

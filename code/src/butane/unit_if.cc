@@ -77,6 +77,8 @@ namespace butane {
     static int lua_unit_set_local_position( lua_State* L ) {
       Unit& unit = lua_checkunit(L, 1);
       unit.scene_graph().local_poses()[0].position = *lua_checkvec3(L, 2);
+      for (SceneGraph::Node::Id node = 0; node < unit.scene_graph().num_of_nodes(); ++node)
+        unit.scene_graph().flags()[node] |= SceneGraph::Node::MOVED;
       return 0;
     }
 
@@ -89,6 +91,8 @@ namespace butane {
     static int lua_unit_set_local_rotation( lua_State* L ) {
       Unit& unit = lua_checkunit(L, 1);
       unit.scene_graph().local_poses()[0].rotation = *lua_checkquat(L, 2);
+      for (SceneGraph::Node::Id node = 0; node < unit.scene_graph().num_of_nodes(); ++node)
+        unit.scene_graph().flags()[node] |= SceneGraph::Node::MOVED;
       return 0;
     }
 
@@ -101,6 +105,8 @@ namespace butane {
     static int lua_unit_set_local_scale( lua_State* L ) {
       Unit& unit = lua_checkunit(L, 1);
       unit.scene_graph().local_poses()[0].scale = *lua_checkvec3(L, 2);
+      for (SceneGraph::Node::Id node = 0; node < unit.scene_graph().num_of_nodes(); ++node)
+        unit.scene_graph().flags()[node] |= SceneGraph::Node::MOVED;
       return 0;
     }
 
