@@ -209,7 +209,7 @@ namespace butane {
 namespace butane {
   World::World()
     : _visual_representation(*this)
-    , _visual_representation_stream(nullptr)
+    , _visual_representation_stream(make_new(VisualRepresentationStream, Allocators::scratch())())
     , _spawning(allocator())
     , _despawning(allocator())
     , _next_avail_unit_id(Unit::invalid)
@@ -310,11 +310,6 @@ namespace butane {
         &Tasks::update_scene_graphs,
         (uintptr_t)usgd,
         update_units_task);
-    }
-
-    if (!_visual_representation_stream) {
-      _visual_representation_stream =
-        make_new(VisualRepresentationStream, Allocators::scratch())();
     }
 
     // TODO: Go wide. Use n VisualRepresentationStreams and then apply all with
@@ -424,7 +419,8 @@ namespace butane {
         generate_render_commands_task);
     }
 
-    _visual_representation_stream = nullptr;
+    _visual_representation_stream =
+      make_new(VisualRepresentationStream, Allocators::scratch())();
 
     dispatch_task->kick();
     generate_render_commands_task->kick();
