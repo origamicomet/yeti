@@ -21,7 +21,7 @@ namespace butane {
     }
 
     static int lua_viewport_destroy( lua_State* L ) {
-      float* viewport = (float*)luaL_checklightuserdata(L, 0);
+      float* viewport = (float*)luaL_checklightuserdata(L, 1);
       Allocators::heap().free((void*)viewport);
       return 0;
     }

@@ -79,8 +79,8 @@ namespace butane {
     static int lua_world_render( lua_State* L ) {
       World* world = lua_checkworld(L, 1);
       const Unit::Reference& camera = *((const Unit::Reference*)luaL_checkuserdata(L, 2));
-      const float* viewport_ = ((const float*)luaL_checkuserdata(L, 3));
-      const Window* window = ((const Window*)luaL_checklightuserdata(L, 4));
+      const float* viewport_ = ((const float*)luaL_checklightuserdata(L, 3));
+      const Window* window = ((lua_gettop(L) == 4) ? Application::windows()[0] : ((const Window*)luaL_checklightuserdata(L, 4)));
       const TiedResources* swap_chain_and_resources = find_swap_chain_and_resources(window);
       const SwapChain* swap_chain = swap_chain_and_resources->swap_chain();
       const Viewport viewport = Viewport(

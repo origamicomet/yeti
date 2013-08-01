@@ -25,5 +25,5 @@ function update( dt )
 end
 
 function render()
-  World.render(world, camera, viewport, window)
+  World.render(world, camera, viewport)
 end
