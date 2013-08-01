@@ -233,6 +233,27 @@ namespace butane {
     if (!hwnd)
       fail("CreateWindowExW failed, err=%d", GetLastError());
 
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONULL);
+    if (!monitor)
+      fail("MonitorFromWindow failed, err=%d", GetLastError());
+
+    MONITORINFO mi;
+    zero((void*)&mi, sizeof(MONITORINFO));
+    mi.cbSize = sizeof(MONITORINFO);
+    if (!GetMonitorInfo(monitor, &mi))
+      fail("GetMonitorInfo failed, err=%d", GetLastError());
+
+    RECT encompassing_area;
+    if (!GetWindowRect(hwnd, &encompassing_area))
+      fail("GetWindowRect failed, err=%d", GetLastError());
+
+    SetWindowPos(
+      hwnd,
+      HWND_TOP,
+      (mi.rcMonitor.right - mi.rcMonitor.left - (encompassing_area.right - encompassing_area.left - 1)) / 2 + mi.rcMonitor.left,
+      (mi.rcMonitor.bottom - mi.rcMonitor.top - (encompassing_area.bottom - encompassing_area.top - 1)) / 2 + mi.rcMonitor.top ,
+      0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE);
+
     SetPropA(hwnd, "butane::Window", (HANDLE)window);
     window->_hwnd = hwnd;
 
