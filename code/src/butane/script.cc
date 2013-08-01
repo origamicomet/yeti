@@ -161,9 +161,11 @@ namespace butane {
     lua_pushcclosure(L, &Script::__error_handler, 1);
     lua_insert(L, -2);
 
-    if (lua_pcall(L, 0, LUA_MULTRET, -2) != 0)
-      return false;
+    if (lua_pcall(L, 0, 0, -2) != 0) {
+      lua_pop(L, 1);
+      return false; }
 
+    lua_pop(L, 1);
     return true;
   }
 
@@ -178,18 +180,19 @@ namespace butane {
 
     lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS);
     lua_getfield(L, -1, name);
-    lua_insert(L, -num_of_arguments - 2);
-    lua_pop(L, 1);
+    lua_remove(L, -2);
+    lua_insert(L, -num_of_arguments - 1);
     lua_pushlightuserdata(L, (void*)this);
     lua_pushcclosure(L, &Script::__error_handler, 1);
-    lua_insert(L, -num_of_arguments - 3);
+    lua_insert(L, -num_of_arguments - 2);
 
-    if (lua_pcall(L, num_of_arguments, LUA_MULTRET, -num_of_arguments - 3) != 0) {
+    if (lua_pcall(L, num_of_arguments, LUA_MULTRET, -num_of_arguments - 2) != 0) {
       lua_pop(L, 1);
       return -1; }
 
-    lua_remove(L, -(lua_gettop(L) - top_prior_to_pcall) - 1);
-    return (lua_gettop(L) - top_prior_to_pcall);
+    const int num_of_results = lua_gettop(L) - (top_prior_to_pcall - num_of_arguments) - 1;
+    lua_remove(L, -num_of_results - 1);
+    return num_of_results;
   }
 
   void Script::set_on_error_handler(
