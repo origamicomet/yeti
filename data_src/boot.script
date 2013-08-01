@@ -1,17 +1,29 @@
 -- This file is part of Butane. See README.md and LICENSE.md for details.
 -- Copyright (c) 2012 Michael Williams <devbug@bitbyte.ca>
 
+local world = nil
+local camera = nil
+local viewport = nil
+
 function init()
+  world = World.create()
+  camera = Unit.node(World.spawn_unit(world, "foundation/units/camera"), 0)
+  assert(camera)
+  Camera.set_type(camera, "orthographic")
+  Camera.set_near(camera, -1.0)
+  Camera.set_far(camera, 1.0)
+  Camera.set_view(camera, -1.0, -1.0, 1.0, 1.0)
+  World.spawn_unit(world, "units/splash")
+  viewport = Viewport.create(-1, -1, 1, 1)
 end
 
 function shutdown()
 end
 
 function update( dt )
+  World.update(world, dt)
 end
 
 function render()
+  World.render(world, camera, viewport, window)
 end
-
-UnitTests = require("foundation/scripts/unit_tests")
-UnitTests.run()

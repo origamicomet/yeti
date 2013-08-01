@@ -69,9 +69,9 @@ namespace butane {
       return 0;
     }
 
-    static const TiedResources* find_swap_chain_and_resources( const SwapChain* swap_chain ) {
+    static const TiedResources* find_swap_chain_and_resources( const Window* window ) {
       for (auto iter = Application::tied_resources().begin(); iter != Application::tied_resources().end(); ++iter)
-        if ((*iter)->swap_chain() == swap_chain)
+        if ((*iter)->swap_chain()->window() == window)
           return *iter;
       return nullptr;
     }
@@ -79,9 +79,15 @@ namespace butane {
     static int lua_world_render( lua_State* L ) {
       World* world = lua_checkworld(L, 1);
       const Unit::Reference& camera = *((const Unit::Reference*)luaL_checkuserdata(L, 2));
-      const Viewport& viewport = *((const Viewport*)luaL_checkuserdata(L, 3));
-      const SwapChain* swap_chain = ((const SwapChain*)luaL_checklightuserdata(L, 4));
-      const TiedResources* swap_chain_and_resources = find_swap_chain_and_resources(swap_chain);
+      const float* viewport_ = ((const float*)luaL_checkuserdata(L, 3));
+      const Window* window = ((const Window*)luaL_checklightuserdata(L, 4));
+      const TiedResources* swap_chain_and_resources = find_swap_chain_and_resources(window);
+      const SwapChain* swap_chain = swap_chain_and_resources->swap_chain();
+      const Viewport viewport = Viewport(
+        (uint32_t)(swap_chain->height() * (viewport_[0] + 1) * 0.5f),
+        (uint32_t)(swap_chain->width() * (viewport_[1] + 1) * 0.5f),
+        (uint32_t)(swap_chain->height() * (viewport_[2] + 1) * 0.5f),
+        (uint32_t)(swap_chain->width() * (viewport_[3] + 1) * 0.5f));
       world->render(camera, viewport, swap_chain_and_resources);
       return 0;
     }
