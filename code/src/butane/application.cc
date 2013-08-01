@@ -107,6 +107,13 @@ namespace Application {
   void pause()
   {
   #if defined(BUTANE_DEBUG_BUILD) || defined(BUTANE_DEVELOPMENT_BUILD)
+    __builtin_trap();
+    // while (true) {
+    //   while (!commands().empty()) {
+    //     Console::Command cmd;
+    //     commands().dequeue(cmd);
+    //     Application::script().exec(cmd.code); }
+    //   __builtin_yield(); }
   #else
     fail("Calls to Application::pause are illegal in runtime builds!");
   #endif
