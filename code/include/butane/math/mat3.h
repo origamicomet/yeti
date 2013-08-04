@@ -40,6 +40,20 @@ namespace butane {
         const Mat3& m_ )
       { copy((void*)&m[0], (const void*)&m_.m[0], sizeof(m)); return *this; }
 
+      FOUNDATION_INLINE Mat3(
+        const Quatf& q )
+      {
+        m[0] = 1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z;
+        m[1] = 2.0f * q.x * q.y - 2.0f * q.z * q.w;
+        m[2] = 2.0f * q.x * q.z + 2.0f * q.y * q.w;
+        m[3] = 2.0f * q.x * q.y + 2.0f * q.z * q.w;
+        m[4] = 1.0f - 2.0f * q.x * q.x - 2.0f * q.z * q.z;
+        m[5] = 2.0f * q.y * q.z - 2.0f * q.x * q.w;
+        m[6] = 2.0f * q.x * q.z - 2.0f * q.y * q.w;
+        m[7] = 2.0f * q.y * q.z + 2.0f * q.x * q.w;
+        m[8] = 1.0f - 2.0f * q.x * q.x - 2.0f * q.y * q.y;
+      }
+
     public:
       static Mat3 from_euler_angles(
         const float x_in_radians,
@@ -64,21 +78,6 @@ namespace butane {
         return (x * y * z);
       }
 
-      static Mat3 from_quat(
-        const Quatf& q )
-      {
-        return Mat3(
-          1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z,
-          2.0f * q.x * q.y - 2.0f * q.z * q.w,
-          2.0f * q.x * q.z + 2.0f * q.y * q.w,
-          2.0f * q.x * q.y + 2.0f * q.z * q.w,
-          1.0f - 2.0f * q.x * q.x - 2.0f * q.z * q.z,
-          2.0f * q.y * q.z - 2.0f * q.x * q.w,
-          2.0f * q.x * q.z - 2.0f * q.y * q.w,
-          2.0f * q.y * q.z + 2.0f * q.x * q.w,
-          1.0f - 2.0f * q.x * q.x - 2.0f * q.y * q.y);
-      }
-
     public:
       FOUNDATION_INLINE Mat3 operator+ (
         const Mat3& m_ ) const
@@ -98,15 +97,15 @@ namespace butane {
 
       FOUNDATION_INLINE Mat3 operator* ( const Mat3& m_ ) const {
         return Mat3(
-          m[0] * m_.m[0] + m[1] * m_.m[3] + m[2] + m_.m[6],
-          m[0] * m_.m[1] + m[1] * m_.m[4] + m[2] * m_.m[7],
-          m[0] * m_.m[2] + m[1] * m_.m[5] + m[2] * m_.m[8],
-          m[3] * m_.m[0] + m[4] * m_.m[3] + m[5] + m_.m[6],
-          m[3] * m_.m[1] + m[4] * m_.m[4] + m[5] + m_.m[7],
-          m[3] * m_.m[2] + m[4] * m_.m[5] + m[5] + m_.m[8],
-          m[6] * m_.m[0] + m[7] * m_.m[3] + m[8] + m_.m[6],
-          m[6] * m_.m[1] + m[7] * m_.m[4] + m[8] + m_.m[7],
-          m[6] * m_.m[2] + m[7] * m_.m[5] + m[8] + m_.m[8]);
+          (m[0]*m_.m[0] + m[1]*m_.m[3] + m[2]*m_.m[6]),
+          (m[0]*m_.m[1] + m[1]*m_.m[4] + m[2]*m_.m[7]),
+          (m[0]*m_.m[2] + m[1]*m_.m[5] + m[2]*m_.m[8]),
+          (m[3]*m_.m[0] + m[4]*m_.m[3] + m[5]*m_.m[6]),
+          (m[3]*m_.m[1] + m[4]*m_.m[4] + m[5]*m_.m[7]),
+          (m[3]*m_.m[2] + m[4]*m_.m[5] + m[5]*m_.m[8]),
+          (m[6]*m_.m[0] + m[7]*m_.m[3] + m[8]*m_.m[6]),
+          (m[6]*m_.m[1] + m[7]*m_.m[4] + m[8]*m_.m[7]),
+          (m[6]*m_.m[2] + m[7]*m_.m[5] + m[8]*m_.m[8]));
       }
 
       FOUNDATION_INLINE Mat3 operator/ (

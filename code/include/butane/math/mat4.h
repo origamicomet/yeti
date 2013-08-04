@@ -22,11 +22,10 @@ namespace butane {
       FOUNDATION_INLINE Mat4(
         const Mat3& m_ )
       {
-        zero((void*)&m[0], sizeof(m));
-        copy((void*)&m[0], (const void*)&m_.m[0], 3 * sizeof(float));
-        copy((void*)&m[4], (const void*)&m_.m[3], 3 * sizeof(float));
-        copy((void*)&m[8], (const void*)&m_.m[6], 3 * sizeof(float));
-        m[15] = 1.0f;
+        m[0] = m_.m[0]; m[1] = m_.m[1]; m[2] = m_.m[2]; m[3] = 0.0f;
+        m[4] = m_.m[3]; m[5] = m_.m[4]; m[6] = m_.m[5]; m[7] = 0.0f;
+        m[8] = m_.m[6]; m[9] = m_.m[7]; m[10] = m_.m[8]; m[11] = 0.0f;
+        m[12] = 0.0f; m[13] = 0.0f; m[14] = 0.0f; m[15] = 1.0f;
       }
 
       FOUNDATION_INLINE Mat4(

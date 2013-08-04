@@ -69,10 +69,10 @@ namespace butane {
         const Quatf& q ) const
       {
         return Quatf(
-          w * q.w - x * q.x - y * q.y - z * q.z,
-          w * q.x + x * q.w + y * q.z - z * q.y,
-          w * q.y + y * q.w + z * q.x - x * q.z,
-          w * q.z + z * q.w + x * q.y - y * q.x);
+          (w * q.w - x * q.x - y * q.y - z * q.z),
+          (w * q.x + x * q.w + y * q.z - z * q.y),
+          (w * q.y - x * q.z + y * q.w + z * q.x),
+          (w * q.z + x * q.y - y * q.x + z * q.w));
       }
 
       FOUNDATION_INLINE Quatf operator/ (
@@ -90,10 +90,11 @@ namespace butane {
       FOUNDATION_INLINE Quatf& operator*= (
         const Quatf& q )
       {
-        w = w * q.w - x * q.x - y * q.y - z * q.z;
-        x = w * q.x + x * q.w + y * q.z - z * q.y;
-        y = w * q.y + y * q.w + z * q.x - x * q.z;
-        z = w * q.z + z * q.w + x * q.y - y * q.x;
+        w = (w * q.w - x * q.x - y * q.y - z * q.z);
+        x = (w * q.x + x * q.w + y * q.z - z * q.y);
+        y = (w * q.y - x * q.z + y * q.w + z * q.x);
+        z = (w * q.z + x * q.y - y * q.x + z * q.w);
+
         return *this;
       }
 
@@ -118,10 +119,13 @@ namespace butane {
       FOUNDATION_INLINE Quatf normalize() const
       { return (*this) / magnitude(); }
 
+      FOUNDATION_INLINE Quatf conjugate() const
+      { return Quatf(w, -x, -y, -z); }
+
       FOUNDATION_INLINE Quatf inverse() const
       {
         const float m = magnitude();
-        return Quatf(-x/m, -y/m, -z/m, w/m);
+        return Quatf(w/m, -x/m, -y/m, -z/m);
       }
 
     public:
