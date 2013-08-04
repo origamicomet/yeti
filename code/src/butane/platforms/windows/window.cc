@@ -3,6 +3,9 @@
 
 #include <butane/platforms/windows/window.h>
 
+#include <butane/input/mouse.h>
+// #include <butane/input/keyboard.h>
+
 namespace butane {
 namespace windows {
   static void state_to_styles(
@@ -188,6 +191,20 @@ namespace windows {
           return 0;
         window->butane::Window::set_dimensions(LOWORD(lParam), HIWORD(lParam));
         return 0;
+      } break;
+
+      case WM_LBUTTONUP: case WM_LBUTTONDOWN:
+      case WM_MBUTTONUP: case WM_MBUTTONDOWN:
+      case WM_RBUTTONUP: case WM_RBUTTONDOWN: {
+        Mouse::set_button(
+          Mouse::LEFT_BUTTON,
+          (wParam & MK_LBUTTON) ? Input::DOWN : Input::UP);
+        Mouse::set_button(
+          Mouse::MIDDLE_BUTTON,
+          (wParam & MK_MBUTTON) ? Input::DOWN : Input::UP);
+        Mouse::set_button(
+          Mouse::RIGHT_BUTTON,
+          (wParam & MK_RBUTTON) ? Input::DOWN : Input::UP);
       } break;
     }
 

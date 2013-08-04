@@ -8,6 +8,7 @@ preload code/src
 preload code/src/butane
 preload code/src/butane/application
 preload code/src/butane/graphics
+preload code/src/butane/input
 preload code/src/butane/math
 preload code/src/butane/platforms
 preload code/src/butane/resource
@@ -19,6 +20,7 @@ OBJS = code/src/*.o code/src/*.res
 OBJS += code/src/butane/*.o
 OBJS += code/src/butane/application/*.o
 OBJS += code/src/butane/graphics/*.o
+OBJS += code/src/butane/input/*.o
 OBJS += code/src/butane/math/*.o
 OBJS += code/src/butane/platforms/*.o
 OBJS += code/src/butane/resource/*.o

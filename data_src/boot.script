@@ -10,7 +10,7 @@ function init()
   world = World.create()
   camera = Unit.node(World.spawn_unit(world, "foundation/units/camera"), 0)
   assert(camera)
-  Camera.set_type(camera, "orthographic")
+  Camera.set_type(camera, 'orthographic')
   Camera.set_near(camera, -1.0)
   Camera.set_far(camera, 1.0)
   Camera.set_view(camera, -1, -1, 1, 1, -1, 1)
@@ -30,12 +30,18 @@ local t = 0.0
 function update( dt )
   Script.set_num_of_temporaries(0)
 
-  Unit.set_local_position(splashes[0], Vec3(math.cos(t), math.sin(t), 0))
-  Unit.set_local_position(splashes[1], Vec3(-math.cos(t), -math.sin(t), 0))
+  if Mouse.button('left') then
+    t = t + dt
+  elseif Mouse.button('right') then
+    t = t - dt
+  end
+
+  if Mouse.button('left') or Mouse.button('right') then
+    Unit.set_local_position(splashes[0], Vec3(math.cos(t), math.sin(t), 0))
+    Unit.set_local_position(splashes[1], Vec3(-math.cos(t), -math.sin(t), 0))
+  end
 
   World.update(world, dt)
-
-  t = t + dt
 end
 
 function render()
