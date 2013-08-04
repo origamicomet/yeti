@@ -141,6 +141,12 @@ namespace butane {
       luaL_argcheck(L, node.is_mesh(), idx, "expected a Mesh node");
       return *node.mesh();
     }
+
+    static int lua_mesh_set_material( lua_State* L ) {
+      SceneGraph::Node::Mesh& mesh = lua_checkmesh(L, 1);
+      lua_pushboolean(L, mesh.set_material(luaL_checkstring(L, 2)));
+      return 1;
+    }
   }
 } // butane
 
@@ -216,6 +222,8 @@ namespace butane {
     lua_setfield(L, -2, "local_scale");
     lua_pushcfunction(L, &lua_node_set_local_scale);
     lua_setfield(L, -2, "set_local_scale");
+    lua_pushcfunction(L, &lua_mesh_set_material);
+    lua_setfield(L, -2, "set_material");
     return 1;
   }
 } // butane
