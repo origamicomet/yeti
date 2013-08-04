@@ -380,6 +380,7 @@ namespace butane {
         (Tasks::FrustumCullData*)Allocators::scratch().alloc(sizeof(Tasks::FrustumCullData));
       fcd->objects = _visual_representation._meshes.raw();
       fcd->num_of_objects = _visual_representation._meshes.size();
+      fcd->num_of_frustums = 0;
       zero((void*)&fcd->frustums[0], 1 /* 32 */ * sizeof(Mat4));
       fcd->culled = culled;
       frustum_cull_task = render_world_task->child(
