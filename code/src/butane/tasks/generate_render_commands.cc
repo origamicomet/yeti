@@ -67,7 +67,7 @@ namespace Tasks {
     grcd->render_context->clear(
       (RenderContext::Command::Key)0x0000000000000000ull /* first */,
       grcd->swap_chain_and_resources->swap_chain()->render_target(),
-      Vec4f(0.0f, 0.0f, 0.0f, 0.0f));
+      Vec4f(0.5f, 0.5f, 0.5f, 1.0f));
 
     for (size_t idx = 0; idx < render_config->globals().size(); ++idx) {
       const RenderConfig::Resource& resource =
@@ -78,7 +78,7 @@ namespace Tasks {
             grcd->render_context->clear(
               (RenderContext::Command::Key)0x0000000000000000ull /* first */,
               (RenderTarget*)grcd->swap_chain_and_resources->globals()[idx],
-              Vec4f(0.0f, 0.0f, 0.0f, 0.0f)); }
+              Vec4f(0.5f, 0.5f, 0.5f, 1.0f)); }
           break;
         case RenderConfig::Resource::DEPTH_STENCIL_TARGET:
           if (!resource.render_or_depth_stencil_target.clear) {
@@ -107,7 +107,7 @@ namespace Tasks {
           grcd->render_context->clear(
             key(layer.id, 0),
             render_targets[rt],
-            Vec4f(0.0f, 0.0f, 0.0f, 0.0f)); }
+            Vec4f(0.5f, 0.5f, 0.5f, 1.0f)); }
       }
 
       DepthStencilTarget* depth_stencil_target =
