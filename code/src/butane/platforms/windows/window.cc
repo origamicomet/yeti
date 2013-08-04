@@ -193,18 +193,43 @@ namespace windows {
         return 0;
       } break;
 
-      case WM_LBUTTONUP: case WM_LBUTTONDOWN:
-      case WM_MBUTTONUP: case WM_MBUTTONDOWN:
-      case WM_RBUTTONUP: case WM_RBUTTONDOWN: {
-        Mouse::set_button(
-          Mouse::LEFT_BUTTON,
-          (wParam & MK_LBUTTON) ? Input::DOWN : Input::UP);
-        Mouse::set_button(
-          Mouse::MIDDLE_BUTTON,
-          (wParam & MK_MBUTTON) ? Input::DOWN : Input::UP);
-        Mouse::set_button(
-          Mouse::RIGHT_BUTTON,
-          (wParam & MK_RBUTTON) ? Input::DOWN : Input::UP);
+      // case WM_LBUTTONUP: case WM_LBUTTONDOWN:
+      // case WM_MBUTTONUP: case WM_MBUTTONDOWN:
+      // case WM_RBUTTONUP: case WM_RBUTTONDOWN: {
+      //   Mouse::set_button(
+      //     Mouse::LEFT_BUTTON,
+      //     (wParam & MK_LBUTTON) ? Input::DOWN : Input::UP);
+      //   Mouse::set_button(
+      //     Mouse::MIDDLE_BUTTON,
+      //     (wParam & MK_MBUTTON) ? Input::DOWN : Input::UP);
+      //   Mouse::set_button(
+      //     Mouse::RIGHT_BUTTON,
+      //     (wParam & MK_RBUTTON) ? Input::DOWN : Input::UP);
+      // } break;
+
+      case WM_INPUT: {
+        RAWINPUT ri;
+        UINT ris;
+        GetRawInputData(
+          (HRAWINPUT)lParam, RID_INPUT, NULL, &ris, sizeof(RAWINPUTHEADER));
+        assert(ris <= sizeof(RAWINPUT));
+        GetRawInputData(
+          (HRAWINPUT)lParam, RID_INPUT, (void*)&ri, &ris, sizeof(RAWINPUTHEADER));
+        switch (ri.header.dwType) {
+          case RIM_TYPEMOUSE: {
+            if (ri.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+              Mouse::set_button(Mouse::LEFT_BUTTON, Input::DOWN);
+            if (ri.data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP)
+              Mouse::set_button(Mouse::LEFT_BUTTON, Input::UP);
+            if (ri.data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN)
+              Mouse::set_button(Mouse::MIDDLE_BUTTON, Input::DOWN);
+            if (ri.data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP)
+              Mouse::set_button(Mouse::MIDDLE_BUTTON, Input::UP);
+            if (ri.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+              Mouse::set_button(Mouse::RIGHT_BUTTON, Input::DOWN);
+            if (ri.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
+              Mouse::set_button(Mouse::RIGHT_BUTTON, Input::UP);
+          } break; }
       } break;
     }
 
