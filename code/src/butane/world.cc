@@ -378,8 +378,9 @@ namespace butane {
     Task* frustum_cull_task; {
       Tasks::FrustumCullData* fcd =
         (Tasks::FrustumCullData*)Allocators::scratch().alloc(sizeof(Tasks::FrustumCullData));
-      fcd->objects = _visual_representation._meshes.raw();
       fcd->num_of_objects = _visual_representation._meshes.size();
+      fcd->stride_between_objects = sizeof(SceneGraph::Node::Mesh::VisualRepresentation);
+      fcd->objects = _visual_representation._meshes.raw();
       fcd->num_of_frustums = 0;
       zero((void*)&fcd->frustums[0], 1 /* 32 */ * sizeof(Mat4));
       fcd->culled = culled;

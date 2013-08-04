@@ -12,8 +12,9 @@
 namespace butane {
 namespace Tasks {
   struct FrustumCullData {
-    const VisualRepresentation* objects;
     size_t num_of_objects;
+    size_t stride_between_objects;
+    const VisualRepresentation* objects;
     size_t num_of_frustums;
     Mat4 frustums[1 /* 32 */];
     Array<VisualRepresentation::Culled>* culled;

@@ -13,12 +13,17 @@ namespace Tasks {
   {
     FrustumCullData* fcd = (FrustumCullData*)data;
 
-    for (size_t i = 0; i < fcd->num_of_objects; ++i) {
-      const VisualRepresentation& object = fcd->objects[i];
+    const VisualRepresentation* object = fcd->objects;
+    const VisualRepresentation* last_object = (const VisualRepresentation*)(
+      ((uintptr_t)fcd->objects) + fcd->num_of_objects * fcd->stride_between_objects);
+
+    while (object < last_object) {
       VisualRepresentation::Culled culled;
-      culled.id = object.id;
+      culled.id = object->id;
       culled.visible = 0xFFFFFFFFu;
       (*fcd->culled) += culled;
+      object = (const VisualRepresentation*)(
+        ((uintptr_t)object) + fcd->stride_between_objects);
     }
 
     Allocators::scratch().free((void*)data);

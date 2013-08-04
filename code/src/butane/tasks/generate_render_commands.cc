@@ -142,12 +142,15 @@ namespace Tasks {
     // TODO: Go wide.
     for (size_t idx = 0; idx < grcd->culled->size(); ++idx) {
       const VisualRepresentation::Culled& culled = (*grcd->culled)[idx];
-      if (!(culled.visible & 1u))
+      if (!(culled.visible & 0x1u))
         continue;
       switch (VisualRepresentation::type(culled.id)) {
         case VisualRepresentation::MESH: {
           const SceneGraph::Node::Mesh::VisualRepresentation* mesh =
-            (const SceneGraph::Node::Mesh::VisualRepresentation*)(&grcd->world->_visual_representation._meshes[grcd->world->_visual_representation._mesh_ids[culled.id & 0xFFFFFFFFu]]);
+            (const SceneGraph::Node::Mesh::VisualRepresentation*)(
+              &grcd->world->_visual_representation._meshes[
+              grcd->world->_visual_representation._mesh_ids[
+              culled.id & 0xFFFFFFFFu]]);
 
           const Mat4& model = mesh->transform;
           const Mat4 inv_model = mesh->transform.inverse();
