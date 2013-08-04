@@ -29,7 +29,6 @@ class Camera final {
         } orthographic;
         struct {
           float field_of_view;
-          float aspect_ratio;
         } perspective;
       };
     };
@@ -38,7 +37,21 @@ class Camera final {
     struct VisualRepresentation final
       : public Node::VisualRepresentation
     {
-      Mat4 projection;
+      Camera::Type type;
+      float near, far;
+      union {
+        struct {
+          float min_x, max_x;
+          float min_y, max_y;
+        } orthographic;
+        struct {
+          float field_of_view;
+        } perspective;
+      } as;
+
+      Mat4 projection(
+        const uint32_t width,
+        const uint32_t height ) const;
     };
 
   public:
@@ -92,12 +105,6 @@ class Camera final {
     void set_field_of_view(
       const float field_of_view );
 
-    FOUNDATION_INLINE float aspect_ratio() const
-    { return _as.perspective.aspect_ratio; }
-
-    void set_aspect_ratio(
-      const float aspect_ratio );
-
   private:
     Camera::Type _type;
     float _near, _far;
@@ -108,7 +115,6 @@ class Camera final {
       } orthographic;
       struct {
         float field_of_view;
-        float aspect_ratio;
       } perspective;
     } _as;
 };

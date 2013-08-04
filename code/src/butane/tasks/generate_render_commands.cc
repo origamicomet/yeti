@@ -42,7 +42,9 @@ namespace Tasks {
 
     const Mat4& view = camera->transform;
     const Mat4 inv_view = view.inverse();
-    const Mat4& proj = camera->projection;
+    const Mat4 proj = camera->projection(
+      grcd->swap_chain_and_resources->swap_chain()->width(),
+      grcd->swap_chain_and_resources->swap_chain()->height());
     const Mat4 inv_proj = proj.inverse();
     const Mat4 view_proj = proj * view;
 
@@ -61,7 +63,7 @@ namespace Tasks {
       globals = ConstantBuffer::create((void*)globals_, sizeof(Globals));
     }
 
-    const Frustum frustum = Frustum(view);
+    const Frustum frustum = Frustum(view_proj);
 
     // 1: Clear the back-buffer
     grcd->render_context->clear(

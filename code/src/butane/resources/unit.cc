@@ -377,17 +377,6 @@ namespace butane {
                     goto failure; }
                   camera->perspective.field_of_view = (float)value->value();
                 }
-
-                /* sn.as.camera.perspective.aspect_ratio = */ {
-                  const sjson::Number* value = (const sjson::Number*)data->find("aspect_ratio");
-                  if (!value) {
-                    output.log("Malformed input: the node %u is missing 'data.aspect_ratio'!", id);
-                    goto failure; }
-                  if (!value->is_number()) {
-                    output.log("Malformed input: 'data.aspect_ratio' in the node %u is not a number!", id);
-                    goto failure; }
-                  camera->perspective.aspect_ratio = (float)value->value();
-                }
               } break;
             }
           } break;

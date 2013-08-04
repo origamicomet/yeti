@@ -396,7 +396,8 @@ namespace butane {
         (Tasks::GenerateRenderCommandsData*)Allocators::scratch().alloc(sizeof(Tasks::GenerateRenderCommandsData));
       grcd->world = this;
       grcd->swap_chain_and_resources = swap_chain_and_resources;
-      grcd->camera = _visual_representation.visual_representation_from_id(camera.to_node().visual_representation());
+      grcd->camera = _visual_representation.visual_representation_from_id(
+        camera.to_node().visual_representation());
       grcd->viewport = viewport;
       grcd->render_context = render_context;
       grcd->culled = culled;

@@ -4,6 +4,28 @@
 #include <butane/scene_graph.h>
 
 namespace butane {
+  Mat4 SceneGraph::Node::Camera::VisualRepresentation::projection(
+    const uint32_t width,
+    const uint32_t height ) const
+  {
+    switch (type) {
+      case Camera::ORTHOGRAPHIC:
+        return Mat4::orthographic(
+          ((float)width) * ((as.orthographic.min_x + 1.0f) * 0.5f),
+          ((float)width) * ((as.orthographic.max_x + 1.0f) * 0.5f),
+          ((float)height) * ((as.orthographic.min_y + 1.0f) * 0.5f),
+          ((float)height) * ((as.orthographic.max_y + 1.0f) * 0.5f),
+          near, far);
+      case Camera::PERSPECTIVE:
+        return Mat4::perspective(
+          as.perspective.field_of_view,
+          ((float)width) / ((float)height),
+          near, far);
+      default:
+        __builtin_unreachable();
+    }
+  }
+
   SceneGraph::Node::Camera::Camera(
     const Serialized& serialized )
   {
@@ -21,7 +43,6 @@ namespace butane {
 
       case Camera::PERSPECTIVE: {
         _as.perspective.field_of_view = serialized.perspective.field_of_view;
-        _as.perspective.aspect_ratio = serialized.perspective.aspect_ratio;
       } break;
     }
   }
@@ -33,21 +54,19 @@ namespace butane {
   void SceneGraph::Node::Camera::update_visual_representation(
     VisualRepresentation& vr ) const
   {
+    vr.type = _type;
+    vr.near = _near;
+    vr.far  = _far;
     switch (_type) {
       case Camera::ORTHOGRAPHIC:
-        vr.projection = Mat4::orthographic(
-          _as.orthographic.min_x, _as.orthographic.max_x,
-          _as.orthographic.min_x, _as.orthographic.max_y,
-          _near, _far);
+        vr.as.orthographic.min_x = _as.orthographic.min_x;
+        vr.as.orthographic.max_x = _as.orthographic.max_x;
+        vr.as.orthographic.min_y = _as.orthographic.min_y;
+        vr.as.orthographic.max_y = _as.orthographic.max_y;
         break;
-
       case Camera::PERSPECTIVE:
-        vr.projection = Mat4::perspective(
-          _as.perspective.field_of_view,
-          _as.perspective.aspect_ratio,
-          _near, _far);
+        vr.as.perspective.field_of_view = _as.perspective.field_of_view;
         break;
-
       default:
         __builtin_unreachable();
     }
@@ -91,12 +110,4 @@ namespace butane {
     node().scene_graph().flags()[node().id()] &= Node::DIRTY;
     _as.perspective.field_of_view = field_of_view;
   }
-
-  void SceneGraph::Node::Camera::set_aspect_ratio(
-    const float aspect_ratio )
-  {
-    node().scene_graph().flags()[node().id()] &= Node::DIRTY;
-    _as.perspective.aspect_ratio = aspect_ratio;
-  }
-
 } // butane
