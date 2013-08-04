@@ -121,6 +121,18 @@ namespace butane {
         Vec2f(luaL_checknumber(L, 4), luaL_checknumber(L, 5)));
       return 0;
     }
+
+    static int lua_camera_field_of_view( lua_State* L ) {
+      const SceneGraph::Node::Camera& camera = lua_checkcamera(L, 1);
+      lua_pushnumber(L, camera.field_of_view());
+      return 1;
+    }
+
+    static int lua_camera_set_field_of_view( lua_State* L ) {
+      SceneGraph::Node::Camera& camera = lua_checkcamera(L, 1);
+      camera.set_field_of_view(luaL_checknumber(L, 2));
+      return 0;
+    }
   }
 
   namespace {
@@ -182,14 +194,10 @@ namespace butane {
     lua_setfield(L, -2, "view");
     lua_pushcfunction(L, &lua_camera_set_view);
     lua_setfield(L, -2, "set_view");
-    // lua_pushcfunction(L, &lua_camera_field_of_view);
-    // lua_setfield(L, -2, "field_of_view");
-    // lua_pushcfunction(L, &lua_camera_set_field_of_view);
-    // lua_setfield(L, -2, "set_field_of_view");
-    // lua_pushcfunction(L, &lua_camera_aspect_ratio);
-    // lua_setfield(L, -2, "aspect_ratio");
-    // lua_pushcfunction(L, &lua_camera_set_aspect_ratio);
-    // lua_setfield(L, -2, "set_aspect_ratio");
+    lua_pushcfunction(L, &lua_camera_field_of_view);
+    lua_setfield(L, -2, "field_of_view");
+    lua_pushcfunction(L, &lua_camera_set_field_of_view);
+    lua_setfield(L, -2, "set_field_of_view");
     return 1;
   }
 
