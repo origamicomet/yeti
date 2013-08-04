@@ -26,11 +26,15 @@ function shutdown()
 end
 
 local t = 0.0
+
 function update( dt )
   Script.set_num_of_temporaries(0)
+
   Unit.set_local_position(splashes[0], Vec3(math.cos(t), math.sin(t), 0))
   Unit.set_local_position(splashes[1], Vec3(-math.cos(t), -math.sin(t), 0))
+
   World.update(world, dt)
+
   t = t + dt
 end
 

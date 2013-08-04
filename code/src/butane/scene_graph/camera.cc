@@ -38,7 +38,7 @@ namespace butane {
         _as.orthographic.min_x = serialized.orthographic.min_x;
         _as.orthographic.max_x = serialized.orthographic.max_x;
         _as.orthographic.min_y = serialized.orthographic.min_y;
-        _as.orthographic.min_y = serialized.orthographic.max_y;
+        _as.orthographic.max_y = serialized.orthographic.max_y;
       } break;
 
       case Camera::PERSPECTIVE: {
