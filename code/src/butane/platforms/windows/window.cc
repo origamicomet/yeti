@@ -61,6 +61,11 @@ namespace windows {
     ShowWindow(_hwnd, SW_MAXIMIZE);
   }
 
+  bool Window::focused()
+  {
+    return (_hwnd == GetFocus());
+  }
+
   void Window::update()
   {
     MSG msg;

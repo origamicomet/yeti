@@ -53,6 +53,7 @@ namespace butane {
       virtual void hide() = 0;
       virtual void minimize() = 0;
       virtual void maximize() = 0;
+      virtual bool focused() = 0;
 
       virtual void update() = 0;
 

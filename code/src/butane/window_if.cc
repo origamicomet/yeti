@@ -85,6 +85,19 @@ namespace butane {
       return 0;
     }
 
+    static int lua_window_focused( lua_State* L ) {
+      switch (lua_gettop(L)) {
+        case 0:
+          lua_pushboolean(L, Application::windows()[0]->focused());
+          break;
+        case 1:
+          lua_pushboolean(L, ((Window*)luaL_checklightuserdata(L, 1))->focused());
+          break;
+        default:
+          return luaL_error(L, "expected zero or one arguments"); }
+      return 1;
+    }
+
     static int lua_window_title( lua_State* L ) {
       switch (lua_gettop(L)) {
         case 0:
@@ -187,6 +200,8 @@ namespace butane {
     lua_setfield(L, -2, "minimize");
     lua_pushcfunction(L, &lua_window_maximize);
     lua_setfield(L, -2, "maximize");
+    lua_pushcfunction(L, &lua_window_focused);
+    lua_setfield(L, -2, "focused");
     lua_pushcfunction(L, &lua_window_title);
     lua_setfield(L, -2, "title");
     lua_pushcfunction(L, &lua_window_set_title);

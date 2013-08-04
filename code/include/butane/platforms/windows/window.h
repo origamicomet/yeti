@@ -33,28 +33,27 @@ namespace windows {
       ~Window();
 
     public:
-      void close();
+      void close() override;
 
     public:
-      void show();
-      void hide();
-      void minimize();
-      void maximize();
+      void show() override;
+      void hide() override;
+      void minimize() override;
+      void maximize() override;
+      bool focused() override;
 
-      void update();
+      void update() override;
 
     public:
-      const String& title() const;
-
       void set_title(
-        const char* title );
+        const char* title ) override;
 
       void set_dimensions(
         const uint32_t width,
-        const uint32_t height );
+        const uint32_t height ) override;
 
       void set_fullscreen(
-        bool fullscreen );
+        bool fullscreen ) override;
 
     private:
       static void _initialize();
