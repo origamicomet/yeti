@@ -86,7 +86,7 @@ namespace butane {
     D3D11RenderDevice::Commands::ClearRenderTargetView cmd;
     cmd.view = ((D3D11RenderTarget*)render_target)->view();
     cmd.view->AddRef();
-    copy((void*)cmd.rgba, (const void*)&to_color, 16);
+    copy((void*)cmd.rgba, (const void*)&to_color, sizeof(float) * 4);
 
     command(key, (const void*)&cmd, sizeof(cmd));
   }
