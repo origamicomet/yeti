@@ -4,6 +4,7 @@
 local world = nil
 local camera = nil
 local viewport = nil
+local splash = nil
 
 function init()
   world = World.create()
@@ -12,8 +13,8 @@ function init()
   Camera.set_type(camera, "orthographic")
   Camera.set_near(camera, -1.0)
   Camera.set_far(camera, 1.0)
-  Camera.set_view(camera, -1.0, -1.0, 1.0, 1.0)
-  World.spawn_unit(world, "units/splash")
+  Camera.set_view(camera, 0, 0, 1280, 720, -1, 1)
+  splash = World.spawn_unit(world, "units/splash")
   viewport = Viewport.create(-1, -1, 1, 1)
   Window.set_title(string.format("butane (platform=%s, architecture=%s, build=%s)", Application.platform(), Application.architecture(), Application.build()))
 end
@@ -21,8 +22,13 @@ end
 function shutdown()
 end
 
+local t = 0.0
 function update( dt )
+  Script.set_num_of_temporaries(0)
+  local scale = (math.sin(t * math.pi * (8/3)) + 1) / 8 + .75
+  Unit.set_local_scale(splash, Vec3(1280/2*scale, 720/2*scale, 1))
   World.update(world, dt)
+  t = t + dt
 end
 
 function render()

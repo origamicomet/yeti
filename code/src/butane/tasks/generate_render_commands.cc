@@ -9,6 +9,7 @@
 #include <butane/graphics/swap_chain.h>
 #include <butane/graphics/render_device.h>
 #include <butane/graphics/render_context.h>
+#include <butane/graphics/constant_buffer.h>
 
 namespace butane {
 namespace Tasks {
@@ -44,6 +45,22 @@ namespace Tasks {
     const Mat4& proj = camera->projection;
     const Mat4 inv_proj = proj.inverse();
     const Mat4 view_proj = proj * view;
+
+    ConstantBuffer* globals; {
+      struct Globals {
+        Mat4 view, inv_view;
+        Mat4 proj, inv_proj;
+      };
+
+      Globals* globals_ = (Globals*)alloca(sizeof(Globals));
+      globals_->view = view;
+      globals_->inv_view = inv_view;
+      globals_->proj = proj;
+      globals_->inv_proj = inv_proj;
+
+      globals = ConstantBuffer::create((void*)globals_, sizeof(Globals));
+    }
+
     const Frustum frustum = Frustum(view);
 
     // 1: Clear the back-buffer
@@ -131,7 +148,22 @@ namespace Tasks {
             (const SceneGraph::Node::Mesh::VisualRepresentation*)(&grcd->world->_visual_representation._meshes[grcd->world->_visual_representation._mesh_ids[culled.id & 0xFFFFFFFFu]]);
 
           const Mat4& model = mesh->transform;
+          const Mat4 inv_model = mesh->transform.inverse();
           const Mat4 model_view_proj = view_proj * model;
+
+          ConstantBuffer* per_model; {
+            struct PerModel {
+              Mat4 model, inv_model;
+              Mat4 model_view_proj;
+            };
+
+            PerModel* per_model_ = (PerModel*)alloca(sizeof(PerModel));
+            per_model_->model = model;
+            per_model_->inv_model = inv_model;
+            per_model_->model_view_proj = model_view_proj;
+
+            per_model = ConstantBuffer::create((void*)per_model_, sizeof(PerModel));
+          }
 
           const MeshResource::Material& material =
             mesh->resource->materials()[mesh->material];
@@ -152,6 +184,7 @@ namespace Tasks {
               render_config->find_layer_by_name(material.shader->layers()[i]);
             if (!layer)
               continue;
+            ConstantBuffer* constant_buffers[2] = { globals, per_model };
             // const bool front_to_back =
             //   (layer->sort == RenderConfig::Layer::FRONT_TO_BACK);
             grcd->render_context->draw(
@@ -166,10 +199,12 @@ namespace Tasks {
               mesh->resource->vertex_declaration(),
               mesh->resource->vertices(),
               mesh->resource->indicies(),
-              0, nullptr /* &globals */,
+              2, &constant_buffers[0],
               Topology::TRIANGLES,
               mesh->resource->num_of_primitives());
           }
+
+          per_model->destroy();
         } break;
       }
     }
@@ -177,6 +212,8 @@ namespace Tasks {
     grcd->render_context->present(
       (RenderContext::Command::Key)0xFFFFFFFFFFFFFFFFull /* last */,
       grcd->swap_chain_and_resources->swap_chain());
+
+    globals->destroy();
 
     grcd->world->_visual_representation._mutex.unlock();
     typedef Array<butane::VisualRepresentation::Culled> Culled;

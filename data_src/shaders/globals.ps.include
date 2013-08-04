@@ -5,12 +5,15 @@
 #define __SHADERS_GLOBALS_PS__
 
 cbuffer Globals : register(b0) {
-  float4x4 model;
   float4x4 view;
-  float4x4 projection;
-  float4x4 inv_model;
   float4x4 inv_view;
+  float4x4 projection;
   float4x4 inv_projection;
+};
+
+cbuffer PerModel : register(b1) {
+  float4x4 model;
+  float4x4 inv_model;
   float4x4 model_view_proj;
 };
 

@@ -18,7 +18,7 @@ struct VS_OUTPUT {
 VS_OUTPUT vs_main( VS_INPUT IN )
 {
   VS_OUTPUT OUT;
-  OUT.position = float4(IN.position, 1.0); // mul(float4(IN.position, 1.0), model_view_proj);
+  OUT.position = mul(float4(IN.position, 1.0), model_view_proj);
   OUT.color = IN.color.xyz;
   OUT.tex_coord = IN.tex_coord.xy;
   return OUT;
