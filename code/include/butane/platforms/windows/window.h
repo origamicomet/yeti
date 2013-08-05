@@ -70,7 +70,6 @@ namespace windows {
 
     private:
       HWND _hwnd;
-      LONG _mouse_x, _mouse_y;
   };
 } // windows
 } // butane

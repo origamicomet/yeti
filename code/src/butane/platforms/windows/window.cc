@@ -29,8 +29,6 @@ namespace windows {
     bool fullscreen
   ) : butane::Window(title, width, height, fullscreen)
     , _hwnd(nullptr)
-    , _mouse_x(0)
-    , _mouse_y(0)
   {
     Window::_initialize();
   }
@@ -73,6 +71,12 @@ namespace windows {
 
   void Window::update()
   {
+    // HACK: Windows doesn't send a RIM_TYPEMOUSE message when the mouse stops
+    //       moving, hence the manual reset.
+    if (_hwnd == GetFocus()) {
+      Mouse::set_axis(Mouse::X_AXIS, Vec3f(0.0f, 0.0f, 0.0f));
+      Mouse::set_axis(Mouse::Y_AXIS, Vec3f(0.0f, 0.0f, 0.0f)); }
+
     MSG msg;
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
@@ -195,20 +199,6 @@ namespace windows {
         return 0;
       } break;
 
-      // case WM_LBUTTONUP: case WM_LBUTTONDOWN:
-      // case WM_MBUTTONUP: case WM_MBUTTONDOWN:
-      // case WM_RBUTTONUP: case WM_RBUTTONDOWN: {
-      //   Mouse::set_button(
-      //     Mouse::LEFT_BUTTON,
-      //     (wParam & MK_LBUTTON) ? Input::DOWN : Input::UP);
-      //   Mouse::set_button(
-      //     Mouse::MIDDLE_BUTTON,
-      //     (wParam & MK_MBUTTON) ? Input::DOWN : Input::UP);
-      //   Mouse::set_button(
-      //     Mouse::RIGHT_BUTTON,
-      //     (wParam & MK_RBUTTON) ? Input::DOWN : Input::UP);
-      // } break;
-
       case WM_INPUT: {
         RAWINPUT ri;
         UINT ris;
@@ -232,14 +222,8 @@ namespace windows {
             if (ri.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
               Mouse::set_button(Mouse::RIGHT_BUTTON, Input::UP);
             if (ri.data.mouse.usFlags == MOUSE_MOVE_RELATIVE) {
-              window->_mouse_x = ri.data.mouse.lLastX;
-              window->_mouse_y = ri.data.mouse.lLastY;
-            } else if (ri.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) {
-              window->_mouse_x -= ri.data.mouse.lLastX;
-              window->_mouse_y -= ri.data.mouse.lLastY; }
-            log("x = %d, y = %d", ri.data.mouse.lLastX, ri.data.mouse.lLastY);
-            Mouse::set_axis(Mouse::X_AXIS, Vec3f(window->_mouse_x, 0.0f, 0.0f));
-            Mouse::set_axis(Mouse::Y_AXIS, Vec3f(0.0f, window->_mouse_y, 0.0f));
+              Mouse::set_axis(Mouse::X_AXIS, Vec3f(ri.data.mouse.lLastX, 0.0f, 0.0f));
+              Mouse::set_axis(Mouse::Y_AXIS, Vec3f(0.0f, ri.data.mouse.lLastY, 0.0f)); }
           } break; }
       } break;
     }
