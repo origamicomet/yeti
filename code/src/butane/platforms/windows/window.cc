@@ -29,6 +29,8 @@ namespace windows {
     bool fullscreen
   ) : butane::Window(title, width, height, fullscreen)
     , _hwnd(nullptr)
+    , _mouse_x(0)
+    , _mouse_y(0)
   {
     Window::_initialize();
   }
@@ -229,6 +231,15 @@ namespace windows {
               Mouse::set_button(Mouse::RIGHT_BUTTON, Input::DOWN);
             if (ri.data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP)
               Mouse::set_button(Mouse::RIGHT_BUTTON, Input::UP);
+            if (ri.data.mouse.usFlags == MOUSE_MOVE_RELATIVE) {
+              window->_mouse_x = ri.data.mouse.lLastX;
+              window->_mouse_y = ri.data.mouse.lLastY;
+            } else if (ri.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) {
+              window->_mouse_x -= ri.data.mouse.lLastX;
+              window->_mouse_y -= ri.data.mouse.lLastY; }
+            log("x = %d, y = %d", ri.data.mouse.lLastX, ri.data.mouse.lLastY);
+            Mouse::set_axis(Mouse::X_AXIS, Vec3f(window->_mouse_x, 0.0f, 0.0f));
+            Mouse::set_axis(Mouse::Y_AXIS, Vec3f(0.0f, window->_mouse_y, 0.0f));
           } break; }
       } break;
     }

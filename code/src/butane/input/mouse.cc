@@ -26,6 +26,27 @@ namespace butane {
 
       _buttons[button] = state;
     }
+
+    static Vec3f _axes[3] = { Vec3f(), Vec3f(), Vec3f() };
+
+    Vec3f axis(
+      const Axis axis )
+    {
+      assert(axis >= X_AXIS);
+      assert(axis <= Y_AXIS);
+
+      return _axes[axis];
+    }
+
+    void set_axis(
+      const Axis axis,
+      const Vec3f& value )
+    {
+      assert(axis >= X_AXIS);
+      assert(axis <= Y_AXIS);
+
+      _axes[axis] = value;
+    }
   } // Mouse
 } // butane
 

@@ -95,7 +95,7 @@ namespace butane {
         const Vec3f& translation,
         const Quatf& rotation,
         const Vec3f& scale )
-      { return Mat4::scale(scale) * Mat4::rotate(rotation) * Mat4::translate(translation); }
+      { return Mat4::translate(translation) * Mat4::rotate(rotation) * Mat4::scale(scale); }
 
       static Mat4 orthographic(
         float min_x, float max_x,

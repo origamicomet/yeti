@@ -4,7 +4,7 @@
 local world = nil
 local camera = nil
 local viewport = nil
-local splashes = {}
+local splash = nil
 
 function init()
   world = World.create()
@@ -14,10 +14,8 @@ function init()
   Camera.set_near(camera, -1.0)
   Camera.set_far(camera, 1.0)
   Camera.set_view(camera, -1, -1, 1, 1, -1, 1)
-  splashes[0] = World.spawn_unit(world, "units/splash")
-  splashes[1] = World.spawn_unit(world, "units/splash")
-  Unit.set_local_scale(splashes[0], Vec3(1280 / 4, 720 / 4, 1))
-  Unit.set_local_scale(splashes[1], Vec3(1280 / 4, 720 / 4, 1))
+  splash = World.spawn_unit(world, "units/splash")
+  Unit.set_local_scale(splash, Vec3(1280 / 4, 720 / 4, 1))
   viewport = Viewport.create(-1, -1, 1, 1)
   Window.set_title(string.format("butane (platform=%s, architecture=%s, build=%s)", Application.platform(), Application.architecture(), Application.build()))
 end
@@ -25,22 +23,9 @@ end
 function shutdown()
 end
 
-local t = 0.0
-
 function update( dt )
   Script.set_num_of_temporaries(0)
-
-  if Mouse.button('left') then
-    t = t + dt
-  elseif Mouse.button('right') then
-    t = t - dt
-  end
-
-  if Mouse.button('left') or Mouse.button('right') then
-    Unit.set_local_position(splashes[0], Vec3(math.cos(t), math.sin(t), 0))
-    Unit.set_local_position(splashes[1], Vec3(-math.cos(t), -math.sin(t), 0))
-  end
-
+  Unit.set_local_position(splash, Vec3(Mouse.axis('x').x, Mouse.axis('y').y, 0))
   World.update(world, dt)
 end
 
