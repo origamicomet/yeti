@@ -5,7 +5,6 @@ endif
 
 ifeq (@(BUTANE_BUILD),development)
 SUFFIX = _dev
-LIB_SUFFIX = -dbg
 endif
 
 ifeq (@(TUP_ARCH),i386)
