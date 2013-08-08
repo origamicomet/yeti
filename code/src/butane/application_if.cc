@@ -4,6 +4,8 @@
 #include <butane/application_if.h>
 #include <butane/application.h>
 
+#include <butane/time_step_policy.h>
+
 namespace butane {
   namespace {
     static int lua_application_platform( lua_State* L ) {
@@ -35,6 +37,24 @@ namespace butane {
       Application::quit();
       return 0;
     }
+
+    static int lua_application_time_step_policy( lua_State* L ) {
+      switch (Application::time_step_policy().policy()) {
+        case TimeStepPolicy::VARIABLE:
+          lua_pushstring(L, "variable"); break;
+        default:
+          __builtin_unreachable(); }
+      return 1;
+    }
+
+    static int lua_application_set_time_step_policy( lua_State* L ) {
+      const char* policy = luaL_checkstring(L, 1);
+      if (strcmp("variable", policy) == 0)
+        Application::set_time_step_policy(TimeStepPolicy::variable());
+      else
+        luaL_argerror(L, 1, "expected 'variable', 'fixed', 'smoothed', or 'smoothed_with_debt_payback'");
+      return 0;
+    }
   }
 } // butane
 
@@ -54,6 +74,10 @@ namespace butane {
     lua_setfield(L, -2, "unpause");
     lua_pushcfunction(L, &lua_application_quit);
     lua_setfield(L, -2, "quit");
+    lua_pushcfunction(L, &lua_application_time_step_policy);
+    lua_setfield(L, -2, "time_step_policy");
+    lua_pushcfunction(L, &lua_application_set_time_step_policy);
+    lua_setfield(L, -2, "set_time_step_policy");
     return 1;
   }
 } // butane

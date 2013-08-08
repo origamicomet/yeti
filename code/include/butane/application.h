@@ -67,7 +67,7 @@ namespace Application {
 
   /*! */
   extern BUTANE_EXPORT void set_time_step_policy(
-    TimeStepPolicy& time_step_policy );
+    const TimeStepPolicy& time_step_policy );
 
   /*! */
   extern BUTANE_EXPORT void boot(

@@ -185,7 +185,7 @@ namespace Application {
   { return _time_step_policy; }
 
   void set_time_step_policy(
-    TimeStepPolicy& time_step_policy )
+    const TimeStepPolicy& time_step_policy )
   {
     _time_step_policy = time_step_policy;
   }

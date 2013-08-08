@@ -8,7 +8,7 @@
 
 namespace butane {
   class BUTANE_EXPORT TimeStepPolicy final {
-    private:
+    public:
       enum Policy {
         VARIABLE = 1,
       };
@@ -30,6 +30,10 @@ namespace butane {
 
       FOUNDATION_INLINE float delta_time_per_step() const
       { return _delta_time_per_step; }
+
+    public:
+      FOUNDATION_INLINE Policy policy() const
+      { return _policy; }
 
     private:
       Policy _policy;
