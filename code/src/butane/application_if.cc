@@ -42,6 +42,8 @@ namespace butane {
       switch (Application::time_step_policy().policy()) {
         case TimeStepPolicy::VARIABLE:
           lua_pushstring(L, "variable"); break;
+        case TimeStepPolicy::FIXED:
+          lua_pushstring(L, "fixed"); break;
         default:
           __builtin_unreachable(); }
       return 1;
@@ -51,6 +53,8 @@ namespace butane {
       const char* policy = luaL_checkstring(L, 1);
       if (strcmp("variable", policy) == 0)
         Application::set_time_step_policy(TimeStepPolicy::variable());
+      else if (strcmp("fixed", policy) == 0)
+        Application::set_time_step_policy(TimeStepPolicy::fixed(luaL_checknumber(L, 2)));
       else
         luaL_argerror(L, 1, "expected 'variable', 'fixed', 'smoothed', or 'smoothed_with_debt_payback'");
       return 0;

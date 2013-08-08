@@ -18,7 +18,14 @@ function shutdown()
 end
 
 function update( dt )
-  if Keyboard.button("escape") then Application.quit() end
+  if Keyboard.button("escape") then
+    Application.quit()
+  end
+
+  if Keyboard.button("f1") then
+    Window.set_title(string.format("ms = %f, fps = %f", dt * 1000, 1/dt))
+  end
+
   Script.set_num_of_temporaries(0)
   World.update(world, dt)
 end
