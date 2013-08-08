@@ -10,9 +10,10 @@ namespace butane {
   class BUTANE_EXPORT TimeStepPolicy final {
     public:
       enum Policy {
-        VARIABLE = 1,
-        FIXED    = 2,
-        SMOOTHED = 3
+        VARIABLE                   = 1,
+        FIXED                      = 2,
+        SMOOTHED                   = 3,
+        SMOOTHED_WITH_DEBT_PAYBACK = 4
       };
 
     public:
@@ -29,6 +30,12 @@ namespace butane {
         const size_t history,
         const size_t outliers,
         const float rate );
+
+      static TimeStepPolicy smoothed_with_debt_payback(
+        const size_t history,
+        const size_t outliers,
+        const float rate,
+        const float payback_rate );
 
     public:
       void frame(
@@ -57,6 +64,7 @@ namespace butane {
           size_t history;
           size_t outliers;
           float rate;
+          float payback_rate;
         } smoothed;
       } _settings;
       union {
@@ -68,6 +76,7 @@ namespace butane {
         struct {
           size_t saturation;
           float history[32];
+          float debt;
         } smoothed;
       } _data;
       size_t _num_of_steps;

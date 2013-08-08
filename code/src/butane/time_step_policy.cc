@@ -50,6 +50,21 @@ namespace butane {
     return tsp;
   }
 
+  TimeStepPolicy TimeStepPolicy::smoothed_with_debt_payback(
+    const size_t history,
+    const size_t outliers,
+    const float rate,
+    const float payback_rate )
+  {
+    assert(payback_rate > 0.0f);
+
+    TimeStepPolicy tsp = TimeStepPolicy::smoothed(history, outliers, rate);
+    tsp._policy = SMOOTHED_WITH_DEBT_PAYBACK;
+    tsp._settings.smoothed.payback_rate = payback_rate;
+    tsp._data.smoothed.debt = 0.0f;
+    return tsp;
+  }
+
   void TimeStepPolicy::frame(
     const float delta_time )
   {
@@ -64,7 +79,8 @@ namespace butane {
         _delta_time_per_step = _settings.fixed.target_delta_time;
         _data.fixed.debt = fmod(_data.fixed.debt, _settings.fixed.target_delta_time);
       } break;
-      case SMOOTHED: {
+      case SMOOTHED:
+      case SMOOTHED_WITH_DEBT_PAYBACK: {
         float* sorted = (float*)alloca(_data.smoothed.saturation * sizeof(float));
         copy(
           (void*)sorted,
@@ -89,6 +105,10 @@ namespace butane {
           (const void*)&_data.smoothed.history[1],
           (_settings.smoothed.history - 1) * sizeof(float));
         _data.smoothed.history[31] = delta_time;
+        if (_policy == SMOOTHED_WITH_DEBT_PAYBACK) {
+          const float payback = _data.smoothed.debt * _settings.smoothed.payback_rate;
+          _delta_time_per_step += payback;
+          _data.smoothed.debt -= payback; }
       } break;
       default:
         __builtin_unreachable();
