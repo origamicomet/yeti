@@ -11,7 +11,8 @@ namespace butane {
     public:
       enum Policy {
         VARIABLE = 1,
-        FIXED    = 2
+        FIXED    = 2,
+        SMOOTHED = 3
       };
 
     public:
@@ -23,6 +24,11 @@ namespace butane {
 
       static TimeStepPolicy fixed(
         const float target_delta_time );
+
+      static TimeStepPolicy smoothed(
+        const size_t history,
+        const size_t outliers,
+        const float rate );
 
     public:
       void frame(
@@ -47,6 +53,11 @@ namespace butane {
         struct {
           float target_delta_time;
         } fixed;
+        struct {
+          size_t history;
+          size_t outliers;
+          float rate;
+        } smoothed;
       } _settings;
       union {
         struct {
@@ -54,6 +65,10 @@ namespace butane {
         struct {
           float debt;
         } fixed;
+        struct {
+          size_t saturation;
+          float history[32];
+        } smoothed;
       } _data;
       size_t _num_of_steps;
       float _delta_time_per_step;
