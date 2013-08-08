@@ -5,6 +5,6 @@
 #define _BUTANE_INPUT_H_
 
 #include <butane/input/mouse.h>
-// #include <butane/input/keyboard.h>
+#include <butane/input/keyboard.h>
 
 #endif // _BUTANE_INPUT_H_

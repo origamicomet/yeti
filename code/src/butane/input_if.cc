@@ -44,6 +44,28 @@ namespace butane {
       return 1;
     }
   }
+
+  namespace {
+    static int lua_keyboard_name( lua_State* L ) {
+      lua_pushinteger(L, Keyboard::name(luaL_checkstring(L, 1)));
+      return 1;
+    }
+
+    static int lua_keyboard_button( lua_State* L ) {
+      switch (lua_type(L, 1)) {
+        case LUA_TNUMBER:
+          lua_pushboolean(L, Keyboard::button(luaL_checkinteger(L, 1)));
+          break;
+        case LUA_TSTRING: {
+          const Keyboard::Button btn = Keyboard::name(luaL_checkstring(L, 1));
+          luaL_argcheck(L, btn != 0xFFFFFFFFu, 1, "unknown button");
+          lua_pushboolean(L, Keyboard::button(btn));
+        } break;
+        default:
+          return luaL_error(L, "expected a button id or name"); }
+      return 1;
+    }
+  }
 } // butane
 
 namespace butane {
@@ -60,6 +82,10 @@ namespace butane {
   int luaopen_keyboard( lua_State* L )
   {
     lua_newtable(L);
+    lua_pushcfunction(L, &lua_keyboard_name);
+    lua_setfield(L, -2, "name");
+    lua_pushcfunction(L, &lua_keyboard_button);
+    lua_setfield(L, -2, "button");
     return 1;
   }
 } // butane
