@@ -209,7 +209,7 @@ namespace windows {
         return (vk - 0x41) + 34;
       case VK_F1: case VK_F2: case VK_F3: case VK_F4: case VK_F5: case VK_F6:
       case VK_F7: case VK_F8: case VK_F9: case VK_F10: case VK_F11: case VK_F12:
-        return (vk - VK_F12) + 1;
+        return (vk - VK_F1) + 1;
       case VK_OEM_1: return 28;
       case VK_OEM_PLUS: return 15;
       case VK_OEM_COMMA: return 30;
