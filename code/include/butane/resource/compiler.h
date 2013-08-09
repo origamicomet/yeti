@@ -74,6 +74,34 @@ class BUTANE_EXPORT Compiler final {
       const char* source_path,
       Logger logger,
       void* closure = nullptr );
+
+  private:
+    static Resource::Database* find_or_create_database(
+      const char* data_dir );
+
+    static void reflect_filesystem_changes_onto_database(
+      const char* data_dir,
+      const char* source_data_dir,
+      Resource::Database* db );
+
+    static void extract_properties_from_path(
+      const char* path,
+      Array<Resource::Property>& properties );
+
+    static Status compile_and_reflect_changes_onto_database(
+      const char* data_dir,
+      const char* source_data_dir,
+      const char* source_path,
+      time_t source_last_modified,
+      Resource::Database* db,
+      Logger logger,
+      void* closure = nullptr );
+
+  public:
+    static void run(
+      const char* data_dir,
+      const char* source_data_dir,
+      const bool daemon = false );
 };
 
 #endif // _BUTANE_RESOURCE_COMPILER_H_
