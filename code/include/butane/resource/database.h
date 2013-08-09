@@ -10,8 +10,8 @@ class BUTANE_EXPORT Database final {
   public:
     struct Record {
       Resource::Id id;
-      char path[256];
-      char source[256];
+      char path[64];
+      char source[64];
       size_t num_of_properties;
       Resource::Property properties[32];
       uint64_t compiled;
@@ -27,7 +27,10 @@ class BUTANE_EXPORT Database final {
     static Database* create(
       const char* path );
 
-    static Database* open(
+    static Database* load(
+      const char* path );
+
+    static Database* create_or_load(
       const char* path );
 
     bool save(

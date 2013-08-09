@@ -33,18 +33,68 @@ namespace butane {
     return make_new(Database, allocator())();
   }
 
-  Resource::Database* Resource::Database::open(
+  Resource::Database* Resource::Database::load(
     const char* path )
   {
     assert(path != nullptr);
-    return false;
+
+    FILE* fh = File::open(path, "rb");
+    if (!fh)
+      return nullptr;
+
+    uint32_t num_of_entries = 0;
+    if (!File::read(fh, (void*)&num_of_entries, sizeof(uint32_t))) {
+      fclose(fh);
+      return nullptr; }
+
+    Resource::Database* db =
+      make_new(Database, allocator())(num_of_entries + num_of_entries / 3);
+
+    for (uint32_t entry = 0; entry < num_of_entries; ++entry) {
+      Record record;
+      if (!File::read(fh, (void*)&record, sizeof(Record))) {
+        fclose(fh);
+        make_delete(Database, allocator(), db);
+        return nullptr; }
+      db->_entries.insert(record.id, record);
+    }
+
+    fclose(fh);
+    return db;
+  }
+
+  Resource::Database* Resource::Database::create_or_load(
+    const char* path )
+  {
+    Resource::Database* db = Resource::Database::load(path);
+    return db ? db : Resource::Database::create(path);
   }
 
   bool Resource::Database::save(
     const char* path )
   {
     assert(path != nullptr);
-    return false;
+
+    FILE* fh = File::open(path, "wb");
+    if (!fh)
+      return false;
+
+    uint32_t num_of_entries = _entries.load();
+    if (!File::write(fh, (const void*)&num_of_entries, sizeof(uint32_t))) {
+      fclose(fh);
+      return false; }
+
+    for (auto iter = _entries.raw().begin(); iter != _entries.raw().end(); ++iter) {
+      const Resource::Id invalid = Resource::Id();
+      if ((*iter).key == invalid)
+        continue;
+      if (!File::write(fh, (const void*)&(*iter).value, sizeof(Record))) {
+        fclose(fh);
+        return false; }
+    }
+
+    fclose(fh);
+    return true;
   }
 
   void Resource::Database::close()
