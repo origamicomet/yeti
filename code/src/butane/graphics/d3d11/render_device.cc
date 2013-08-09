@@ -235,7 +235,6 @@ namespace butane {
     if (_input_layout_cache.find(hash, input_layout))
       return input_layout;
 
-    UINT offset = 0;
     UINT num_of_input_elements = 0;
     UINT component_offsets[32] = { 0, };
     D3D11_INPUT_ELEMENT_DESC input_elements[32];
@@ -249,6 +248,7 @@ namespace butane {
         4, 4,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+      UINT offset = 0;
       uint32_t components = input.components();
       for (; components; ++num_of_input_elements) {
         const uint32_t component = __builtin_ctz(components);
