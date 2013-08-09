@@ -10,7 +10,7 @@ Countless rewrites and refactors have produced a meticulously and rigorously des
 Lightweight
 ---
 
-Minimalism and pragmatism dominate; Butane clocks in just under 22k lines of code.
+Minimalism and pragmatism dominate; Butane clocks in just over 14k lines of code.
 
 Modular
 ---
@@ -25,7 +25,7 @@ Careful attention to algorithims, data layouts, threading, and processor pipelin
 Flexible
 ---
 
-A completely data-driven architecture allows for rapid iteration of visuals and logic--without having to restart, or write a line of code.
+A completely data-driven architecture allows for rapid iteration of visuals and logic--without having to restart or write a line of code.
 
 # Meta
 
