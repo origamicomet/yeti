@@ -18,6 +18,7 @@ namespace butane {
       class Stream;
       template <typename T>
       class Handle;
+      typedef Hash<uint32_t, murmur_hash> Property;
 
       #include <butane/resource/id.h>
       #include <butane/resource/database.h>

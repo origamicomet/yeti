@@ -8,51 +8,14 @@ class BUTANE_EXPORT Database final {
   __foundation_trait(Database, non_copyable);
 
   public:
-    class Record {
-      public:
-        struct Serialized {
-          Resource::Id id;
-          char path[256];
-          // char properties[];
-          time_t compiled;
-        };
-
-      public:
-        Record()
-          : path(Allocators::heap())
-          , properties(Allocators::heap())
-          , compiled(0)
-        {}
-
-        ~Record()
-        {}
-
-        Record(
-          const Record& r
-        ) : path(r.path)
-          , properties(r.properties)
-          , compiled(r.compiled)
-        {}
-
-        Record& operator= (
-          const Record& r )
-        {
-          if (&r == this)
-            return *this;
-          path = r.path;
-          properties = r.properties;
-          compiled = r.compiled;
-          return *this;
-        }
-
-      public:
-        String path;
-        Array<String> properties;
-        time_t compiled;
+    struct Record {
+      Resource::Id id;
+      char path[256];
+      char source[256];
+      size_t num_of_properties;
+      Resource::Property properties[32];
+      uint64_t compiled;
     };
-
-  private:
-    typedef HashTable<Resource::Id, Record>::Pair Entry;
 
   private:
     Database(

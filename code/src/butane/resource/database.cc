@@ -37,64 +37,14 @@ namespace butane {
     const char* path )
   {
     assert(path != nullptr);
-
-    FILE* fh = File::open(path, "rb");
-    if (!fh)
-      return nullptr;
-
-    uint32_t num_of_entries = 0;
-    if (!File::read(fh, (void*)&num_of_entries, 4))
-      { fclose(fh); return nullptr; }
-
-    Database* db =
-      make_new(Database, allocator())();
-
-    for (uint32_t e = 0; e < num_of_entries; ++e) {
-      Record::Serialized serialized;
-      if (!File::read(fh, (void*)&serialized, sizeof(Record::Serialized)))
-        { make_delete(Database, allocator(), db); fclose(fh); return nullptr; }
-      Record record;
-      record.path = &serialized.path[0];
-      // record.properties = [];
-      record.compiled = serialized.compiled;
-      db->insert(serialized.id, record);
-    }
-
-    fclose(fh);
-    return db;
+    return false;
   }
 
   bool Resource::Database::save(
     const char* path )
   {
     assert(path != nullptr);
-
-    FILE* fh = File::open(path, "wb");
-    if (!fh)
-      return nullptr;
-
-    uint32_t num_of_entries = _entries.load();
-    if (!File::write(fh, (const void*)&num_of_entries, 4))
-      { fclose(fh); return false; }
-
-    static const Resource::Id empty;
-    for (uint32_t e = 0; e < _entries.raw().size(); ++e) {
-      const HashTable<Resource::Id, Record>::Pair& entry = _entries.raw()[e];
-      if (entry.key == empty)
-        continue;
-      Record::Serialized serialized;
-      serialized.id = entry.key;
-      assert(entry.value.path.size() <= 256);
-      assert(!entry.value.path.empty());
-      copy((void*)&serialized.path[0], (const void*)entry.value.path.raw(), entry.value.path.size());
-      zero((void*)&serialized.path[entry.value.path.size()], 256 - entry.value.path.size());
-      serialized.compiled = entry.value.compiled;
-      if (!File::write(fh, (const void*)&serialized, sizeof(Record::Serialized)))
-        { fclose(fh); return false; }
-    }
-
-    fclose(fh);
-    return true;
+    return false;
   }
 
   void Resource::Database::close()
