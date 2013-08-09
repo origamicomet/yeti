@@ -112,15 +112,6 @@ namespace butane {
     return Unsuccessful;
   }
 
-  Resource::Database* Resource::Compiler::find_or_create_database(
-    const char* data_dir )
-  {
-    const String path =
-      String::format(Allocators::scratch(), "%s/resource.db", data_dir);
-    Resource::Database* db = Resource::Database::open(path.raw());
-    return (db ? db : Resource::Database::create(path.raw()));
-  }
-
   void Resource::Compiler::reflect_filesystem_changes_onto_database(
       const char* data_dir,
       const char* source_data_dir,
@@ -202,11 +193,16 @@ namespace butane {
       return Skipped;
     const String relative_path_sans_ext_and_properties =
       Path::sans_extension(String(Allocators::scratch(), relative_path), true);
+    if ((strlen(relative_path) + 1) > 64) {
+      log("Path exceeds maximum supported path (a maximum of 64 characters are supported).");
+      return Unsuccessful; }
     const Resource::Id id = Resource::Id(*type, relative_path_sans_ext_and_properties);
     Database::Record record;
-    if (db->find(id, record))
+    if (db->find(id, record)) {
       if (source_last_modified < record.compiled)
         return Skipped;
+    } else {
+      zero((void*)&record, sizeof(record)); }
     Array<Resource::Property> properties(Allocators::heap());
     Resource::Compiler::extract_properties_from_path(relative_path, properties);
     if (properties.size() > 32) {
@@ -250,8 +246,10 @@ namespace butane {
     if (!Directory::exists(source_data_dir))
       fail("Invalid source data directory!");
 
+    const String database_path =
+      String::format(Allocators::scratch(), "%s/resource.db", data_dir);
     Resource::Database* db =
-      Resource::Compiler::find_or_create_database(data_dir);
+      Resource::Database::create_or_load(database_path.raw());
     if (!db)
       fail("Unable to find or create resource database!");
 
@@ -340,6 +338,7 @@ namespace butane {
       }
     }
 
+    db->save(database_path.raw());
     db->close();
   }
 } // butane

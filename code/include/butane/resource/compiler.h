@@ -76,9 +76,6 @@ class BUTANE_EXPORT Compiler final {
       void* closure = nullptr );
 
   private:
-    static Resource::Database* find_or_create_database(
-      const char* data_dir );
-
     static void reflect_filesystem_changes_onto_database(
       const char* data_dir,
       const char* source_data_dir,
