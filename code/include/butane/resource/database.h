@@ -12,7 +12,7 @@ class BUTANE_EXPORT Database final {
       Resource::Id id;
       char path[64];
       char source[64];
-      size_t num_of_properties;
+      uint32_t num_of_properties;
       Resource::Property properties[32];
       uint64_t compiled;
     };
