@@ -5,53 +5,116 @@
 
 namespace butane {
   Resource::Compiler::Status Resource::Compiler::compile(
-    const char* data_dir,
-    const char* source_data_dir,
-    const char* source_path,
-    Logger logger,
-    void* closure )
+    const Input& input,
+    const Output& output )
   {
-    const LogScope log_scope("Resource::Compiler::compile");
-
-    assert(data_dir != nullptr);
-    assert(source_data_dir != nullptr);
-    assert(source_path != nullptr);
-    assert(logger != nullptr);
-
-    if (!Directory::exists(data_dir))
-      if (!Directory::create(data_dir))
-        return Unsuccessful;
-
     const Resource::Type* type;
-    if (!(type = Resource::Type::determine(source_path)))
+    if (!(type = Resource::Type::determine(input.path)))
       return Skipped;
 
-    const char* relative_path =
-      chomp("\\", chomp("/", chomp(source_data_dir, source_path)));
+    if (!type->compile(input, output))
+      return Unsuccessful;
 
-    const String path =
+    const bool has_memory_resident_data = (ftell(output.memory_resident_data) != 0);
+    const bool has_streaming_data = (ftell(output.streaming_data) != 0);
+
+    if (!has_memory_resident_data && !has_streaming_data)
+      return Unsuccessful;
+
+    return Successful;
+  }
+
+  void Resource::Compiler::extract_properties_from_path(
+    const char* path,
+    Array<Resource::Property>& properties )
+  {
+    assert(path != nullptr);
+
+    const char* iter = path;
+    while (true) {
+      const char* seperator = foundation::find(iter, ".");
+      const char* min = foundation::next(seperator);
+      const char* next_seperator = foundation::find(min, ".");
+      const char* max = next_seperator;
+      if (!seperator || !next_seperator || !min || !max) break;
+      const size_t property_len = (max - min);
+      String extracted = String(Allocators::scratch(), property_len + 1);
+      copy((void*)extracted.raw(), (const void*)min, property_len);
+      extracted.raw()[property_len] = '\0';
+      properties += Resource::Property(extracted);
+      iter = next_seperator;
+    }
+  }
+
+  Resource::Compiler::Status Resource::Compiler::compile(
+    const char* source_data_dir,
+    const char* data_dir,
+    const char* path,
+    Resource::Database::Record& record,
+    const Log& log )
+  {
+    assert(source_data_dir != nullptr);
+    assert(data_dir != nullptr);
+    assert(path != nullptr);
+
+    const char* relative_path =
+      chomp("\\", chomp("/", chomp(source_data_dir, path)));
+
+    const Resource::Type* type = Resource::Type::determine(relative_path);
+    if (!type)
+      return Skipped;
+
+    if ((strlen(relative_path) + 1) > 64) {
+      log("Path exceeds maximum supported path (a maximum of 64 characters are supported).");
+      return Unsuccessful; }
+
+    const String relative_path_sans_ext_and_properties =
       Path::sans_extension(String(Allocators::scratch(), relative_path), true);
 
     const Resource::Id id =
-      Resource::Id(*type, path.raw());
+      Resource::Id(*type, relative_path_sans_ext_and_properties);
 
-    const String streams_dir =
-      String::format(Allocators::scratch(), "%s/%016" PRIx64, data_dir, (uint64_t)id);
+    Array<Resource::Property> properties(Allocators::heap());
+    Resource::Compiler::extract_properties_from_path(relative_path, properties);
 
-    if (!Directory::exists(streams_dir.raw()))
-      if (!Directory::create(streams_dir.raw()))
+    if (properties.size() > 32) {
+      log("Too many properties specified (a maximum of 32 are supported).");
+      return Unsuccessful; }
+
+    record.id = id;
+    copy(
+      (void*)&record.path[0],
+      (const void*)relative_path_sans_ext_and_properties.raw(),
+      relative_path_sans_ext_and_properties.size());
+    copy(
+      (void*)&record.source[0],
+      (const void*)relative_path,
+      strlen(relative_path) + 1);
+    record.num_of_properties = properties.size();
+    copy(
+      (void*)&record.properties[0],
+      (const void*)properties.raw(),
+      properties.size() * sizeof(Resource::Property));
+
+    const Resource::Variantion variation =
+      Resource::determine_variation_based_on_properties(properties);
+
+    const String resource_dir = String::format(Allocators::scratch(),
+      "%s/%016" PRIx64, data_dir, (uint64_t)id);
+
+    const String variation_dir = String::format(Allocators::scratch(),
+      "%s/%08x", resource_dir.raw(), variation);
+
+    if (!Directory::exists(resource_dir.raw()))
+      if (!Directory::create(resource_dir.raw()))
         return Unsuccessful;
 
-    // TODO: Use a temporary file and copy over.
-
-    FILE* source_data =
-      File::open(source_path, "rb");
-
-    if (!source_data)
-      return Unsuccessful;
+    if (!Directory::exists(variation_dir.raw()))
+      if (!Directory::create(variation_dir.raw()))
+        return Unsuccessful;
 
     const String memory_resident_data_path =
-      String::format(Allocators::scratch(), "%s/memory_resident_data", streams_dir.raw());
+      String::format(Allocators::scratch(), "%s/memory_resident_data", variation_dir.raw());
 
     FILE* memory_resident_data =
       File::open(memory_resident_data_path.raw(), "wb");
@@ -60,7 +123,7 @@ namespace butane {
       return Unsuccessful;
 
     const String streaming_data_path =
-      String::format(Allocators::scratch(), "%s/streaming_data", streams_dir.raw());
+      String::format(Allocators::scratch(), "%s/streaming_data", variation_dir.raw());
 
     FILE* streaming_data =
       File::open(streaming_data_path.raw(), "wb");
@@ -70,51 +133,67 @@ namespace butane {
 
     Input input;
     input.root = source_data_dir;
-    input.path = source_path;
-    input.data = source_data;
+    input.path = path;
+    input.data = File::open(path, "rb");
 
     Output output;
-    output.log = Log(logger, closure);
-    output.path = path.raw();
+    output.log = log;
+    output.path = relative_path_sans_ext_and_properties.raw();
     output.memory_resident_data = memory_resident_data;
     output.streaming_data = streaming_data;
 
-    if (type->compile(input, output)) {
-      const bool no_memory_resident_data = (ftell(memory_resident_data) == 0);
-      const bool no_streaming_data = (ftell(streaming_data) == 0);
+    const Status status = Resource::Compiler::compile(input, output);
+    const bool has_memory_resident_data = (ftell(output.memory_resident_data) != 0);
+    const bool has_streaming_data = (ftell(output.streaming_data) != 0);
 
-      fclose(source_data);
+    fclose(input.data);
+    fclose(output.memory_resident_data);
+    fclose(output.streaming_data);
 
-      fclose(memory_resident_data);
-      if (no_memory_resident_data)
+    if (status != Successful) {
+      File::remove(memory_resident_data_path.raw());
+      File::remove(streaming_data_path.raw());
+      Directory::remove(variation_dir.raw());
+    } else {
+      if (!has_memory_resident_data)
         File::remove(memory_resident_data_path.raw());
-
-      fclose(streaming_data);
-      if (no_streaming_data)
+      if (!has_streaming_data)
         File::remove(streaming_data_path.raw());
-
-      if (no_memory_resident_data && no_streaming_data)
-        return Unsuccessful;
-
-      return Successful;
     }
 
-    fclose(source_data);
+    return status;
+  }
 
-    fclose(memory_resident_data);
-    File::remove(memory_resident_data_path.raw());
+  Resource::Compiler::Status Resource::Compiler::compile_and_reflect_changes_onto_database(
+    const char* source_data_dir,
+    const char* data_dir,
+    const char* path,
+    Resource::Database* db,
+    const Log& log )
+  {
+    assert(source_data_dir != nullptr);
+    assert(data_dir != nullptr);
+    assert(path != nullptr);
+    assert(db != nullptr);
 
-    fclose(streaming_data);
-    File::remove(streaming_data_path.raw());
+    Resource::Database::Record record;
+    zero((void*)&record, sizeof(Resource::Database::Record));
 
-    Directory::remove(streams_dir.raw());
+    const Status status =
+      Resource::Compiler::compile(source_data_dir, data_dir, path, record, log);
 
-    return Unsuccessful;
+    if (status != Successful)
+      return status;
+
+    record.compiled = time(NULL);
+    db->update(record.id, record);
+
+    return status;
   }
 
   void Resource::Compiler::reflect_filesystem_changes_onto_database(
-      const char* data_dir,
       const char* source_data_dir,
+      const char* data_dir,
       Resource::Database* db )
   {
     struct ReflectFilesystemChangesOntoDatabase {
@@ -154,90 +233,41 @@ namespace butane {
     db->for_each(&ReflectFilesystemChangesOntoDatabase::reflect, (void*)&rfcodb);
   }
 
-  void Resource::Compiler::extract_properties_from_path(
+  bool Resource::Compiler::is_out_of_date(
+    const char* source_data_dir,
+    const char* data_dir,
     const char* path,
-    Array<Resource::Property>& properties )
+    uint64_t time,
+    Resource::Database* db )
   {
+    assert(source_data_dir != nullptr);
+    assert(data_dir != nullptr);
     assert(path != nullptr);
 
-    const char* iter = path;
-    while (true) {
-      const char* seperator = foundation::find(iter, ".");
-      const char* min = foundation::next(seperator);
-      const char* next_seperator = foundation::find(min, ".");
-      const char* max = next_seperator;
-      if (!seperator || !next_seperator || !min || !max) break;
-      const size_t property_len = (max - min);
-      String extracted = String(Allocators::scratch(), property_len + 1);
-      copy((void*)extracted.raw(), (const void*)min, property_len);
-      extracted.raw()[property_len] = '\0';
-      properties += Resource::Property(extracted);
-      iter = next_seperator;
-    }
-  }
-
-  Resource::Compiler::Status Resource::Compiler::compile_and_reflect_changes_onto_database(
-    const char* data_dir,
-    const char* source_data_dir,
-    const char* source_path,
-    time_t source_last_modified,
-    Resource::Database* db,
-    Logger logger,
-    void* closure )
-  {
-    const Log log(logger, closure);
     const char* relative_path =
-      chomp("\\", chomp("/", chomp(source_data_dir, source_path)));
+      chomp("\\", chomp("/", chomp(source_data_dir, path)));
+
     const Resource::Type* type = Resource::Type::determine(relative_path);
     if (!type)
-      return Skipped;
+      return false;
+
     const String relative_path_sans_ext_and_properties =
       Path::sans_extension(String(Allocators::scratch(), relative_path), true);
-    if ((strlen(relative_path) + 1) > 64) {
-      log("Path exceeds maximum supported path (a maximum of 64 characters are supported).");
-      return Unsuccessful; }
-    const Resource::Id id = Resource::Id(*type, relative_path_sans_ext_and_properties);
-    Database::Record record;
-    if (db->find(id, record)) {
-      if (source_last_modified < record.compiled)
-        return Skipped;
-    } else {
-      zero((void*)&record, sizeof(record)); }
-    Array<Resource::Property> properties(Allocators::heap());
-    Resource::Compiler::extract_properties_from_path(relative_path, properties);
-    if (properties.size() > 32) {
-      log("Too many properties specified (a maximum of 32 are supported).");
-      return Unsuccessful; }
-    const Status status = Resource::Compiler::compile(
-      data_dir, source_data_dir, source_path, logger, closure);
-    if (status != Successful)
-      return status;
-    record.id = id;
-    copy(
-      (void*)&record.path[0],
-      (const void*)relative_path_sans_ext_and_properties.raw(),
-      relative_path_sans_ext_and_properties.size());
-    copy(
-      (void*)&record.source[0],
-      (const void*)relative_path,
-      strlen(relative_path) + 1);
-    record.num_of_properties = properties.size();
-    copy(
-      (void*)&record.properties[0],
-      (const void*)properties.raw(),
-      properties.size() * sizeof(Resource::Property));
-    record.compiled = source_last_modified;
-    db->update(id, record);
-    return Successful;
+
+    const Resource::Id id =
+      Resource::Id(*type, relative_path_sans_ext_and_properties);
+
+    Resource::Database::Record record;
+    return (db->find(id, record) ? (time > record.compiled) : true);
   }
 
   void Resource::Compiler::run(
-    const char* data_dir,
     const char* source_data_dir,
+    const char* data_dir,
     bool daemon )
   {
-    assert(data_dir != nullptr);
     assert(source_data_dir != nullptr);
+    assert(data_dir != nullptr);
 
     if (!Directory::exists(data_dir))
       if (!Directory::create(data_dir))
@@ -255,7 +285,7 @@ namespace butane {
 
     /* Updated the database to reflect delete source or compiled data. */ {
       Resource::Compiler::reflect_filesystem_changes_onto_database(
-        data_dir, source_data_dir, db);
+        source_data_dir, data_dir, db);
     }
 
     struct Console {
@@ -274,11 +304,15 @@ namespace butane {
       if (!Directory::scan(source_data_dir, entries))
         fail("Unable to scan source data directory!");
       for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
+        const bool out_of_date = Resource::Compiler::is_out_of_date(
+          source_data_dir, data_dir,
+          &(*iter).path[0], (*iter).last_modified, db);
+        if (!out_of_date)
+          continue;
         Resource::Compiler::compile_and_reflect_changes_onto_database(
-          data_dir, source_data_dir,
+          source_data_dir, data_dir,
           &(*iter).path[0],
-          (*iter).last_modified,
-          db, &Console::log);
+          db, Log(&Console::log));
       }
     }
 
@@ -287,7 +321,6 @@ namespace butane {
         struct Event {
           Hash<uint32_t, murmur_hash> hash;
           char path[256];
-          time_t last_modified;
         };
 
       public:
@@ -305,7 +338,6 @@ namespace butane {
             return;
           Event event_;
           copy((void*)&event_.path, (const void*)&path[0], strlen(path) + 1);
-          event_.last_modified = time(NULL);
           event_.hash = Hash<uint32_t, murmur_hash>(&path[0]);
           daemon->events += event_;
         }
@@ -328,10 +360,9 @@ namespace butane {
             if (daemon_.events[event].hash == daemon_.events[event_].hash)
               goto duplicate;
           Resource::Compiler::compile_and_reflect_changes_onto_database(
-            data_dir, source_data_dir,
+            source_data_dir, data_dir,
             &daemon_.events[event].path[0],
-            daemon_.events[event].last_modified,
-            db, &Console::log);
+            db, Log(&Console::log));
         duplicate:
           continue;
         }

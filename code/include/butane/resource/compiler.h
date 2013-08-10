@@ -33,7 +33,7 @@ class BUTANE_EXPORT Compiler final {
 
         Log(
           const Logger logger,
-          void* closure
+          void* closure = nullptr
         ) : _logger(logger)
           , _closure(closure)
         {}
@@ -69,35 +69,47 @@ class BUTANE_EXPORT Compiler final {
 
   public:
     static Status compile(
-      const char* data_dir,
-      const char* source_data_dir,
-      const char* source_path,
-      Logger logger,
-      void* closure = nullptr );
+      const Input& input,
+      const Output& output );
 
   private:
-    static void reflect_filesystem_changes_onto_database(
-      const char* data_dir,
-      const char* source_data_dir,
-      Resource::Database* db );
-
     static void extract_properties_from_path(
       const char* path,
       Array<Resource::Property>& properties );
 
-    static Status compile_and_reflect_changes_onto_database(
-      const char* data_dir,
+  public:
+    static Status compile(
       const char* source_data_dir,
-      const char* source_path,
-      time_t source_last_modified,
+      const char* data_dir,
+      const char* path,
+      Resource::Database::Record& record,
+      const Log& log );
+
+  public:
+    static Status compile_and_reflect_changes_onto_database(
+      const char* source_data_dir,
+      const char* data_dir,
+      const char* path,
       Resource::Database* db,
-      Logger logger,
-      void* closure = nullptr );
+      const Log& log );
+
+  private:
+    static void reflect_filesystem_changes_onto_database(
+      const char* source_data_dir,
+      const char* data_dir,
+      Resource::Database* db );
+
+    static bool is_out_of_date(
+      const char* source_data_dir,
+      const char* data_dir,
+      const char* path,
+      uint64_t time,
+      Resource::Database* db );
 
   public:
     static void run(
-      const char* data_dir,
       const char* source_data_dir,
+      const char* data_dir,
       const bool daemon = false );
 };
 

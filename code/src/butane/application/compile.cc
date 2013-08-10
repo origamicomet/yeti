@@ -44,7 +44,7 @@ namespace Application {
       }
     }
 
-    Resource::Compiler::run(args[2], args[1], daemon);
+    Resource::Compiler::run(args[1], args[2], daemon);
 
     Application::quit();
   }

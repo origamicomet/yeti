@@ -120,6 +120,14 @@ namespace butane {
     __start_background_unloading_thread();
     __ts_marked_for_unload().enqueue(this);
   }
+
+  Resource::Variantion Resource::determine_variation_based_on_properties(
+    const Array<Resource::Property>& properties )
+  {
+    if (properties.empty())
+      return 0;
+    return murmur_hash((void*)properties.raw(), properties.size() * sizeof(Resource::Property), 0);
+  }
 } // butane
 
 namespace butane {

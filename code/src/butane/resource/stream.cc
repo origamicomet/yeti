@@ -26,7 +26,7 @@ namespace butane {
     const LogScope log_scope("Resource::Stream");
 
     const String streams_dir =
-      String::format(Allocators::scratch(), "data/%016" PRIx64, (uint64_t)id);
+      String::format(Allocators::scratch(), "data/%016" PRIx64 "/00000000", (uint64_t)id);
 
     if (!Directory::exists(streams_dir.raw()))
       fail("Streams directory, aka '%s', does not exist!", streams_dir.raw());
