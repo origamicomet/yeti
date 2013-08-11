@@ -35,7 +35,7 @@ namespace butane {
         const size_t history,
         const size_t outliers,
         const float rate,
-        const float payback_rate );
+        const float debt_payback_rate );
 
     public:
       void frame(
@@ -64,7 +64,7 @@ namespace butane {
           size_t history;
           size_t outliers;
           float rate;
-          float payback_rate;
+          float debt_payback_rate;
         } smoothed;
       } _settings;
       union {

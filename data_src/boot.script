@@ -9,7 +9,10 @@ local splash = nil
 function init()
   Window.set_title(string.format("butane (platform=%s, architecture=%s, build=%s)", Application.platform(), Application.architecture(), Application.build()))
   world = World.create()
+  camera = World.spawn_unit(world, "foundation/units/camera")
+  camera = { unit = camera, node = Unit.node(camera, 0) }
   viewport = Viewport.create(-1, -1, 1, 1)
+  Application.set_time_step_policy('smoothed_with_debt_payback', 11, 2, 0.2, 0.1)
 end
 
 function shutdown()
@@ -26,10 +29,14 @@ function update( dt )
     Window.set_title(string.format("ms = %f, fps = %f", dt * 1000, 1/dt))
   end
 
+  if math.random(0, 1000) > 750 then
+    for i=1,1000,1 do end
+  end
+
   Script.set_num_of_temporaries(0)
   World.update(world, dt)
 end
 
 function render()
-  -- World.render(world, camera, viewport)
+  World.render(world, camera.node, viewport)
 end

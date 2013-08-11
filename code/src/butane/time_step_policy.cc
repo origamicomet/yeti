@@ -39,6 +39,7 @@ namespace butane {
     assert(history <= 32);
     assert((outliers * 2) < history);
     assert(rate > 0.0f);
+    assert(rate <= 1.0f);
 
     TimeStepPolicy tsp;
     tsp._policy = SMOOTHED;
@@ -54,13 +55,13 @@ namespace butane {
     const size_t history,
     const size_t outliers,
     const float rate,
-    const float payback_rate )
+    const float debt_payback_rate )
   {
-    assert(payback_rate > 0.0f);
+    assert(debt_payback_rate > 0.0f);
 
     TimeStepPolicy tsp = TimeStepPolicy::smoothed(history, outliers, rate);
     tsp._policy = SMOOTHED_WITH_DEBT_PAYBACK;
-    tsp._settings.smoothed.payback_rate = payback_rate;
+    tsp._settings.smoothed.debt_payback_rate = debt_payback_rate;
     tsp._data.smoothed.debt = 0.0f;
     return tsp;
   }
@@ -81,34 +82,39 @@ namespace butane {
       } break;
       case SMOOTHED:
       case SMOOTHED_WITH_DEBT_PAYBACK: {
-        float* sorted = (float*)alloca(_data.smoothed.saturation * sizeof(float));
-        copy(
-          (void*)sorted,
-          (const void*)&_data.smoothed.history[32 - _data.smoothed.saturation],
-          (_data.smoothed.saturation) * sizeof(float));
-        sort(sorted, _data.smoothed.saturation);
-        if (_data.smoothed.saturation >= (_settings.smoothed.outliers * 2 + 1)) {
-          const float avg = arithmetic_mean(
-            &sorted[_settings.smoothed.outliers],
-            _data.smoothed.saturation - (_settings.smoothed.outliers * 2));
-          const float last_frame =
-            _data.smoothed.history[_data.smoothed.saturation - 1];
-          const float smoothed =
-            _settings.smoothed.rate*avg + (1-_settings.smoothed.rate) * last_frame;
-          _num_of_steps = 1;
-          _delta_time_per_step = smoothed;
-        } else {
-          _num_of_steps = 1;
-          _delta_time_per_step = delta_time; }
+        _num_of_steps = 1;
+        _delta_time_per_step = delta_time;
+
         copy_safe(
-          (void*)&_data.smoothed.history[0],
-          (const void*)&_data.smoothed.history[1],
+          (void*)&_data.smoothed.history[1],
+          (const void*)&_data.smoothed.history[0],
           (_settings.smoothed.history - 1) * sizeof(float));
-        _data.smoothed.history[31] = delta_time;
+        _data.smoothed.history[0] = delta_time;
+        _data.smoothed.saturation = min(
+          _data.smoothed.saturation + 1,
+          _settings.smoothed.history);
+
+        if (_data.smoothed.saturation >= (_settings.smoothed.outliers * 2 + 1)) {
+          float sorted[32];
+          copy(
+            (void*)&sorted[0],
+            (const void*)&_data.smoothed.history[0],
+            _data.smoothed.saturation * sizeof(float));
+          sort(&sorted[0], _data.smoothed.saturation);
+          const float avg = arithmetic_mean(
+            &sorted[_settings.smoothed.outliers - 1],
+            _data.smoothed.saturation - (_settings.smoothed.outliers * 2));
+          const float& rate = _settings.smoothed.rate;
+          const float smoothed =
+            rate * avg + (1 - rate) * delta_time;
+          _delta_time_per_step = smoothed;
+        }
+
         if (_policy == SMOOTHED_WITH_DEBT_PAYBACK) {
-          const float payback = _data.smoothed.debt * _settings.smoothed.payback_rate;
-          _delta_time_per_step += payback;
-          _data.smoothed.debt -= payback; }
+          _delta_time_per_step +=
+            _data.smoothed.debt * _settings.smoothed.debt_payback_rate;
+          _data.smoothed.debt += delta_time - _delta_time_per_step;
+        }
       } break;
       default:
         __builtin_unreachable();
