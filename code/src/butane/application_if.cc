@@ -60,9 +60,9 @@ namespace butane {
       else if (strcmp("fixed", policy) == 0)
         Application::set_time_step_policy(TimeStepPolicy::fixed(luaL_checknumber(L, 2)));
       else if (strcmp("smoothed", policy) == 0)
-        Application::set_time_step_policy(TimeStepPolicy::smoothed(luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), luaL_checknumber(L, 3)));
+        Application::set_time_step_policy(TimeStepPolicy::smoothed(luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), luaL_checknumber(L, 4)));
       else if (strcmp("smoothed_with_debt_payback", policy) == 0)
-        Application::set_time_step_policy(TimeStepPolicy::smoothed_with_debt_payback(luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), luaL_checknumber(L, 3), luaL_checknumber(L, 4)));
+        Application::set_time_step_policy(TimeStepPolicy::smoothed_with_debt_payback(luaL_checkinteger(L, 2), luaL_checkinteger(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5)));
       else
         luaL_argerror(L, 1, "expected 'variable', 'fixed', 'smoothed', or 'smoothed_with_debt_payback'");
       return 0;
