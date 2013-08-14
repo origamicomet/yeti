@@ -279,8 +279,8 @@ namespace butane {
           if (!samplers->is_array()) {
             output.log("Malformed input: 'samplers' in the layer %u is not an array!", id);
             goto failure; }
-          if (samplers->size() > BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS) {
-            output.log("Malformed input: expected less than %u samplers in the layer %u!", BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS, id);
+          if (samplers->size() > BUTANE_LAYER_MAXIMUM_NUM_OF_SAMPLERS) {
+            output.log("Malformed input: expected less than %u samplers in the layer %u!", BUTANE_LAYER_MAXIMUM_NUM_OF_SAMPLERS, id);
             goto failure; }
           sl.num_of_samplers = samplers->size();
           for (size_t sampler = 0; sampler < samplers->size(); ++sampler) {
@@ -318,8 +318,8 @@ namespace butane {
           if (!render_targets->is_array()) {
             output.log("Malformed input: 'render_targets' in the layer %u is not an array!", id);
             goto failure; }
-          if (render_targets->size() > BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS) {
-            output.log("Malformed input: expected less than %u render targets in the layer %u!", BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS, id);
+          if (render_targets->size() > BUTANE_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS) {
+            output.log("Malformed input: expected less than %u render targets in the layer %u!", BUTANE_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS, id);
             goto failure; }
           sl.num_of_render_targets = render_targets->size();
           for (size_t render_target = 0; render_target < render_targets->size(); ++render_target) {

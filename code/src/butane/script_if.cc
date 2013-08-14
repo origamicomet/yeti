@@ -589,7 +589,7 @@ namespace butane {
   int luaopen_script( lua_State* L ) {
     lua_pushlightuserdata(L, (void*)&__lua_temporaries_key);
     Array<lua_Temporary>* temporaries = new (lua_newuserdata(L, sizeof(Array<lua_Temporary>))) Array<lua_Temporary>(
-      Allocators::heap(), BT_SCRIPT_MAXIMUM_NUM_OF_TEMPORARY_MATH_OBJECTS);
+      Allocators::heap(), BUTANE_SCRIPT_MAXIMUM_NUM_OF_TEMPORARY_MATH_OBJECTS);
     lua_createtable(L, 0, 1);
     lua_pushcfunction(L, &lua_temporaries__gc);
     lua_setfield(L, -2, "__gc");

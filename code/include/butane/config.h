@@ -54,12 +54,12 @@
 #define BUTANE_MAXIMUM_NUM_OF_DISPATCHABLE_RENDER_CONTEXTS 1
 
 // The maximum number of bound textures/smaplers accepted by RenderConfig::Layers.
-#define BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS 8
+#define BUTANE_LAYER_MAXIMUM_NUM_OF_SAMPLERS 8
 
 // The maximum number of bound render targets accepted by RenderConfig::Layers.
-#define BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS 8
+#define BUTANE_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS 8
 
 // The maximum number of temporary math objects available to a script.
-#define BT_SCRIPT_MAXIMUM_NUM_OF_TEMPORARY_MATH_OBJECTS 4096
+#define BUTANE_SCRIPT_MAXIMUM_NUM_OF_TEMPORARY_MATH_OBJECTS 4096
 
 #endif // _BUTANE_CONFIG_H_

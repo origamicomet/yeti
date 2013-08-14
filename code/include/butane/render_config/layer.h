@@ -21,13 +21,13 @@ class BUTANE_EXPORT Layer {
     size_t num_of_samplers;
 
     /*! */
-    Resource::Id samplers[BT_LAYER_MAXIMUM_NUM_OF_SAMPLERS];
+    Resource::Id samplers[BUTANE_LAYER_MAXIMUM_NUM_OF_SAMPLERS];
 
     /*! */
     size_t num_of_render_targets;
 
     /*! */
-    Resource::Id render_targets[BT_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS];
+    Resource::Id render_targets[BUTANE_LAYER_MAXIMUM_NUM_OF_RENDER_TARGETS];
 
     /*! */
     Resource::Id depth_stencil_target;
