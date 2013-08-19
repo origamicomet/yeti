@@ -64,15 +64,16 @@ namespace butane {
     if (!type)
       return Skipped;
 
-    if ((strlen(relative_path) + 1) > 64) {
-      log("Path exceeds maximum supported path (a maximum of 64 characters are supported).");
-      return Unsuccessful; }
-
     const String relative_path_sans_ext_and_properties =
       Path::sans_extension(String(Allocators::scratch(), relative_path), true);
 
+    log("Compiling '%s' into '%s'", relative_path, relative_path_sans_ext_and_properties.raw());
+
     const Resource::Id id =
       Resource::Id(*type, relative_path_sans_ext_and_properties);
+
+    log(" type = '%s'", type->name().raw());
+    log(" id = %016" PRIx64, (uint64_t)id);
 
     Array<Resource::Property> properties(Allocators::heap());
     Resource::Compiler::extract_properties_from_path(relative_path, properties);
@@ -81,23 +82,23 @@ namespace butane {
       log("Too many properties specified (a maximum of 32 are supported).");
       return Unsuccessful; }
 
-    record.id = id;
-    copy(
-      (void*)&record.path[0],
-      (const void*)relative_path_sans_ext_and_properties.raw(),
-      relative_path_sans_ext_and_properties.size());
-    copy(
-      (void*)&record.source[0],
-      (const void*)relative_path,
-      strlen(relative_path) + 1);
-    record.num_of_properties = properties.size();
-    copy(
-      (void*)&record.properties[0],
-      (const void*)properties.raw(),
-      properties.size() * sizeof(Resource::Property));
+    if (properties.size() > 0) {
+      log(" properties = ");
+      for (size_t property = 0; property < properties.size(); ++property)
+        log(" [%u] = %08x", (uint32_t)property, (uint32_t)properties[property]);
+    }
 
-    const Resource::Variantion variation =
+    const Resource::Variation variation =
       Resource::determine_variation_based_on_properties(properties);
+
+    log(" variation = %08x", (uint32_t)variation);
+
+    record.set_path(relative_path_sans_ext_and_properties.raw());
+    Resource::Database::Record::Variation* variation_ =
+      record.find_or_add_variation_by_id(variation);
+    variation_->set_source(relative_path);
+    variation_->properties() = properties;
+    variation_->set_compiled_at(0);
 
     const String resource_dir = String::format(Allocators::scratch(),
       "%s/%016" PRIx64, data_dir, (uint64_t)id);
@@ -105,13 +106,19 @@ namespace butane {
     const String variation_dir = String::format(Allocators::scratch(),
       "%s/%08x", resource_dir.raw(), variation);
 
-    if (!Directory::exists(resource_dir.raw()))
-      if (!Directory::create(resource_dir.raw()))
+    if (!Directory::exists(resource_dir.raw())) {
+      if (!Directory::create(resource_dir.raw())) {
+        log("Unable to create output directory '%s'!", resource_dir.raw());
         return Unsuccessful;
+      }
+    }
 
-    if (!Directory::exists(variation_dir.raw()))
-      if (!Directory::create(variation_dir.raw()))
+    if (!Directory::exists(variation_dir.raw())) {
+      if (!Directory::create(variation_dir.raw())) {
+        log("Unable to create output directory '%s'!", variation_dir.raw());
         return Unsuccessful;
+      }
+    }
 
     const String memory_resident_data_path =
       String::format(Allocators::scratch(), "%s/memory_resident_data", variation_dir.raw());
@@ -119,8 +126,10 @@ namespace butane {
     FILE* memory_resident_data =
       File::open(memory_resident_data_path.raw(), "wb");
 
-    if (!memory_resident_data)
+    if (!memory_resident_data) {
+      log("Unable to create output stream '%s'!", memory_resident_data_path.raw());
       return Unsuccessful;
+    }
 
     const String streaming_data_path =
       String::format(Allocators::scratch(), "%s/streaming_data", variation_dir.raw());
@@ -128,8 +137,10 @@ namespace butane {
     FILE* streaming_data =
       File::open(streaming_data_path.raw(), "wb");
 
-    if (!streaming_data)
+    if (!streaming_data) {
+      log("Unable to create output stream '%s'!", streaming_data_path.raw());
       return Unsuccessful;
+    }
 
     Input input;
     input.root = source_data_dir;
@@ -154,11 +165,15 @@ namespace butane {
       File::remove(memory_resident_data_path.raw());
       File::remove(streaming_data_path.raw());
       Directory::remove(variation_dir.raw());
+      record.remove_variation_by_id(variation);
+      log("Compilation was unsuccessful!");
     } else {
       if (!has_memory_resident_data)
         File::remove(memory_resident_data_path.raw());
       if (!has_streaming_data)
         File::remove(streaming_data_path.raw());
+      variation_->set_compiled_at(time(NULL));
+      log("Compilation was successful (finished at %016" PRIx64 ")!", variation_->compiled_at());
     }
 
     return status;
@@ -176,46 +191,86 @@ namespace butane {
     assert(path != nullptr);
     assert(db != nullptr);
 
-    Resource::Database::Record record;
-    zero((void*)&record, sizeof(Resource::Database::Record));
+    Resource::Id id; {
+      const char* relative_path =
+        chomp("\\", chomp("/", chomp(source_data_dir, path)));
+      const Resource::Type* type = Resource::Type::determine(relative_path);
+      if (!type) return Skipped;
+      const String relative_path_sans_ext_and_properties =
+        Path::sans_extension(String(Allocators::scratch(), relative_path), true);
+      id = Resource::Id(*type, relative_path_sans_ext_and_properties);
+    }
 
-    const Status status =
-      Resource::Compiler::compile(source_data_dir, data_dir, path, record, log);
-
-    if (status != Successful)
-      return status;
-
-    record.compiled = time(NULL);
-    db->update(record.id, record);
-
-    return status;
+    return Resource::Compiler::compile(
+      source_data_dir, data_dir, path, *db->find_or_add(id), log);
   }
 
   void Resource::Compiler::reflect_filesystem_changes_onto_database(
-      const char* source_data_dir,
-      const char* data_dir,
-      Resource::Database* db )
+    const char* source_data_dir,
+    const char* data_dir,
+    Resource::Database* db )
   {
     struct ReflectFilesystemChangesOntoDatabase {
+      private:
+        struct PerVariation {
+          public:
+            static bool reflect(
+              void* closure,
+              const Resource::Variation id,
+              const Resource::Database::Record::Variation* variation )
+            {
+              PerVariation* pv = (PerVariation*)closure;
+
+              const String variation_dir = String::format(Allocators::scratch(),
+               "%s/%08x", pv->resource_dir, id);
+
+              Resource::Database::Record* record =
+                pv->rfcodb->db->find(pv->resource_id);
+
+              if (!Directory::exists(variation_dir.raw())) {
+                record->remove_variation_by_id(id);
+                return true; }
+
+              const String source = String::format(Allocators::scratch(),
+                "%s/%s", pv->rfcodb->source_data_dir, variation->source());
+
+              if (!File::exists(source.raw())) {
+                Directory::remove(variation_dir.raw(), true);
+                record->remove_variation_by_id(id);
+                return true; }
+
+              return true;
+            }
+
+          public:
+            ReflectFilesystemChangesOntoDatabase* rfcodb;
+            Resource::Id resource_id;
+            const char* resource_dir;
+        };
+
       public:
         static bool reflect(
           void* closure,
           const Resource::Id id,
-          const Resource::Database::Record& record )
+          const Resource::Database::Record* record )
         {
           ReflectFilesystemChangesOntoDatabase* rfcodb =
             (ReflectFilesystemChangesOntoDatabase*)closure;
-          const String streams_dir = String::format(Allocators::scratch(),
+
+          const String resource_dir = String::format(Allocators::scratch(),
             "%s/%016" PRIx64, rfcodb->data_dir, (uint64_t)id);
-          if (!Directory::exists(streams_dir.raw())) {
+
+          if (!Directory::exists(resource_dir.raw())) {
             rfcodb->db->remove(id);
             return true; }
-          const String source = String::format(Allocators::scratch(),
-            "%s/%s", rfcodb->source_data_dir, &record.source[0]);
-          if (!File::exists(source.raw())) {
-            Directory::remove(streams_dir.raw(), true);
-            rfcodb->db->remove(id);
-            return true; }
+
+          PerVariation pv;
+          pv.rfcodb = rfcodb;
+          pv.resource_id = id;
+          pv.resource_dir = resource_dir.raw();
+
+          record->for_each_variation(&PerVariation::reflect, (void*)&pv);
+
           return true;
         }
 
@@ -244,21 +299,27 @@ namespace butane {
     assert(data_dir != nullptr);
     assert(path != nullptr);
 
-    const char* relative_path =
-      chomp("\\", chomp("/", chomp(source_data_dir, path)));
+    Resource::Id id; Resource::Variation variation; {
+      const char* relative_path =
+        chomp("\\", chomp("/", chomp(source_data_dir, path)));
+      const Resource::Type* type = Resource::Type::determine(relative_path);
+      if (!type) return false;
+      const String relative_path_sans_ext_and_properties =
+        Path::sans_extension(String(Allocators::scratch(), relative_path), true);
+      id = Resource::Id(*type, relative_path_sans_ext_and_properties);
+      Array<Resource::Property> properties(Allocators::heap());
+      Resource::Compiler::extract_properties_from_path(relative_path, properties);
+      if (properties.size() > 32)
+        return true;
+      variation = Resource::determine_variation_based_on_properties(properties);
+    }
 
-    const Resource::Type* type = Resource::Type::determine(relative_path);
-    if (!type)
-      return false;
-
-    const String relative_path_sans_ext_and_properties =
-      Path::sans_extension(String(Allocators::scratch(), relative_path), true);
-
-    const Resource::Id id =
-      Resource::Id(*type, relative_path_sans_ext_and_properties);
-
-    Resource::Database::Record record;
-    return (db->find(id, record) ? (time > record.compiled) : true);
+    const Resource::Database::Record* record = db->find(id);
+    if (!record) return true;
+    const Resource::Database::Record::Variation* variation_ =
+      record->find_variation_by_id(variation);
+    if (!variation_) return true;
+    return (variation_->compiled_at() < time);
   }
 
   void Resource::Compiler::run(
@@ -353,19 +414,23 @@ namespace butane {
         fail("Unable to watch source data directory!");
       while(true) {
         Timer timer;
-        while (timer.miliseconds() <= 500)
+        while (timer.miliseconds() <= 300)
           Directory::poll(watched);
+        size_t num_of_compilations = 0;
         for (size_t event = 0; event < daemon_.events.size(); ++event) {
-          for (size_t event_ = event; event_ < daemon_.events.size(); ++event)
+          for (size_t event_ = event + 1; event_ < daemon_.events.size(); ++event_)
             if (daemon_.events[event].hash == daemon_.events[event_].hash)
               goto duplicate;
           Resource::Compiler::compile_and_reflect_changes_onto_database(
             source_data_dir, data_dir,
             &daemon_.events[event].path[0],
             db, Log(&Console::log));
+          ++num_of_compilations;
         duplicate:
-          continue;
-        }
+          continue; }
+        daemon_.events.resize(0);
+        if (num_of_compilations > 0)
+          db->save(database_path.raw());
       }
     }
 
