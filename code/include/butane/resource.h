@@ -19,7 +19,7 @@ namespace butane {
       template <typename T>
       class Handle;
       typedef Hash<uint32_t, murmur_hash> Property;
-      typedef uint32_t Variantion;
+      typedef uint32_t Variation;
 
       #include <butane/resource/id.h>
       #include <butane/resource/database.h>
@@ -62,7 +62,7 @@ namespace butane {
       void mark_for_unload();
 
     public:
-      static Variantion determine_variation_based_on_properties(
+      static Variation determine_variation_based_on_properties(
         const Array<Resource::Property>& properties );
 
     public:
