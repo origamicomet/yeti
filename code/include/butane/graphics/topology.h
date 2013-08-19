@@ -10,8 +10,12 @@ namespace butane {
   class BUTANE_EXPORT Topology final {
     public:
       enum Value {
-        INVALID   = 0,
-        TRIANGLES = 1
+        INVALID        = 0,
+        POINTS         = 1,
+        LINES          = 2,
+        LINE_STRIP     = 3,
+        TRIANGLES      = 4,
+        TRIANGLE_STRIP = 5
       };
 
     public:

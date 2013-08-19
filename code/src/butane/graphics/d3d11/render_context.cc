@@ -185,9 +185,29 @@ namespace butane {
       cmd.constant_buffers[i]->AddRef(); }
 
     switch (topology) {
+      case Topology::POINTS:
+        cmd.topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+        cmd.num_of_indicies = num_of_primitives;
+      break;
+
+      case Topology::LINES:
+        cmd.topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+        cmd.num_of_indicies = num_of_primitives / 2;
+      break;
+
+      case Topology::LINE_STRIP:
+        cmd.topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
+        cmd.num_of_indicies = num_of_primitives - 1;
+      break;
+
       case Topology::TRIANGLES:
         cmd.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         cmd.num_of_indicies = num_of_primitives * 3;
+      break;
+
+      case Topology::TRIANGLE_STRIP:
+        cmd.topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+        cmd.num_of_indicies = (num_of_primitives - 3) + 1;
       break;
     }
 
