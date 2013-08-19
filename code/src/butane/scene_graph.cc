@@ -4,9 +4,8 @@
 #include <butane/scene_graph.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("scene graphs", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("scene graphs", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

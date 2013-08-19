@@ -9,9 +9,8 @@
 #include <butane/math/quat.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("config resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("config resources", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -21,13 +20,12 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "config", "config",
       (Resource::Type::Load)&ConfigResource::load,
       (Resource::Type::Unload)&ConfigResource::unload,
       (Resource::Type::Compile)&ConfigResource::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

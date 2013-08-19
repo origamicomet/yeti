@@ -12,9 +12,8 @@
 #include <butane/graphics/depth_stencil_target.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("tied resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("tied resources", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

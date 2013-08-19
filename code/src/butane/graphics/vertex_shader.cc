@@ -4,13 +4,12 @@
 #include <butane/graphics/vertex_shader.h>
 
 namespace butane {
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "vertex shader", "vs",
       (Resource::Type::Load)&VertexShader::load,
       (Resource::Type::Unload)&VertexShader::unload,
       (Resource::Type::Compile)&VertexShader::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

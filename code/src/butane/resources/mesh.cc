@@ -4,9 +4,8 @@
 #include <butane/resources/mesh.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("mesh resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("mesh resources", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -16,13 +15,12 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "mesh", "mesh",
       (Resource::Type::Load)&MeshResource::load,
       (Resource::Type::Unload)&MeshResource::unload,
       (Resource::Type::Compile)&MeshResource::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

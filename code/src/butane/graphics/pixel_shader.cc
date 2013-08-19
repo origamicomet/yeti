@@ -4,13 +4,12 @@
 #include <butane/graphics/pixel_shader.h>
 
 namespace butane {
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "pixel shader", "ps",
       (Resource::Type::Load)&PixelShader::load,
       (Resource::Type::Unload)&PixelShader::unload,
       (Resource::Type::Compile)&PixelShader::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

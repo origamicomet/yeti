@@ -8,9 +8,8 @@
 #include <butane/graphics/d3d11/texture.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("render targets", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("render targets", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

@@ -64,9 +64,8 @@ namespace butane {
 namespace butane {
   const Unit::Id Unit::invalid = (Id)0xFFFFFFFFFFFFFFFF;
 
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("units", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("units", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

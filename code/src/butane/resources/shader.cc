@@ -7,18 +7,23 @@
 #include <butane/graphics/pixel_shader.h>
 
 namespace butane {
-  static Allocator& allocator() {
-    static ProxyAllocator allocator("shader resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("shader resources", Allocators::heap());
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
+  }
+
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "shader", "shader",
       (Resource::Type::Load)&ShaderResource::load,
       (Resource::Type::Unload)&ShaderResource::unload,
       (Resource::Type::Compile)&ShaderResource::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

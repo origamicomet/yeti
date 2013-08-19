@@ -12,9 +12,8 @@
 
 namespace butane {
 namespace Application {
-  static Array<Console*>& __consoles_initializer() {
-    static Array<Console*> consoles(Allocators::heap());
-    return consoles;
+  static Array<Console*>* __consoles_initializer() {
+    return new Array<Console*>(Allocators::heap());
   }
 
   static const thread_safe::Static< Array<Console*> >

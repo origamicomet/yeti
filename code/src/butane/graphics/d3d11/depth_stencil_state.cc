@@ -7,9 +7,8 @@
 #include <butane/graphics/d3d11/render_device.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("depth-stencil states", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("depth-stencil states", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

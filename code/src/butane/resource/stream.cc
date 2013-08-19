@@ -4,9 +4,8 @@
 #include <butane/resource.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("resource streams", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("resource streams", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

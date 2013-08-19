@@ -4,9 +4,8 @@
 #include <butane/task.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("task scheduler", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("task scheduler", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -16,10 +15,9 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static thread_safe::Queue<Task*>& __tasks_initializer() {
-    static thread_safe::Queue<Task*> tasks(
+  static thread_safe::Queue<Task*>* __tasks_initializer() {
+    return new thread_safe::Queue<Task*>(
       allocator(), BUTANE_TASK_SCHEDULER_MAXIMUM_NUM_OF_INFLIGHT_TASKS);
-    return tasks;
   }
 
   static const thread_safe::Static< thread_safe::Queue<Task*> >

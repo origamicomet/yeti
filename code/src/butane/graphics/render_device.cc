@@ -8,9 +8,8 @@
 #include <butane/graphics/depth_stencil_target.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("render device", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("render device", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

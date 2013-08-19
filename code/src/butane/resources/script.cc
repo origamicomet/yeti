@@ -6,18 +6,23 @@
 #include <butane/script.h>
 
 namespace butane {
-  static Allocator& allocator() {
-    static ProxyAllocator allocator("script resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("script resources", Allocators::heap());
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const thread_safe::Static< Allocator >
+    __ts_allocator(&__allocator_initializer);
+
+  static Allocator& allocator() {
+    return __ts_allocator();
+  }
+
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "script", "script",
       (Resource::Type::Load)&ScriptResource::load,
       (Resource::Type::Unload)&ScriptResource::unload,
       (Resource::Type::Compile)&ScriptResource::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

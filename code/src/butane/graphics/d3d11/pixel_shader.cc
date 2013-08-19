@@ -7,9 +7,8 @@
 #include <butane/graphics/d3d11/render_device.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("pixel shaders", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("pixel shaders", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

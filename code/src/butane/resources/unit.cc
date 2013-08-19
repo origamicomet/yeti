@@ -4,9 +4,8 @@
 #include <butane/resources/unit.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("unit resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("unit resources", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -16,13 +15,12 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "unit", "unit",
       (Resource::Type::Load)&UnitResource::load,
       (Resource::Type::Unload)&UnitResource::unload,
       (Resource::Type::Compile)&UnitResource::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

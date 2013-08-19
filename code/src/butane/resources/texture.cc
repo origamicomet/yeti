@@ -4,9 +4,8 @@
 #include <butane/resources/texture.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("texture resources", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("texture resources", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -16,9 +15,8 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static Allocator& __scratch_initializer() {
-    static ProxyAllocator scratch("texture resources (scratch)", Allocators::heap());
-    return scratch;
+  static Allocator*__scratch_initializer() {
+    return new ProxyAllocator("texture resources (scratch)", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -28,13 +26,12 @@ namespace butane {
     return __ts_scratch();
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "texture", "dds",
       (Resource::Type::Load)&TextureResource::load,
       (Resource::Type::Unload)&TextureResource::unload,
       (Resource::Type::Compile)&TextureResource::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

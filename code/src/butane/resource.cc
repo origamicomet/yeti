@@ -79,10 +79,9 @@ namespace butane {
       mark_for_unload();
   }
 
-  static thread_safe::Queue<Resource*>& __marked_for_unload_initializer() {
-    static thread_safe::Queue<Resource*> marked_for_unload(
+  static thread_safe::Queue<Resource*>* __marked_for_unload_initializer() {
+    return new thread_safe::Queue<Resource*>(
       Allocators::heap(), BUTANE_BACKGROUND_RESOURCE_UNLOADING_QUEUE_SIZE);
-    return marked_for_unload;
   }
 
   static const thread_safe::Static< thread_safe::Queue<Resource*> >
@@ -132,10 +131,9 @@ namespace butane {
 
 namespace butane {
   namespace Resources {
-    static HashTable<Resource::Id, Resource*>& __loaded_initializer() {
-      static HashTable<Resource::Id, Resource*> loaded(
+    static HashTable<Resource::Id, Resource*>* __loaded_initializer() {
+      return new HashTable<Resource::Id, Resource*>(
         Allocators::heap(), BUTANE_LOADED_RESOURCES_HASH_TABLE_INITAL_SIZE);
-      return loaded;
     }
 
     static const thread_safe::Static< HashTable<Resource::Id, Resource*> >

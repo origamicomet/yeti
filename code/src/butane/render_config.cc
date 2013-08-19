@@ -4,9 +4,8 @@
 #include <butane/render_config.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("render configurations", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("render configurations", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -16,13 +15,12 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static const Resource::Type& __type_initializer() {
-    static const Resource::Type type(
+  static const Resource::Type* __type_initializer() {
+    return new Resource::Type(
       "render_config", "render_config",
       (Resource::Type::Load)&RenderConfig::load,
       (Resource::Type::Unload)&RenderConfig::unload,
       (Resource::Type::Compile)&RenderConfig::compile);
-    return type;
   }
 
   static const thread_safe::Static< const Resource::Type >

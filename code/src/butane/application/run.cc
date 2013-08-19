@@ -53,9 +53,8 @@ namespace Application {
     create_or_update_global_resources();
   }
 
-  static Array<void*>& __globals_initializer() {
-    static Array<void*> globals(Allocators::heap());
-    return globals; }
+  static Array<void*>* __globals_initializer() {
+    return new Array<void*>(Allocators::heap()); }
 
   static const thread_safe::Static< Array<void*> >
     __ts_globals(&__globals_initializer);
@@ -63,9 +62,8 @@ namespace Application {
   Array<void*>& globals()
   { return __ts_globals(); }
 
-  static Array<Window*>& __windows_initializer() {
-    static Array<Window*> windows(Allocators::heap());
-    return windows; }
+  static Array<Window*>* __windows_initializer() {
+    return new Array<Window*>(Allocators::heap()); }
 
   static const thread_safe::Static< Array<Window*> >
     __ts_windows(&__windows_initializer);
@@ -73,9 +71,8 @@ namespace Application {
   Array<Window*>& windows()
   { return __ts_windows(); }
 
-  static Array<SwapChain*>& __swap_chains_initializer() {
-    static Array<SwapChain*> swap_chains(Allocators::heap());
-    return swap_chains; }
+  static Array<SwapChain*>* __swap_chains_initializer() {
+    return new Array<SwapChain*>(Allocators::heap()); }
 
   static const thread_safe::Static< Array<SwapChain*> >
     __ts_swap_chains(&__swap_chains_initializer);
@@ -83,9 +80,8 @@ namespace Application {
   Array<SwapChain*>& swap_chains()
   { return __ts_swap_chains(); }
 
-  static Array<TiedResources*>& __tied_resources_initializer() {
-    static Array<TiedResources*> tied_resources(Allocators::heap());
-    return tied_resources; }
+  static Array<TiedResources*>* __tied_resources_initializer() {
+    return new Array<TiedResources*>(Allocators::heap()); }
 
   static const thread_safe::Static< Array<TiedResources*> >
     __ts_tied_resources(&__tied_resources_initializer);
@@ -169,9 +165,8 @@ namespace Application {
     Application::windows().remove(window_iter);
   }
 
-  static Array<World*>& __worlds_initializer() {
-    static Array<World*> worlds(Allocators::heap());
-    return worlds; }
+  static Array<World*>* __worlds_initializer() {
+    return new Array<World*>(Allocators::heap()); }
 
   static const thread_safe::Static< Array<World*> >
     __ts_worlds(&__worlds_initializer);

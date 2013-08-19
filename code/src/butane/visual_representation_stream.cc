@@ -4,9 +4,8 @@
 #include <butane/visual_representation_stream.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("visual representation streams", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("visual representation streams", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >

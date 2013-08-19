@@ -6,9 +6,8 @@
 #include <butane/application.h>
 
 namespace butane {
-  static Allocator& __allocator_initializer() {
-    static ProxyAllocator allocator("consoles", Allocators::heap());
-    return allocator;
+  static Allocator* __allocator_initializer() {
+    return new ProxyAllocator("consoles", Allocators::heap());
   }
 
   static const thread_safe::Static< Allocator >
@@ -18,9 +17,9 @@ namespace butane {
     return __ts_allocator();
   }
 
-  static const Network::Protocol& __protocol_initializer() {
-    static const Network::Protocol protocol = Network::Protocol("console", 1)
-      .connected((Network::Protocol::OnConnected)&Console::connected)
+  static const Network::Protocol* __protocol_initializer() {
+    Network::Protocol* protocol = new Network::Protocol("console", 1);
+    protocol->connected((Network::Protocol::OnConnected)&Console::connected)
       .disconnected((Network::Protocol::OnDisconnected)&Console::disconnected)
       .local_to_remote("msg", (Network::Protocol::Constructor)&Console::__msg)
       .remote_to_local("cmd", (Network::Protocol::Handler)&Console::__on_cmd);
@@ -94,10 +93,9 @@ namespace butane {
   }
 
   namespace Consoles {
-    static thread_safe::Queue<Console::Message>& __messages_initializer() {
-      static thread_safe::Queue<Console::Message> messages(
+    static thread_safe::Queue<Console::Message>* __messages_initializer() {
+      return new thread_safe::Queue<Console::Message>(
         Allocators::heap(), BUTANE_CONSOLE_MAXIMUM_NUM_OF_INFLIGHT_MESSAGES);
-      return messages;
     }
 
     static const thread_safe::Static< thread_safe::Queue<Console::Message> >
