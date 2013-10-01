@@ -1,7 +1,0 @@
-include_rules
-
-: foreach *.cc |> !cc |> %B.o
-
-ifeq (@(TUP_PLATFORM),win32)
-: win32.rc |> !rc |> %B.res
-endif
