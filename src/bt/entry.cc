@@ -35,6 +35,8 @@
 /* ========================================================================== */
 
 #include <bt/application.h>
+
+#include <stdlib.h>
 #include <locale.h>
 
 int main(int argc, const char *argv[]) {
