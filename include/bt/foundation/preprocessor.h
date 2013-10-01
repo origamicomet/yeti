@@ -30,25 +30,25 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+/*! @file butane/foundation/preprocessor.h
+      Provides various pre-processor functionality extensions.                */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#ifndef _BT_PREPROCESSOR_H_
+#define _BT_PREPROCESSOR_H_
 
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-#include <bt/foundation/compat/inttypes.h>
-#include <bt/foundation/compat/malloc.h>
-#include <bt/foundation/compat/stdalign.h>
-#include <bt/foundation/compat/stdbool.h>
-#include <bt/foundation/compat/stdint.h>
-#include <bt/foundation/compat/stdio.h>
-#include <bt/foundation/detect/architecture.h>
-#include <bt/foundation/detect/compiler.h>
-#include <bt/foundation/detect/platform.h>
+/* @def bt_stringificate
+  Forces the expansion of `_` prior to stringification. */
 
-#endif /* _BT_FOUNDATION_H_ */
+#define __bt_stringificate__(_) #_
+#define __bt_stringificate_(_) __bt_stringificate__(_)
+#define bt_stringificate(_) __bt_stringificate_(_)
+
+/* @def bt_join
+  Forces the expansion of `_Lhs` and `_Rhs` prior to joining. */
+
+#define __bt_join__(_Lhs, _Rhs) _Lhs ## _Rhs
+#define __bt_join_(_Lhs, _Rhs) __bt_join__(_Lhs, _Rhs)
+#define bt_join(_Lhs, _Rhs) __bt_join_(_Lhs, _Rhs)
+
+#endif /* _BT_PREPROCESSOR_H_ */
