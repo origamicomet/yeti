@@ -310,8 +310,8 @@ OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.cc=%.o)))
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
 	@echo "[CXX] $<"
 	@mkdir -p ${@D}
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBUTANE_COMPILING -c $< -o $@
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBUTANE_COMPILING -MM -MT $@ -c $< > $(patsubst %.o,%.d,$@)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBUTANE_BUILD=$(COMMIT) -DBUTANE_COMPILING -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBUTANE_BUILD=$(COMMIT) -DBUTANE_COMPILING -MM -MT $@ -c $< > $(patsubst %.o,%.d,$@)
 
 $(BUTANE): $(OBJECTS)
 	@echo "[LD] $@"

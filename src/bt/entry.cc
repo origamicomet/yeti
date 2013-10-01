@@ -34,13 +34,11 @@
       Defines the entry-point of Butane.                                      */
 /* ========================================================================== */
 
-#include <bt/foundation.h>
+#include <bt/application.h>
 #include <locale.h>
 
 int main(int argc, const char *argv[]) {
-  (void)argc; (void)argv;
   setlocale(LC_ALL, "en-US.UTF-8");
-  fprintf(stdout, "Hello, Butane!");
-  // bt_application_boot(((size_t)argc) - 1u, &argv[1]);
+  bt_application_boot(((size_t)argc) - 1u, &argv[1]);
   return EXIT_FAILURE;
 }
