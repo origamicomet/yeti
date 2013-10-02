@@ -30,20 +30,65 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+    #include <bt/foundation/allocators/heap.h>
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#include <malloc.h>
+#include <string.h>
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
+typedef struct alloc_header {
+  size_t num_of_bytes;
+  void *unaligned;
+} alloc_header_t;
 
-#endif /* _BT_FOUNDATION_H_ */
+static alloc_header_t *header_from_ptr(void *ptr) {
+  return &((alloc_header_t *)ptr)[-1];
+}
+
+#include <stdio.h>
+
+static void *bt_heap_allocator_alloc(
+  bt_allocator_t *allocator,
+  const size_t num_of_bytes,
+  const size_t alignment)
+{
+  (void)allocator;
+  uintptr_t ptr =
+    (uintptr_t)malloc(num_of_bytes + sizeof(alloc_header_t) + alignment - 1);
+  uintptr_t aligned = ((ptr + sizeof(alloc_header_t)) & ~(alignment - 1));
+  header_from_ptr((void *)aligned)->num_of_bytes = num_of_bytes;
+  header_from_ptr((void *)aligned)->unaligned = (void *)ptr;
+  return ((void *)aligned);
+}
+
+static void *bt_heap_allocator_realloc(
+  bt_allocator_t *allocator,
+  void *ptr,
+  const size_t num_of_bytes,
+  const size_t alignment)
+{
+  void *ptr_ = allocator->alloc(allocator, num_of_bytes, alignment);
+  if (ptr) {
+    memcpy(ptr_, ptr, header_from_ptr(ptr)->num_of_bytes);
+    allocator->free(allocator, ptr); }
+  return ptr_;
+}
+
+static void bt_heap_allocator_free(
+  bt_allocator_t *allocator,
+  void *ptr)
+{
+  (void)allocator;
+  if (ptr)
+    free(header_from_ptr(ptr)->unaligned);
+}
+
+static bt_allocator_t _heap_allocator = {
+  &bt_heap_allocator_alloc,
+  &bt_heap_allocator_realloc,
+  &bt_heap_allocator_free,
+};
+
+bt_allocator_t *bt_heap_allocator() {
+  return &_heap_allocator;
+}
