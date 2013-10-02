@@ -30,18 +30,5 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+    #include <bt/foundation/detect.h>
 /* ========================================================================== */
-
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
-
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-
-#endif /* _BT_FOUNDATION_H_ */
