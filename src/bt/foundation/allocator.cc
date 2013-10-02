@@ -30,19 +30,20 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+    #include <bt/foundation/allocator.h>
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+void *bt_allocator_alloc(bt_allocator_t *allocator, const size_t nb, const size_t alignment) {
+  // bt_assert(debug, allocator != NULL);
+  return allocator->alloc(allocator, nb, alignment);
+}
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
+void *bt_allocator_realloc(bt_allocator_t *allocator, void *ptr, const size_t nb, const size_t alignment) {
+  // bt_assert(debug, allocator != NULL);
+  return allocator->realloc(allocator, ptr, nb, alignment);
+}
 
-#endif /* _BT_FOUNDATION_H_ */
+void bt_allocator_free(bt_allocator_t *allocator, void *ptr) {
+  // bt_assert(debug, allocator != NULL);
+  allocator->free(allocator, ptr);
+}

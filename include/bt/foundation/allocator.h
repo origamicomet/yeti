@@ -30,19 +30,57 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+/*! @file butane/foundation/allocator.h
+      Defines a generic allocator interface.                                  */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#ifndef _BT_FOUNDATION_ALLOCATOR_H_
+#define _BT_FOUNDATION_ALLOCATOR_H_
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/architecture.h>
 #include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
 
-#endif /* _BT_FOUNDATION_H_ */
+/* ========================================================================== */
+/*  Allocator (bt_allocator_t):                                               */
+/* ========================================================================== */
+
+/*! A generic allocator interface. */
+typedef struct bt_allocator {
+  void *(*alloc)(
+    struct bt_allocator *allocator,
+    const size_t num_of_bytes,
+    const size_t alignment);
+
+  void *(*realloc)(
+    struct bt_allocator *allocator,
+    void *ptr,
+    const size_t num_of_bytes,
+    const size_t alignment);
+
+  void (*free)(
+    struct bt_allocator *allocator,
+    void *ptr);
+} bt_allocator_t;
+
+/* ========================================================================== */
+
+/*! Allocates `num_of_bytes` of memory aligned to `alignment`.
+  @returns A non-null pointer on success, or null on failure. */
+extern void *bt_allocator_alloc(
+  bt_allocator_t *allocator,
+  const size_t num_of_bytes,
+  const size_t alignment);
+
+/*! Reallocates `ptr` to `num_of_bytes` of memory aligned to `alignment`.
+  @returns A non-null pointer on success, or null of failure. */
+extern void *bt_allocator_realloc(
+  bt_allocator_t *allocator,
+  void *ptr,
+  const size_t num_of_bytes,
+  const size_t alignment);
+
+/*! Deallocates the memory pointed to by `ptr`. */
+extern void bt_allocator_free(
+  bt_allocator_t *allocator,
+  void *ptr);
+
+#endif /* _BT_FOUNDATION_ALLOCATOR_H_ */
