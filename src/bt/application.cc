@@ -85,8 +85,30 @@ void bt_application_quit() {
 }
 
 /* ========================================================================== */
-/*  Boot:                                                                     */
+/*  Boot and run:                                                              */
 /* ========================================================================== */
+
+static void bt_application_update(const float dt) {
+  (void)dt;
+  // bt_profile_begin("bt_application_update");
+  // bt_profile_end();
+}
+
+static void bt_application_render() {
+  // bt_profile_begin("bt_application_render");
+  // bt_profile_end();
+}
+
+static void bt_application_run() {
+  // bt_profile_begin("bt_application_run");
+
+  while (true) {
+    bt_application_update(0.0f);
+    bt_application_render();
+  }
+
+  // bt_profile_end();
+}
 
 void bt_application_boot(const size_t num_of_args, const char *args[]) {
   (void)num_of_args; (void)args;
@@ -94,5 +116,6 @@ void bt_application_boot(const size_t num_of_args, const char *args[]) {
   fprintf(stdout, " architecture = %s\n", bt_application_architecture());
   fprintf(stdout, " platform = %s\n", bt_application_platform());
   fprintf(stdout, " build = %s\n", bt_application_build());
+  bt_application_run();
   bt_application_quit();
 }
