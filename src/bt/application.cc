@@ -33,6 +33,8 @@
     #include <bt/application.h>
 /* ========================================================================== */
 
+#include <bt/profiler.h>
+
 #include <stdlib.h>
 #include <signal.h>
 
@@ -89,25 +91,24 @@ void bt_application_quit() {
 /* ========================================================================== */
 
 static void bt_application_update(const float dt) {
-  (void)dt;
-  // bt_profile_begin("bt_application_update");
-  // bt_profile_end();
+  bt_profile_begin("bt_application_update");
+  bt_profile_end();
 }
 
 static void bt_application_render() {
-  // bt_profile_begin("bt_application_render");
-  // bt_profile_end();
+  bt_profile_begin("bt_application_render");
+  bt_profile_end();
 }
 
 static void bt_application_run() {
-  // bt_profile_begin("bt_application_run");
+  bt_profile_begin("bt_application_run");
 
   while (true) {
     bt_application_update(0.0f);
     bt_application_render();
   }
 
-  // bt_profile_end();
+  bt_profile_end();
 }
 
 void bt_application_boot(const size_t num_of_args, const char *args[]) {
