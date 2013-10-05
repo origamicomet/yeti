@@ -1,5 +1,5 @@
 /*
- * This file is part of PolySWF.
+ * This file is part of Butane.
  *
  * Copyright (c) Michael Williams <devbug@bitbyte.ca>
  *
