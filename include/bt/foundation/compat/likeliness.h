@@ -30,19 +30,33 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/compat.h
-      Imports all headers in bt/foundation/compat. */
+/*! @file bt/foundation/compat/likeliness.h
+      Provides a method of specifing the likeliness of taking a branch.       */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_COMPAT_H_
-#define _BT_FOUNDATION_COMPAT_H_
+#ifndef _BT_FOUNDATION_COMPAT_LIKELINESS_H_
+#define _BT_FOUNDATION_COMPAT_LIKELINESS_H_
 
-#include <bt/foundation/compat/inttypes.h>
-#include <bt/foundation/compat/likeliness.h>
-#include <bt/foundation/compat/malloc.h>
-#include <bt/foundation/compat/stdalign.h>
-#include <bt/foundation/compat/stdbool.h>
-#include <bt/foundation/compat/stdint.h>
-#include <bt/foundation/compat/stdio.h>
+#include <bt/foundation/detect/compiler.h>
 
-#endif /* _BT_FOUNDATION_COMPAT_H_ */
+/*! @def bt_likely
+  Hints to the compiler that `_Expr` will almost always evaluate to TRUE. */
+
+/*! @def bt_unlikely
+  Hints to the compiler that `_Expr` will almost always evaluate to FALSE. */
+
+#if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
+  #define bt_likely(_Expr) \
+    __builtin_expect(!!(_Expr), TRUE)
+  #define bt_unlikely(_Expr) \
+    __builtin_expect(!!(_Expr), FALSE)
+#else
+  #warning ("Using fallback bt_likely; performance may be degraded.")
+  #define bt_likely(_Expr) \
+    (!!(_Expr) == TRUE)
+  #warning ("Using fallback bt_unlikely; performance may be degraded.")
+  #define bt_unlikely(_Expr) \
+    (!!(_Expr) == FALSE)
+#endif
+
+#endif /* _BT_FOUNDATION_COMPAT_LIKELINESS_H_ */
