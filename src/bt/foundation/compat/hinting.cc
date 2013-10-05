@@ -30,20 +30,5 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/compat.h
-      Imports all headers in bt/foundation/compat. */
+    #include <bt/foundation/compat/hinting.h>
 /* ========================================================================== */
-
-#ifndef _BT_FOUNDATION_COMPAT_H_
-#define _BT_FOUNDATION_COMPAT_H_
-
-#include <bt/foundation/compat/hinting.h>
-#include <bt/foundation/compat/inttypes.h>
-#include <bt/foundation/compat/likeliness.h>
-#include <bt/foundation/compat/malloc.h>
-#include <bt/foundation/compat/stdalign.h>
-#include <bt/foundation/compat/stdbool.h>
-#include <bt/foundation/compat/stdint.h>
-#include <bt/foundation/compat/stdio.h>
-
-#endif /* _BT_FOUNDATION_COMPAT_H_ */
