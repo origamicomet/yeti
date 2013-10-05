@@ -37,6 +37,7 @@
 #ifndef _BT_FOUNDATION_COMPAT_H_
 #define _BT_FOUNDATION_COMPAT_H_
 
+#include <bt/foundation/compat/attributes.h>
 #include <bt/foundation/compat/hinting.h>
 #include <bt/foundation/compat/inttypes.h>
 #include <bt/foundation/compat/likeliness.h>
