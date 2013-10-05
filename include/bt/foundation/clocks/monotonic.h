@@ -30,22 +30,16 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+/*! @file bt/foundation/clocks/monotonic.h
+      Provides a high-precision monotonic (never drifting) clock.             */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#ifndef _BT_FOUNDATION_CLOCKS_MONOTONIC_H_
+#define _BT_FOUNDATION_CLOCKS_MONOTONIC_H_
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/clocks.h>
-#include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
 #include <bt/foundation/timestamp.h>
 
-#endif /* _BT_FOUNDATION_H_ */
+/*! Determines the time elapsed since an arbitary point with high-precision. */
+extern bt_timestamp_t bt_monotonic_now();
+
+#endif /* _BT_FOUNDATION_CLOCKS_MONOTONIC_H_ */
