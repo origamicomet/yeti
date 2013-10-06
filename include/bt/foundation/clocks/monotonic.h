@@ -39,7 +39,4 @@
 
 #include <bt/foundation/timestamp.h>
 
-/*! Determines the time elapsed since an arbitary point with high-precision. */
-extern bt_timestamp_t bt_monotonic_now();
-
 #endif /* _BT_FOUNDATION_CLOCKS_MONOTONIC_H_ */
