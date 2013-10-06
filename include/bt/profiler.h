@@ -38,20 +38,54 @@
 #define _BT_PROFILIER_H_
 
 #include <bt/config.h>
+#include <bt/foundation.h>
 
 /* ========================================================================== */
 /*  Profiler:                                                                 */
+/*   * Scope                                                                  */
 /*   * Instrumenting macros                                                   */
 /* ========================================================================== */
+
+/* ========================================================================== */
+/*  Scope:                                                                    */
+/* ========================================================================== */
+
+typedef struct bt_profiler_scope {
+  struct bt_profiler_scope *parent;
+  const char *name;
+  uint64_t begin;
+  uint64_t end;
+} bt_profiler_scope_t;
+
+/* ========================================================================== */
+
+extern bt_profiler_scope_t *bt_profiler_current_scope();
+
+extern void bt_profiler_set_current_scope(
+  bt_profiler_scope_t *scope);
 
 /* ========================================================================== */
 /*  Instrumenting macros:                                                     */
 /* ========================================================================== */
 
-#define bt_profile_begin(_Name) \
-  do { (void)sizeof(_Name); } while (0)
-
-#define bt_profile_end() \
-  do {} while (0)
+#if (defined(BT_DEBUG) || defined(BT_DEVELOPMENT))
+  #define bt_profile_begin(_Name) \
+    bt_profiler_scope_t bt_join(__prof_scope_, __LINE__) = { \
+      bt_profiler_current_scope(), _Name, bt_rdtsc() }; \
+    bt_profiler_set_current_scope(&bt_join(__prof_scope_, __LINE__));
+  #define bt_profile_end() \
+    do { \
+      bt_profiler_scope_t *prof_scope = bt_profiler_current_scope(); \
+      prof_scope->end = bt_rdtsc(); \
+      bt_profiler_set_current_scope(prof_scope->parent); \
+      const uint64_t cycles_in_scope = prof_scope->end - prof_scope->begin; \
+      fprintf(stdout, "%s (%" PRIu64 " cycles)\n", prof_scope->name, cycles_in_scope); \
+    } while (0)
+#else /* (!defined(BT_DEBUG) && !defined(BT_DEVELOPMENT)) */
+  #define bt_profile_begin(_Name) \
+    do { (void)sizeof(_Name); } while (0)
+  #define bt_profile_end() \
+    do {} while (0)
+#endif
 
 #endif /* _BT_PROFILIER_H_ */

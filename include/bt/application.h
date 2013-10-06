@@ -37,6 +37,7 @@
 #ifndef _BT_APPLICATION_H_
 #define _BT_APPLICATION_H_
 
+#include <bt/config.h>
 #include <bt/foundation.h>
 
 /* ========================================================================== */
