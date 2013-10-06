@@ -60,20 +60,6 @@
     static void __attribute__((constructor)) __perf_freq_ctor()
     { QueryPerformanceFrequency(&__perf_freq); }
   #endif
-#elif ((BT_ARCHITECTURE == BT_ARCHITECTURE_X86) || (BT_ARCHITECTURE == BT_ARCHITECTURE_X86_64))
-  #include <unistd.h>
-  static inline uint64_t rdtsc() {
-    uint32_t high, low;
-    asm volatile(
-      "rdtsc\n movl%%edx, %0\nmovl %%eax, %1\ncpuid"
-      : "=r" (high), "=r" (low) : : "%rax", "%rbx", "%rcx", "%rdx");
-    return ((((uint64_t)high) << 32ull) | (uint64_t)low); }
-  static uint64_t __rdtsc_per_sec = 0;
-  static void __attribute__((constructor)) __rdtsc_per_sec_ctor() {
-    const uint64_t before = rdtsc();
-    usleep(1000000u);
-    const uint64_t after = rdtsc();
-    __rdtsc_per_sec = after - before; }
 #else
   #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
 #endif
@@ -84,22 +70,17 @@ bt_timestamp_t bt_monotonic_now() {
   clock_gettime(CLOCK_MONOTONIC, &t);
   return bt_timestamp_from_nsec(t.tv_sec, t.tv_nsec);
 #elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
-  return bt_timestamp_from_nsec(
+  return bt_timestamp_from_usec(
     (mach_absolute_time() * mach_absolute_time().numer) /
-    (__mach_timebase_info.denom * 1000000000ull),
+    (__mach_timebase_info.denom * 1000000ull),
     ((mach_absolute_time() * mach_absolute_time().numer) /
-    __mach_timebase_info.denom) % 1000000000ull);
+    __mach_timebase_info.denom) % 1000000ull);
 #elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
   LARGE_INTEGER perf_counter;
   QueryPerformanceCounter(&perf_counter);
-  return bt_timestamp_from_nsec(
+  return bt_timestamp_from_usec(
     (perf_counter.QuadPart / __perf_freq.QuadPart),
-    (perf_counter.QuadPart / (__perf_freq.QuadPart / 1000000000ull)) % 1000000000ull);
-#elif ((BT_ARCHITECTURE == BT_ARCHITECTURE_X86) || (BT_ARCHITECTURE == BT_ARCHITECTURE_X86_64))
-  const uint64_t tsc = rdtsc();
-  return bt_timestamp_from_nsec(
-    (tsc / __rdtsc_per_sec),
-    (tsc / (__rdtsc_per_sec / 1000000000ull)) % 1000000000ull);
+    (perf_counter.QuadPart / (__perf_freq.QuadPart / 1000000ull)) % 1000000ull);
 #else
   #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
 #endif
