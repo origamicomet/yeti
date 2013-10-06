@@ -32,3 +32,49 @@
 /* ========================================================================== */
     #include <bt/foundation/timestamp.h>
 /* ========================================================================== */
+
+bt_timestamp_t bt_timestamp_from_sec(uint64_t sec) {
+  return ((bt_timestamp_t)(((uint64_t)(sec)) << UINT64_C(32)));
+}
+
+bt_timestamp_t bt_timestamp_from_gsec(uint64_t sec, uint64_t gsec) {
+  return ((bt_timestamp_t)((((uint64_t)(sec)) << UINT64_C(32)) | (((uint64_t)(gsec)) & UINT64_C(0xffffffff))));
+}
+
+bt_timestamp_t bt_timestamp_from_msec(uint64_t sec, uint64_t msec) {
+  return ((bt_timestamp_t)((((uint64_t)(sec)) << UINT64_C(32)) | ((((uint64_t)(msec)) << UINT64_C(32)) / UINT64_C(1000))));
+}
+
+bt_timestamp_t bt_timestamp_from_usec(uint64_t sec, uint64_t usec) {
+  return ((bt_timestamp_t)((((uint64_t)(sec)) << UINT64_C(32)) | ((((uint64_t)(usec)) << UINT64_C(32)) / UINT64_C(1000000))));
+}
+
+bt_timestamp_t bt_timestamp_from_nsec(uint64_t sec, uint64_t nsec) {
+  return ((bt_timestamp_t)((((uint64_t)(sec)) << UINT64_C(32)) | ((((uint64_t)(nsec)) << UINT64_C(32)) / UINT64_C(1000000000))));
+}
+
+/* ========================================================================== */
+
+uint32_t bt_timestamp_sec(const bt_timestamp_t ts) {
+  return ((uint32_t)(ts >> UINT64_C(32)));
+}
+
+uint32_t bt_timestamp_gsec(const bt_timestamp_t ts) {
+  return ((uint32_t)(ts & UINT64_C(0xffffffff)));
+}
+
+static uint64_t bt_timestamp_gsec_to_units(const bt_timestamp_t ts, const uint64_t denom) {
+  return ((uint64_t)((ts & UINT64_C(0xffffffff)) * (denom >> UINT64_C(32))));
+}
+
+uint64_t bt_timestamp_msec(const bt_timestamp_t ts) {
+  return bt_timestamp_gsec_to_units(ts, UINT64_C(1000));
+}
+
+uint64_t bt_timestamp_usec(const bt_timestamp_t ts) {
+  return bt_timestamp_gsec_to_units(ts, UINT64_C(1000000));
+}
+
+uint64_t bt_timestamp_nsec(const bt_timestamp_t ts) {
+  return bt_timestamp_gsec_to_units(ts, UINT64_C(1000000000));
+}

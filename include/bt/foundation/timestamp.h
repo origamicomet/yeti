@@ -48,50 +48,18 @@ typedef uint64_t bt_timestamp_t;
 
 /* ========================================================================== */
 
-static bt_timestamp_t bt_timestamp_from_sec(uint64_t sec) {
-  return ((bt_timestamp_t)(((uint64_t)(sec)) << 32ull));
-}
-
-static bt_timestamp_t bt_timestamp_from_gsec(uint64_t sec, uint64_t gsec) {
-  return ((bt_timestamp_t)((((uint64_t)(sec)) << 32ull) | (((uint64_t)(gsec)) & 0xffffffffull)));
-}
-
-static bt_timestamp_t bt_timestamp_from_msec(uint64_t sec, uint64_t msec) {
-  return ((bt_timestamp_t)((((uint64_t)(sec)) << 32ull) | ((((uint64_t)(msec)) << 32ull) / 1000ull)));
-}
-
-static bt_timestamp_t bt_timestamp_from_usec(uint64_t sec, uint64_t usec) {
-  return ((bt_timestamp_t)((((uint64_t)(sec)) << 32ull) | ((((uint64_t)(usec)) << 32ull) / 1000000ull)));
-}
-
-static bt_timestamp_t bt_timestamp_from_nsec(uint64_t sec, uint64_t nsec) {
-  return ((bt_timestamp_t)((((uint64_t)(sec)) << 32ull) | ((((uint64_t)(nsec)) << 32ull) / 1000000000ull)));
-}
+extern bt_timestamp_t bt_timestamp_from_sec(uint64_t sec);
+extern bt_timestamp_t bt_timestamp_from_gsec(uint64_t sec, uint64_t gsec);
+extern bt_timestamp_t bt_timestamp_from_msec(uint64_t sec, uint64_t msec);
+extern bt_timestamp_t bt_timestamp_from_usec(uint64_t sec, uint64_t usec);
+extern bt_timestamp_t bt_timestamp_from_nsec(uint64_t sec, uint64_t nsec);
 
 /* ========================================================================== */
 
-static uint32_t bt_timestamp_sec(const bt_timestamp_t ts) {
-  return ((uint32_t)(ts >> 32ull));
-}
-
-static uint32_t bt_timestamp_gsec(const bt_timestamp_t ts) {
-  return ((uint32_t)(ts & 0xffffffffull));
-}
-
-static uint64_t bt_timestamp_gsec_to_units(const bt_timestamp_t ts, const uint64_t denom) {
-  return ((uint64_t)((ts & 0xffffffffull) * (denom >> 32ull)));
-}
-
-static uint64_t bt_timestamp_msec(const bt_timestamp_t ts) {
-  return bt_timestamp_gsec_to_units(ts, 1000ull);
-}
-
-static uint64_t bt_timestamp_usec(const bt_timestamp_t ts) {
-  return bt_timestamp_gsec_to_units(ts, 1000000ull);
-}
-
-static uint64_t bt_timestamp_nsec(const bt_timestamp_t ts) {
-  return bt_timestamp_gsec_to_units(ts, 1000000000ull);
-}
+extern uint32_t bt_timestamp_sec(const bt_timestamp_t ts);
+extern uint32_t bt_timestamp_gsec(const bt_timestamp_t ts);
+extern uint64_t bt_timestamp_msec(const bt_timestamp_t ts);
+extern uint64_t bt_timestamp_usec(const bt_timestamp_t ts);
+extern uint64_t bt_timestamp_nsec(const bt_timestamp_t ts);
 
 #endif /* _BT_FOUNDATION_TIMESTAMP_H_ */
