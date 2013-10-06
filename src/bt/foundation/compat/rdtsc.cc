@@ -30,22 +30,42 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/compat.h
-      Imports all headers in bt/foundation/compat. */
+    #include <bt/foundation/compat/rdtsc.h>
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_COMPAT_H_
-#define _BT_FOUNDATION_COMPAT_H_
+#include <bt/foundation/detect/compiler.h>
 
-#include <bt/foundation/compat/attributes.h>
-#include <bt/foundation/compat/hinting.h>
-#include <bt/foundation/compat/inttypes.h>
-#include <bt/foundation/compat/likeliness.h>
-#include <bt/foundation/compat/malloc.h>
-#include <bt/foundation/compat/rdtsc.h>
-#include <bt/foundation/compat/stdalign.h>
-#include <bt/foundation/compat/stdbool.h>
-#include <bt/foundation/compat/stdint.h>
-#include <bt/foundation/compat/stdio.h>
+#if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
+  #include <unistd.h>
 
-#endif /* _BT_FOUNDATION_COMPAT_H_ */
+  static uint64_t __cycles_per_sec = 0;
+  static uint64_t __cycles_per_msec = 0;
+  static uint64_t __cycles_per_usec = 0;
+
+  static void __attribute__((constructor)) __cycles_per_sec_ctor() {
+    const uint64_t before = bt_rdtsc();
+    usleep(1000000);
+    const uint64_t after = bt_rdtsc();
+    __cycles_per_sec = after - before;
+    __cycles_per_msec = (__cycles_per_sec / 1000ull);
+    __cycles_per_msec = __cycles_per_msec ? __cycles_per_msec : (0xffffffffffffffffull);
+    __cycles_per_usec = (__cycles_per_sec / 1000000ull);
+    __cycles_per_usec = __cycles_per_usec ? __cycles_per_usec : (0xffffffffffffffffull);
+  }
+
+  uint64_t bt_cycles_to_sec(const uint64_t cycles) {
+    return (cycles / __cycles_per_sec);
+  }
+
+  uint64_t bt_cycles_to_msec(const uint64_t cycles) {
+    return (cycles / __cycles_per_usec);
+  }
+
+  uint64_t bt_cycles_to_usec(const uint64_t cycles) {
+    return (cycles / __cycles_per_msec);
+  }
+#elif (BT_COMPILER == BT_COMPILER_MSVC)
+  #error ("Not yet implemented!")
+#else
+  #error ("Time Stamp Counter is unsupported!")
+#endif

@@ -30,22 +30,37 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/compat.h
-      Imports all headers in bt/foundation/compat. */
+/*! @file bt/foundation/compat/rdtsc.h
+      Provides a method for reading the Time Stamp Counter.                   */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_COMPAT_H_
-#define _BT_FOUNDATION_COMPAT_H_
+#ifndef _BT_FOUNDATION_COMPAT_RDTSC_H_
+#define _BT_FOUNDATION_COMPAT_RDTSC_H_
 
-#include <bt/foundation/compat/attributes.h>
-#include <bt/foundation/compat/hinting.h>
-#include <bt/foundation/compat/inttypes.h>
-#include <bt/foundation/compat/likeliness.h>
-#include <bt/foundation/compat/malloc.h>
-#include <bt/foundation/compat/rdtsc.h>
-#include <bt/foundation/compat/stdalign.h>
-#include <bt/foundation/compat/stdbool.h>
+#include <bt/foundation/detect/compiler.h>
 #include <bt/foundation/compat/stdint.h>
-#include <bt/foundation/compat/stdio.h>
 
-#endif /* _BT_FOUNDATION_COMPAT_H_ */
+/* ========================================================================== */
+
+/*! Returns the number of cycles since reset. */
+static inline uint64_t bt_rdtsc() {
+#if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
+  uint32_t high, low;
+  asm volatile(
+    "rdtsc\n movl %%edx, %0\nmovl %%eax, %1\ncpuid"
+    : "=r" (high), "=r" (low) : : "%rax", "%rbx", "%rcx", "%rdx");
+  return ((((uint64_t)high) << 32ull) | (uint64_t)low);
+#elif (BT_COMPILER == BT_COMPILER_MSVC)
+  #error ("Not yet implemented!")
+#else
+  #error ("Time Stamp Counter is unsupported!")
+#endif
+}
+
+/* ========================================================================== */
+
+extern uint64_t bt_cycles_to_sec(const uint64_t cycles);
+extern uint64_t bt_cycles_to_msec(const uint64_t cycles);
+extern uint64_t bt_cycles_to_usec(const uint64_t cycles);
+
+#endif /* _BT_FOUNDATION_COMPAT_RDTSC_H_ */
