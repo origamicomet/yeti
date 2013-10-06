@@ -38,6 +38,7 @@
 #define _BT_FOUNDATION_COMPAT_STDINT_H_
 
 #define __STDC_LIMIT_MACROS
+#define __STDC_CONSTANT_MACROS
 #include <stdint.h>
 
 #endif /* _BT_FOUNDATION_COMPAT_STDINT_H_ */
