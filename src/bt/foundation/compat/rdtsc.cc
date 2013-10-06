@@ -44,7 +44,7 @@
 
   static void __attribute__((constructor)) __cycles_per_sec_ctor() {
     const uint64_t before = bt_rdtsc();
-    usleep(1000000);
+    usleep(999999);
     const uint64_t after = bt_rdtsc();
     __cycles_per_sec = after - before;
     __cycles_per_msec = (__cycles_per_sec / 1000ull);
@@ -58,11 +58,11 @@
   }
 
   uint64_t bt_cycles_to_msec(const uint64_t cycles) {
-    return (cycles / __cycles_per_usec);
+    return (cycles / __cycles_per_msec);
   }
 
   uint64_t bt_cycles_to_usec(const uint64_t cycles) {
-    return (cycles / __cycles_per_msec);
+    return (cycles / __cycles_per_usec);
   }
 #elif (BT_COMPILER == BT_COMPILER_MSVC)
   #error ("Not yet implemented!")
