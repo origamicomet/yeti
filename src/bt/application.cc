@@ -67,7 +67,7 @@ const char *bt_application_platform() {
 }
 
 const char *bt_application_build() {
-  return bt_stringificate(BUTANE_BUILD);
+  return bt_stringificate(BT_BUILD);
 }
 
 /* ========================================================================== */

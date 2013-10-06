@@ -247,17 +247,17 @@ endif
 ################################################################################
 
 ifeq ($(DEBUG),yes)
-  CFLAGS += -g -DBUTANE_DEBUG -D_DEBUG
-  CXXFLAGS += -g -DBUTANE_DEBUG -D_DEBUG
+  CFLAGS += -g -DBT_DEBUG -D_DEBUG
+  CXXFLAGS += -g -DBT_DEBUG -D_DEBUG
   ifeq ($(PARANOID),yes)
-    CFLAGS += -DBUTANE_PARANOID
-    CXXFLAGS += -DBUTANE_PARANOID
+    CFLAGS += -DBT_PARANOID
+    CXXFLAGS += -DBT_PARANOID
   endif
 endif
 
 ifneq ($(DEBUG),yes)
-  CFLAGS += -O3 -DBUTANE_RELEASE -DNDEBUG
-  CXXFLAGS += -O3 -DBUTANE_RELEASE -DNDEBUG
+  CFLAGS += -O3 -DBT_RELEASE -DNDEBUG
+  CXXFLAGS += -O3 -DBT_RELEASE -DNDEBUG
 endif
 
 ################################################################################
@@ -265,8 +265,8 @@ endif
 ################################################################################
 
 ifeq ($(STATICALLY_LINKING),yes)
-  CFLAGS += -DBUTANE_STATICALLY_LINKING
-  CXXFLAGS += -DBUTANE_STATICALLY_LINKING
+  CFLAGS += -DBT_STATICALLY_LINKING
+  CXXFLAGS += -DBT_STATICALLY_LINKING
 endif
 
 ifeq ($(TARGET_PLATFORM),windows-mingw)
@@ -310,8 +310,8 @@ OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.cc=%.o)))
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
 	@echo "[CXX] $<"
 	@mkdir -p ${@D}
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBUTANE_BUILD=$(COMMIT) -DBUTANE_COMPILING -c $< -o $@
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBUTANE_BUILD=$(COMMIT) -DBUTANE_COMPILING -MM -MT $@ -c $< > $(patsubst %.o,%.d,$@)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBT_BUILD=$(COMMIT) -DBT_COMPILING -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) -DBT_BUILD=$(COMMIT) -DBT_COMPILING -MM -MT $@ -c $< > $(patsubst %.o,%.d,$@)
 
 $(BUTANE): $(OBJECTS)
 	@echo "[LD] $@"
