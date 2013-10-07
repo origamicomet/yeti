@@ -47,16 +47,16 @@
 
 #if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
   #define bt_likely(_Expr) \
-    __builtin_expect(!!(_Expr), TRUE)
+    __builtin_expect(!!(_Expr), 1)
   #define bt_unlikely(_Expr) \
-    __builtin_expect(!!(_Expr), FALSE)
+    __builtin_expect(!!(_Expr), 0)
 #else
   #warning ("Using fallback bt_likely; performance may be degraded.")
   #define bt_likely(_Expr) \
-    (!!(_Expr) == TRUE)
+    (!!(_Expr))
   #warning ("Using fallback bt_unlikely; performance may be degraded.")
   #define bt_unlikely(_Expr) \
-    (!!(_Expr) == FALSE)
+    (!!(_Expr))
 #endif
 
 #endif /* _BT_FOUNDATION_COMPAT_LIKELINESS_H_ */
