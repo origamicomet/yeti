@@ -30,23 +30,28 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+/*! @file bt/foundation/hash.h
+      Provides various hashing and digesting functions.                       */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#ifndef _BT_FOUNDATION_HASH_H_
+#define _BT_FOUNDATION_HASH_H_
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/clocks.h>
 #include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/hash.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-#include <bt/foundation/timestamp.h>
 
-#endif /* _BT_FOUNDATION_H_ */
+/* ========================================================================== */
+/*  * Hashes                                                                  */
+/*    * MurmurHash2                                                           */
+/* ========================================================================== */
+
+/* ========================================================================== */
+/*  MurmurHash2:                                                              */
+/* ========================================================================== */
+
+/*! Hashes a buffer with MurmurHash2. */
+extern uint32_t bt_murmur_hash(const void *buf, const size_t buf_sz, const uint32_t seed);
+
+/*! Hashes a string with MurmurHash2. */
+extern uint32_t bt_murmur_hash_str(const char *str, const uint32_t seed);
+
+#endif /* _BT_FOUNDATION_HASH_H_ */

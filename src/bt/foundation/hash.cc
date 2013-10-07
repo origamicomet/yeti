@@ -30,23 +30,51 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+    #include <bt/foundation/hash.h>
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#include <string.h>
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/clocks.h>
-#include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/hash.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-#include <bt/foundation/timestamp.h>
+/* ========================================================================== */
+/*  MurmurHash2:                                                              */
+/* ========================================================================== */
 
-#endif /* _BT_FOUNDATION_H_ */
+uint32_t bt_murmur_hash(const void *buf, const size_t buf_sz, const uint32_t seed) {
+  // bt_assert(debug, buf != NULL);
+
+  const uint32_t m = UINT32_C(0x5bd1e995);
+  const uint32_t r = UINT32_C(24);
+
+  const uint8_t *key = (const uint8_t *)buf;
+  size_t key_len = buf_sz;
+  uint32_t h = seed ^ key_len;
+
+  while (key_len >= 4) {
+    uint32_t k = *(const uint32_t *)key;
+    k *= m;
+    k ^= k >> r;
+    k *= m;
+    h *= m;
+    h ^= k;
+    key += 4;
+    key_len -= 4;
+  }
+
+  switch (key_len) {
+    case 3: h ^= key[2] << UINT32_C(16);
+    case 2: h ^= key[1] << UINT32_C(8);
+    case 1: h ^= key[0];
+  }
+
+  h *= m;
+  h ^= h >> UINT32_C(13);
+  h *= m;
+  h ^= h >> UINT32_C(15);
+
+  return h;
+}
+
+uint32_t bt_murmur_hash_str(const char *str, const uint32_t seed) {
+  // bt_assert(debug, str != NULL);
+  return bt_murmur_hash((const void *)str, strlen(str) + 1, seed);
+}
