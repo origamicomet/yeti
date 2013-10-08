@@ -40,22 +40,22 @@
 #include <stddef.h>
 
 #if (defined(__STDC_VERSION__) && (__STDC_VERSION__ < 201112L))
-  #ifndef alignof
-    #define alignof(_Type) ((size_t)offsetof(struct{char _; _Type __;},__))
-  #endif /* ifndef alignof */
+  #ifndef bt_alignof
+    #define bt_alignof(_Type) ((size_t)offsetof(struct{char _; _Type __;},__))
+  #endif /* ifndef bt_alignof */
 #elif (defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__))
   /* Bless me, Father, for I have sinned. */
-  template <typename _Type> struct __butane_alignof;
-  template <int _SzDiff> struct __butane_alignof_ {
+  template <typename _Type> struct __bt_alignof;
+  template <int _SzDiff> struct __bt_alignof_ {
     template <typename _Type> struct E { enum { _ = _SzDiff }; }; };
-  template <> struct __butane_alignof_<0> {
-    template <typename _Type> struct E { enum { _ = __butane_alignof<_Type>::_ }; }; };
-  template <typename _Type> struct __butane_alignof {
+  template <> struct __bt_alignof_<0> {
+    template <typename _Type> struct E { enum { _ = __bt_alignof<_Type>::_ }; }; };
+  template <typename _Type> struct __bt_alignof {
     struct C { _Type __; char _; };
-    enum { D = (sizeof(C) - sizeof(_Type)), _ = __butane_alignof_<D>::template E<C>::_ }; };
-  #ifndef alignof
-    #define alignof(_Type) ((size_t)__butane_alignof<_Type>::_)
-  #endif /* ifndef alignof */
+    enum { D = (sizeof(C) - sizeof(_Type)), _ = __bt_alignof_<D>::template E<C>::_ }; };
+  #ifndef bt_alignof
+    #define bt_alignof(_Type) ((size_t)__bt_alignof<_Type>::_)
+  #endif /* ifndef bt_alignof */
 #else
   #include <stdalign.h>
 #endif
