@@ -42,6 +42,7 @@
 /* ========================================================================== */
 /*  * Hashes                                                                  */
 /*    * MurmurHash2                                                           */
+/*    * MurmurHash3                                                           */
 /* ========================================================================== */
 
 /* ========================================================================== */
@@ -53,5 +54,15 @@ extern uint32_t bt_murmur_hash(const void *buf, const size_t buf_sz, const uint3
 
 /*! Hashes a string with MurmurHash2. */
 extern uint32_t bt_murmur_hash_str(const char *str, const uint32_t seed);
+
+/* ========================================================================== */
+/*  MurmurHash3:                                                              */
+/* ========================================================================== */
+
+/*! Mixes a signed-integer with MurmurHash3's finalizer. */
+extern int32_t bt_murmur_hash_s32(const int32_t key);
+
+/*! Mixes an unsigned-integer with MurmurHash3's finalizer. */
+extern uint32_t bt_murmur_hash_u32(const uint32_t key);
 
 #endif /* _BT_FOUNDATION_HASH_H_ */

@@ -78,3 +78,23 @@ uint32_t bt_murmur_hash_str(const char *str, const uint32_t seed) {
   // bt_assert(debug, str != NULL);
   return bt_murmur_hash((const void *)str, strlen(str) + 1, seed);
 }
+
+/* ========================================================================== */
+/*  MurmurHash3:                                                              */
+/* ========================================================================== */
+
+int32_t bt_murmur_hash_s32(const int32_t key) {
+  const uint32_t hash = bt_murmur_hash_u32(*((const uint32_t *)&key));
+  return *((const int32_t *)&hash);
+}
+
+uint32_t bt_murmur_hash_u32(const uint32_t key) {
+  uint32_t h = key;
+  h ^= h >> UINT32_C(16);
+  h *= UINT32_C(0x85ebca6b);
+  h ^= h >> UINT32_C(13);
+  h *= UINT32_C(0xc2b2ae35);
+  h ^= h >> UINT32_C(16);
+  return h;
+}
+
