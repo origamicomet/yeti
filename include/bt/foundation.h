@@ -48,5 +48,6 @@
 #include <bt/foundation/platform.h>
 #include <bt/foundation/preprocessor.h>
 #include <bt/foundation/timestamp.h>
+#include <bt/foundation/unordered_map.h>
 
 #endif /* _BT_FOUNDATION_H_ */
