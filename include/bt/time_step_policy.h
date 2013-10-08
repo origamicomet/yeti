@@ -30,61 +30,64 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/application.h
-      A central point to manage global state and control the engine.          */
+/*! @file bt/time_step_policy.h
+      Provides various time-step policies.                                    */
 /* ========================================================================== */
 
-#ifndef _BT_APPLICATION_H_
-#define _BT_APPLICATION_H_
+#ifndef _BT_TIME_STEP_POLICY_H_
+#define _BT_TIME_STEP_POLICY_H_
 
-#include <bt/config.h>
 #include <bt/foundation.h>
-#include <bt/time_step_policy.h>
 
 /* ========================================================================== */
-/*  Application:                                                              */
-/*   * Build information                                                      */
-/*   * Control (time-step policy, pause, unpause, etc.)                       */
-/*   * Boot and run                                                           */
+/*  Time Step Policy:                                                         */
 /* ========================================================================== */
 
-/* ========================================================================== */
-/*  Build information:                                                        */
-/* ========================================================================== */
+/*! Controls how the time-step is advanced. */
+typedef struct bt_time_step_policy {
+  void (*update)(
+    struct bt_time_step_policy *time_step_policy,
+    const bt_monotonic_clock_t *wall,
+    const bt_monotonic_clock_t *frame);
+  size_t (*num_of_ticks)(
+    const struct bt_time_step_policy *time_step_policy);
+  float (*step_per_tick)(
+    const struct bt_time_step_policy *time_step_policy);
+} bt_time_step_policy_t;
 
-/*! */
-extern const char *bt_application_architecture();
-
-/*! */
-extern const char *bt_application_platform();
-
-/*! */
-extern const char *bt_application_build();
-
-/* ========================================================================== */
-/*  Control (time-step policy, pause, unpause, etc.):                         */
 /* ========================================================================== */
 
 /*! */
-extern void bt_application_set_time_step_policy(
+extern bt_time_step_policy_t *bt_time_step_policy_variable();
+
+/*! */
+extern bt_time_step_policy_t *bt_time_step_policy_fixed(
+  const float frame_rate);
+
+/*! */
+extern bt_time_step_policy_t *bt_time_step_policy_smoothed(
+  const size_t history,
+  const size_t outliers,
+  const float rate);
+
+/*! */
+extern void bt_time_step_policy_destroy(
   bt_time_step_policy_t *time_step_policy);
 
-/*! */
-extern void bt_application_pause();
-
-/*! */
-extern void bt_application_unpause();
-
-/*! */
-extern void bt_application_quit();
-
-/* ========================================================================== */
-/*  Boot and run:                                                             */
 /* ========================================================================== */
 
 /*! */
-extern void bt_application_boot(
-  const size_t num_of_args,
-  const char *args[]);
+void bt_time_step_policy_update(
+  bt_time_step_policy_t *time_step_policy,
+  const bt_monotonic_clock_t *wall,
+  const bt_monotonic_clock_t *frame);
 
-#endif /* _BT_APPLICATION_H_ */
+/*! */
+size_t bt_time_step_policy_num_of_ticks(
+  const bt_time_step_policy_t *time_step_policy);
+
+/*! */
+float bt_time_step_policy_step_per_tick(
+  const bt_time_step_policy_t *time_step_policy);
+
+#endif /* _BT_TIME_STEP_POLICY_H_ */

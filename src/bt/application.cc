@@ -74,6 +74,13 @@ const char *bt_application_build() {
 /*  Control (pause, unpause, etc.):                                           */
 /* ========================================================================== */
 
+static bt_time_step_policy_t *_time_step_policy = NULL;
+
+void bt_application_set_time_step_policy(bt_time_step_policy_t *time_step_policy) {
+  // bt_assert(debug, time_step_policy != NULL);
+  _time_step_policy = time_step_policy;
+}
+
 void bt_application_pause() {
   raise(SIGABRT);
 }
@@ -103,12 +110,15 @@ static void bt_application_render() {
 static void bt_application_run() {
   bt_profile_begin("bt_application_run");
 
-  bt_monotonic_clock_t *clock = bt_monotonic_clock_create();
-  bt_monotonic_clock_t *frame_timer = bt_monotonic_clock_create();
+  bt_monotonic_clock_t *wall = bt_monotonic_clock_create();
+  bt_monotonic_clock_t *frame = bt_monotonic_clock_create();
 
-  while (bt_monotonic_clock_secs(clock) < 1) {
-    bt_monotonic_clock_reset(frame_timer);
-    bt_application_update(((float)bt_monotonic_clock_msecs(frame_timer) / 1000.0f));
+  while (true) {
+    bt_time_step_policy_update(_time_step_policy, wall, frame);
+    bt_monotonic_clock_reset(frame);
+    const size_t num_of_ticks = bt_time_step_policy_num_of_ticks(_time_step_policy);
+    for (size_t tick = 0; tick < num_of_ticks; ++tick)
+      bt_application_update(bt_time_step_policy_step_per_tick(_time_step_policy));
     bt_application_render();
   }
 
@@ -121,6 +131,8 @@ void bt_application_boot(const size_t num_of_args, const char *args[]) {
   fprintf(stdout, " architecture = %s\n", bt_application_architecture());
   fprintf(stdout, " platform = %s\n", bt_application_platform());
   fprintf(stdout, " build = %s\n", bt_application_build());
+
+  bt_application_set_time_step_policy(bt_time_step_policy_variable());
   bt_application_run();
   bt_application_quit();
 }
