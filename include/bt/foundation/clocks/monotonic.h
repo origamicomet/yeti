@@ -31,12 +31,44 @@
 
 /* ========================================================================== */
 /*! @file bt/foundation/clocks/monotonic.h
-      Provides a high-precision monotonic (never drifting) clock.             */
+      Provides a high-precision monotonic (increases steadily) clock.         */
 /* ========================================================================== */
 
 #ifndef _BT_FOUNDATION_CLOCKS_MONOTONIC_H_
 #define _BT_FOUNDATION_CLOCKS_MONOTONIC_H_
 
 #include <bt/foundation/timestamp.h>
+
+/* ========================================================================== */
+/*  Monotonic Clock:                                                          */
+/* ========================================================================== */
+
+/*! A high-precision monotonic (increases steadily) clock. */
+typedef struct bt_monotonic_clock bt_monotonic_clock_t;
+
+/* ========================================================================== */
+
+/*! Creates and resets a monotonic clock. */
+extern bt_monotonic_clock_t *bt_monotonic_clock_create();
+
+/*! Destroys `clock`. */
+extern void bt_monotonic_clock_destroy(bt_monotonic_clock_t *clock);
+
+/* ========================================================================== */
+
+/*! Resets `clock's` epoch. */
+extern void bt_monotonic_clock_reset(bt_monotonic_clock_t *clock);
+
+/*! Gets the number of seconds elapsed since epoch. */
+extern uint64_t bt_monotonic_clock_secs(const bt_monotonic_clock_t *clock);
+
+/*! Gets the number of miliseconds elapsed since epoch. */
+extern uint64_t bt_monotonic_clock_msecs(const bt_monotonic_clock_t *clock);
+
+/*! Gets the number of microseconds elapsed since epoch. */
+extern uint64_t bt_monotonic_clock_usecs(const bt_monotonic_clock_t *clock);
+
+/*! Gets the number of nanoseconds elapsed since epoch. */
+extern uint64_t bt_monotonic_clock_nsecs(const bt_monotonic_clock_t *clock);
 
 #endif /* _BT_FOUNDATION_CLOCKS_MONOTONIC_H_ */

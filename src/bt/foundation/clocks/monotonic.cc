@@ -32,3 +32,173 @@
 /* ========================================================================== */
     #include <bt/foundation/clocks/monotonic.h>
 /* ========================================================================== */
+
+#include <bt/foundation/detect/compiler.h>
+#include <bt/foundation/detect/architecture.h>
+#include <bt/foundation/detect/platform.h>
+#include <bt/foundation/allocators.h>
+
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  #include <unistd.h>
+  #include <time.h>
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  #include <unistd.h>
+  #include <mach/mach_time.h>
+  static mach_timebase_info_data_t __mach_timebase_info;
+  static void __attribute__((constructor)) __mach_timebase_info_ctor()
+  { mach_timebase_info(&__mach_timebase_info); }
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  #include <windows.h>
+  #if (BT_COMPILER == BT_COMPILER_MSVC)
+    static uint64_t __counts_per_sec;
+    static uint64_t __counts_per_msec;
+    static uint64_t __counts_per_usec;
+    static uint64_t __counts_per_nsec;
+
+    static void __cdecl __perf_freq_ctor() {
+      LARGE_INTEGER perf_freq;
+      QueryPerformanceFrequency(&perf_freq);
+      __counts_per_sec = perf_freq.QuadPart;
+      __counts_per_msec = perf_freq.QuadPart / UINT64_C(1000);
+      __counts_per_msec = (__counts_per_msec ? __counts_per_msec : UINT64_MAX);
+      __counts_per_usec = perf_freq.QuadPart / UINT64_C(1000000);
+      __counts_per_usec = (__counts_per_usec ? __counts_per_usec : UINT64_MAX);
+      __counts_per_nsec = perf_freq.QuadPart / UINT64_C(1000000000);
+      __counts_per_nsec = (__counts_per_nsec ? __counts_per_nsec : UINT64_MAX);
+    }
+
+    __declspec(allocate(".CRT$XCU")) void (__cdecl*__perf_freq_ctor_)() = &__perf_freq_ctor;
+  #else
+    static uint64_t __counts_per_sec;
+    static uint64_t __counts_per_msec;
+    static uint64_t __counts_per_usec;
+    static uint64_t __counts_per_nsec;
+
+    static void __attribute__((constructor)) __perf_freq_ctor() {
+      LARGE_INTEGER perf_freq;
+      QueryPerformanceFrequency(&perf_freq);
+      __counts_per_sec = perf_freq.QuadPart;
+      __counts_per_msec = perf_freq.QuadPart / UINT64_C(1000);
+      __counts_per_msec = (__counts_per_msec ? __counts_per_msec : UINT64_MAX);
+      __counts_per_usec = perf_freq.QuadPart / UINT64_C(1000000);
+      __counts_per_usec = (__counts_per_usec ? __counts_per_usec : UINT64_MAX);
+      __counts_per_nsec = perf_freq.QuadPart / UINT64_C(1000000000);
+      __counts_per_nsec = (__counts_per_nsec ? __counts_per_nsec : UINT64_MAX);
+    }
+  #endif
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+
+/* ========================================================================== */
+/*  Monotonic Clock:                                                          */
+/* ========================================================================== */
+
+struct bt_monotonic_clock {
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  uint64_t epoch;
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  uint64_t epoch;
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  LARGE_INTEGER epoch;
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+};
+
+/* ========================================================================== */
+
+bt_monotonic_clock_t *bt_monotonic_clock_create() {
+  bt_monotonic_clock_t *clock =
+    (bt_monotonic_clock_t *)bt_allocator_alloc(
+      bt_heap_allocator(),
+      sizeof(bt_monotonic_clock_t),
+      bt_alignof(bt_monotonic_clock_t));
+  bt_monotonic_clock_reset(clock);
+  return clock;
+}
+
+void bt_monotonic_clock_destroy(bt_monotonic_clock_t *clock) {
+  // bt_assert(debug, clock != NULL);
+  bt_allocator_free(bt_heap_allocator(), (void *)clock);
+}
+
+/* ========================================================================== */
+
+void bt_monotonic_clock_reset(bt_monotonic_clock_t *clock) {
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  struct timespec t;
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  clock->epoch = t.tv_sec * UINT64_C(1000000000) + t.tv_nsec;
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  clock->epoch = mach_absolute_time();
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  QueryPerformanceCounter(&clock->epoch);
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+}
+
+uint64_t bt_monotonic_clock_secs(const bt_monotonic_clock_t *clock) {
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  return bt_monotonic_clock_nsecs(clock) / UINT64_C(1000000000);
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  return bt_monotonic_clock_nsecs(clock) / UINT64_C(1000000000);
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  return ((now.QuadPart - clock->epoch.QuadPart) / __counts_per_sec);
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+}
+
+uint64_t bt_monotonic_clock_msecs(const bt_monotonic_clock_t *clock) {
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  return bt_monotonic_clock_nsecs(clock) / UINT64_C(1000000);
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  return bt_monotonic_clock_nsecs(clock) / UINT64_C(1000000);
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  if (__counts_per_msec == UINT64_MAX)
+    return bt_monotonic_clock_secs(clock) * UINT64_C(1000);
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  return ((now.QuadPart - clock->epoch.QuadPart) / __counts_per_msec);
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+}
+
+uint64_t bt_monotonic_clock_usecs(const bt_monotonic_clock_t *clock) {
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  return bt_monotonic_clock_nsecs(clock) / UINT64_C(1000);
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  return bt_monotonic_clock_nsecs(clock) / UINT64_C(1000);
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  if (__counts_per_usec == UINT64_MAX)
+    return bt_monotonic_clock_msecs(clock) * UINT64_C(1000);
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  return ((now.QuadPart - clock->epoch.QuadPart) / __counts_per_usec);
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+}
+
+uint64_t bt_monotonic_clock_nsecs(const bt_monotonic_clock_t *clock) {
+#if ((BT_PLATFORM == BT_PLATFORM_LINUX) || (BT_PLATFORM == BT_PLATFORM_ANDROID))
+  struct timespec t;
+  clock_gettime(CLOCK_MONOTONIC, &t);
+  return ((t.tv_sec * UINT64_C(1000000000) + t.tv_nsec) - clock->epoch);
+#elif ((BT_PLATFORM == BT_PLATFORM_MACOSX) || (BT_PLATFORM == BT_PLATFORM_IOS))
+  return (((mach_absolute_time() - clock->epoch) * __mach_timebase_info.numer) / __mach_timebase_info.denom);
+#elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
+  if (__counts_per_nsec == UINT64_MAX)
+    return bt_monotonic_clock_usecs(clock) * UINT64_C(1000);
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  return ((now.QuadPart - clock->epoch.QuadPart) / __counts_per_nsec);
+#else
+  #error ("Unknown or unsupported compiler, architecture, and platform configuration!")
+#endif
+}

@@ -103,8 +103,12 @@ static void bt_application_render() {
 static void bt_application_run() {
   bt_profile_begin("bt_application_run");
 
-  while (true) {
-    bt_application_update(0.0f);
+  bt_monotonic_clock_t *clock = bt_monotonic_clock_create();
+  bt_monotonic_clock_t *frame_timer = bt_monotonic_clock_create();
+
+  while (bt_monotonic_clock_secs(clock) < 1) {
+    bt_monotonic_clock_reset(frame_timer);
+    bt_application_update(((float)bt_monotonic_clock_msecs(frame_timer) / 1000.0f));
     bt_application_render();
   }
 
