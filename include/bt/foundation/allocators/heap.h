@@ -30,7 +30,7 @@
  */
 
 /* ========================================================================== */
-/*! @file butane/foundation/allocators/heap.h
+/*! @file bt/foundation/allocators/heap.h
       Provides a thread-safe heap allocator.                                  */
 /* ========================================================================== */
 

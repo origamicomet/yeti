@@ -30,7 +30,7 @@
  */
 
 /* ========================================================================== */
-/*! @file butane/foundation/allocator.h
+/*! @file bt/foundation/allocator.h
       Defines a generic allocator interface.                                  */
 /* ========================================================================== */
 

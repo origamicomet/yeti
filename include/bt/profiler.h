@@ -30,7 +30,7 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/profilier.h
+/*! @file bt/profiler.h
       Provides the facilities to perform instrumented profiling .             */
 /* ========================================================================== */
 

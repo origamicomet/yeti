@@ -30,7 +30,7 @@
  */
 
 /* ========================================================================== */
-/*! @file butane/foundation/preprocessor.h
+/*! @file bt/foundation/preprocessor.h
       Provides various pre-processor functionality extensions.                */
 /* ========================================================================== */
 
