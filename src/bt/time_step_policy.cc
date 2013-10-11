@@ -37,90 +37,108 @@
 /*  Time Step Policy:                                                         */
 /* ========================================================================== */
 
-typedef struct variable {
+typedef struct bt_variable_time_step_policy {
   bt_time_step_policy_t tsp;
   float delta_;
-} variable_t;
+} bt_variable_time_step_policy_t;
 
 static void bt_time_step_policy_variable__update(
   bt_time_step_policy_t *time_step_policy,
   const bt_monotonic_clock_t *wall,
   const bt_monotonic_clock_t *frame)
 {
-  variable_t *time_step_policy_ = (variable_t *)time_step_policy;
-  time_step_policy_->delta_ = ((float)bt_monotonic_clock_nsecs(frame) / 1000000000.0f);
+  bt_variable_time_step_policy_t *time_step_policy_ =
+    (bt_variable_time_step_policy_t *)time_step_policy;
+  time_step_policy_->delta_ =
+    ((float)bt_monotonic_clock_nsecs(frame) / 1000000000.0f);
 }
 
 static size_t bt_time_step_policy_variable__num_of_ticks(
   const bt_time_step_policy_t *time_step_policy)
 {
-  const variable_t *time_step_policy_ = (const variable_t *)time_step_policy;
+  const bt_variable_time_step_policy_t *time_step_policy_ =
+    (const bt_variable_time_step_policy_t *)time_step_policy;
   return 1;
 }
 
 static float bt_time_step_policy_variable__step_per_tick(
   const bt_time_step_policy_t *time_step_policy)
 {
-  const variable_t *time_step_policy_ = (const variable_t *)time_step_policy;
+  const bt_variable_time_step_policy_t *time_step_policy_ =
+    (const bt_variable_time_step_policy_t *)time_step_policy;
   return time_step_policy_->delta_;
 }
 
 bt_time_step_policy_t *bt_time_step_policy_variable() {
-  variable_t *time_step_policy = (variable_t *)bt_allocator_alloc(
-    bt_heap_allocator(),
-    sizeof(variable_t),
-    bt_alignof(variable_t));
-  time_step_policy->tsp.update = &bt_time_step_policy_variable__update;
-  time_step_policy->tsp.num_of_ticks = &bt_time_step_policy_variable__num_of_ticks;
-  time_step_policy->tsp.step_per_tick = &bt_time_step_policy_variable__step_per_tick;
+  bt_variable_time_step_policy_t *time_step_policy =
+    (bt_variable_time_step_policy_t *)bt_allocator_alloc(
+      bt_heap_allocator(),
+      sizeof(bt_variable_time_step_policy_t),
+      bt_alignof(bt_variable_time_step_policy_t));
+  time_step_policy->tsp.update =
+    &bt_time_step_policy_variable__update;
+  time_step_policy->tsp.num_of_ticks =
+    &bt_time_step_policy_variable__num_of_ticks;
+  time_step_policy->tsp.step_per_tick =
+    &bt_time_step_policy_variable__step_per_tick;
   time_step_policy->delta_ = 0.0f;
   return &time_step_policy->tsp;
 }
 
 /* ========================================================================== */
 
-typedef struct fixed {
+typedef struct bt_fixed_time_step_policy {
   bt_time_step_policy_t tsp;
   float frame_rate;
   float debt_;
   size_t num_of_ticks_;
-} fixed_t;
+} bt_fixed_time_step_policy_t;
 
 static void bt_time_step_policy_fixed__update(
   bt_time_step_policy_t *time_step_policy,
   const bt_monotonic_clock_t *wall,
   const bt_monotonic_clock_t *frame)
 {
-  fixed_t *time_step_policy_ = (fixed_t *)time_step_policy;
-  time_step_policy_->debt_ += ((float)bt_monotonic_clock_nsecs(frame) / 1000000000.0f);
-  time_step_policy_->num_of_ticks_ = ((size_t)time_step_policy_->debt_ / time_step_policy_->frame_rate);
-  time_step_policy_->debt_ -= time_step_policy_->num_of_ticks_ * time_step_policy_->frame_rate;
+  bt_fixed_time_step_policy_t *time_step_policy_ =
+    (bt_fixed_time_step_policy_t *)time_step_policy;
+  time_step_policy_->debt_ +=
+    ((float)bt_monotonic_clock_nsecs(frame) / 1000000000.0f);
+  time_step_policy_->num_of_ticks_ =
+    ((size_t)time_step_policy_->debt_ / time_step_policy_->frame_rate);
+  time_step_policy_->debt_ -=
+    time_step_policy_->num_of_ticks_ * time_step_policy_->frame_rate;
 }
 
 static size_t bt_time_step_policy_fixed__num_of_ticks(
   const bt_time_step_policy_t *time_step_policy)
 {
-  const fixed_t *time_step_policy_ = (const fixed_t *)time_step_policy;
+  const bt_fixed_time_step_policy_t *time_step_policy_ =
+    (const bt_fixed_time_step_policy_t *)time_step_policy;
   return time_step_policy_->num_of_ticks_;
 }
 
 static float bt_time_step_policy_fixed__step_per_tick(
   const bt_time_step_policy_t *time_step_policy)
 {
-  const fixed_t *time_step_policy_ = (const fixed_t *)time_step_policy;
+  const bt_fixed_time_step_policy_t *time_step_policy_ =
+    (const bt_fixed_time_step_policy_t *)time_step_policy;
   return time_step_policy_->frame_rate;
 }
 
 bt_time_step_policy_t *bt_time_step_policy_fixed(
   const float frame_rate)
 {
-  fixed_t *time_step_policy = (fixed_t *)bt_allocator_alloc(
-    bt_heap_allocator(),
-    sizeof(fixed_t),
-    bt_alignof(fixed_t));
-  time_step_policy->tsp.update = &bt_time_step_policy_fixed__update;
-  time_step_policy->tsp.num_of_ticks = &bt_time_step_policy_fixed__num_of_ticks;
-  time_step_policy->tsp.step_per_tick = &bt_time_step_policy_fixed__step_per_tick;
+  bt_fixed_time_step_policy_t *time_step_policy =
+    (bt_fixed_time_step_policy_t *)bt_allocator_alloc(
+      bt_heap_allocator(),
+      sizeof(bt_fixed_time_step_policy_t),
+      bt_alignof(bt_fixed_time_step_policy_t));
+  time_step_policy->tsp.update =
+    &bt_time_step_policy_fixed__update;
+  time_step_policy->tsp.num_of_ticks =
+    &bt_time_step_policy_fixed__num_of_ticks;
+  time_step_policy->tsp.step_per_tick =
+    &bt_time_step_policy_fixed__step_per_tick;
   time_step_policy->frame_rate = frame_rate;
   time_step_policy->debt_ = 0.0f;
   time_step_policy->num_of_ticks_ = 0;
@@ -129,7 +147,7 @@ bt_time_step_policy_t *bt_time_step_policy_fixed(
 
 /* ========================================================================== */
 
-typedef struct smoothed {
+typedef struct bt_smoothed_time_step_policy {
   bt_time_step_policy_t tsp;
   size_t history;
   size_t outliers;
@@ -137,7 +155,7 @@ typedef struct smoothed {
   size_t saturation_;
   float history_[32];
   float delta_;
-} smoothed_t;
+} bt_smoothed_time_step_policy_t;
 
 static int bt_time_step_policy_smoothed__history_comparator(const void *lhs, const void *rhs) {
   const float lhs_ = *((const float *)lhs);
@@ -161,7 +179,8 @@ static void bt_time_step_policy_smoothed__update(
   const bt_monotonic_clock_t *wall,
   const bt_monotonic_clock_t *frame)
 {
-  smoothed_t *time_step_policy_ = (smoothed_t *)time_step_policy;
+  bt_smoothed_time_step_policy_t *time_step_policy_ =
+    (bt_smoothed_time_step_policy_t *)time_step_policy;
   bt_copy_overlapped(
     (const void *)&time_step_policy_->history_[0],
     (void *)&time_step_policy_->history_[1],
@@ -193,14 +212,16 @@ static void bt_time_step_policy_smoothed__update(
 static size_t bt_time_step_policy_smoothed__num_of_ticks(
   const bt_time_step_policy_t *time_step_policy)
 {
-  const smoothed_t *time_step_policy_ = (const smoothed_t *)time_step_policy;
+  const bt_smoothed_time_step_policy_t *time_step_policy_ =
+    (const bt_smoothed_time_step_policy_t *)time_step_policy;
   return 1;
 }
 
 static float bt_time_step_policy_smoothed__step_per_tick(
   const bt_time_step_policy_t *time_step_policy)
 {
-  const smoothed_t *time_step_policy_ = (const smoothed_t *)time_step_policy;
+  const bt_smoothed_time_step_policy_t *time_step_policy_ =
+    (const bt_smoothed_time_step_policy_t *)time_step_policy;
   return time_step_policy_->delta_;
 }
 
@@ -212,13 +233,17 @@ bt_time_step_policy_t *bt_time_step_policy_smoothed(
   // bt_assert(development, history <= 32);
   // bt_assert(development, (outliers * 2 + 1) <= 32);
   // bt_assert(development, rate > 0.0f);
-  smoothed_t *time_step_policy = (smoothed_t *)bt_allocator_alloc(
-    bt_heap_allocator(),
-    sizeof(smoothed_t),
-    bt_alignof(smoothed_t));
-  time_step_policy->tsp.update = &bt_time_step_policy_smoothed__update;
-  time_step_policy->tsp.num_of_ticks = &bt_time_step_policy_smoothed__num_of_ticks;
-  time_step_policy->tsp.step_per_tick = &bt_time_step_policy_smoothed__step_per_tick;
+  bt_smoothed_time_step_policy_t *time_step_policy =
+    (bt_smoothed_time_step_policy_t *)bt_allocator_alloc(
+      bt_heap_allocator(),
+      sizeof(bt_smoothed_time_step_policy_t),
+      bt_alignof(bt_smoothed_time_step_policy_t));
+  time_step_policy->tsp.update =
+    &bt_time_step_policy_smoothed__update;
+  time_step_policy->tsp.num_of_ticks =
+    &bt_time_step_policy_smoothed__num_of_ticks;
+  time_step_policy->tsp.step_per_tick =
+    &bt_time_step_policy_smoothed__step_per_tick;
   time_step_policy->history = history;
   time_step_policy->outliers = outliers;
   time_step_policy->rate = rate;
