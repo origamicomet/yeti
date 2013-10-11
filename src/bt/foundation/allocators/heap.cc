@@ -46,8 +46,6 @@ static bt_alloc_header_t *header_from_ptr(void *ptr) {
   return &((bt_alloc_header_t *)ptr)[-1];
 }
 
-#include <stdio.h>
-
 static void *bt_heap_allocator_alloc(
   bt_allocator_t *allocator,
   const size_t num_of_bytes,
