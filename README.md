@@ -1,5 +1,19 @@
 # Butane
 
+## Platforms
+
+| Platform  | Toolchain               | Supported             |
+|:--------- |:----------------------- |:---------------------:|
+| Windows   | Microsoft Visual Studio |                       |
+| Windows   | MinGW/MSYS              | <span>&#10003;</span> |
+| Mac OSX   | GCC or Clang            |                       |
+| Linux     | GCC or Clang            |                       |
+| BSD       | GCC or Clang            |                       |
+| Android   | GCC or Clang            |                       |
+| iOS       | GCC or Clang            |                       |
+| Web       | Native Client (NaCl)    |                       |
+| Web       | emscripten              |                       |
+
 ## Building
 
 ### Windows
