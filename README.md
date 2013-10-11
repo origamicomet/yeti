@@ -1,5 +1,99 @@
 # Butane
 
+## Building
+
+### Windows
+
+You have two options:
+
+  * MinGW/MSYS;
+  * or Microsoft Visual Studio.
+
+Microsoft Visual Studio recommended for performance, debugging, and support reasons.
+
+#### via MinGW
+
+Before you run `make` you're going to need:
+
+  * MinGW/MSYS;
+  * Ruby (1.9.3);
+  * GCC (preferably the latest and greatest);
+  * and a brain.
+
+##### 1. Open a MinGW/MSYS terminal
+
+Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
+
+##### 2. Configure
+
+You don't need to specify anything; it should just work.
+
+```
+$ ./configure
+```
+
+##### 3. Build
+
+```
+$ make all
+```
+
+#### via Microsoft Visual Studio
+
+Before you run `make` you're going to need:
+
+  * MinGW/MSYS;
+  * Ruby (1.9.3);
+  * Microsoft Visual Studio;
+  * and a brain.
+
+##### 1. Open a MinGW/MSYS terminal
+
+Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
+
+##### 2. Configure
+
+You're going to need to specify the `use-msvc` and `vcvars` options, e.g.:
+
+```
+$ ./configure --use-msvc --vcvars="C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/vcvarsall.bat"
+```
+
+##### 3. Build
+
+```
+$ make all
+```
+
+### Mac OSX
+
+TODO
+
+### Linux
+
+TODO
+
+### BSD
+
+TODO
+
+### Android
+
+TODO
+
+### iOS
+
+TODO
+
+### Web
+
+#### via [Native Client (NaCl)](https://developers.google.com/native-client/)
+
+TODO
+
+#### via [emscripten](https://github.com/kripken/emscripten)
+
+TODO
 
 ## License
 
