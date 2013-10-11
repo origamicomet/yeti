@@ -37,13 +37,13 @@
 
 #include <malloc.h>
 
-typedef struct alloc_header {
+typedef struct bt_alloc_header {
   size_t num_of_bytes;
   void *unaligned;
-} alloc_header_t;
+} bt_alloc_header_t;
 
-static alloc_header_t *header_from_ptr(void *ptr) {
-  return &((alloc_header_t *)ptr)[-1];
+static bt_alloc_header_t *header_from_ptr(void *ptr) {
+  return &((bt_alloc_header_t *)ptr)[-1];
 }
 
 #include <stdio.h>
@@ -55,8 +55,8 @@ static void *bt_heap_allocator_alloc(
 {
   (void)allocator;
   uintptr_t ptr =
-    (uintptr_t)malloc(num_of_bytes + sizeof(alloc_header_t) + alignment - 1);
-  uintptr_t aligned = ((ptr + sizeof(alloc_header_t)) & ~(alignment - 1));
+    (uintptr_t)malloc(num_of_bytes + sizeof(bt_alloc_header_t) + alignment - 1);
+  uintptr_t aligned = ((ptr + sizeof(bt_alloc_header_t)) & ~(alignment - 1));
   header_from_ptr((void *)aligned)->num_of_bytes = num_of_bytes;
   header_from_ptr((void *)aligned)->unaligned = (void *)ptr;
   return ((void *)aligned);
