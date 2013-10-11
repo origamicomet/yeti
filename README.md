@@ -70,7 +70,7 @@ Assuming default install options, you should be able to do so by running `C:/Min
 You're going to need to specify the `use-msvc` and `vcvars` options, e.g.:
 
 ```
-$ ./configure --use-msvc --vcvars="C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/vcvarsall.bat"
+$ ./configure --toolchain=msvc --vcvars="C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/vcvarsall.bat"
 ```
 
 ##### 3. Build
@@ -108,6 +108,26 @@ TODO
 #### via [emscripten](https://github.com/kripken/emscripten)
 
 TODO
+
+## Configuring
+
+Butane's compile, link, and runtime behaviour is controlled by `./configure` switches and options, as well as various pre-processor defines (which are documented in `include/bt/config.h`).
+
+### via switches and options
+
+**--paranoid**: defines `BT_PARANOID`, which will enable paranoid checks.
+
+**--debug**: defines `BT_DEBUG`, which will enable debugging related checks; disables optimizations; and enables symbol generation.
+
+**--development**: defines `BT_DEVELOPMENT`, which will enable development related checks; enables optimizations; and enables symbol generation.
+
+**--release**: defines `BT_RELEASE`, which will enable only release related checks; enables optimizations; and disables symbol generation.
+
+**--toolchain=[gcc,clang,msvc]**: will use specifed toolchain.
+
+**--architecture=[x86,x86-64,arm]**: will compile for the specific architecture.
+
+**--vcvars="[path]"**: is required when using Microsoft Visual Studio.
 
 ## License
 
