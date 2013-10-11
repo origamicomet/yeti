@@ -31,7 +31,7 @@
 
 /* ========================================================================== */
 
-#include <string.h>
+#include <bt/foundation/memory.h>
 
 /* ========================================================================== */
 
@@ -96,7 +96,7 @@ static void bt_unordered_map__grow(
     const _Value *src = &unordered_map->kvps_[index].value;
     _Value *dest = bt_unordered_map__insert<_Key, _Value>(kvps, kvps_sz, hash);
     // bt_assert(development, dest != NULL);
-    memcpy((void *)dest, (const void *)src, sizeof(_Value));
+    bt_copy((const void *)src, (void *)dest, sizeof(_Value));
   }
 
   bt_allocator_free(unordered_map->allocator, (void *)unordered_map->kvps_);

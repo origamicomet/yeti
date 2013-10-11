@@ -33,8 +33,9 @@
     #include <bt/foundation/allocators/heap.h>
 /* ========================================================================== */
 
+#include <bt/foundation/memory.h>
+
 #include <malloc.h>
-#include <string.h>
 
 typedef struct alloc_header {
   size_t num_of_bytes;
@@ -69,7 +70,7 @@ static void *bt_heap_allocator_realloc(
 {
   void *ptr_ = allocator->alloc(allocator, num_of_bytes, alignment);
   if (ptr) {
-    memcpy(ptr_, ptr, header_from_ptr(ptr)->num_of_bytes);
+    bt_copy(ptr, ptr_, header_from_ptr(ptr)->num_of_bytes);
     allocator->free(allocator, ptr); }
   return ptr_;
 }

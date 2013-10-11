@@ -30,25 +30,30 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+/*! @file bt/foundation/memory.h
+      Provides various optimized memory manipulation functions.               */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#ifndef _BT_FOUNDATION_MEMORY_H_
+#define _BT_FOUNDATION_MEMORY_H_
 
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/clocks.h>
 #include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/hash.h>
-#include <bt/foundation/memory.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-#include <bt/foundation/timestamp.h>
-#include <bt/foundation/unordered_map.h>
 
-#endif /* _BT_FOUNDATION_H_ */
+#include <string.h>
+
+/*! */
+static void bt_zero(void *mem, const size_t sz) {
+  memset(mem, 0, sz);
+}
+
+/*! */
+static void bt_copy(const void *src, void *dest, const size_t sz) {
+  memcpy(dest, src, sz);
+}
+
+/*! */
+static void bt_copy_overlapped(const void *src, void *dest, const size_t sz) {
+  memmove(dest, src, sz);
+}
+
+#endif /* _BT_FOUNDATION_MEMORY_H_ */

@@ -162,21 +162,20 @@ static void bt_time_step_policy_smoothed__update(
   const bt_monotonic_clock_t *frame)
 {
   smoothed_t *time_step_policy_ = (smoothed_t *)time_step_policy;
-  memmove(
-    (void *)&time_step_policy_->history_[1],
+  bt_copy_overlapped(
     (const void *)&time_step_policy_->history_[0],
+    (void *)&time_step_policy_->history_[1],
     (time_step_policy_->history - 1) * sizeof(float));
   time_step_policy_->history_[0] =
     ((float)bt_monotonic_clock_nsecs(frame) / 1000000000.0f);
   time_step_policy_->saturation_++;
   if (bt_likely(time_step_policy_->saturation_ > time_step_policy_->history))
     time_step_policy_->saturation_ = time_step_policy_->history;
-
   if (bt_likely(time_step_policy_->saturation_ >= (time_step_policy_->outliers * 2 + 1))) {
     float sorted[32];
-    memcpy(
-      (void *)&sorted[0],
+    bt_copy(
       (const void *)&time_step_policy_->history_[0],
+      (void *)&sorted[0],
       time_step_policy_->saturation_ * sizeof(float));
     qsort((void *)&sorted[0], 32, sizeof(float), &bt_time_step_policy_smoothed__history_comparator);
     const float avg = bt_time_step_policy_smoothed__avg(
@@ -224,7 +223,7 @@ bt_time_step_policy_t *bt_time_step_policy_smoothed(
   time_step_policy->outliers = outliers;
   time_step_policy->rate = rate;
   time_step_policy->saturation_ = 0;
-  memset((void *)&time_step_policy->history_[0], 0, 32 * sizeof(float));
+  bt_zero((void *)&time_step_policy->history_[0], 32 * sizeof(float));
   time_step_policy->delta_ = 0.0f;
   return &time_step_policy->tsp;
 }
@@ -240,7 +239,6 @@ void bt_time_step_policy_destroy(
 
 /* ========================================================================== */
 
-/*! */
 void bt_time_step_policy_update(
   bt_time_step_policy_t *time_step_policy,
   const bt_monotonic_clock_t *wall,
@@ -249,14 +247,12 @@ void bt_time_step_policy_update(
   time_step_policy->update(time_step_policy, wall, frame);
 }
 
-/*! */
 size_t bt_time_step_policy_num_of_ticks(
   const bt_time_step_policy_t *time_step_policy)
 {
   return time_step_policy->num_of_ticks(time_step_policy);
 }
 
-/*! */
 float bt_time_step_policy_step_per_tick(
   const bt_time_step_policy_t *time_step_policy)
 {
