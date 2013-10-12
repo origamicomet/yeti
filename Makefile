@@ -85,13 +85,17 @@ endif
 ifeq ($(DEVELOPMENT),yes)
   CFLAGS   += $(call def,BT_DEVELOPMENT)
   CXXFLAGS += $(call def,BT_DEVELOPMENT)
-  OPTIMIZE := yes
+  ifneq ($(DEBUG),yes)
+    OPTIMIZE := yes
+  endif
 endif
 
 ifeq ($(RELEASE),yes)
   CFLAGS   += $(call def,BT_RELEASE)
   CXXFLAGS += $(call def,BT_RELEASE)
-  OPTIMIZE := yes
+  ifneq ($(DEBUG),yes)
+    OPTIMIZE := yes
+  endif
 endif
 
 ifeq ($(OPTIMIZE),yes)
