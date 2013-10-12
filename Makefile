@@ -39,6 +39,7 @@
 # See ./configure
 include config.mk
 
+include mk/varargs.mk
 include mk/toolchain.mk
 include mk/platform.mk
 
@@ -60,47 +61,43 @@ SRC_DIR := src
 
 ################################################################################
 
-INCLUDE_DIRS := $(call include_dir,include)
-LIB_DIRS     := $(call lib_dir,include)
+INCLUDES := $(call cc,dir,include)
 
 ################################################################################
 # Debugging and optimization:                                                  #
 ################################################################################
 
 ifeq ($(PARANOID),yes)
-  CFLAGS   += $(call def,BT_PARANOID)
-  CXXFLAGS += $(call def,BT_PARANOID)
+  CFLAGS   += $(call cc,define,BT_PARANOID)
+  CXXFLAGS += $(call cxx,define,BT_PARANOID)
 endif
 
 ifeq ($(DEBUG),yes)
-  CFLAGS   += $(call generate_debug_info)
-  CFLAGS   += $(call def,BT_DEBUG) $(call def,_DEBUG)
-  CXXFLAGS += $(call generate_debug_info)
-  CXXFLAGS += $(call def,BT_DEBUG) $(call def,_DEBUG)
+  CFLAGS   += $(call cc,debug) $(call cc,define,BT_DEBUG)  $(call cc,define,_DEBUG)
+  CXXFLAGS += $(call cxx,debug) $(call cxx,define,BT_DEBUG) $(call cxx,define,_DEBUG)
 else
-  CFLAGS   += $(call def,_NDEBUG)
-  CXXFLAGS += $(call def,_NDEBUG)
+  CFLAGS   += $(call cc,define,_NDEBUG)
+  CXXFLAGS += $(call cc,define,_NDEBUG)
 endif
 
 ifeq ($(DEVELOPMENT),yes)
-  CFLAGS   += $(call def,BT_DEVELOPMENT)
-  CXXFLAGS += $(call def,BT_DEVELOPMENT)
+  CFLAGS   += $(call cc,define,BT_DEVELOPMENT)
+  CXXFLAGS += $(call cxx,define,BT_DEVELOPMENT)
   ifneq ($(DEBUG),yes)
-    OPTIMIZE := yes
+    CFLAGS   += $(call cc,development)
+    CXXFLAGS += $(call cxx,development)
+    LDFLAGS  += $(call ld,development)
   endif
 endif
 
 ifeq ($(RELEASE),yes)
-  CFLAGS   += $(call def,BT_RELEASE)
-  CXXFLAGS += $(call def,BT_RELEASE)
-  ifneq ($(DEBUG),yes)
-    OPTIMIZE := yes
+  CFLAGS   += $(call cc,define,BT_RELEASE)
+  CXXFLAGS += $(call cxx,define,BT_RELEASE)
+  ifneq ($(DEVELOPMENT),yes)
+    CFLAGS   += $(call cc,release)
+    CXXFLAGS += $(call cxx,release)
+    LDFLAGS  += $(call ld,release)
   endif
-endif
-
-ifeq ($(OPTIMIZE),yes)
-  CFLAGS   += $(call optimize)
-  CXXFLAGS += $(call optimize)
 endif
 
 ################################################################################
@@ -132,17 +129,18 @@ clean:
 ################################################################################
 
 SOURCES := $(shell find $(SRC_DIR) -name '*.cc')
-OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.cc=%.o)))
-DEFINES := $(call def,BT_BUILD=$(COMMIT)) $(call def,BT_COMPILING)
+OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.cc=%$(OBJECT_SUFFIX))))
+DEFINES := $(call cc,define,BT_BUILD=$(COMMIT)) $(call cc,define,BT_COMPILING)
 
--include $(OBJECTS:.o=.d)
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
+-include $(OBJECTS:$(OBJECT_SUFFIX)=.d)
+$(OBJ_DIR)/%$(OBJECT_SUFFIX): $(SRC_DIR)/%.cc
 	@echo "[CXX] $<"
 	@mkdir -p ${@D}
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) $(DEFINES) -c $< -o $@
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) $(DEFINES) -MM -MT $@ -c $< > $(patsubst %.o,%.d,$@)
+	$(call cxx) $(INCLUDES) $(DEFINES) $(call cc,output,$@) $(call cc,input,$<)
+	@$(call cxx) $(INCLUDES) $(DEFINES) -MM -MT $@ -c $< > $(patsubst %$(OBJECT_SUFFIX),%.d,$@)
 
 $(BUTANE): $(OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@$(CXX) $(LDFLAGS) $(LIB_DIRS) -o $@ $^ $(DEPENDENCIES)
+	@echo $^
+	$(call ldxx) $(call ld,output,$@) $(call ld,input,$^) $(call ld,input,$(DEPENDENCIES))

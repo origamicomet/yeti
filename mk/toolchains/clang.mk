@@ -31,43 +31,94 @@
 
 ################################################################################
 # Toolchain:                                                                   #
-#  * CC & CXX                                                                  #
+#  * CC & CXX & LD & LDXX                                                      #
 #  * Flags                                                                     #
 #  * Macros                                                                    #
+#  * Prefixes and suffixes                                                     #
 ################################################################################
 
 ################################################################################
-# CC & CXX:                                                                    #
+# CC & CXX & LD & LDXX                                                         #
 ################################################################################
 
-CC  := clang
-CXX := clang++
+CC   := clang
+CXX  := clang++
+LD   := clang
+LDXX := clang++
 
 ################################################################################
 # Flags:                                                                       #
 ################################################################################
 
-CFLAGS   := -std=c99 -pedantic -Wall -Wextra -Wfloat-equal -Wshadow \
-            -Wunsafe-loop-optimizations -Wpointer-arith -Wcast-qual \
-            -Wcast-align -Wmissing-field-initializers -Wpacked \
-            -Wpadded -Wredundant-decls -Wunreachable-code -Winline
+CFLAGS    := -std=c99 -pedantic -Wall -Wextra -Wfloat-equal -Wshadow \
+             -Wunsafe-loop-optimizations -Wpointer-arith -Wcast-qual \
+             -Wcast-align -Wmissing-field-initializers -Wpacked \
+             -Wpadded -Wredundant-decls -Wunreachable-code -Winline
 
-CXXFLAGS := -std=c++98 -pedantic -Wall -Wextra -Wfloat-equal -Wshadow \
-            -Wunsafe-loop-optimizations -Wpointer-arith -Wcast-qual \
-            -Wcast-align -Wmissing-field-initializers -Wpacked \
-            -Wpadded -Wredundant-decls -Wunreachable-code -Winline
+CXXFLAGS  := -std=c++98 -pedantic -Wall -Wextra -Wfloat-equal -Wshadow \
+             -Wunsafe-loop-optimizations -Wpointer-arith -Wcast-qual \
+             -Wcast-align -Wmissing-field-initializers -Wpacked \
+             -Wpadded -Wredundant-decls -Wunreachable-code -Winline
 
-LDFLAGS  :=
+LDFLAGS   :=
+
+LDXXFLAGS :=
 
 ################################################################################
 # Macros:                                                                      #
 ################################################################################
 
-include_dir               = -I$(1)
-lib_dir                   = -L$(1)
-link                      = -l$(1)
-shared                    = -shared
-position_independent_code =
-optimize                  = -O3
-generate_debug_info       = -g
-def                       = -D$(1)
+cc = $(call __cc_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
+
+  __cc_                           = $(CC) $(CFLAGS)
+  __cc_position_independent_code  =
+  __cc_input                      = -c $(1)
+  __cc_output                     = -o $(1)
+  __cc_dir                        = -I$(1)
+  __cc_define                     = -D$(1)
+  __cc_debug                      = -g
+  __cc_development                = -g
+  __cc_release                    = -03
+
+cxx = $(call __cxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
+
+	__cxx_                          = $(CXX) $(CXXFLAGS)
+  __cxx_position_independent_code = $(__cc_position_independent_code)
+  __cxx_input                     = $(__cc_input)
+  __cxx_output                    = $(__cc_output)
+  __cxx_dir                       = $(__cc_dir)
+  __cxx_define                    = $(__cc_define)
+  __cxx_debug                     = $(__cc_debug)
+  __cxx_development               = $(__cc_development)
+  __cxx_release                   = $(__cc_release)
+
+ld = $(call __ld_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
+
+  __ld_                           = $(LD) $(LDFLAGS)
+  __ld_shared                     = -shared
+  __ld_input                      = $(1)
+  __ld_output                     = -o $(1)
+  __ld_dir                        = -L$(1)
+  __ld_link                       = -l$(1)
+  __ld_debug                      =
+  __ld_development                =
+  __ld_release                    =
+
+ldxx = $(call __ldxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
+
+  __ldxx_                         = $(LDXX) $(LDXXFLAGS)
+  __ldxx_shared                   = $(__ld_shared)
+  __ldxx_input                    = $(__ld_input)
+  __ldxx_output                   = $(__ld_output)
+  __ldxx_dir                      = $(__ld_dir)
+  __ldxx_link                     = $(__ld_link)
+  __ldxx_debug                    = $(__ld_debug)
+  __ldxx_development              = $(__ld_development)
+  __ldxx_release                  = $(__ld_release)
+
+################################################################################
+# Prefix and suffixes:                                                         #
+################################################################################
+
+OBJECT_PREFIX :=
+OBJECT_SUFFIX := .o

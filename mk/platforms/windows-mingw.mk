@@ -89,7 +89,7 @@ SHARED_LIB_SUFFIX := .dll
 ################################################################################
 
 ifeq ($(ARCHITECTURE),x86)
-  DEPENDENCIES += $(call link kernel32) $(call link user32)
+  DEPENDENCIES += $(call ld,link,kernel32) $(call ld,link,user32)
 endif
 ifeq ($(ARCHITECTURE),x86-64)
   $(error System libraries are not known for 'windows-mingw' on 'x86-64'.)

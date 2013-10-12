@@ -68,10 +68,10 @@ Assuming default install options, you should be able to do so by running `C:/Min
 
 ##### 2. Configure
 
-You're going to need to specify the `toolchain` and `vcvars` options, e.g.:
+You're going to need to specify the `toolchain`, `windows-sdk`, and `msvc` options, e.g.:
 
 ```
-$ ./configure --toolchain=msvc --vcvars="C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/vcvarsall.bat"
+$ ./configure --toolchain=msvc --windows-sdk="C:/Program Files/Microsoft SDKs/Windows/v7.1" --msvc="C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC"
 ```
 
 ##### 3. Build
@@ -130,7 +130,9 @@ Butane's compile, link, and runtime behaviour is controlled by `./configure` swi
 
 **--platform=[windows,macosx,linux]**: builds for the specified platform.
 
-**--vcvars=[path]**: is required when using Microsoft Visual Studio.
+**--windows-sdk=[path]**: specifies the Windows SDK to use when using Microsoft Visual Studio.
+
+**--msvc=[path]**: specifies which verison of Microsoft Visual Studio to use.
 
 ## License
 
