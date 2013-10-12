@@ -252,7 +252,7 @@ class SwitchesAndOptions
     switches_and_options.toolchain    = (option 'toolchain')
     switches_and_options.platform     = (option 'platform')
     switches_and_options.windows_sdk  = (option 'windows_sdk')
-    switches_and_options.msvc         = (option 'msvc')
+    switches_and_options.vs_path      = (option 'vs_path')
 
     parser = OptionParser.new do |opts|
       opts.banner =  "Usage: ./configure [switches and options]"
@@ -287,8 +287,8 @@ class SwitchesAndOptions
         switches_and_options.windows_sdk = sdk
       end
 
-      opts.on("--msvc=PATH", "Specifies which verison of Microsoft Visual Studio to use.") do |msvc|
-        switches_and_options.msvc = msvc
+      opts.on("--vs-path=PATH", "Specifies which verison of Microsoft Visual Studio to use.") do |vs_path|
+        switches_and_options.vs_path = vs_path
       end
 
       opts.on("--h", "--help") do
@@ -373,7 +373,7 @@ class SwitchesAndOptions
       if not switches_and_options.windows_sdk
         puts "Windows SDK not specified!"
         return false
-      elsif not switches_and_options.msvc
+      elsif not switches_and_options.vs_path
         puts "Microsoft Visual Studio path not specified!"
         return false
       end
@@ -400,8 +400,8 @@ class SwitchesAndOptions
       f.write "\n"
 
       if switches_and_options.toolchain.downcase == 'msvc'
-        f.write "WINDOWS_SDK  := #{switches_and_options.windows_sdk}\n"
-        f.write "MSVC_PATH    := #{switches_and_options.msvc}\n"
+        f.write "WINDOWS_SDK := #{switches_and_options.windows_sdk}\n"
+        f.write "VS_PATH     := #{switches_and_options.vs_path}\n"
         f.write "\n"
       end
 

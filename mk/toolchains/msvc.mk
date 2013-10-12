@@ -35,6 +35,7 @@
 #  * Flags                                                                     #
 #  * Macros                                                                    #
 #  * Prefixes and suffixes                                                     #
+#  * Enviornment hack                                                          #
 ################################################################################
 
 ################################################################################
@@ -50,17 +51,21 @@ LDXX := link
 # Flags:                                                                       #
 ################################################################################
 
-CFLAGS    := /nologo /c /TC /favor:blend /GF /GR- /Wall
+# See http://superuser.com/a/376617.
 
-CXXFLAGS  := /nologo /c /TP /favor:blend /GF /GR- /Wall
+CFLAGS    := -nologo -c -TC -favor:blend -GF -GR- -Wall
 
-LDFLAGS   := /nologo /manifest:embed
+CXXFLAGS  := -nologo -c -TP -favor:blend -GF -GR- -Wall
 
-LDXXFLAGS := /nologo /manifest:embed
+LDFLAGS   := -nologo -manifest:embed
+
+LDXXFLAGS := -nologo -manifest:embed
 
 ################################################################################
 # Macros:                                                                      #
 ################################################################################
+
+mingw-path = /$(subst //,/,$(subst :,/,$(1)))
 
 # See http://msdn.microsoft.com/en-us/library/19z1t1wy.aspx.
 
@@ -68,13 +73,13 @@ cc = $(call __cc_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
   __cc_                           = $(CC) $(CFLAGS)
   __cc_position_independent_code  =
-  __cc_input                      = $(1)
-  __cc_output                     = /Fo"$(1)" /Fd"$(patsubst %.o,%.pdb,$(1))"
-  __cc_dir                        = /I"$(1)"
-  __cc_define                     = /D$(1)
-  __cc_debug                      = /MDd /Od /Zi /RTCsu /fp:precise /fp:expect
-  __cc_development                = /MD /Zi /fp:fast /fp:expect-
-  __cc_release                    = /MD /GL /Ox /fp:fast /fp:expect-
+  __cc_input                      = "$(1)"
+  __cc_output                     = -Fo"$(1)" -Fd"$(patsubst %.o,%.pdb,$(1))"
+  __cc_dir                        = -I"$(1)"
+  __cc_define                     = -D$(1)
+  __cc_debug                      = -MDd -Od -Zi -RTCsu -fp:precise -fp:expect
+  __cc_development                = -MD -Zi -fp:fast -fp:expect-
+  __cc_release                    = -MD -GL -Ox -fp:fast -fp:expect-
 
 cxx = $(call __cxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
@@ -93,14 +98,14 @@ cxx = $(call __cxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 ld = $(call __ld_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
   __ld_                           = $(LD) $(LDFLAGS)
-  __ld_shared                     = /DLL
+  __ld_shared                     = -DLL
   __ld_input                      = $(1)
-  __ld_output                     = /OUT:"$(1)"
-  __ld_dir                        = /LIBPATH:"$(1)"
+  __ld_output                     = -OUT:"$(1)"
+  __ld_dir                        = -LIBPATH:"$(1)"
   __ld_link                       = $(1).lib
-  __ld_debug                      = /DEBUG
-  __ld_development                = /DEBUG
-  __ld_release                    = /LTCG
+  __ld_debug                      = -DEBUG
+  __ld_development                = -DEBUG
+  __ld_release                    = -LTCG
 
 ldxx = $(call __ldxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
@@ -121,3 +126,18 @@ ldxx = $(call __ldxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 OBJECT_PREFIX :=
 OBJECT_SUFFIX := .obj
 
+################################################################################
+# Environment hack:                                                            #
+################################################################################
+
+# See http://stackoverflow.com/a/84496.
+
+WINDOWS_SDK_ := $(call mingw-path,$(WINDOWS_SDK))
+VS_PATH_     := $(call mingw-path,$(VS_PATH))
+
+export PATH := $(WINDOWS_SDK_)/Bin:$(VS_PATH_)/Common7/IDE:$(VS_PATH_)/VC/Bin:$(PATH)
+
+CFLAGS    += -I"$(WINDOWS_SDK_)/Include" -I"$(VS_PATH_)/VC/include"
+CXXFLAGS  += -I"$(WINDOWS_SDK_)/Include" -I"$(VS_PATH_)/VC/include"
+LDFLAGS   += -LIBPATH:"$(WINDOWS_SDK_)/Lib" -LIBPATH:"$(VS_PATH_)/VC/Lib"
+LDXXFLAGS += -LIBPATH:"$(WINDOWS_SDK_)/Lib" -LIBPATH:"$(VS_PATH_)/VC/Lib"

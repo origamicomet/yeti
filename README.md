@@ -68,10 +68,10 @@ Assuming default install options, you should be able to do so by running `C:/Min
 
 ##### 2. Configure
 
-You're going to need to specify the `toolchain`, `windows-sdk`, and `msvc` options, e.g.:
+You're going to need to specify the `toolchain`, `windows-sdk`, and `vs-path` options, e.g.:
 
 ```
-$ ./configure --toolchain=msvc --windows-sdk="C:/Program Files/Microsoft SDKs/Windows/v7.1" --msvc="C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC"
+$ ./configure --toolchain=msvc --windows-sdk="C:/Program Files/Microsoft SDKs/Windows/v7.1" --vs-path="C:/Program Files (x86)/Microsoft Visual Studio 11.0"
 ```
 
 ##### 3. Build
