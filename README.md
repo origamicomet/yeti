@@ -117,11 +117,11 @@ Butane's compile, link, and runtime behaviour is controlled by `./configure` swi
 
 **--paranoid**: defines `BT_PARANOID`, which will enable paranoid checks.
 
-**--config=debug**: defines `BT_DEBUG`, which will enable debugging related checks; disables optimizations; and enables symbol generation.
+**--config=debug**: defines `BT_DEBUG` and `BT_DEVELOPMENT` and `BT_RELEASE`, which will enable debugging, development, and release checks; disables optimizations; and enables symbol generation.
 
-**--config=development**: defines `BT_DEVELOPMENT`, which will enable development related checks; enables optimizations; and enables symbol generation.
+**--config=development**: defines `BT_DEVELOPMENT` and `BT_RELEASE`, which will enable development and release checks; enables optimizations; and enables symbol generation.
 
-**--config=release**: defines `BT_RELEASE`, which will enable only release related checks; enables optimizations; and disables symbol generation.
+**--config=release**: defines `BT_RELEASE`, which will enable **only** release checks; enables optimizations; and disables symbol generation.
 
 **--architecture=[x86,x86-64,arm]**: compiles for the specified architecture.
 
