@@ -1,6 +1,5 @@
 *.sublime-workspace
 *.log
-bin/
-lib/
-obj/
+config.mk
+build/
 docs/html/
