@@ -92,6 +92,23 @@ ifeq ($(findstring Linux,$(UNAME_S)),Linux)
   PLATFORM := linux
 endif
 
+# Make sure the platform is supported:
+ifeq ($(PLATFORM),windows-cygwin)
+  PLATFORM_IS_SUPPORTED := no
+endif
+ifeq ($(PLATFORM),windows-mingw)
+  PLATFORM_IS_SUPPORTED := yes
+endif
+ifeq ($(PLATFORM),macosx)
+  PLATFORM_IS_SUPPORTED := yes
+endif
+ifeq ($(PLATFORM),linux)
+  PLATFORM_IS_SUPPORTED := yes
+endif
+ifneq ($(PLATFORM_IS_SUPPORTED),yes)
+  $(error Compilation support on '$(PLATFORM)' isn't available right now.)
+endif
+
 # Determine the current architecture based on `uname -m`:
 # Again, http://en.wikipedia.org/wiki/Uname is immensely helpful here.
 ifeq ($(findstring i386,$(UNAME_M)),i386)
@@ -109,9 +126,35 @@ endif
 ifeq ($(findstring x86_64,$(UNAME_M)),x86_64)
   ARCHITECTURE := x86-64
 endif
+ifeq ($(findstring arm,$(UNAME_M)),arm)
+  ARCHITECTURE := arm
+endif
+
+# Default to the current architecture if no target is specified:
+ifndef TARGET_ARCHITECTURE
+  $(warning No target architecture specified. Did you forget to ./configure?)
+  $(info Defaulting to '$(ARCHITECTURE)'...)
+  TARGET_ARCHITECTURE := $(ARCHITECTURE)
+endif
+
+# Make sure the target architecture is supported:
+ifeq ($(TARGET_ARCHITECTURE),x86)
+  TARGET_ARCHITECTURE_IS_SUPPORTED := yes
+endif
+ifeq ($(TARGET_ARCHITECTURE),x86-64)
+  TARGET_ARCHITECTURE_IS_SUPPORTED := yes
+endif
+ifeq ($(TARGET_ARCHITECTURE),arm)
+  TARGET_ARCHITECTURE_IS_SUPPORTED := no
+endif
+ifneq ($(TARGET_ARCHITECTURE_IS_SUPPORTED),yes)
+  $(error Compilation support for '$(TARGET_ARCHITECTURE)' isn't available right now.)
+endif
 
 # Default to the current platform if no target is specified:
 ifndef TARGET_PLATFORM
+  $(warning No target platform specified. Did you forget to ./configure?)
+  $(info Defaulting to '$(PLATFORM)'...)
   TARGET_PLATFORM := $(PLATFORM)
 endif
 
@@ -123,7 +166,7 @@ ifeq ($(TARGET_PLATFORM),windows-mingw)
   TARGET_PLATFORM_IS_SUPPORTED := yes
 endif
 ifeq ($(TARGET_PLATFORM),macosx)
-  TARGET_PLATFORM_IS_SUPPORTED := no
+  TARGET_PLATFORM_IS_SUPPORTED := yes
 endif
 ifeq ($(TARGET_PLATFORM),linux)
   TARGET_PLATFORM_IS_SUPPORTED := yes
@@ -170,6 +213,8 @@ else
   ifeq ($(TARGET_PLATFORM),ios)
     $(error Compilation support for '$(TARGET_PLATFORM)' isn't available right now.)
   endif
+  $(warning No 'CC' specified. Did you forget to ./configure?)
+  $(info Defaulted to '$(CC)'...)
 endif
 ifdef CXX
   ifeq ($(CXX),gcc)
@@ -183,13 +228,13 @@ else
     $(error Compilation support for '$(TARGET_PLATFORM)' isn't available right now.)
   endif
   ifeq ($(TARGET_PLATFORM),windows-mingw)
-    CC := g++
+    CXX := g++
   endif
   ifeq ($(TARGET_PLATFORM),macosx)
-    CC := clang++
+    CXX := clang++
   endif
   ifeq ($(TARGET_PLATFORM),linux)
-    CC := g++
+    CXX := g++
   endif
   ifeq ($(TARGET_PLATFORM),android)
     $(error Compilation support for '$(TARGET_PLATFORM)' isn't available right now.)
@@ -197,6 +242,8 @@ else
   ifeq ($(TARGET_PLATFORM),ios)
     $(error Compilation support for '$(TARGET_PLATFORM)' isn't available right now.)
   endif
+  $(warning No 'CXX' specified. Did you forget to ./configure?)
+  $(info Defaulted to '$(CXX)'...)
 endif
 
 ################################################################################
@@ -254,8 +301,9 @@ ifeq ($(DEBUG),yes)
     CXXFLAGS += -DBT_PARANOID
   endif
 endif
-
 ifneq ($(DEBUG),yes)
+  ifeq ($(DEVELOPMENT),yes)
+
   CFLAGS += -O3 -DBT_RELEASE -DNDEBUG
   CXXFLAGS += -O3 -DBT_RELEASE -DNDEBUG
 endif
