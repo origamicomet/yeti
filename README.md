@@ -1,11 +1,12 @@
 # Butane
 
-## Platforms
+## Supports
 
 | Platform  | Toolchain               | Supported             |
 |:--------- |:----------------------- |:---------------------:|
 | Windows   | Microsoft Visual Studio |                       |
 | Windows   | MinGW/MSYS              | <span>&#10003;</span> |
+| Windows   | Cygwin                  |         Never         |
 | Mac OSX   | GCC or Clang            |                       |
 | Linux     | GCC or Clang            |                       |
 | BSD       | GCC or Clang            |                       |
