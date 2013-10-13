@@ -134,10 +134,10 @@ OBJECT_SUFFIX := .obj
 WINDOWS_SDK_ := $(call mingw-path,$(WINDOWS_SDK))
 VS_PATH_     := $(call mingw-path,$(VS_PATH))
 export PATH := $(WINDOWS_SDK_)/Bin:$(VS_PATH_)/Common7/IDE:$(VS_PATH_)/VC/Bin:$(PATH)
-CFLAGS    += -I"$(WINDOWS_SDK_)/Include" -I"$(VS_PATH_)/VC/include"
-CXXFLAGS  += -I"$(WINDOWS_SDK_)/Include" -I"$(VS_PATH_)/VC/include"
-LDFLAGS   += -LIBPATH:"$(WINDOWS_SDK_)/Lib" -LIBPATH:"$(VS_PATH_)/VC/Lib"
-LDXXFLAGS += -LIBPATH:"$(WINDOWS_SDK_)/Lib" -LIBPATH:"$(VS_PATH_)/VC/Lib"
+CFLAGS    += -I"$(WINDOWS_SDK)/Include" -I"$(VS_PATH)/VC/include"
+CXXFLAGS  += -I"$(WINDOWS_SDK)/Include" -I"$(VS_PATH)/VC/include"
+LDFLAGS   += -LIBPATH:"$(WINDOWS_SDK)/Lib" -LIBPATH:"$(VS_PATH)/VC/Lib"
+LDXXFLAGS += -LIBPATH:"$(WINDOWS_SDK)/Lib" -LIBPATH:"$(VS_PATH)/VC/Lib"
 
 # See http://stackoverflow.com/questions/14363929.
 # It might not fix the issues, though, but it's always worth a try...
