@@ -30,34 +30,25 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/compat/likeliness.h
-      Provides a method of specifing the likeliness of taking a branch.       */
+/*! @file bt/foundation/compat/warning.h
+      Provides compiler independent warning messages.                         */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_COMPAT_LIKELINESS_H_
-#define _BT_FOUNDATION_COMPAT_LIKELINESS_H_
+#ifndef _BT_FOUNDATION_COMPAT_WARNING_H_
+#define _BT_FOUNDATION_COMPAT_WARNING_H_
 
 #include <bt/foundation/detect/compiler.h>
-#include <bt/foundation/compat/warning.h>
-
-/*! @def bt_likely
-  Hints to the compiler that `_Expr` will almost always evaluate to TRUE. */
-
-/*! @def bt_unlikely
-  Hints to the compiler that `_Expr` will almost always evaluate to FALSE. */
 
 #if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
-  #define bt_likely(_Expr) \
-    __builtin_expect(!!(_Expr), 1)
-  #define bt_unlikely(_Expr) \
-    __builtin_expect(!!(_Expr), 0)
+  #define bt_warning(_Msg) \
+    #warning(_Msg)
+#elif (BT_COMPILER == BT_COMPILER_MSVC)
+  // See http://stackoverflow.com/questions/3030099.
+  #include <bt/foundation/preprocessor.h>
+  #define bt_warning(_Msg) \
+    __pragma(message(__FILE__ "(" bt_stringificate(__LINE__) ") : warning: " _Msg))
 #else
-  bt_warning ("Using fallback bt_likely; performance may be degraded.")
-  #define bt_likely(_Expr) \
-    (!!(_Expr))
-  bt_warning ("Using fallback bt_unlikely; performance may be degraded.")
-  #define bt_unlikely(_Expr) \
-    (!!(_Expr))
+  #error ("Unknown or unsupported compiler")
 #endif
 
-#endif /* _BT_FOUNDATION_COMPAT_LIKELINESS_H_ */
+#endif /* _BT_FOUNDATION_COMPAT_WARNING_H_ */

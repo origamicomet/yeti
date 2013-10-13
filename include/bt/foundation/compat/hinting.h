@@ -38,6 +38,7 @@
 #define _BT_FOUNDATION_COMPAT_HINTS_H_
 
 #include <bt/foundation/detect/compiler.h>
+#include <bt/foundation/compat/warning.h>
 
 /*! @def BT_INLINE
   Hint to the compiler to inline a function aggressively as possible. */
@@ -46,7 +47,7 @@
 #elif (BT_COMPILER == BT_COMPILER_MSVC)
   #define BT_INLINE __forceinline
 #else
-  #warning ("Inline forcing function attribute is unsupported, thus performance may be degraded!")
+  bt_warning ("Inline forcing function attribute is unsupported, thus performance may be degraded!")
   #define BT_INLINE inline
 #endif
 
@@ -57,7 +58,7 @@
 #elif (BT_COMPILER == BT_COMPILER_MSVC)
   #define BT_NEVER_INLINE __declspec(noinline)
 #else
-  #warning ("Never inline forcing function attribute is unsupported, thus performance may be degraded!")
+  bt_warning ("Never inline forcing function attribute is unsupported, thus performance may be degraded!")
   #define BT_NEVER_INLINE
 #endif
 
@@ -66,7 +67,7 @@
 #if (BT_COMPILER == BT_COMPILER_MSVC)
   #define BT_NO_ALIAS __declspec(noalias)
 #else
-  #warning ("No-alias function attribute is unsupported, thus performance may be degraded!")
+  bt_warning ("No-alias function attribute is unsupported, thus performance may be degraded!")
   #define BT_NO_ALIAS
 #endif
 
@@ -77,7 +78,7 @@
 #elif (BT_COMPILER == BT_COMPILER_MSVC)
   #define BT_DEPRECATED __declspec(deprecated)
 #else
-  #warning ("Deprecated function attribute is unsupported, thus deprecated function usage does not raise a warning!")
+  bt_warning ("Deprecated function attribute is unsupported, thus deprecated function usage does not raise a warning!")
   #define BT_DEPRECATED
 #endif
 
@@ -88,7 +89,7 @@
 #elif (BT_COMPILER == BT_COMPILER_MSVC)
   #define BT_RESTRICT __restrict
 #else
-  #warning ("Restrict attribute is unsupported, thus performance may be degraded!")
+  bt_warning ("Restrict attribute is unsupported, thus performance may be degraded!")
   #define BT_RESTRICT
 #endif
 

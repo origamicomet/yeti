@@ -49,41 +49,32 @@
   { mach_timebase_info(&__mach_timebase_info); }
 #elif (BT_PLATFORM == BT_PLATFORM_WINDOWS)
   #include <windows.h>
+
+  static uint64_t __counts_per_sec;
+  static uint64_t __counts_per_msec;
+  static uint64_t __counts_per_usec;
+  static uint64_t __counts_per_nsec;
+
+  static void __perf_freq_ctor_() {
+    LARGE_INTEGER perf_freq;
+    QueryPerformanceFrequency(&perf_freq);
+    __counts_per_sec = perf_freq.QuadPart;
+    __counts_per_msec = perf_freq.QuadPart / UINT64_C(1000);
+    __counts_per_msec = (__counts_per_msec ? __counts_per_msec : UINT64_MAX);
+    __counts_per_usec = perf_freq.QuadPart / UINT64_C(1000000);
+    __counts_per_usec = (__counts_per_usec ? __counts_per_usec : UINT64_MAX);
+    __counts_per_nsec = perf_freq.QuadPart / UINT64_C(1000000000);
+    __counts_per_nsec = (__counts_per_nsec ? __counts_per_nsec : UINT64_MAX);
+  }
+
   #if (BT_COMPILER == BT_COMPILER_MSVC)
-    static uint64_t __counts_per_sec;
-    static uint64_t __counts_per_msec;
-    static uint64_t __counts_per_usec;
-    static uint64_t __counts_per_nsec;
-
-    static void __cdecl __perf_freq_ctor() {
-      LARGE_INTEGER perf_freq;
-      QueryPerformanceFrequency(&perf_freq);
-      __counts_per_sec = perf_freq.QuadPart;
-      __counts_per_msec = perf_freq.QuadPart / UINT64_C(1000);
-      __counts_per_msec = (__counts_per_msec ? __counts_per_msec : UINT64_MAX);
-      __counts_per_usec = perf_freq.QuadPart / UINT64_C(1000000);
-      __counts_per_usec = (__counts_per_usec ? __counts_per_usec : UINT64_MAX);
-      __counts_per_nsec = perf_freq.QuadPart / UINT64_C(1000000000);
-      __counts_per_nsec = (__counts_per_nsec ? __counts_per_nsec : UINT64_MAX);
-    }
-
-    __declspec(allocate(".CRT$XCU")) void (__cdecl*__perf_freq_ctor_)() = &__perf_freq_ctor;
+    static void __cdecl __perf_freq_ctor()
+    { __perf_freq_ctor_(); }
+    #pragma section(".CRT$XCU", read)
+    __declspec(allocate(".CRT$XCU")) void (__cdecl*__perf_freq_ctor__)() = &__perf_freq_ctor;
   #else
-    static uint64_t __counts_per_sec;
-    static uint64_t __counts_per_msec;
-    static uint64_t __counts_per_usec;
-    static uint64_t __counts_per_nsec;
-
     static void __attribute__((constructor)) __perf_freq_ctor() {
-      LARGE_INTEGER perf_freq;
-      QueryPerformanceFrequency(&perf_freq);
-      __counts_per_sec = perf_freq.QuadPart;
-      __counts_per_msec = perf_freq.QuadPart / UINT64_C(1000);
-      __counts_per_msec = (__counts_per_msec ? __counts_per_msec : UINT64_MAX);
-      __counts_per_usec = perf_freq.QuadPart / UINT64_C(1000000);
-      __counts_per_usec = (__counts_per_usec ? __counts_per_usec : UINT64_MAX);
-      __counts_per_nsec = perf_freq.QuadPart / UINT64_C(1000000000);
-      __counts_per_nsec = (__counts_per_nsec ? __counts_per_nsec : UINT64_MAX);
+      __perf_freq_ctor_();
     }
   #endif
 #else

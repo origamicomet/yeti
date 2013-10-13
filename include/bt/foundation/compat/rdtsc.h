@@ -38,29 +38,32 @@
 #define _BT_FOUNDATION_COMPAT_RDTSC_H_
 
 #include <bt/foundation/detect/compiler.h>
+#include <bt/foundation/detect/architecture.h>
+#include <bt/foundation/detect/platform.h>
 #include <bt/foundation/compat/stdint.h>
 
-/* ========================================================================== */
-
-/*! Returns the number of cycles since reset. */
-static inline uint64_t bt_rdtsc() {
-#if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
-  uint32_t high, low;
-  asm volatile(
-    "rdtsc\n movl %%edx, %0\nmovl %%eax, %1\ncpuid"
-    : "=r" (high), "=r" (low) : : "%rax", "%rbx", "%rcx", "%rdx");
-  return ((((uint64_t)high) << 32ull) | (uint64_t)low);
-#elif (BT_COMPILER == BT_COMPILER_MSVC)
-  #error ("Not yet implemented!")
+#if ((BT_ARCHITECTURE == BT_ARCHITECTURE_X86) || (BT_ARCHITECTURE == BT_ARCHITECTURE_X86_64))
+  #if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
+    /*! Returns the number of cycles since the CPU was reset. */
+    static inline uint64_t bt_rdtsc() {
+      uint32_t high, low;
+      asm volatile(
+        "rdtsc\n movl %%edx, %0\nmovl %%eax, %1\ncpuid"
+        : "=r" (high), "=r" (low) : : "%rax", "%rbx", "%rcx", "%rdx");
+      return ((((uint64_t)high) << 32ull) | (uint64_t)low);
+    }
+  #elif (BT_COMPILER == BT_COMPILER_MSVC)
+    #include <intrin.h>
+    #pragma intrinsic(__rdtsc)
+    /*! Returns the number of cycles since the CPU was reset. */
+    static __forceinline uint64_t bt_rdtsc() {
+      return __rdtsc();
+    }
+  #else
+    #error ("Unknown or unsupported compiler!")
+  #endif
 #else
-  #error ("Time Stamp Counter is unsupported!")
+  #error ("Time-Stamp Counter is not supported!")
 #endif
-}
-
-/* ========================================================================== */
-
-extern uint64_t bt_cycles_to_sec(const uint64_t cycles);
-extern uint64_t bt_cycles_to_msec(const uint64_t cycles);
-extern uint64_t bt_cycles_to_usec(const uint64_t cycles);
 
 #endif /* _BT_FOUNDATION_COMPAT_RDTSC_H_ */

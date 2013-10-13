@@ -37,6 +37,18 @@
 #ifndef _BT_FOUNDATION_COMPAT_STDBOOL_H_
 #define _BT_FOUNDATION_COMPAT_STDBOOL_H_
 
-#include <stdbool.h>
+#include <bt/foundation/detect/compiler.h>
+
+#if (BT_COMPILER == BT_COMPILER_MSVC)
+  #ifndef __cplusplus
+    typedef unsigned char _Bool;
+    typedef _Bool bool;
+    #define true ((_Bool)1)
+    #define false ((_Bool)0)
+    #define __bool_true_false_are_defined 1
+  #endif
+#else
+  #include <stdbool.h>
+#endif
 
 #endif /* _BT_FOUNDATION_COMPAT_STDBOOL_H_ */

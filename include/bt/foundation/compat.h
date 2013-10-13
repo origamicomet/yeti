@@ -47,5 +47,6 @@
 #include <bt/foundation/compat/stdbool.h>
 #include <bt/foundation/compat/stdint.h>
 #include <bt/foundation/compat/stdio.h>
+#include <bt/foundation/compat/warning.h>
 
 #endif /* _BT_FOUNDATION_COMPAT_H_ */
