@@ -137,10 +137,8 @@ $(OBJ_DIR)/%$(OBJECT_SUFFIX): $(SRC_DIR)/%.cc
 	@echo "[CXX] $<"
 	@mkdir -p ${@D}
 	@$(call cxx) $(INCLUDES) $(DEFINES) $(call cc,output,$@) $(call cc,input,$<)
-	# @$(call cxx) $(INCLUDES) $(DEFINES) -MM -MT $@ -c $< > $(patsubst %$(OBJECT_SUFFIX),%.d,$@)
 
 $(BUTANE): $(OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@echo $^
 	@$(call ldxx) $(call ld,output,$@) $(call ld,input,$^) $(call ld,input,$(DEPENDENCIES))

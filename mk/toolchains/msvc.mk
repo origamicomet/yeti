@@ -42,8 +42,8 @@
 # CC & CXX & LD & LDXX                                                         #
 ################################################################################
 
-CC   := cl
-CXX  := cl
+CC   := mk/toolchains/msvc/cl
+CXX  := mk/toolchains/msvc/cl
 LD   := link
 LDXX := link
 
@@ -53,9 +53,9 @@ LDXX := link
 
 # See http://superuser.com/a/376617.
 
-CFLAGS    := -nologo -c -TC -favor:blend -GF -GR- -Wall
+CFLAGS    := -nologo -c -TC -favor:blend -GF -GR- -W4
 
-CXXFLAGS  := -nologo -c -TP -favor:blend -GF -GR- -Wall
+CXXFLAGS  := -nologo -c -TP -favor:blend -GF -GR- -W4
 
 LDFLAGS   := -nologo -manifest:embed
 
@@ -74,12 +74,12 @@ cc = $(call __cc_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
   __cc_                           = $(CC) $(CFLAGS)
   __cc_position_independent_code  =
   __cc_input                      = "$(1)"
-  __cc_output                     = -Fo"$(1)" -Fd"$(patsubst %.o,%.pdb,$(1))"
+  __cc_output                     = -Fo"$(1)" -Fd"$(patsubst %.obj,%.pdb,$(1))"
   __cc_dir                        = -I"$(1)"
   __cc_define                     = -D$(1)
-  __cc_debug                      = -MDd -Od -Zi -RTCsu -fp:precise -fp:expect
-  __cc_development                = -MD -Zi -fp:fast -fp:expect-
-  __cc_release                    = -MD -GL -Ox -fp:fast -fp:expect-
+  __cc_debug                      = -MDd -Od -Zi -RTCsu -fp:precise -fp:except
+  __cc_development                = -MD -Zi -fp:fast -fp:except-
+  __cc_release                    = -MD -GL -Ox -fp:fast -fp:except-
 
 cxx = $(call __cxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
@@ -131,13 +131,17 @@ OBJECT_SUFFIX := .obj
 ################################################################################
 
 # See http://stackoverflow.com/a/84496.
-
 WINDOWS_SDK_ := $(call mingw-path,$(WINDOWS_SDK))
 VS_PATH_     := $(call mingw-path,$(VS_PATH))
-
 export PATH := $(WINDOWS_SDK_)/Bin:$(VS_PATH_)/Common7/IDE:$(VS_PATH_)/VC/Bin:$(PATH)
-
 CFLAGS    += -I"$(WINDOWS_SDK_)/Include" -I"$(VS_PATH_)/VC/include"
 CXXFLAGS  += -I"$(WINDOWS_SDK_)/Include" -I"$(VS_PATH_)/VC/include"
 LDFLAGS   += -LIBPATH:"$(WINDOWS_SDK_)/Lib" -LIBPATH:"$(VS_PATH_)/VC/Lib"
 LDXXFLAGS += -LIBPATH:"$(WINDOWS_SDK_)/Lib" -LIBPATH:"$(VS_PATH_)/VC/Lib"
+
+# See http://stackoverflow.com/questions/14363929.
+# It might not fix the issues, though, but it's always worth a try...
+ifeq ($(findstring 11.0,$(VS_PATH)),11.0)
+  CFLAGS   += -D_USING_V110_SDK71_=1
+  CXXFLAGS += -D_USING_V110_SDK71_=1
+endif
