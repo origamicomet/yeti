@@ -48,7 +48,7 @@ cmd = ARGV.map { |arg|
 output = `#{cmd}`
 returned = $?.exitstatus
 
-puts output.lines.to_a[1..-1].join
+print output.lines.to_a[1..-1].join
 
 if returned != 0
   obj = ARGV.select { |arg|
