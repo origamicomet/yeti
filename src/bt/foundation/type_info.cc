@@ -30,27 +30,5 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+    #include <bt/foundation/type_info.h>
 /* ========================================================================== */
-
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
-
-#include <bt/foundation/algorithms.h>
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/clocks.h>
-#include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/hash.h>
-#include <bt/foundation/memory.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-#include <bt/foundation/timestamp.h>
-#include <bt/foundation/type_info.h>
-#include <bt/foundation/unordered_map.h>
-
-#endif /* _BT_FOUNDATION_H_ */
