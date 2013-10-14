@@ -159,23 +159,6 @@ typedef struct bt_smoothed_time_step_policy {
   float delta_;
 } bt_smoothed_time_step_policy_t;
 
-static int bt_time_step_policy_smoothed__history_comparator(const void *lhs, const void *rhs) {
-  const float lhs_ = *((const float *)lhs);
-  const float rhs_ = *((const float *)rhs);
-  if (lhs_ < rhs_)
-    return -1;
-  else if (rhs_ > lhs_)
-    return 1;
-  return 0;
-}
-
-static float bt_time_step_policy_smoothed__avg(const float *history, const size_t history_sz) {
-  float sum = 0.0f;
-  for (size_t i = 0; i < history_sz; ++i)
-    sum += history[i];
-  return (sum / (float)history_sz);
-}
-
 static void bt_time_step_policy_smoothed__update(
   bt_time_step_policy_t *time_step_policy,
   const bt_monotonic_clock_t *wall,
@@ -198,13 +181,13 @@ static void bt_time_step_policy_smoothed__update(
       (const void *)&time_step_policy_->history_[0],
       (void *)&sorted[0],
       time_step_policy_->saturation_ * sizeof(float));
-    qsort((void *)&sorted[0], 32, sizeof(float), &bt_time_step_policy_smoothed__history_comparator);
-    const float avg = bt_time_step_policy_smoothed__avg(
+    bt_unstable_sort(&sorted[0], 32);
+    const float mean = bt_arithmetic_mean(
       &sorted[time_step_policy_->outliers - 1],
       time_step_policy_->saturation_ - (time_step_policy_->outliers * 2));
     const float rate = time_step_policy_->rate;
     const float smoothed =
-      (rate * avg + (1 - rate) * time_step_policy_->history_[0]);
+      (rate * mean + (1 - rate) * time_step_policy_->history_[0]);
     time_step_policy_->delta_ = smoothed;
   } else {
     time_step_policy_->delta_ = time_step_policy_->history_[0];
