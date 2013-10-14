@@ -72,6 +72,7 @@ mingw-path = /$(subst //,/,$(subst :,/,$(1)))
 cc = $(call __cc_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
   __cc_                           = $(CC) $(CFLAGS)
+  __cc_deps                       = mk/toolchains/msvc/cl-deps $(CFLAGS) -Zs -showIncludes -MT"$(1)"
   __cc_position_independent_code  =
   __cc_input                      = "$(1)"
   __cc_output                     = -Fo"$(1)" -Fd"$(patsubst %.obj,%.pdb,$(1))"
@@ -84,6 +85,7 @@ cc = $(call __cc_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 cxx = $(call __cxx_$(1),$(subst $(1),,$(subst $(strip $(1),),,$(args))))
 
   __cxx_                          = $(CXX) $(CXXFLAGS)
+  __cxx_deps                      = mk/toolchains/msvc/cl-deps $(CXXFLAGS) -Zs -showIncludes -MT"$(1)"
   __cxx_position_independent_code = $(__cc_position_independent_code)
   __cxx_input                     = $(__cc_input)
   __cxx_output                    = $(__cc_output)

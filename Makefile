@@ -132,11 +132,12 @@ SOURCES := $(shell find $(SRC_DIR) -name '*.cc')
 OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.cc=%$(OBJECT_SUFFIX))))
 DEFINES := $(call cc,define,BT_BUILD=$(COMMIT)) $(call cc,define,BT_COMPILING)
 
--include $(OBJECTS:$(OBJECT_SUFFIX)=.d)
+-include $(OBJECTS:%$(OBJECT_SUFFIX)=%.d)
 $(OBJ_DIR)/%$(OBJECT_SUFFIX): $(SRC_DIR)/%.cc
 	@echo "[CXX] $<"
 	@mkdir -p ${@D}
 	@$(call cxx) $(INCLUDES) $(DEFINES) $(call cc,output,$@) $(call cc,input,$<)
+	@$(call cxx,deps,$@) $(INCLUDES) $(DEFINES) $(call cc,input,$<) > $(patsubst %$(OBJECT_SUFFIX),%.d,$@)
 
 $(BUTANE): $(OBJECTS)
 	@echo "[LD] $@"
