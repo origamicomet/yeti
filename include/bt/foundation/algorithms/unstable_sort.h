@@ -30,26 +30,31 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation.h
-      Imports all headers in bt/foundation. */
+/*! @file bt/foundation/algorithms/unstable_sort.h
+      Provides an unstable relative sort.                                     */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_H_
-#define _BT_FOUNDATION_H_
+#ifndef _BT_FOUNDATION_ALGORITHMS_UNSTABLE_SORT_H_
+#define _BT_FOUNDATION_ALGORITHMS_UNSTABLE_SORT_H_
 
-#include <bt/foundation/algorithms.h>
-#include <bt/foundation/allocator.h>
-#include <bt/foundation/allocators.h>
-#include <bt/foundation/architecture.h>
-#include <bt/foundation/clocks.h>
 #include <bt/foundation/compat.h>
-#include <bt/foundation/compiler.h>
-#include <bt/foundation/detect.h>
-#include <bt/foundation/hash.h>
-#include <bt/foundation/memory.h>
-#include <bt/foundation/platform.h>
-#include <bt/foundation/preprocessor.h>
-#include <bt/foundation/timestamp.h>
-#include <bt/foundation/unordered_map.h>
 
-#endif /* _BT_FOUNDATION_H_ */
+#include <stdlib.h>
+
+/*! Sorts `elements` in non-decreasing (lowest to highest) order without
+  guarantees on the order of equal elements. Makes at most, O(n log n)
+  comparisons. */
+template <typename _Type>
+static void bt_unstable_sort(_Type *elements, const size_t elements_sz) {
+  struct _Comparator {
+    static int compare(const void *lhs, const void *rhs) {
+      const _Type &lhs_ = *((const _Type *)lhs);
+      const _Type &rhs_ = *((const _Type *)rhs);
+      if (lhs_ < rhs_) return -1;
+      if (lhs_ > rhs_) return 0;
+      return 1;
+    } };
+  qsort((void *)elements, elements_sz, sizeof(_Type), &_Comparator::compare);
+}
+
+#endif /* _BT_FOUNDATION_ALGORITHMS_UNSTABLE_SORT_H_ */
