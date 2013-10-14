@@ -4,7 +4,7 @@
 
 | Platform  | Toolchain               | Supported             |
 |:--------- |:----------------------- |:---------------------:|
-| Windows   | Microsoft Visual Studio |                       |
+| Windows   | Microsoft Visual Studio | <span>&#10003;</span> |
 | Windows   | MinGW/MSYS              | <span>&#10003;</span> |
 | Windows   | Cygwin                  |         Never         |
 | Mac OSX   | GCC or Clang            |                       |
