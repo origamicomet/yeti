@@ -37,6 +37,8 @@
 #ifndef _BT_FOUNDATION_COMPAT_STDINT_H_
 #define _BT_FOUNDATION_COMPAT_STDINT_H_
 
+#include <bt/foundation/detect/compiler.h>
+
 #ifndef __STDC_LIMIT_MACROS // [
   #define __STDC_LIMIT_MACROS
 #endif // __STDC_LIMIT_MACROS ]

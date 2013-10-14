@@ -37,6 +37,7 @@
 #ifndef _BT_FOUNDATION_COMPAT_INTTYPES_H_
 #define _BT_FOUNDATION_COMPAT_INTTYPES_H_
 
+#include <bt/foundation/detect/compiler.h>
 #include <bt/foundation/compat/stdint.h>
 
 #ifndef __STDC_FORMAT_MACROS // [

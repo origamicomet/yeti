@@ -39,11 +39,11 @@
 
 #include <stddef.h>
 
-#if (defined(__STDC_VERSION__) && (__STDC_VERSION__ < 201112L))
+#if ((defined(__STDC_VERSION__) && (__STDC_VERSION__ < 201112L)) || (!defined(__cplusplus) && defined(_MSC_VER)))
   #ifndef bt_alignof
     #define bt_alignof(_Type) ((size_t)offsetof(struct{char _; _Type __;},__))
   #endif /* ifndef bt_alignof */
-#elif (defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__))
+#elif ((defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__)) || (defined(__cplusplus) && defined(_MSC_VER)))
   /* Bless me, Father, for I have sinned. */
   template <typename _Type> struct __bt_alignof;
   template <int _SzDiff> struct __bt_alignof_ {

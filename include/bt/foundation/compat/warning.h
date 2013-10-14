@@ -40,8 +40,10 @@
 #include <bt/foundation/detect/compiler.h>
 
 #if ((BT_COMPILER == BT_COMPILER_GCC) || (BT_COMPILER == BT_COMPILER_CLANG))
+  #define __bt_warning(_Msg) \
+    _Pragma(#_Msg)
   #define bt_warning(_Msg) \
-    #warning(_Msg)
+    __bt_warning(message "warning: " _Msg)
 #elif (BT_COMPILER == BT_COMPILER_MSVC)
   // See http://stackoverflow.com/questions/3030099.
   #include <bt/foundation/preprocessor.h>
