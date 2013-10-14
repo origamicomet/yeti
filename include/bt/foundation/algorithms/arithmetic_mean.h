@@ -30,14 +30,22 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/algorithms.h
-      Imports all headers in bt/foundation/algorithms. */
+/*! @file bt/foundation/algorithms/arithmetic_mean.h
+      Provides a typed arithmetic mean.                                       */
 /* ========================================================================== */
 
-#ifndef _BT_FOUNDATION_ALGORITHMS_H_
-#define _BT_FOUNDATION_ALGORITHMS_H_
+#ifndef _BT_FOUNDATION_ALGORITHMS_ARITHMETIC_MEAN_H_
+#define _BT_FOUNDATION_ALGORITHMS_ARITHMETIC_MEAN_H_
 
-#include <bt/foundation/algorithms/arithmetic_mean.h>
-#include <bt/foundation/algorithms/unstable_sort.h>
+#include <bt/foundation/compat.h>
 
-#endif /* _BT_FOUNDATION_ALGORITHMS_H_ */
+/*! Calculates the arithmetic mean of `elements`. */
+template <typename _Type>
+static _Type bt_arithmetic_mean(const _Type *elements, const size_t elements_sz) {
+  _Type sum = _Type(0);
+  for (size_t element = 0; element < elements_sz; ++element)
+    sum += elements[element];
+  return (sum / _Type(elements_sz));
+}
+
+#endif /* _BT_FOUNDATION_ALGORITHMS_ARITHMETIC_MEAN_H_ */

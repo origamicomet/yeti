@@ -30,14 +30,5 @@
  */
 
 /* ========================================================================== */
-/*! @file bt/foundation/algorithms.h
-      Imports all headers in bt/foundation/algorithms. */
+    #include <bt/foundation/algorithms/arithmetic_mean.h>
 /* ========================================================================== */
-
-#ifndef _BT_FOUNDATION_ALGORITHMS_H_
-#define _BT_FOUNDATION_ALGORITHMS_H_
-
-#include <bt/foundation/algorithms/arithmetic_mean.h>
-#include <bt/foundation/algorithms/unstable_sort.h>
-
-#endif /* _BT_FOUNDATION_ALGORITHMS_H_ */
