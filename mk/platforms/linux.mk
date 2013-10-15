@@ -29,4 +29,68 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-$(error Compilation support on and for 'linux' isn't available right now.)
+################################################################################
+# Platform:                                                                    #
+#  * Compilation support                                                       #
+#  * Prefix and suffixes                                                       #
+#  * System Libraries                                                          #
+################################################################################
+
+################################################################################
+# Compilation support:                                                         #
+################################################################################
+
+# Cross compiling?
+COMPILATION_IS_SUPPORTED := no
+ifeq ($(HOST_PLATFORM),windows-cygwin)
+  COMPILATION_IS_SUPPORTED := no
+endif
+ifeq ($(HOST_PLATFORM),windows-mingw)
+  COMPILATION_IS_SUPPORTED := no
+endif
+ifeq ($(HOST_PLATFORM),macosx)
+  COMPILATION_IS_SUPPORTED := no
+endif
+ifeq ($(HOST_PLATFORM),linux)
+  COMPILATION_IS_SUPPORTED := yes
+endif
+ifneq ($(COMPILATION_IS_SUPPORTED),yes)
+  $(error Compilation support on '$(HOST_PLATFORM)' for 'linux' isn't available right now.)
+endif
+
+# Architecture?
+COMPILATION_IS_SUPPORTED := no
+ifeq ($(ARCHITECTURE),x86)
+  COMPILATION_IS_SUPPORTED := yes
+endif
+ifeq ($(ARCHITECTURE),x86-64)
+  COMPILATION_IS_SUPPORTED := yes
+endif
+ifeq ($(ARCHITECTURE),arm)
+  COMPILATION_IS_SUPPORTED := no
+endif
+ifneq ($(COMPILATION_IS_SUPPORTED),yes)
+  $(error Compilation support for 'linux' on '$(ARCHITECTURE)' isn't available right now.)
+endif
+
+################################################################################
+# Prefix and suffixes:                                                         #
+################################################################################
+
+EXECUTABLE_PREFIX :=
+EXECUTABLE_SUFFIX :=
+STATIC_LIB_PREFIX := lib
+STATIC_LIB_SUFFIX := .a
+SHARED_LIB_PREFIX := lib
+SHARED_LIB_SUFFIX := .so
+
+################################################################################
+# System Libraries:                                                            #
+################################################################################
+
+ifeq ($(ARCHITECTURE),x86)
+  DEPENDENCIES += -pthread -lrt
+endif
+ifeq ($(ARCHITECTURE),x86-64)
+  DEPENDENCIES += -pthread -lrt
+endif

@@ -203,7 +203,7 @@ class SwitchesAndOptions
     when "macosx"
       false
     when "linux"
-      false
+      true
     else
       false
     end
