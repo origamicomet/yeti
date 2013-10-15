@@ -69,6 +69,8 @@ class SwitchesAndOptions
     host_cpu = RbConfig::CONFIG['host_cpu'].downcase
     if host_cpu =~ /i[0-6]86/i
       "x86"
+    elsif host_cpu == "x86_64"
+      "x86-64"
     else
       abort("Unknown 'host_cpu' #{host_cpu}!")
     end
