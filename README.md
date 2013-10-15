@@ -86,7 +86,62 @@ TODO
 
 ### Linux
 
-TODO
+You have two options:
+
+  * GCC;
+  * or Clang.
+
+#### via GCC
+
+Before you run `make` you're going to need:
+
+  * GCC (preferably the latest and greatest);
+  * Ruby (1.9.3);
+  * and a brain.
+
+##### 1. Open a terminal
+
+This varies based on distribution, but you can try `Super + T`.
+
+##### 2. Configure
+
+You don't need to specify anything; it should just work.
+
+```
+$ ./configure
+```
+
+##### 3. Build
+
+```
+$ make all
+```
+
+#### via Clang
+
+Before you run `make` you're going to need:
+
+  * Clang (preferably the latest and greatest);
+  * Ruby (1.9.3);
+  * and a brain.
+
+##### 1. Open a terminal
+
+This varies based on distribution, but you can try `Super + T`.
+
+##### 2. Configure
+
+You're going to need to specify the `toolchain` option, e.g.:
+
+```
+$ ./configure --toolchain=clang
+```
+
+##### 3. Build
+
+```
+$ make all
+```
 
 ### BSD
 
