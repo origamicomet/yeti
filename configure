@@ -427,4 +427,4 @@ if not (SwitchesAndOptions.generate(switches_and_options, "config.mk"))
   exit false
 end
 
-puts "Configuration succesful!"
+puts "Configuration successful!"
