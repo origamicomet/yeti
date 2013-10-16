@@ -99,6 +99,7 @@ void bt_application_quit() {
 
 static void bt_application_update(const float dt) {
   bt_profile_begin("bt_application_update");
+  fprintf(stdout, "dt = %fs %fms %fus\n", dt, dt * 1000.0f, dt * 1000.0f * 1000.0f);
   bt_profile_end();
 }
 
