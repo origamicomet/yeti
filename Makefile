@@ -73,8 +73,10 @@ ifeq ($(PARANOID),yes)
 endif
 
 ifeq ($(DEBUG),yes)
-  CFLAGS   += $(call cc,debug) $(call cc,define,BT_DEBUG)  $(call cc,define,_DEBUG)
-  CXXFLAGS += $(call cxx,debug) $(call cxx,define,BT_DEBUG) $(call cxx,define,_DEBUG)
+  CFLAGS    += $(call cc,debug) $(call cc,define,BT_DEBUG)  $(call cc,define,_DEBUG)
+  CXXFLAGS  += $(call cxx,debug) $(call cxx,define,BT_DEBUG) $(call cxx,define,_DEBUG)
+  LDFLAGS   += $(call ld,debug)
+  LDXXFLAGS += $(call ldxx,debug)
 else
   CFLAGS   += $(call cc,define,_NDEBUG)
   CXXFLAGS += $(call cc,define,_NDEBUG)
@@ -84,9 +86,10 @@ ifeq ($(DEVELOPMENT),yes)
   CFLAGS   += $(call cc,define,BT_DEVELOPMENT)
   CXXFLAGS += $(call cxx,define,BT_DEVELOPMENT)
   ifneq ($(DEBUG),yes)
-    CFLAGS   += $(call cc,development)
-    CXXFLAGS += $(call cxx,development)
-    LDFLAGS  += $(call ld,development)
+    CFLAGS    += $(call cc,development)
+    CXXFLAGS  += $(call cxx,development)
+    LDFLAGS   += $(call ld,development)
+    LDXXFLAGS += $(call ldxx,development)
   endif
 endif
 
@@ -94,9 +97,10 @@ ifeq ($(RELEASE),yes)
   CFLAGS   += $(call cc,define,BT_RELEASE)
   CXXFLAGS += $(call cxx,define,BT_RELEASE)
   ifneq ($(DEVELOPMENT),yes)
-    CFLAGS   += $(call cc,release)
-    CXXFLAGS += $(call cxx,release)
-    LDFLAGS  += $(call ld,release)
+    CFLAGS    += $(call cc,release)
+    CXXFLAGS  += $(call cxx,release)
+    LDFLAGS   += $(call ld,release)
+    LDXXFLAGS += $(call ldxx,release)
   endif
 endif
 
