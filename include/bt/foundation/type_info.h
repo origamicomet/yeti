@@ -83,6 +83,9 @@ struct bt_has_type_info_t_ : public bt_has_type_info_t {
   const bt_type_info_t bt_has_type_info_t_<_Type>::_ = \
     bt_type_info_t(bt_murmur_hash_str(#_Type, 0), #_Type);
 
+#define bt_init_type_info(_Type, _Ptr) \
+  do { (((bt_has_type_info_t *)_Ptr)->__type_info = &bt_has_type_info_t_<_Type>::_) } while(0)
+
 #define bt_type_info(_Ptr) \
   (((const bt_has_type_info_t *)_Ptr)->__type_info)
 
