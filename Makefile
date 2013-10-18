@@ -130,7 +130,7 @@ clean:
 
 SOURCES := $(shell find $(SRC_DIR) -name '*.cc')
 OBJECTS := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.cc=%$(OBJECT_SUFFIX))))
-DEFINES := $(call cc,define,BT_BUILD="$(COMMIT) ($(REVISION))") $(call cc,define,BT_COMPILING)
+DEFINES := $(call cc,define,BT_BUILD=$(COMMIT) ($(REVISION))) $(call cc,define,BT_COMPILING)
 
 -include $(OBJECTS:%$(OBJECT_SUFFIX)=%.d)
 $(OBJ_DIR)/%$(OBJECT_SUFFIX): $(SRC_DIR)/%.cc
