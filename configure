@@ -416,4 +416,13 @@ if not (SwitchesAndOptions.generate(switches_and_options, 'build/config'))
   exit false
 end
 
+puts "Configuring deps/foundation..."
+Dir.chdir("deps/foundation")
+`ruby configure #{ARGV.map { |argument| "\"#{argument}\"" }.join(' ')}`
+if not $?.success?
+  puts "Configuration of deps/foundation unsuccesful!"
+  exit false
+end
+Dir.chdir("../..")
+
 puts "Configuration successful!"
