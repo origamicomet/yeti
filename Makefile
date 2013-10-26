@@ -89,6 +89,7 @@ SOURCES      := $(shell find $(SRC_DIR) -name '*.c')
 OBJECTS      := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.c=%.o)))
 INCLUDES     := $(call cc-includes,include) $(call cc-includes,deps/foundation/include)
 DEFINES      := $(call cc-define-str,BT_BUILD,$(BUILD))
+DEFINES      += $(call cc-define,FND_LINK=1)
 DEPENDENCIES := $(call ld-libraries,deps/foundation/lib) $(call ld-link,foundation)
 
 -include $(OBJECTS:%.o=%.d)

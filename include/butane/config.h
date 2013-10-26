@@ -75,4 +75,8 @@
   #define FND_CONFIGURATION BT_CONFIGURATION
 #endif
 
+/* ========================================================================== */
+ #  include <foundation/config.h>
+/* ========================================================================== */
+
 #endif /* _BUTANE_CONFIG_H_ */
