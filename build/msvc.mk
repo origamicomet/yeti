@@ -147,7 +147,7 @@ ifeq ($(TARGET_ARCHITECTURE),x86)
   LDFLAGS     += -LIBPATH:"$(WINDOWS_SDK)/Lib" -LIBPATH:"$(VS_PATH)/VC/Lib"
 endif
 ifeq ($(TARGET_ARCHITECTURE),x86-64)
-  export PATH := $(WINDOWS_SDK_)/Bin/x64:$(VS_PATH_)/Common7/IDE:$(VS_PATH_)/VC/Bin/x86_amd64:$(PATH)
+  export PATH := $(WINDOWS_SDK_)/Bin/x64:$(VS_PATH_)/Common7/IDE:$(VS_PATH_)/VC/Bin/x86_amd64:$(VS_PATH_)/VC/Bin:$(PATH)
   CFLAGS      += -I"$(WINDOWS_SDK)/Include" -I"$(VS_PATH)/VC/include"
   LDFLAGS     += -LIBPATH:"$(WINDOWS_SDK)/Lib/x64" -LIBPATH:"$(VS_PATH)/VC/Lib/amd64"
 endif
