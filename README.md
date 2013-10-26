@@ -1,84 +1,27 @@
 # Butane
 
+A data-driven game engine.
+
 ## Supports
 
 | Platform  | Toolchain               | Supported             |
 |:--------- |:----------------------- |:---------------------:|
-| Windows   | Microsoft Visual Studio | <span>&#10003;</span> |
-| Windows   | MinGW/MSYS              | <span>&#10003;</span> |
+| Windows   | Microsoft Visual Studio |                       |
+| Windows   | MinGW/MSYS              |                       |
 | Windows   | Cygwin                  |         Never         |
 | Mac OSX   | GCC or Clang            |                       |
-| Linux     | GCC or Clang            | <span>&#10003;</span> |
+| Linux     | GCC or Clang            |                       |
 | BSD       | GCC or Clang            |                       |
 | Android   | GCC or Clang            |                       |
 | iOS       | GCC or Clang            |                       |
-| Web       | Native Client (NaCl)    |                       |
+| Web       | Native Client (PNaCl)   |                       |
 | Web       | emscripten              |                       |
 
 ## Building
 
 ### Windows
 
-You have two options:
-
-  * MinGW/MSYS;
-  * or Microsoft Visual Studio.
-
-Microsoft Visual Studio recommended for performance, debugging, and support reasons.
-
-#### via MinGW
-
-Before you run `make` you're going to need:
-
-  * MinGW/MSYS;
-  * Ruby (1.9.3);
-  * GCC (preferably the latest and greatest);
-  * and a brain.
-
-##### 1. Open a MinGW/MSYS terminal
-
-Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
-
-##### 2. Configure
-
-You don't need to specify anything; it should just work.
-
-```
-$ ./configure
-```
-
-##### 3. Build
-
-```
-$ make all
-```
-
-#### via Microsoft Visual Studio
-
-Before you run `make` you're going to need:
-
-  * MinGW/MSYS;
-  * Ruby (1.9.3);
-  * Microsoft Visual Studio;
-  * and a brain.
-
-##### 1. Open a MinGW/MSYS terminal
-
-Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
-
-##### 2. Configure
-
-You're going to need to specify the `toolchain`, `windows-sdk`, and `vs-path` options, e.g.:
-
-```
-$ ./configure --toolchain=msvc --windows-sdk="C:/Program Files/Microsoft SDKs/Windows/v7.1" --vs-path="C:/Program Files (x86)/Microsoft Visual Studio 11.0"
-```
-
-##### 3. Build
-
-```
-$ make all
-```
+TODO
 
 ### Mac OSX
 
@@ -86,62 +29,7 @@ TODO
 
 ### Linux
 
-You have two options:
-
-  * GCC;
-  * or Clang.
-
-#### via GCC
-
-Before you run `make` you're going to need:
-
-  * GCC (preferably the latest and greatest);
-  * Ruby (1.9.3);
-  * and a brain.
-
-##### 1. Open a terminal
-
-This varies based on distribution, but you can try `Super + T`.
-
-##### 2. Configure
-
-You don't need to specify anything; it should just work.
-
-```
-$ ./configure
-```
-
-##### 3. Build
-
-```
-$ make all
-```
-
-#### via Clang
-
-Before you run `make` you're going to need:
-
-  * Clang (preferably the latest and greatest);
-  * Ruby (1.9.3);
-  * and a brain.
-
-##### 1. Open a terminal
-
-This varies based on distribution, but you can try `Super + T`.
-
-##### 2. Configure
-
-You're going to need to specify the `toolchain` option, e.g.:
-
-```
-$ ./configure --toolchain=clang
-```
-
-##### 3. Build
-
-```
-$ make all
-```
+TODO
 
 ### BSD
 
@@ -157,7 +45,7 @@ TODO
 
 ### Web
 
-#### via [Native Client (NaCl)](https://developers.google.com/native-client/)
+#### via [Native Client (PNaCl)](https://developers.google.com/native-client/)
 
 TODO
 
@@ -167,31 +55,19 @@ TODO
 
 ## Configuring
 
-Butane's compile, link, and runtime behaviour is controlled by `./configure` switches and options, as well as various pre-processor defines (which are documented in `include/bt/config.h`).
+Butanes's compile-, link-, and runtime behaviour is controlled by `./configure` switches and options, as well as various pre-processor defines (which are documented in `include/butane/config.h`).
 
 ### via switches and options
 
-**--paranoid**: defines `BT_PARANOID`, which will enable paranoid checks.
-
-**--config=debug**: defines `BT_DEBUG` and `BT_DEVELOPMENT` and `BT_RELEASE`, which will enable debugging, development, and release checks; disables optimizations; and enables symbol generation.
-
-**--config=development**: defines `BT_DEVELOPMENT` and `BT_RELEASE`, which will enable development and release checks; enables optimizations; and enables symbol generation.
-
-**--config=release**: defines `BT_RELEASE`, which will enable **only** release checks; enables optimizations; and disables symbol generation.
-
-**--architecture=[x86,x86-64,arm]**: compiles for the specified architecture.
-
-**--toolchain=[gcc,clang,msvc]**: uses specifed toolchain.
-
-**--platform=[windows,macosx,linux]**: builds for the specified platform.
-
-**--windows-sdk=[path]**: specifies the Windows SDK to use when using Microsoft Visual Studio.
-
-**--msvc=[path]**: specifies which verison of Microsoft Visual Studio to use.
+TODO
 
 ## License
 
 Copyright (c) Michael Williams <devbug@bitbyte.ca>
+
+Author(s):
+
+  * Michael Williams <devbug@bitbyte.ca>
 
 All rights reserved.
 
