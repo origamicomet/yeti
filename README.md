@@ -6,8 +6,8 @@ A data-driven game engine.
 
 | Platform  | Toolchain               | Supported             |
 |:--------- |:----------------------- |:---------------------:|
-| Windows   | Microsoft Visual Studio |                       |
-| Windows   | MinGW/MSYS              |                       |
+| Windows   | Microsoft Visual Studio | <span>&#10003;</span> |
+| Windows   | MinGW/MSYS              | <span>&#10003;</span> |
 | Windows   | Cygwin                  |         Never         |
 | Mac OSX   | GCC or Clang            |                       |
 | Linux     | GCC or Clang            |                       |
@@ -21,7 +21,68 @@ A data-driven game engine.
 
 ### Windows
 
-TODO
+You have two options:
+
+  * MinGW/MSYS;
+  * or Microsoft Visual Studio.
+
+Microsoft Visual Studio is recommended for performance, debugging, and support reasons.
+
+#### via MinGW/MSYS
+
+Before you run `make` you're going to need:
+
+  * MinGW/MSYS;
+  * Ruby 1.9.3+;
+  * and a brain.
+
+##### 1. Open a MinGW/MSYS terminal
+
+Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
+
+##### 2. Configure
+
+You don't need to specify anything; the defaults will work:
+
+```
+$ ./configure --paranoid --config=debug
+```
+
+##### 3. Build
+
+```
+$ make all
+```
+
+#### via Microsoft Visual Studio
+
+Before you run `make` you're going to need:
+
+  * MinGW/MSYS;
+  * Ruby 1.9.3+;
+  * Microsoft Visual Studio;
+  * and a brain.
+
+##### 1. Open a MinGW/MSYS terminal
+
+Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
+
+##### 2. Configure
+
+You're going to need to specify the `toolchain`, `windows-sdk`, and `vs-path` options:
+
+```
+$ ./configure --paranoid --config=debug --toolchain=msvc \
+  --windows-sdk="C:/Program Files/Microsoft SDKs/Windows/v7.1" \
+  --vs-path="C:/Program Files (x86)/Microsoft Visual Studio 11.0" \
+  --architecture=x86-64
+```
+
+##### 3. Build
+
+```
+$ make all
+```
 
 ### Mac OSX
 
