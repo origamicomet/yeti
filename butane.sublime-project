@@ -6,7 +6,10 @@
 
 			"folder_exclude_patterns": [
 				".git",
-				"docs/html"
+				"bin",
+				"lib",
+				"obj",
+				"docs"
 			]
 		}
 	]
