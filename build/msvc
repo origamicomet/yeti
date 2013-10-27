@@ -147,7 +147,7 @@ end
 # Otherwise invalid rules are generated, which freaks out make.
 
 if not M_OR_MM
-  print COMMAND[:output].lines.to_a[1..-1].join('\n')
+  print COMMAND[:output].lines.to_a[1..-1].join("\n")
 end
 
 # Due to the nature of how debug information is generated any resulting .pdb
