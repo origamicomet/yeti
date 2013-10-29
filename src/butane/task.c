@@ -20,6 +20,16 @@
 extern "C" {
 #endif
 
+butane_task_id_t butane_task_invalid() {
+  return ~((butane_task_id_t)0);
+}
+
+butane_task_affinity_t butane_task_any() {
+  return ~((butane_task_affinity_t)0);
+}
+
+/* ========================================================================== */
+
 typedef void (*butane_task_kernel_0)(void);
 typedef void (*butane_task_kernel_1)(uintptr_t);
 typedef void (*butane_task_kernel_2)(uintptr_t,uintptr_t);
@@ -71,6 +81,9 @@ void butane_task_run(const butane_task_t *task) {
 
 #ifdef __cplusplus
 namespace butane {
+  const Task::Id Task::invalid = ~((Id)butane_task_invalid());
+  const Task::Affinity Task::any = ~((Affinity)butane_task_any());
+
   Task::Task() {
   }
 

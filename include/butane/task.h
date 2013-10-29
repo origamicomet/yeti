@@ -58,6 +58,14 @@ typedef struct butane_task {
 /* ========================================================================== */
 
 /*! */
+extern butane_task_id_t butane_task_invalid();
+
+/*! */
+extern butane_task_affinity_t butane_task_any();
+
+/* ========================================================================== */
+
+/*! */
 extern void butane_task_run(const butane_task_t *task);
 
 #ifdef __cplusplus
@@ -74,10 +82,11 @@ namespace butane {
   class Task : private butane_task_t {
     public:
       typedef butane_task_id_t Id;
-      static const Id invalid = ~((Id)0);
       typedef butane_task_affinity_t Affinity;
-      static const Affinity any = ~((Affinity)0);
       typedef butane_task_kernel_fn Kernel;
+    public:
+      static const Id invalid;
+      static const Affinity any;
     public:
       Task();
       ~Task();
