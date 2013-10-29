@@ -21,6 +21,7 @@
 #include <foundation/architecture.h>
 #include <foundation/array.h>
 #include <foundation/assert.h>
+#include <foundation/atomics.h>
 #include <foundation/compat/inttypes.h>
 #include <foundation/compat/malloc.h>
 #include <foundation/compat/stdalign.h>
@@ -33,6 +34,5 @@
 #include <foundation/detect/platform.h>
 #include <foundation/platform.h>
 #include <foundation/preprocessor.h>
-
 
 #endif /* _BUTANE_FOUNDATION_H_ */
