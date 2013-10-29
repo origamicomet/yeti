@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 butane_task_id_t butane_task_invalid() {
-  return ~((butane_task_id_t)0);
+  return ((butane_task_id_t)NULL);
 }
 
 butane_task_affinity_t butane_task_any() {

@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 /*! */
-typedef uint32_t butane_task_id_t;
+typedef uintptr_t butane_task_id_t;
 
 /*! */
 typedef uint32_t butane_task_affinity_t;
