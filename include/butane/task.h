@@ -48,7 +48,7 @@ typedef struct butane_task {
   butane_task_id_t id_;
   butane_task_affinity_t affinity_;
   butane_task_id_t parent_;
-  butane_task_id_t depends_on_;
+  butane_task_id_t dependency_;
   butane_task_kernel_fn kernel_;
   size_t num_of_args_;
   uintptr_t args_[4];
@@ -66,7 +66,75 @@ extern butane_task_affinity_t butane_task_any();
 /* ========================================================================== */
 
 /*! */
+extern butane_task_id_t butane_task_id(
+  const butane_task_t *task);
+
+/*! */
+extern void butane_task_set_id(
+  butane_task_t *task,
+  const butane_task_id_t id);
+
+/*! */
+extern butane_task_affinity_t butane_task_affinity(
+  const butane_task_t *task);
+
+/*! */
+extern void butane_task_set_affinity(
+  butane_task_t *task,
+  const butane_task_affinity_t affinity);
+
+/*! */
+extern butane_task_id_t butane_task_parent(
+  const butane_task_t *task);
+
+/*! */
+extern void butane_task_set_parent(
+  butane_task_t *task,
+  const butane_task_id_t parent);
+
+/*! */
+extern butane_task_id_t butane_task_dependency(
+  const butane_task_t *task);
+
+/*! */
+extern void butane_task_set_dependency(
+  butane_task_t *task,
+  const butane_task_id_t dependency);
+
+/*! */
+extern butane_task_kernel_fn butane_task_kernel(
+  const butane_task_t *task);
+
+/*! */
+extern void butane_task_set_kernel(
+  butane_task_t *task,
+  butane_task_kernel_fn kernel);
+
+extern void butane_task_set_kernel_1(
+  butane_task_t *task,
+  butane_task_kernel_fn kernel,
+  uintptr_t _0);
+
+extern void butane_task_set_kernel_2(
+  butane_task_t *task,
+  butane_task_kernel_fn kernel,
+  uintptr_t _0, uintptr_t _1);
+
+extern void butane_task_set_kernel_3(
+  butane_task_t *task,
+  butane_task_kernel_fn kernel,
+  uintptr_t _0, uintptr_t _1, uintptr_t _2);
+
+extern void butane_task_set_kernel_4(
+  butane_task_t *task,
+  butane_task_kernel_fn kernel,
+  uintptr_t _0, uintptr_t _1, uintptr_t _2, uintptr_t _3);
+
+/* ========================================================================== */
+
+/*! */
 extern void butane_task_run(const butane_task_t *task);
+
 
 #ifdef __cplusplus
 }
@@ -81,49 +149,48 @@ namespace butane {
   /*! @copydoc butane_task_t */
   class Task : private butane_task_t {
     public:
+      /*! @copydoc butane_task_id_t */
       typedef butane_task_id_t Id;
+      /*! @copydoc butane_task_affinity_t */
       typedef butane_task_affinity_t Affinity;
+      /*! @copydoc butane_task_kernel_fn */
       typedef butane_task_kernel_fn Kernel;
     public:
+      /*! @copydoc butane_task_invalid */
       static const Id invalid;
+      /*! @copydoc butane_task_any */
       static const Affinity any;
     public:
       Task();
       ~Task();
     public:
+      /*! @copydoc butane_task_run */
       void run() const;
     public:
-      Id id() const {
-        return ((Id)id_); }
-      void set_id(const Id id) {
-        id_ = ((butane_task_id_t)id); }
-      Affinity affinity() const {
-        return ((Affinity)affinity_); }
-      void set_affinity(const Affinity affinity) {
-        affinity_ = ((butane_task_id_t)affinity); }
-      Id parent() const {
-        return ((Id)parent_); }
-      void set_parent(const Id parent) {
-        parent_ = ((butane_task_id_t)parent); }
-      Id depends_on() const {
-        return ((Id)depends_on_); }
-      void set_depends_on(const Id depends_on) {
-        depends_on_ = ((butane_task_id_t)depends_on); }
-      Kernel kernel() const { return ((Kernel)kernel_); }
-      void set_kernel(Kernel kernel) {
-        kernel_ = ((Kernel)kernel); num_of_args_ = 0; }
-      void set_kernel(Kernel kernel, uintptr_t _0) {
-        kernel_ = ((Kernel)kernel);  num_of_args_ = 1;
-        args_[0] = _0; }
-      void set_kernel(Kernel kernel, uintptr_t _0, uintptr_t _1) {
-        kernel_ = ((Kernel)kernel); num_of_args_ = 2;
-        args_[0] = _0; args_[1] = _1; }
-      void set_kernel(Kernel kernel, uintptr_t _0, uintptr_t _1, uintptr_t _2) {
-        kernel_ = ((Kernel)kernel); num_of_args_ = 3;
-        args_[0] = _0; args_[1] = _1; args_[2] = _2; }
-      void set_kernel(Kernel kernel, uintptr_t _0, uintptr_t _1, uintptr_t _2, uintptr_t _3) {
-        kernel_ = ((Kernel)kernel); num_of_args_ = 4;
-        args_[0] = _0; args_[1] = _1; args_[2] = _2; args_[3] = _3; }
+      /*! @copydoc butane_task_id */
+      Id id() const;
+      /*! @copydoc butane_task_set_id */
+      void set_id(const Id id);
+      /*! @copydoc butane_task_affinity */
+      Affinity affinity() const;
+      /*! @copydoc butane_task_set_affinity */
+      void set_affinity(const Affinity affinity);
+      /*! @copydoc butane_task_parent */
+      Id parent() const;
+      /*! @copydoc butane_task_set_parent */
+      void set_parent(const Id parent);
+      /*! @copydoc butane_task_dependency */
+      Id dependency() const;
+      /*! @copydoc butane_task_set_dependency */
+      void set_dependency(const Id dependency);
+      /*! @copydoc butane_task_kernel */
+      Kernel kernel() const;
+      /*! @copydoc butane_task_set_kernel */
+      void set_kernel(Kernel kernel);
+      void set_kernel(Kernel kernel, uintptr_t);
+      void set_kernel(Kernel kernel, uintptr_t, uintptr_t);
+      void set_kernel(Kernel kernel, uintptr_t, uintptr_t, uintptr_t);
+      void set_kernel(Kernel kernel, uintptr_t, uintptr_t, uintptr_t, uintptr_t);
   };
 } /* butane */
 #endif
