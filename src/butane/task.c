@@ -191,6 +191,14 @@ namespace butane {
   const Task::Affinity Task::any = ~((Affinity)butane_task_any());
 
   Task::Task() {
+    id_ = ((butane_task_id_t)this);
+    affinity_ = butane_task_any();
+    parent_ = butane_task_invalid();
+    dependency_ = butane_task_invalid();
+    kernel_ = NULL;
+    num_of_args_ = 0;
+    args_[0] = args_[1] = args_[2] = args_[3] = 0;
+    refs_ = 1;
   }
 
   Task::~Task() {
