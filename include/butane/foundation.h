@@ -32,6 +32,7 @@
 #include <foundation/detect/architecture.h>
 #include <foundation/detect/compiler.h>
 #include <foundation/detect/platform.h>
+#include <foundation/mutex.h>
 #include <foundation/platform.h>
 #include <foundation/preprocessor.h>
 #include <foundation/system.h>
