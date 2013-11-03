@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 butane_task_id_t butane_task_invalid() {
-  return ((butane_task_id_t)NULL);
+  return ~((butane_task_id_t)0);
 }
 
 butane_task_affinity_t butane_task_any() {
@@ -191,7 +191,7 @@ namespace butane {
   const Task::Affinity Task::any = ~((Affinity)butane_task_any());
 
   Task::Task() {
-    id_ = ((butane_task_id_t)this);
+    id_ = Task::invalid;
     affinity_ = butane_task_any();
     parent_ = butane_task_invalid();
     dependency_ = butane_task_invalid();
