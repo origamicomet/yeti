@@ -34,5 +34,7 @@
 #include <foundation/detect/platform.h>
 #include <foundation/platform.h>
 #include <foundation/preprocessor.h>
+#include <foundation/system.h>
+#include <foundation/thread.h>
 
 #endif /* _BUTANE_FOUNDATION_H_ */
