@@ -64,6 +64,8 @@ static void butane_task_sched_worker_thread(uintptr_t id) {
     if (!consumable)
       continue;
     butane_task_run(consumable);
+    if (consumable->increment_on_completion_)
+      fnd_atomic_uint32_fetch_increment_relaxed(consumable->increment_on_completion_);
     fnd_mutex_lock(queue_lock_);
     consumable->refs_by_children_and_self_ = UINT32_C(0);
     if (consumable->parent_ != butane_task_invalid())
@@ -146,6 +148,42 @@ void butane_task_sched_enqueue(const size_t num_of_tasks, const butane_task_t *t
     if (task->dependency_ != butane_task_invalid())
       task->dependency_ = ((task->dependency_ + queue_write_) % BT_TASK_SCHED_QUEUE_SZ); }
   queue_write_ += num_of_tasks;
+  fnd_mutex_unlock(queue_lock_);
+}
+
+void butane_task_sched_do_work(void) {
+  /* TODO(mtwilliams): Remove code dupliation (refactor worker threads)? */
+  fnd_mutex_lock(queue_lock_);
+  butane_task_t *consumable = NULL;
+  for (size_t read = queue_read_; read < queue_write_; ++read) {
+    butane_task_t *task = &queue_[read % BT_TASK_SCHED_QUEUE_SZ];
+    if (task->affinity_ != butane_task_any())
+      continue;
+    if (task->refs_by_children_and_self_ > 1)
+      continue;
+    if (task->refs_by_children_and_self_ == 0) {
+      if (task->refs_by_dependencies_ == 0)
+        if (read == queue_read_)
+          ++queue_read_;
+      continue; }
+    if (task->dependency_ != butane_task_invalid())
+      if (queue_[task->dependency_].refs_by_children_and_self_ > 1)
+        continue;
+    consumable = task;
+    consumable->refs_by_children_and_self_ = UINT32_C(0xFFFFFFFF);
+    break; }
+  fnd_mutex_unlock(queue_lock_);
+  if (!consumable)
+    return;
+  butane_task_run(consumable);
+  if (consumable->increment_on_completion_)
+    fnd_atomic_uint32_fetch_increment_relaxed(consumable->increment_on_completion_);
+  fnd_mutex_lock(queue_lock_);
+  consumable->refs_by_children_and_self_ = UINT32_C(0);
+  if (consumable->parent_ != butane_task_invalid())
+    queue_[consumable->parent_].refs_by_children_and_self_--;
+  if (consumable->dependency_ != butane_task_invalid())
+    queue_[consumable->dependency_].refs_by_dependencies_--;
   fnd_mutex_unlock(queue_lock_);
 }
 

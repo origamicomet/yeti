@@ -54,6 +54,7 @@ typedef struct butane_task {
   uintptr_t args_[4];
   uint32_t refs_by_children_and_self_;
   uint32_t refs_by_dependencies_;
+  fnd_atomic_uint32_t *increment_on_completion_;
 } butane_task_t;
 
 /* ========================================================================== */

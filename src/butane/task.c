@@ -196,6 +196,7 @@ namespace butane {
     args_[0] = args_[1] = args_[2] = args_[3] = 0;
     refs_by_children_and_self_ = 1;
     refs_by_dependencies_ = 0;
+    increment_on_completion_ = NULL;
   }
 
   Task::~Task() {

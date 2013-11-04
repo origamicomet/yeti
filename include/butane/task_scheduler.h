@@ -60,6 +60,9 @@ extern void butane_task_sched_enqueue(
   const size_t num_of_tasks,
   const butane_task_t *tasks);
 
+/*! */
+extern void butane_task_sched_do_work(void);
+
 #ifdef __cplusplus
 }
 #endif
@@ -94,6 +97,9 @@ namespace butane {
     /*! @copydoc butane_task_sched_enqueue */
     static void enqueue(const size_t num_of_tasks, const Task *tasks) {
       butane_task_sched_enqueue(num_of_tasks, (const butane_task_t *)tasks); }
+    /*! @copydoc butane_task_sched_do_work */
+    static void do_work() {
+      butane_task_sched_do_work(); }
   } /* task_sched */
 } /* butane */
 #endif
