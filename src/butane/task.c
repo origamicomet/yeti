@@ -20,11 +20,11 @@
 extern "C" {
 #endif
 
-butane_task_id_t butane_task_invalid() {
+butane_task_id_t butane_task_invalid(void) {
   return ~((butane_task_id_t)0);
 }
 
-butane_task_affinity_t butane_task_any() {
+butane_task_affinity_t butane_task_any(void) {
   return ~((butane_task_affinity_t)0);
 }
 

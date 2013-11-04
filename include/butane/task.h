@@ -59,10 +59,10 @@ typedef struct butane_task {
 /* ========================================================================== */
 
 /*! */
-extern butane_task_id_t butane_task_invalid();
+extern butane_task_id_t butane_task_invalid(void);
 
 /*! */
-extern butane_task_affinity_t butane_task_any();
+extern butane_task_affinity_t butane_task_any(void);
 
 /* ========================================================================== */
 
