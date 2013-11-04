@@ -52,7 +52,8 @@ typedef struct butane_task {
   butane_task_kernel_fn kernel_;
   size_t num_of_args_;
   uintptr_t args_[4];
-  size_t refs_;
+  uint32_t refs_by_children_and_self_;
+  uint32_t refs_by_dependencies_;
 } butane_task_t;
 
 /* ========================================================================== */

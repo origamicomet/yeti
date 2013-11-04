@@ -23,6 +23,10 @@ extern "C" {
 static fnd_atomic_uint32_t scheduling_ = UINT32_C(0);
 static size_t num_of_worker_threads_ = 0;
 static fnd_thread_t **worker_threads_ = NULL;
+static butane_task_t *queue_ = NULL;
+static fnd_mutex_t *queue_lock_ = NULL;
+static size_t queue_read_ = 0;
+static size_t queue_write_ = 0;
 
 /* ========================================================================== */
 /*  Worker Thread:                                                            */
@@ -31,8 +35,42 @@ static fnd_thread_t **worker_threads_ = NULL;
 static void butane_task_sched_worker_thread(uintptr_t id) {
   const butane_task_affinity_t affinity =
     (butane_task_affinity_t)(((unsigned)1 << (unsigned)id));
-  while (fnd_atomic_uint32_load_relaxed(&scheduling_)) {
-    /* TODO(mtwilliams): Consume consumable tasks. */
+  while (true) {
+    fnd_mutex_lock(queue_lock_);
+    if (!fnd_atomic_uint32_load_relaxed(&scheduling_)) {
+      if (queue_read_ == queue_write_) {
+        fnd_mutex_unlock(queue_lock_);
+        break; }}
+    butane_task_t *consumable = NULL;
+    for (size_t read = queue_read_; read < queue_write_; ++read) {
+      butane_task_t *task = &queue_[read % BT_TASK_SCHED_QUEUE_SZ];
+      if (!(affinity & task->affinity_))
+        continue;
+      if (task->refs_by_children_and_self_ > 1)
+        continue;
+      if (task->refs_by_children_and_self_ == 0) {
+        if (task->refs_by_dependencies_ == 0)
+          if (read == queue_read_)
+            ++queue_read_;
+        continue; }
+      if (task->dependency_ != butane_task_invalid())
+        if (queue_[task->dependency_].refs_by_children_and_self_ > 1)
+          continue;
+      consumable = task;
+      consumable->refs_by_children_and_self_ = UINT32_C(0xFFFFFFFF);
+      break; }
+    fnd_mutex_unlock(queue_lock_);
+    /*! TODO(mtwilliams): Yield. */
+    if (!consumable)
+      continue;
+    butane_task_run(consumable);
+    fnd_mutex_lock(queue_lock_);
+    consumable->refs_by_children_and_self_ = UINT32_C(0);
+    if (consumable->parent_ != butane_task_invalid())
+      queue_[consumable->parent_].refs_by_children_and_self_--;
+    if (consumable->dependency_ != butane_task_invalid())
+      queue_[consumable->dependency_].refs_by_dependencies_--;
+    fnd_mutex_unlock(queue_lock_);
   }
 }
 
@@ -57,6 +95,13 @@ void butane_task_sched_initialize(void) {
       fnd_heap(),
       num_of_worker_threads_ * sizeof(fnd_thread_t *),
       fnd_alignof(fnd_thread_t *));
+  queue_ = (butane_task_t *)
+    fnd_allocator_alloc(
+      fnd_heap(),
+      BT_TASK_SCHED_QUEUE_SZ * sizeof(butane_task_t),
+      fnd_alignof(butane_task_t));
+  queue_lock_ = fnd_mutex_create();
+  queue_read_ = queue_write_ = 0;
   for (size_t i = 0; i < num_of_worker_threads_; ++i) {
     worker_threads_[i] = fnd_thread_create(&butane_task_sched_worker_thread, (uintptr_t)i);
     const fnd_thread_affinity_t affinity =
@@ -71,6 +116,8 @@ void butane_task_sched_shutdown(void) {
   for (size_t i = 0; i < num_of_worker_threads_; ++i)
     fnd_thread_join(worker_threads_[i]);
   fnd_allocator_free(fnd_heap(), (void *)worker_threads_);
+  fnd_mutex_destroy(queue_lock_);
+  fnd_allocator_free(fnd_heap(), (void *)queue_);
 }
 
 /* ========================================================================== */
@@ -88,7 +135,18 @@ size_t butane_task_sched_num_of_worker_threads(void) {
 void butane_task_sched_enqueue(const size_t num_of_tasks, const butane_task_t *tasks) {
   bt_assert(debug, num_of_tasks > 0);
   bt_assert(debug, tasks != NULL);
-  /* TODO(mtwilliams): Enqueue and patch tasks. */
+  fnd_mutex_lock(queue_lock_);
+  bt_assert(release, (BT_TASK_SCHED_QUEUE_SZ - (queue_write_ - queue_read_)) > num_of_tasks);
+  for (size_t write = 0; write < num_of_tasks; ++write) {
+    butane_task_t *task = &queue_[((write + queue_write_) % BT_TASK_SCHED_QUEUE_SZ)];
+    memcpy((void *)task, (const void *)&tasks[write], sizeof(butane_task_t));
+    task->id_ = ((task->id_ + queue_write_) % BT_TASK_SCHED_QUEUE_SZ);
+    if (task->parent_ != butane_task_invalid())
+      task->parent_ = ((task->parent_ + queue_write_) % BT_TASK_SCHED_QUEUE_SZ);
+    if (task->dependency_ != butane_task_invalid())
+      task->dependency_ = ((task->dependency_ + queue_write_) % BT_TASK_SCHED_QUEUE_SZ); }
+  queue_write_ += num_of_tasks;
+  fnd_mutex_unlock(queue_lock_);
 }
 
 #ifdef __cplusplus

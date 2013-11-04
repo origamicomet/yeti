@@ -144,10 +144,6 @@ typedef void (*butane_task_kernel_4)(uintptr_t,uintptr_t,uintptr_t,uintptr_t);
 
 void butane_task_run(const butane_task_t *task) {
   bt_assert(debug, task != NULL);
-  bt_assert(debug, task->refs_ == 1);
-  bt_assert(paranoid, task->kernel_ != NULL);
-  bt_assert(paranoid, task->num_of_args_ > 0);
-  bt_assert(paranoid, task->num_of_args_ <= 4);
   switch (task->num_of_args_) {
     case 0:
       ((butane_task_kernel_0)task->kernel_)();
@@ -198,7 +194,8 @@ namespace butane {
     kernel_ = NULL;
     num_of_args_ = 0;
     args_[0] = args_[1] = args_[2] = args_[3] = 0;
-    refs_ = 1;
+    refs_by_children_and_self_ = 1;
+    refs_by_dependencies_ = 0;
   }
 
   Task::~Task() {

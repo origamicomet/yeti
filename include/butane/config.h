@@ -20,7 +20,8 @@
 /* ========================================================================== */
 /*  Configuration:                                                            */
 /*   * Compiler, architecture, and platform autodetection;                    */
-/*   * Paranoid and/or debug, development, and release selection.             */
+/*   * Paranoid and/or debug, development, and release selection;             */
+/*   * Task scheduler.                                                        */
 /* ========================================================================== */
 
 /* ========================================================================== */
@@ -74,6 +75,14 @@
 #else
   #define FND_CONFIGURATION BT_CONFIGURATION
 #endif
+
+/* ========================================================================== */
+/*  Task scheduler:                                                           */
+/* ========================================================================== */
+
+/*! @def BT_TASK_SCHED_QUEUE_SZ
+  Specifies the size of the task scheduler's global task queue. */
+#define BT_TASK_SCHED_QUEUE_SZ 256
 
 /* ========================================================================== */
  #  include <foundation/config.h>
