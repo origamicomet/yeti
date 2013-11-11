@@ -41,14 +41,14 @@ require 'rbconfig'
 
 class SwitchesAndOptions
   def self.switch(name)
-    (ENV['CONFIG_' + name.upcase] == 'yes')
+    (ENV['BUTANE_CONFIG_' + name.upcase] == 'yes')
   end
 
   private_class_method :switch
 
   def self.option(name)
-    if ENV.include? 'CONFIG_' + name.upcase
-      ENV['CONFIG_' + name.upcase]
+    if ENV.include? 'BUTANE_CONFIG_' + name.upcase
+      ENV['BUTANE_CONFIG_' + name.upcase]
     end
   end
 
@@ -229,12 +229,18 @@ class SwitchesAndOptions
     switches_and_options = OpenStruct.new
 
     switches_and_options.paranoid     = (switch 'paranoid')
-    switches_and_options.config       = (option 'config')
+    switches_and_options.config       = (option 'configuration')
     switches_and_options.architecture = (option 'architecture')
     switches_and_options.toolchain    = (option 'toolchain')
+    if ENV.include? 'CC'
+      switches_and_options.toolchain = ENV['CC'].downcase
+    end
     switches_and_options.platform     = (option 'platform')
+    switches_and_options.linkage      = (option 'linkage')
+      switches_and_options.linkage ||= 'dynamic'
     switches_and_options.windows_sdk  = (option 'windows_sdk')
     switches_and_options.vs_path      = (option 'vs_path')
+    switches_and_options.foundation   = "deps/foundation"
 
     parser = OptionParser.new do |opts|
       opts.banner =  "Usage: ./configure [switches and options]"
@@ -265,12 +271,20 @@ class SwitchesAndOptions
                                         end
       end
 
+      opts.on("--linkage=LINKAGE", "Selects static or dynamic linkage.") do |linkage|
+        switches_and_options.linkage = linkage.downcase
+      end
+
       opts.on("--windows-sdk=PATH", "Path to Windows SDK.") do |sdk|
         switches_and_options.windows_sdk = sdk
       end
 
       opts.on("--vs-path=PATH", "Path to Microsoft Visual Studio.") do |vs_path|
         switches_and_options.vs_path = vs_path
+      end
+
+      opts.on("--foundation=PATH", "Override path to Foundation.") do |path|
+        switches_and_options.foundation = path
       end
 
       opts.on("--h", "--help") do
@@ -351,6 +365,11 @@ class SwitchesAndOptions
       end
     end
 
+    if switches_and_options.linkage != 'static' && switches_and_options.linkage != 'dynamic'
+      puts "Unknown linkage '#{switches_and_options.linkage}'"
+      return false
+    end
+
     if switches_and_options.toolchain.downcase == 'msvc'
       if not switches_and_options.windows_sdk
         puts "Path to Windows SDK not specified!"
@@ -389,11 +408,16 @@ class SwitchesAndOptions
       f.write "TARGET_ARCHITECTURE := #{switches_and_options.architecture}\n"
       f.write "\n"
 
+      f.write "LINKAGE             := #{switches_and_options.linkage}\n"
+      f.write "\n"
+
       if switches_and_options.toolchain.downcase == 'msvc'
         f.write "WINDOWS_SDK         := #{switches_and_options.windows_sdk}\n"
         f.write "VS_PATH             := #{switches_and_options.vs_path}\n"
-        f.write "\n"
       end
+
+      f.write "FOUNDATION_PATH     := #{switches_and_options.foundation}\n"
+      f.write "\n"
 
       f.write "endif # _BUTANE_BUILD_CONFIG_\n"
       return true
@@ -416,13 +440,30 @@ if not (SwitchesAndOptions.generate(switches_and_options, 'build/config'))
   exit false
 end
 
-puts "Configuring deps/foundation..."
-Dir.chdir("deps/foundation")
-`ruby configure #{ARGV.map { |argument| "\"#{argument}\"" }.join(' ')}`
-if not $?.success?
-  puts "Configuration of deps/foundation unsuccesful!"
-  exit false
+ARGS = lambda {
+  _ = []
+  if switches_and_options.paranoid
+    _ << "--paranoid"
+  end
+  _ << "--configuration=#{switches_and_options.config}"
+  _ << "--architecture=#{switches_and_options.architecture}"
+  _ << "--toolchain=#{switches_and_options.toolchain}"
+  _ << "--platform=#{switches_and_options.platform}"
+  _ << "--windows-sdk=\"#{switches_and_options.windows_sdk}\""
+  _ << "--vs-path=\"#{switches_and_options.vs_path}\""
+  _.join(' ')
+}.call
+
+
+if switches_and_options.foundation == "deps/foundation"
+  puts "Configuring deps/foundation..."
+  Dir.chdir("deps/foundation")
+  `ruby configure #{ARGS}`
+  if not $?.success?
+    puts "Configuration of deps/foundation unsuccesful!"
+    exit false
+  end
+  Dir.chdir("../..")
 end
-Dir.chdir("../..")
 
 puts "Configuration successful!"

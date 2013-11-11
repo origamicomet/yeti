@@ -11,7 +11,7 @@
 /* ========================================================================== */
 /*! @file include/butane/config.h
      Documents a collection of pre-processor defines used for the
-     configuration of Butanes's compile-, link-, and runtime behaviour.       */
+     configuration of Butane's compile-, link-, and runtime behaviour.        */
 /* ========================================================================== */
 
 #ifndef _BUTANE_CONFIG_H_
@@ -21,28 +21,28 @@
 /*  Configuration:                                                            */
 /*   * Compiler, architecture, and platform autodetection;                    */
 /*   * Paranoid and/or debug, development, and release selection;             */
-/*   * Task scheduler.                                                        */
+/*   * Linkage.                                                               */
 /* ========================================================================== */
 
 /* ========================================================================== */
 /*  Compiler, architecture, and platform autodetection:                       */
 /* ========================================================================== */
 
-/*! @def BT_DONT_AUTODETECT_COMPILER
+/*! @def BUTANE_DONT_AUTODETECT_COMPILER
   See FND_DONT_AUTODETECT_COMPILER. */
-#ifdef BT_DONT_AUTODETECT_COMPILER
+#ifdef BUTANE_DONT_AUTODETECT_COMPILER
   #define FND_DONT_AUTODETECT_COMPILER
 #endif
 
-/*! @def BT_DONT_AUTODETECT_PLATFORM
+/*! @def BUTANE_DONT_AUTODETECT_PLATFORM
   See FND_DONT_AUTODETECT_PLATFORM. */
-#ifdef BT_DONT_AUTODETECT_PLATFORM
+#ifdef BUTANE_DONT_AUTODETECT_PLATFORM
   #define FND_DONT_AUTODETECT_PLATFORM
 #endif
 
-/*! @def BT_DONT_AUTODETECT_ARCHITECTURE
+/*! @def BUTANE_DONT_AUTODETECT_ARCHITECTURE
   See FND_DONT_AUTODETECT_ARCHITECTURE. */
-#ifdef BT_DONT_AUTODETECT_ARCHITECTURE
+#ifdef BUTANE_DONT_AUTODETECT_ARCHITECTURE
   #define FND_DONT_AUTODETECT_ARCHITECTURE
 #endif
 
@@ -50,42 +50,52 @@
 /*  Paranoid and/or debug, development, and release selection:                */
 /* ========================================================================== */
 
-/*! @def BT_PARANOID
+/*! @def BUTANE_PARANOID
   See FND_PARANOID. */
-#ifdef BT_PARANOID
+#ifdef BUTANE_PARANOID
   #define FND_PARANOID
 #endif
 
-/*! @def BT_DEBUG
+/*! @def BUTANE_DEBUG
   See FND_DEBUG. */
-#define BT_DEBUG FND_DEBUG
+#define BUTANE_DEBUG FND_DEBUG
 
-/*! @def BT_DEVELOPMENT
+/*! @def BUTANE_DEVELOPMENT
   See FND_DEVELOPMENT. */
-#define BT_DEVELOPMENT FND_DEVELOPMENT
+#define BUTANE_DEVELOPMENT FND_DEVELOPMENT
 
-/*! @def BT_RELEASE
+/*! @def BUTANE_RELEASE
   See FND_RELEASE. */
-#define BT_RELEASE FND_RELEASE
+#define BUTANE_RELEASE FND_RELEASE
 
-/*! @def BT_CONFIGURATION
+/*! @def BUTANE_CONFIGURATION
   See FND_CONFIGURATION. */
-#ifndef BT_CONFIGURATION
-  #error ("Please specify a configuration by defining `BT_CONFIGURATION`.")
+#ifndef BUTANE_CONFIGURATION
+  #error ("Please specify a configuration by defining `BUTANE_CONFIGURATION`.")
 #else
-  #define FND_CONFIGURATION BT_CONFIGURATION
+  #ifndef FND_CONFIGURATION
+    #define FND_CONFIGURATION BUTANE_CONFIGURATION
+  #endif
 #endif
 
 /* ========================================================================== */
-/*  Task scheduler:                                                           */
+/*  Linkage:                                                                  */
 /* ========================================================================== */
 
-/*! @def BT_TASK_SCHED_QUEUE_SZ
-  Specifies the size of the task scheduler's global task queue. */
-#define BT_TASK_SCHED_QUEUE_SZ 256
+/*! @def BUTANE_LINK_STATICALLY
+  Linking to Butane statically, e.g., using libbutane.a. */
+#define BUTANE_LINK_STATICALLY 1
 
-/* ========================================================================== */
- #  include <foundation/config.h>
+/*! @def BUTANE_LINK_DYNAMICALLY
+  Linking to Butane dynamically, e.g., using libbutane.so. */
+#define BUTANE_LINK_DYNAMICALLY 2
+
+/*! @def BUTANE_LINKAGE
+  Specifies if Butane is being linked to statically or dynamically. */
+#ifndef BUTANE_LINKAGE
+  #error ("Please specify how you are linking to Butane by defining `BUTANE_LINKAGE`.")
+#endif
+
 /* ========================================================================== */
 
 #endif /* _BUTANE_CONFIG_H_ */

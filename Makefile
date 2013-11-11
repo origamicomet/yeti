@@ -46,17 +46,17 @@ SRC_DIR := src
 ################################################################################
 
 ifeq ($(CONFIGURATION),debug)
-  CFLAGS  += $(call cc-define,BT_CONFIGURATION=1) $(call cc-debug)
+  CFLAGS  += $(call cc-define,BUTANE_CONFIGURATION=1) $(call cc-debug)
   LDFLAGS += $(call ld-debug)
   ARFLAGS += $(call ar-debug)
 endif
 ifeq ($(CONFIGURATION),development)
-  CFLAGS  += $(call cc-define,BT_CONFIGURATION=2) $(call cc-development)
+  CFLAGS  += $(call cc-define,BUTANE_CONFIGURATION=2) $(call cc-development)
   LDFLAGS += $(call ld-development)
   ARFLAGS += $(call ar-development)
 endif
 ifeq ($(CONFIGURATION),release)
-  CFLAGS  += $(call cc-define,BT_CONFIGURATION=3) $(call cc-release)
+  CFLAGS  += $(call cc-define,BUTANE_CONFIGURATION=3) $(call cc-release)
   LDFLAGS += $(call ld-release)
   ARFLAGS += $(call ar-release)
 endif
@@ -65,17 +65,23 @@ endif
 # Rules:                                                                       #
 ################################################################################
 
-FOUNDATION := deps/foundation/lib/$(STATIC_LIB_PREFIX)foundation$(STATIC_LIB_SUFFIX)$(STATIC_LIB_EXTENSION)
-BUTANE     := $(BIN_DIR)/$(EXECUTABLE_PREFIX)butane$(EXECUTABLE_SUFFIX)$(EXECUTABLE_EXTENSION)
+FOUNDATION := $(FOUNDATION_PATH)/lib/$(STATIC_LIB_PREFIX)foundation$(STATIC_LIB_SUFFIX)$(STATIC_LIB_EXTENSION)
+
+ifeq ($(LINKAGE),static)
+  BUTANE := $(LIB_DIR)/$(STATIC_LIB_PREFIX)butane$(STATIC_LIB_SUFFIX)$(STATIC_LIB_EXTENSION)
+endif
+ifeq ($(LINKAGE),dynamic)
+  BUTANE := $(BIN_DIR)/$(SHARED_LIB_PREFIX)butane$(SHARED_LIB_SUFFIX)$(SHARED_LIB_EXTENSION)
+endif
 
 .PHONY: all docs clean \
-	$(FOUNDATION)
+  $(FOUNDATION)
 
 all: $(BUTANE)
 
 docs:
-	@echo "[DOXYGEN] docs/doxygen.conf"
-	@doxygen docs/doxygen.conf
+	@echo "[DOXYGEN] Doxyfile"
+	@doxygen Doxyfile
 
 clean:
 	@echo "Cleaning..."
@@ -83,14 +89,23 @@ clean:
 	@rm -R -f $(LIB_DIR)
 	@rm -R -f $(OBJ_DIR)
 	@rm -R -f docs/html
-	cd deps/foundation; make clean
+	cd $(FOUNDATION_PATH); make clean
 
 SOURCES      := $(shell find $(SRC_DIR) -name '*.c')
 OBJECTS      := $(addprefix $(OBJ_DIR)/, $(subst $(SRC_DIR)/,,$(SOURCES:%.c=%.o)))
-INCLUDES     := $(call cc-includes,include) $(call cc-includes,deps/foundation/include)
-DEFINES      := $(call cc-define-str,BT_BUILD,$(BUILD))
-DEFINES      += $(call cc-define,FND_LINK=1)
-DEPENDENCIES := $(call ld-libraries,deps/foundation/lib) $(call ld-link,foundation)
+
+INCLUDES     := $(call cc-includes,include) $(call cc-includes,$(FOUNDATION_PATH)/include)
+DEPENDENCIES := $(call ld-libraries,$(FOUNDATION_PATH)/lib) $(call ld-link,foundation)
+
+DEFINES      := $(call cc-define,BUTANE_COMPILING)
+DEFINES      := $(call cc-define-str,BUTANE_BUILD,$(BUILD))
+DEFINES      += $(call cc-define,FND_LINKAGE=1)
+ifeq ($(LINKAGE),static)
+  DEFINES    += $(call cc-define,BUTANE_LINKAGE=1)
+endif
+ifeq ($(LINKAGE),dynamic)
+  DEFINES    += $(call cc-define,BUTANE_LINKAGE=2)
+endif
 
 -include $(OBJECTS:%.o=%.d)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
@@ -100,9 +115,14 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(call c++) $(INCLUDES) $(DEFINES) $(call cc-input,$<) -MM -MT $@ >$(patsubst %.o,%.d,$@)
 
 $(FOUNDATION):
-	cd deps/foundation; make all
+	cd $(FOUNDATION_PATH); make all
 
 $(BUTANE): $(FOUNDATION) $(OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@$(call ld++) $(call ld-output,$@) $(foreach input,$(OBJECTS),$(call ld-input,$(input))) $(DEPENDENCIES)
+ifeq ($(LINKAGE),static)
+	@$(call ar++) $(call ld-output,$@) $(foreach input,$(OBJECTS),$(call ar-input,$(input)))
+endif
+ifeq ($(LINKAGE),dynamic)
+	@$(call ld++) $(call ld-shared) $(call ld-output,$@) $(foreach input,$(OBJECTS),$(call ld-input,$(input))) $(DEPENDENCIES)
+endif
