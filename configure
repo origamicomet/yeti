@@ -427,6 +427,16 @@ class SwitchesAndOptions
   end
 end
 
+puts "#============================================================================#"
+puts "# Butane                                                                     #"
+puts "#============================================================================#"
+puts ""
+
+at_exit {
+  puts ""
+  puts "#============================================================================#"
+}
+
 switches_and_options = SwitchesAndOptions.parse(ARGV)
 
 if not (SwitchesAndOptions.sane? switches_and_options)
@@ -454,16 +464,21 @@ ARGS = lambda {
   _.join(' ')
 }.call
 
-
 if switches_and_options.foundation == "deps/foundation"
   puts "Configuring deps/foundation..."
-  Dir.chdir("deps/foundation")
-  `ruby configure #{ARGS}`
-  if not $?.success?
-    puts "Configuration of deps/foundation unsuccesful!"
-    exit false
+  begin
+    Dir.chdir("deps/foundation")
+    print "\n"
+    puts `ruby configure #{ARGS}`
+    print "\n"
+    if not $?.success?
+      raise "Configuration of deps/foundation unsuccesful!"
+    end
+  rescue
+    raise
+  ensure
+    Dir.chdir("../..")
   end
-  Dir.chdir("../..")
 end
 
 puts "Configuration successful!"
