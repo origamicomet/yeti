@@ -16,9 +16,7 @@
 #ifndef _BUTANE_FOUNDATION_H_
 #define _BUTANE_FOUNDATION_H_
 
-#ifndef _BUTANE_CONFIG_H_
-  #include <butane/config.h>
-#endif /* _BUTANE_CONFIG_H_ */
+#include <butane/config.h>
 
 #include <foundation.h>
 
