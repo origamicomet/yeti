@@ -45,7 +45,9 @@ Assuming default install options, you should be able to do so by running `C:/Min
 You don't need to specify anything; the defaults will work:
 
 ```
-$ ./configure --paranoid --config=debug
+$ ./configure \
+  --paranoid \
+  --configuration=debug
 ```
 
 ##### 3. Build
@@ -72,10 +74,12 @@ Assuming default install options, you should be able to do so by running `C:/Min
 You're going to need to specify the `toolchain`, `windows-sdk`, and `vs-path` options:
 
 ```
-$ ./configure --paranoid --config=debug --toolchain=msvc \
-  --windows-sdk="C:/Program Files/Microsoft SDKs/Windows/v7.1" \
-  --vs-path="C:/Program Files (x86)/Microsoft Visual Studio 11.0" \
-  --architecture=x86-64
+$ ./configure \
+  --paranoid \
+  --configuration=debug \
+  --toolchain=msvc \
+  --windows-sdk="C:\Program Files\Microsoft SDKs\Windows\v7.1" \
+  --vs-path="C:\Program Files (x86)\Microsoft Visual Studio 12.0"
 ```
 
 ##### 3. Build
