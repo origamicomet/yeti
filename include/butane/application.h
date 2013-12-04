@@ -33,6 +33,8 @@
 extern "C" {
 #endif
 
+/* ========================================================================== */
+
 /*! ... */
 typedef bool (*butane_application_initialize_fn)(
   struct butane_application *application);
@@ -101,6 +103,11 @@ namespace butane {
     protected:
       Application();
       virtual ~Application();
+    public: /* private: */
+      static Application *recover_(::butane_application_t *app);
+      ::butane_application_t *lose_();
+      static const Application *recover_(const ::butane_application_t *app);
+      const ::butane_application_t *lose_() const;
     public:
       /*! @copydoc butane_application_t::initialize */
       virtual bool initialize();
@@ -110,11 +117,9 @@ namespace butane {
       virtual void render() const;
       /*! @copydoc butane_application_t::shutdown */
       virtual void shutdown();
+    public:
       /*! @copydoc butane_application_run */
       void run();
-    private:
-      static Application *recover_(::butane_application_t *app);
-      static const Application *recover_(const ::butane_application_t *app);
     private:
       static bool initialize_(::butane_application_t *app);
       static void update_(::butane_application_t *app, const float delta_time);

@@ -20,6 +20,8 @@
 extern "C" {
 #endif
 
+/* ========================================================================== */
+
 bool butane_application_initialize(
   butane_application_t *app)
 {
@@ -34,6 +36,8 @@ void butane_application_update(
 {
   butane_assert(debug, app != NULL);
   butane_assert(debug, app->update != NULL);
+  // TODO(mtwilliams): Support negative delta-times?
+  butane_assert(development, delta_time > 0.0f);
   app->update(app, delta_time);
 }
 
@@ -53,7 +57,7 @@ void butane_application_shutdown(
   app->shutdown(app);
 }
 
-/* ========================================================================== */
+/* =========================================================================== */
 
 void butane_application_run(
   butane_application_t *app)
@@ -70,6 +74,8 @@ void butane_application_run(
   }
 }
 
+/* =========================================================================== */
+
 #ifdef __cplusplus
 }
 #endif
@@ -80,6 +86,8 @@ void butane_application_run(
 
 #ifdef __cplusplus
 namespace butane {
+  /* ======================================================================== */
+
   Application::Application() {
     _.initialize = &Application::initialize_;
     _.update = &Application::update_;
@@ -89,6 +97,30 @@ namespace butane {
   }
 
   Application::~Application() {
+  }
+
+  /* ======================================================================== */
+
+  Application *Application::recover_(::butane_application_t *app) {
+    butane_assert(development, app != NULL);
+    static const size_t offset =
+      (offsetof(Application, this_) - offsetof(Application, _));
+    return *((Application **)(((uintptr_t)app) + offset));
+  }
+
+  ::butane_application_t *Application::lose_() {
+    return ((::butane_application_t *)&_);
+  }
+
+  const Application *Application::recover_(const ::butane_application_t *app) {
+    butane_assert(development, app != NULL);
+    static const size_t offset =
+      (offsetof(Application, this_) - offsetof(Application, _));
+    return *((const Application **)(((uintptr_t)app) + offset));
+  }
+
+  const ::butane_application_t *Application::lose_() const {
+    return ((const ::butane_application_t *)&_);
   }
 
   /* ======================================================================== */
@@ -112,20 +144,6 @@ namespace butane {
 
   /* ======================================================================== */
 
-  Application *Application::recover_(::butane_application_t *app) {
-    return *((Application **)
-      ((uintptr_t)app) +
-      (offsetof(Application, this_) - offsetof(Application, _)));
-  }
-
-  const Application *Application::recover_(const ::butane_application_t *app) {
-    return *((const Application **)
-      ((uintptr_t)app) +
-      (offsetof(Application, this_) - offsetof(Application, _)));
-  }
-
-  /* ======================================================================== */
-
   bool Application::initialize_(::butane_application_t *app) {
     return recover_(app)->initialize();
   }
@@ -145,8 +163,10 @@ namespace butane {
   /* ======================================================================== */
 
   void Application::run() {
-    butane_application_run(&_);
+    butane_application_run(this->lose_());
   }
+
+  /* ======================================================================== */
 } /* butane */
 #endif
 
