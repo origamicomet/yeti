@@ -12,6 +12,8 @@
  #  include <butane/application.h>
 /* ========================================================================== */
 
+#include <butane/time_step_policy.h>
+
 /* ========================================================================== */
 /*  C (butane_application_t):                                                 */
 /* ========================================================================== */
@@ -19,6 +21,27 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* ========================================================================== */
+
+butane_time_step_policy_t *butane_application_time_step_policy(
+  const butane_application_t *app)
+{
+  butane_assert(debug, app != NULL);
+  return app->time_step_policy_;
+}
+
+void butane_application_set_time_step_policy(
+  butane_application_t *app,
+  butane_time_step_policy_t *time_step_policy)
+{
+  butane_assert(debug, app != NULL);
+  butane_assert(development, time_step_policy != NULL);
+  // TENTATIVE(mtwilliams): Don't automatically destroy?
+  if (app->time_step_policy_)
+    butane_time_step_policy_destroy(app->time_step_policy_);
+  app->time_step_policy_ = time_step_policy;
+}
 
 /* ========================================================================== */
 
@@ -54,6 +77,7 @@ void butane_application_shutdown(
 {
   butane_assert(debug, app != NULL);
   butane_assert(debug, app->shutdown != NULL);
+  butane_time_step_policy_destroy(app->time_step_policy_);
   app->shutdown(app);
 }
 
@@ -63,14 +87,21 @@ void butane_application_run(
   butane_application_t *app)
 {
   butane_assert(debug, app != NULL);
-
   if (!butane_application_initialize(app))
     return;
-
+  fnd_monotonic_clock_t *wall = fnd_monotonic_clock_create();
+  fnd_monotonic_clock_t *frame = fnd_monotonic_clock_create();
   while (true) {
-    /* TODO(mtwilliams): Implement time-step policies. */
-    butane_application_update(app, 1.0f / 60.0f);
+    butane_time_step_policy_t *tsp = butane_application_time_step_policy(app);
+    butane_time_step_policy_update(tsp, wall, frame);
+    const size_t num_of_steps = butane_time_step_policy_num_of_steps(tsp);
+    const float delta_time_per_step = butane_time_step_policy_delta_time_per_step(tsp);
+    if (delta_time_per_step <= 0.0f)
+      continue;
+    for (size_t step = 0; step < num_of_steps; ++step)
+      butane_application_update(app, delta_time_per_step);
     butane_application_render(app);
+    fnd_monotonic_clock_reset(frame);
   }
 }
 
@@ -121,6 +152,17 @@ namespace butane {
 
   const ::butane_application_t *Application::lose_() const {
     return ((const ::butane_application_t *)&_);
+  }
+
+  /* ======================================================================== */
+
+  TimeStepPolicy *Application::time_step_policy() const {
+    return TimeStepPolicy::recover_(butane_application_time_step_policy(this->lose_()));
+  }
+
+  void Application::set_time_step_policy(TimeStepPolicy *time_step_policy) {
+    butane_assert(debug, time_step_policy != NULL);
+    butane_application_set_time_step_policy(this->lose_(), time_step_policy->lose_());
   }
 
   /* ======================================================================== */

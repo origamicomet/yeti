@@ -54,11 +54,26 @@ typedef void (*butane_application_shutdown_fn)(
 
 /*! ... */
 typedef struct butane_application {
+  /* ======================================================================== */
   butane_application_initialize_fn initialize;
   butane_application_update_fn update;
   butane_application_render_fn render;
   butane_application_shutdown_fn shutdown;
+  /* ======================================================================== */
+  struct butane_time_step_policy *time_step_policy_;
+  /* ======================================================================== */
 } butane_application_t;
+
+/* ========================================================================== */
+
+/*! ... */
+extern BUTANE_API struct butane_time_step_policy *butane_application_time_step_policy(
+  const butane_application_t *app);
+
+/*! ... */
+extern BUTANE_API void butane_application_set_time_step_policy(
+  butane_application_t *app,
+  struct butane_time_step_policy *time_step_policy);
 
 /* ========================================================================== */
 
@@ -95,6 +110,7 @@ extern BUTANE_API void butane_application_run(
 
 #ifdef __cplusplus
 namespace butane {
+  class TimeStepPolicy;
   /*! @copydoc butane_application_t */
   class BUTANE_API Application {
     private:
@@ -108,6 +124,11 @@ namespace butane {
       ::butane_application_t *lose_();
       static const Application *recover_(const ::butane_application_t *app);
       const ::butane_application_t *lose_() const;
+    public:
+      /*! @copydoc butane_application_time_step_policy */
+      TimeStepPolicy *time_step_policy() const;
+      /*! @copydoc butane_application_set_time_step_policy */
+      void set_time_step_policy(TimeStepPolicy *time_step_policy);
     public:
       /*! @copydoc butane_application_t::initialize */
       virtual bool initialize();
