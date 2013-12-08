@@ -24,6 +24,49 @@ extern "C" {
 
 /* ========================================================================== */
 
+const char *butane_application_platform(
+  const butane_application_t *app)
+{
+  butane_assert(debug, app != NULL);
+#if (FND_PLATFORM == FND_PLATFORM_WINDOWS)
+  return "windows";
+#elif (FND_PLATFORM == FND_PLATFORM_MACOSX)
+  return "macosx";
+#elif (FND_PLATFORM == FND_PLATFORM_LINUX)
+  return "linux";
+#elif (FND_PLATFORM == FND_PLATFORM_ANDROID)
+  return "android";
+#elif (FND_PLATFORM == FND_PLATFORM_IOS)
+  return "ios";
+#endif
+}
+
+const char *butane_application_architecture(
+  const butane_application_t *app)
+{
+  butane_assert(debug, app != NULL);
+#if (FND_ARCHITECTURE == FND_ARCHITECTURE_X86)
+  return "x86";
+#elif (FND_ARCHITECTURE == FND_ARCHITECTURE_X86_64)
+  return "x86-64";
+#elif (FND_ARCHITECTURE == FND_ARCHITECTURE_ARM)
+  return "arm";
+#endif
+}
+
+const char *butane_application_build(
+  const butane_application_t *app)
+{
+  butane_assert(debug, app != NULL);
+#if (BUTANE_CONFIGURATION == BUTANE_DEBUG)
+  return "debug";
+#elif (BUTANE_CONFIGURATION == BUTANE_DEVELOPMENT)
+  return "development";
+#elif (BUTANE_CONFIGURATION == BUTANE_RELEASE)
+  return "release";
+#endif
+}
+
 butane_time_step_policy_t *butane_application_time_step_policy(
   const butane_application_t *app)
 {
@@ -155,6 +198,18 @@ namespace butane {
   }
 
   /* ======================================================================== */
+
+  const char *Application::platform() const {
+    return ::butane_application_platform(this->lose_());
+  }
+
+  const char *Application::architecture() const {
+    return ::butane_application_architecture(this->lose_());
+  }
+
+  const char *Application::build() const {
+    return ::butane_application_build(this->lose_());
+  }
 
   TimeStepPolicy *Application::time_step_policy() const {
     return TimeStepPolicy::recover_(butane_application_time_step_policy(this->lose_()));

@@ -67,6 +67,18 @@ typedef struct butane_application {
 /* ========================================================================== */
 
 /*! ... */
+extern BUTANE_API const char *butane_application_platform(
+  const butane_application_t *app);
+
+/*! ... */
+extern BUTANE_API const char *butane_application_architecture(
+  const butane_application_t *app);
+
+/*! ... */
+extern BUTANE_API const char *butane_application_build(
+  const butane_application_t *app);
+
+/*! ... */
 extern BUTANE_API struct butane_time_step_policy *butane_application_time_step_policy(
   const butane_application_t *app);
 
@@ -125,6 +137,12 @@ namespace butane {
       static const Application *recover_(const ::butane_application_t *app);
       const ::butane_application_t *lose_() const;
     public:
+      /*! @copydoc butane_application_platform */
+      const char *platform() const;
+      /*! @copydoc butane_application_architecture */
+      const char *architecture() const;
+      /*! @copydoc butane_application_build */
+      const char *build() const;
       /*! @copydoc butane_application_time_step_policy */
       TimeStepPolicy *time_step_policy() const;
       /*! @copydoc butane_application_set_time_step_policy */
