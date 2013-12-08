@@ -18,6 +18,7 @@
 
 #include <butane/config.h>
 #include <butane/foundation.h>
+#include <butane/log.h>
 
 /* ========================================================================== */
 /*  Time-step Policy:                                                         */
