@@ -25,14 +25,6 @@ include build/detect/platform.mk
 include build/detect/architecture.mk
 
 ################################################################################
-# Version:                                                                     #
-################################################################################
-
-COMMIT   := $(shell git log --pretty=oneline | wc -l)
-REVISION := $(shell git rev-parse HEAD)
-BUILD    := $(COMMIT) ($(REVISION))
-
-################################################################################
 # Binary, library, object, and source directories:                             #
 ################################################################################
 
@@ -98,7 +90,6 @@ INCLUDES     := $(call cc-includes,include) $(call cc-includes,$(FOUNDATION_PATH
 DEPENDENCIES := $(call ld-libraries,$(FOUNDATION_PATH)/lib) $(call ld-link,foundation)
 
 DEFINES      := $(call cc-define,BUTANE_COMPILING)
-DEFINES      := $(call cc-define-str,BUTANE_BUILD,$(BUILD))
 DEFINES      += $(call cc-define,FND_LINKAGE=1)
 ifeq ($(LINKAGE),static)
   DEFINES    += $(call cc-define,BUTANE_LINKAGE=1)
