@@ -9,48 +9,32 @@
 /* See LICENSE.md for licensing information.                                  */
 /*                                                                            */
 /* ========================================================================== */
-/*! @file include/butane.h
-     Includes all public headers necessary to use Butane.                     */
-/* ========================================================================== */
-
-#ifndef _BUTANE_H_
-#define _BUTANE_H_
-
-/* ========================================================================== */
-/*  Butane:                                                                   */
-/*   * Configuration;                                                         */
-/*   * Foundation;                                                            */
-/*   * Logging;                                                               */
-/*   * Application;                                                           */
-/*   * Initialization:                                                        */
-/*      * C (butane_initialize);                                              */
-/*      * C++ (butane::initialize).                                           */
+ #  include <butane.h>
 /* ========================================================================== */
 
 /* ========================================================================== */
 /*  Configuration:                                                            */
 /* ========================================================================== */
 
-#include <butane/config.h>
+/* ... */
 
 /* ========================================================================== */
 /*  Foundation:                                                               */
 /* ========================================================================== */
 
-#include <butane/foundation.h>
+/* ... */
 
 /* ========================================================================== */
 /*  Logging:                                                                  */
 /* ========================================================================== */
 
-#include <butane/log.h>
+/* ... */
 
 /* ========================================================================== */
 /*  Application:                                                             */
 /* ========================================================================== */
 
-#include <butane/application.h>
-#include <butane/time_step_policy.h>
+/* ... */
 
 /* ========================================================================== */
 /*  Initialization:                                                           */
@@ -64,12 +48,9 @@
 extern "C" {
 #endif
 
-/* ========================================================================== */
-
-/*! ... */
-extern BUTANE_API void butane_initialize(void);
-
-/* ========================================================================== */
+void butane_initialize(void) {
+  butane_set_log_level(BUTANE_LOG_NOTHING);
+}
 
 #ifdef __cplusplus
 }
@@ -81,11 +62,10 @@ extern BUTANE_API void butane_initialize(void);
 
 #ifdef __cplusplus
 namespace butane {
-  /*! @copydoc butane_initialize */
-  extern BUTANE_API void initialize();
+  void initialize() {
+    ::butane_initialize();
+  }
 } /* butane */
 #endif
 
 /* ========================================================================== */
-
-#endif /* _BUTANE_H_ */
