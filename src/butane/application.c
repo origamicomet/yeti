@@ -86,6 +86,30 @@ void butane_application_set_time_step_policy(
   app->time_step_policy_ = time_step_policy;
 }
 
+/* =========================================================================== */
+
+void butane_application_run(
+  butane_application_t *app)
+{
+  butane_assert(debug, app != NULL);
+  if (!butane_application_initialize(app))
+    return;
+  fnd_monotonic_clock_t *wall = fnd_monotonic_clock_create();
+  fnd_monotonic_clock_t *frame = fnd_monotonic_clock_create();
+  while (true) {
+    butane_time_step_policy_t *tsp = butane_application_time_step_policy(app);
+    butane_time_step_policy_update(tsp, wall, frame);
+    const size_t num_of_steps = butane_time_step_policy_num_of_steps(tsp);
+    const float delta_time_per_step = butane_time_step_policy_delta_time_per_step(tsp);
+    if (delta_time_per_step <= 0.0f)
+      continue;
+    for (size_t step = 0; step < num_of_steps; ++step)
+      butane_application_update(app, delta_time_per_step);
+    butane_application_render(app);
+    fnd_monotonic_clock_reset(frame);
+  }
+}
+
 /* ========================================================================== */
 
 bool butane_application_initialize(
@@ -122,30 +146,6 @@ void butane_application_shutdown(
   butane_assert(debug, app->shutdown != NULL);
   butane_time_step_policy_destroy(app->time_step_policy_);
   app->shutdown(app);
-}
-
-/* =========================================================================== */
-
-void butane_application_run(
-  butane_application_t *app)
-{
-  butane_assert(debug, app != NULL);
-  if (!butane_application_initialize(app))
-    return;
-  fnd_monotonic_clock_t *wall = fnd_monotonic_clock_create();
-  fnd_monotonic_clock_t *frame = fnd_monotonic_clock_create();
-  while (true) {
-    butane_time_step_policy_t *tsp = butane_application_time_step_policy(app);
-    butane_time_step_policy_update(tsp, wall, frame);
-    const size_t num_of_steps = butane_time_step_policy_num_of_steps(tsp);
-    const float delta_time_per_step = butane_time_step_policy_delta_time_per_step(tsp);
-    if (delta_time_per_step <= 0.0f)
-      continue;
-    for (size_t step = 0; step < num_of_steps; ++step)
-      butane_application_update(app, delta_time_per_step);
-    butane_application_render(app);
-    fnd_monotonic_clock_reset(frame);
-  }
 }
 
 /* =========================================================================== */
@@ -222,6 +222,12 @@ namespace butane {
 
   /* ======================================================================== */
 
+  void Application::run() {
+    butane_application_run(this->lose_());
+  }
+
+  /* ======================================================================== */
+
   bool Application::initialize() {
     butane_assertf_(0, "butane::Application::initialize() not overridden!");
     return false;
@@ -255,12 +261,6 @@ namespace butane {
 
   void Application::shutdown_(::butane_application_t *app) {
     recover_(app)->render();
-  }
-
-  /* ======================================================================== */
-
-  void Application::run() {
-    butane_application_run(this->lose_());
   }
 
   /* ======================================================================== */

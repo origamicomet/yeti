@@ -91,6 +91,12 @@ extern BUTANE_API void butane_application_set_time_step_policy(
 /* ========================================================================== */
 
 /*! ... */
+extern BUTANE_API void butane_application_run(
+  butane_application_t *app);
+
+/* ========================================================================== */
+
+/*! ... */
 extern BUTANE_API bool butane_application_initialize(
   butane_application_t *app);
 
@@ -108,10 +114,6 @@ extern BUTANE_API void butane_application_shutdown(
   butane_application_t *app);
 
 /* ========================================================================== */
-
-/*! ... */
-extern BUTANE_API void butane_application_run(
-  butane_application_t *app);
 
 #ifdef __cplusplus
 }
@@ -149,6 +151,9 @@ namespace butane {
       /*! @copydoc butane_application_set_time_step_policy */
       void set_time_step_policy(TimeStepPolicy *time_step_policy);
     public:
+      /*! @copydoc butane_application_run */
+      void run();
+    public:
       /*! @copydoc butane_application_t::initialize */
       virtual bool initialize();
       /*! @copydoc butane_application_t::update */
@@ -157,9 +162,6 @@ namespace butane {
       virtual void render() const;
       /*! @copydoc butane_application_t::shutdown */
       virtual void shutdown();
-    public:
-      /*! @copydoc butane_application_run */
-      void run();
     private:
       static bool initialize_(::butane_application_t *app);
       static void update_(::butane_application_t *app, const float delta_time);
