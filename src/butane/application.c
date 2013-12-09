@@ -12,6 +12,8 @@
  #  include <butane/application.h>
 /* ========================================================================== */
 
+#include <stdlib.h>
+
 #include <butane/time_step_policy.h>
 
 /* ========================================================================== */
@@ -80,7 +82,7 @@ void butane_application_set_time_step_policy(
 {
   butane_assert(debug, app != NULL);
   butane_assert(development, time_step_policy != NULL);
-  // TENTATIVE(mtwilliams): Don't automatically destroy?
+  /* TENTATIVE(mtwilliams): Don't automatically destroy? */
   if (app->time_step_policy_)
     butane_time_step_policy_destroy(app->time_step_policy_);
   app->time_step_policy_ = time_step_policy;
@@ -110,6 +112,13 @@ void butane_application_run(
   }
 }
 
+void butane_application_quit(
+  butane_application_t *app)
+{
+  butane_assert(debug, app != NULL);
+  exit(EXIT_SUCCESS);
+}
+
 /* ========================================================================== */
 
 bool butane_application_initialize(
@@ -126,7 +135,7 @@ void butane_application_update(
 {
   butane_assert(debug, app != NULL);
   butane_assert(debug, app->update != NULL);
-  // TODO(mtwilliams): Support negative delta-times?
+  /* TODO(mtwilliams): Support negative delta-times? */
   butane_assert(development, delta_time > 0.0f);
   app->update(app, delta_time);
 }
@@ -217,13 +226,17 @@ namespace butane {
 
   void Application::set_time_step_policy(TimeStepPolicy *time_step_policy) {
     butane_assert(debug, time_step_policy != NULL);
-    butane_application_set_time_step_policy(this->lose_(), time_step_policy->lose_());
+    ::butane_application_set_time_step_policy(this->lose_(), time_step_policy->lose_());
   }
 
   /* ======================================================================== */
 
   void Application::run() {
-    butane_application_run(this->lose_());
+    ::butane_application_run(this->lose_());
+  }
+
+  void Application::quit() {
+    ::butane_application_quit(this->lose_());
   }
 
   /* ======================================================================== */

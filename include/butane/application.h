@@ -94,6 +94,10 @@ extern BUTANE_API void butane_application_set_time_step_policy(
 extern BUTANE_API void butane_application_run(
   butane_application_t *app);
 
+/*! ... */
+extern BUTANE_API void butane_application_quit(
+  butane_application_t *app);
+
 /* ========================================================================== */
 
 /*! ... */
@@ -153,6 +157,8 @@ namespace butane {
     public:
       /*! @copydoc butane_application_run */
       void run();
+      /*! @copydoc butane_application_quit */
+      void quit();
     public:
       /*! @copydoc butane_application_t::initialize */
       virtual bool initialize();
