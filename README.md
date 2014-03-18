@@ -14,79 +14,14 @@ A data-driven game engine.
 | BSD       | GCC or Clang            |                       |
 | Android   | GCC or Clang            |                       |
 | iOS       | GCC or Clang            |                       |
-| Web       | Native Client (PNaCl)   |                       |
+| Web       | Native Client           |                       |
 | Web       | emscripten              |                       |
 
 ## Building
 
 ### Windows
 
-You have two options:
-
-  * MinGW/MSYS;
-  * or Microsoft Visual Studio.
-
-Microsoft Visual Studio is recommended for performance, debugging, and support reasons.
-
-#### via MinGW/MSYS
-
-Before you run `make` you're going to need:
-
-  * MinGW/MSYS;
-  * Ruby 1.9.3+;
-  * and a brain.
-
-##### 1. Open a MinGW/MSYS terminal
-
-Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
-
-##### 2. Configure
-
-You don't need to specify anything; the defaults will work:
-
-```
-$ ./configure \
-  --paranoid \
-  --configuration=debug
-```
-
-##### 3. Build
-
-```
-$ make all
-```
-
-#### via Microsoft Visual Studio
-
-Before you run `make` you're going to need:
-
-  * MinGW/MSYS;
-  * Ruby 1.9.3+;
-  * Microsoft Visual Studio;
-  * and a brain.
-
-##### 1. Open a MinGW/MSYS terminal
-
-Assuming default install options, you should be able to do so by running `C:/MinGW/msys/1.0/msys.bat`.
-
-##### 2. Configure
-
-You're going to need to specify the `toolchain`, `windows-sdk`, and `vs-path` options:
-
-```
-$ ./configure \
-  --paranoid \
-  --configuration=debug \
-  --toolchain=msvc \
-  --windows-sdk="C:\Program Files\Microsoft SDKs\Windows\v7.1" \
-  --vs-path="C:\Program Files (x86)\Microsoft Visual Studio 12.0"
-```
-
-##### 3. Build
-
-```
-$ make all
-```
+TODO
 
 ### Mac OSX
 
@@ -110,7 +45,7 @@ TODO
 
 ### Web
 
-#### via [Native Client (PNaCl)](https://developers.google.com/native-client/)
+#### via [Native Client](https://developers.google.com/native-client/)
 
 TODO
 
@@ -120,7 +55,7 @@ TODO
 
 ## Configuring
 
-Butanes's compile-, link-, and runtime behaviour is controlled by `./configure` switches and options, as well as various pre-processor defines (which are documented in `include/butane/config.h`).
+Foundations's compile-, link-, and runtime behaviour is controlled by `./configure` switches and options, as well as various pre-processor defines.
 
 ### via switches and options
 
@@ -128,16 +63,29 @@ TODO
 
 ## License
 
-Copyright (c) Michael Williams <devbug@bitbyte.ca>
+Copyright (c) 2012-2014 Bitbyte Studios, Inc.
 
 Author(s):
 
-  * Michael Williams <devbug@bitbyte.ca>
+  * Michael Williams <mtwilliams@bitbyte.ca>
 
-All rights reserved.
+This software is provided 'as-is', without any express or implied warranty. In
+no event will the authors be held liable for any damages arising from the use
+of this software.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
 
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. Neither the name of the nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+   1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product in the form of a provided
+   splash screen is required, and an acknowledgement in the product
+   documentation is required.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+
+   3. Altered versions may not be sublicensed.
+
+   4. This notice may not be removed or altered from any source distribution.

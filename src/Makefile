@@ -1,6 +1,6 @@
-#=== build/architecture.mk ====================================================#
+#=== Makefile =================================================================#
 #                                                                              #
-#  Butane                                                                      #
+#  Foundation                                                                  #
 #                                                                              #
 #  This file is distributed under the terms described in LICENSE.              #
 #                                                                              #
@@ -9,11 +9,8 @@
 #                                                                              #
 #===------------------------------------------------------------------------===#
 
-## @file build/architecture.mk
+## @file Makefile
 ## @brief ...
 ##
 
-ifndef _BITBYTE_BUTANE_BUILD_ARCHITECTURE_MK_
-_BITBYTE_BUTANE_BUILD_ARCHITECTURE_MK_ := 1
-
-endif # _BITBYTE_BUTANE_BUILD_ARCHITECTURE_MK_
+include src/bitbyte/butane.mk

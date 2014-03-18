@@ -1,39 +1,19 @@
 #!/usr/bin/env ruby
-################################################################################
-##                                                                            ##
-## This file is part of Foundation.                                           ##
-##                                                                            ##
-## Author(s):                                                                 ##
-##                                                                            ##
-##   Michael Williams <devbug@bitbyte.ca>                                     ##
-##                                                                            ##
-## This is free and unencumbered software released into the public domain.    ##
-##                                                                            ##
-## Anyone is free to copy, modify, publish, use, compile, sell, or distribute ##
-## this software, either in source code form or as a compiled binary, for any ##
-## purpose, commercial or non-commercial, and by any means.                   ##
-##                                                                            ##
-## In jurisdictions that recognize copyright laws, the author or authors of   ##
-## this software dedicate any and all copyright interest in the software to   ##
-## the public domain. We make this dedication for the benefit of the public   ##
-## large and to the detriment of our heirs and successors. We intend this     ##
-## dedication to be an overt act of relinquishment in perpetuity of all       ##
-## present and future rights to this software under copyright law.            ##
-##                                                                            ##
-## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR ##
-## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,   ##
-## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL    ##
-## THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER   ##
-## OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,      ##
-## ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR      ##
-## OTHER DEALINGS IN THE SOFTWARE.                                            ##
-##                                                                            ##
-## For more information, please refer to <http://unlicense.org/>              ##
-##                                                                            ##
-################################################################################
-## configure                                                                  ##
-##  Specifies compile-, link-, and runtime- behaviours via build/config.      ##
-################################################################################
+
+#=== configure ================================================================#
+#                                                                              #
+#  Foundation                                                                  #
+#                                                                              #
+#  This file is distributed under the terms described in LICENSE.              #
+#                                                                              #
+#  Author(s):                                                                  #
+#   Michael Williams <mwilliams@bitbyte.ca>                                    #
+#                                                                              #
+#===------------------------------------------------------------------------===#
+
+## @file configure
+## @brief Specifies compile-, link-, and runtime- behaviours via conf.mk.
+##
 
 require 'optparse'
 require 'ostruct'
@@ -41,14 +21,14 @@ require 'rbconfig'
 
 class SwitchesAndOptions
   def self.switch(name)
-    (ENV['BUTANE_CONFIG_' + name.upcase] == 'yes')
+    (ENV['BITBYTE_BUTANE_CONFIG_' + name.upcase] == 'yes')
   end
 
   private_class_method :switch
 
   def self.option(name)
-    if ENV.include? 'BUTANE_CONFIG_' + name.upcase
-      ENV['BUTANE_CONFIG_' + name.upcase]
+    if ENV.include? 'BITBYTE_BUTANE_CONFIG_' + name.upcase
+      ENV['BITBYTE_BUTANE_CONFIG_' + name.upcase]
     end
   end
 
@@ -229,7 +209,7 @@ class SwitchesAndOptions
     switches_and_options = OpenStruct.new
 
     switches_and_options.paranoid     = (switch 'paranoid')
-    switches_and_options.config       = (option 'configuration')
+    switches_and_options.config       = (option 'config')
     switches_and_options.architecture = (option 'architecture')
     switches_and_options.toolchain    = (option 'toolchain')
     if ENV.include? 'CC'
@@ -237,10 +217,9 @@ class SwitchesAndOptions
     end
     switches_and_options.platform     = (option 'platform')
     switches_and_options.linkage      = (option 'linkage')
-      switches_and_options.linkage ||= 'dynamic'
+      switches_and_options.linkage ||= 'statically'
     switches_and_options.windows_sdk  = (option 'windows_sdk')
     switches_and_options.vs_path      = (option 'vs_path')
-    switches_and_options.foundation   = "deps/foundation"
 
     parser = OptionParser.new do |opts|
       opts.banner =  "Usage: ./configure [switches and options]"
@@ -271,7 +250,7 @@ class SwitchesAndOptions
                                         end
       end
 
-      opts.on("--linkage=LINKAGE", "Selects static or dynamic linkage.") do |linkage|
+      opts.on("--linkage=LINKAGE", "Specifies statica or dynamic linkage.") do |linkage|
         switches_and_options.linkage = linkage.downcase
       end
 
@@ -281,10 +260,6 @@ class SwitchesAndOptions
 
       opts.on("--vs-path=PATH", "Path to Microsoft Visual Studio.") do |vs_path|
         switches_and_options.vs_path = vs_path
-      end
-
-      opts.on("--foundation=PATH", "Override path to Foundation.") do |path|
-        switches_and_options.foundation = path
       end
 
       opts.on("--h", "--help") do
@@ -365,7 +340,7 @@ class SwitchesAndOptions
       end
     end
 
-    if switches_and_options.linkage != 'static' && switches_and_options.linkage != 'dynamic'
+    if switches_and_options.linkage != 'statically' && switches_and_options.linkage != 'dynamically'
       puts "Unknown linkage '#{switches_and_options.linkage}'"
       return false
     end
@@ -385,18 +360,25 @@ class SwitchesAndOptions
 
   def self.generate(switches_and_options, path)
     File.open(path, 'wb') do |f|
-      f.write "################################################################################\n"
-      f.write "##                                                                            ##\n"
-      f.write "## Do not modify this file, instead modify ./configure.                       ##\n"
-      f.write "##                                                                            ##\n"
-      f.write "################################################################################\n"
-      f.write "## build/config                                                               ##\n"
-      f.write "##  An auto-generated file by ./configure that specifies compile-, link-, and ##\n"
-      f.write "##  and runtime behaviour.                                                    ##\n"
-      f.write "################################################################################\n"
+      f.write "#=== conf.mk ==================================================================#\n"
+      f.write "#                                                                              #\n"
+      f.write "#  Butane                                                                      #\n"
+      f.write "#                                                                              #\n"
+      f.write "#  This file is distributed under the terms described in LICENSE.              #\n"
+      f.write "#                                                                              #\n"
+      f.write "#  Author(s):                                                                  #\n"
+      f.write "#   Michael Williams <mwilliams@bitbyte.ca>                                    #\n"
+      f.write "#                                                                              #\n"
+      f.write "#===------------------------------------------------------------------------===#\n"
       f.write "\n"
-      f.write "ifndef _BUTANE_BUILD_CONFIG_\n"
-      f.write "_BUTANE_BUILD_CONFIG_ := 1\n"
+      f.write "## @file conf.mk\n"
+      f.write "## @brief An auto-generated file by ./configure that specifies compile-, link-,\n"
+      f.write "##  and runtime behaviour.\n"
+      f.write "##\n"
+      f.write "\n"
+
+      f.write "ifndef _BITBYTE_BUTANE_BUILD_CONFIG_\n"
+      f.write "_BITBYTE_BUTANE_BUILD_CONFIG_ := 1\n"
       f.write "\n"
 
       f.write "PARANOID            := #{yes_or_no(switches_and_options.paranoid)}\n"
@@ -404,6 +386,8 @@ class SwitchesAndOptions
       f.write "\n"
 
       f.write "TOOLCHAIN           := #{switches_and_options.toolchain}\n"
+      f.write "\n"
+
       f.write "TARGET_PLATFORM     := #{switches_and_options.platform}\n"
       f.write "TARGET_ARCHITECTURE := #{switches_and_options.architecture}\n"
       f.write "\n"
@@ -414,12 +398,10 @@ class SwitchesAndOptions
       if switches_and_options.toolchain.downcase == 'msvc'
         f.write "WINDOWS_SDK         := #{switches_and_options.windows_sdk}\n"
         f.write "VS_PATH             := #{switches_and_options.vs_path}\n"
+        f.write "\n"
       end
 
-      f.write "FOUNDATION_PATH     := #{switches_and_options.foundation}\n"
-      f.write "\n"
-
-      f.write "endif # _BUTANE_BUILD_CONFIG_\n"
+      f.write "endif # _BITBYTE_BUTANE_BUILD_CONFIG_\n"
       return true
     end
 
@@ -428,13 +410,14 @@ class SwitchesAndOptions
 end
 
 puts "#============================================================================#"
-puts "# Butane                                                                     #"
-puts "#============================================================================#"
+puts "# Butane"
+puts "#"
+
 puts ""
 
 at_exit {
   puts ""
-  puts "#============================================================================#"
+  puts "#===----------------------------------------------------------------------===#"
 }
 
 switches_and_options = SwitchesAndOptions.parse(ARGV)
@@ -444,13 +427,13 @@ if not (SwitchesAndOptions.sane? switches_and_options)
   exit false
 end
 
-if not (SwitchesAndOptions.generate(switches_and_options, 'build/config'))
-  puts "Generation of 'build/config' failed."
-  File.delete('build/config')
+if not (SwitchesAndOptions.generate(switches_and_options, 'conf.mk'))
+  puts "Generation of 'conf.mk' failed."
+  File.delete('conf.mk')
   exit false
 end
 
-ARGS = lambda {
+FOUNDATION = lambda {
   _ = []
   if switches_and_options.paranoid
     _ << "--paranoid"
@@ -459,26 +442,25 @@ ARGS = lambda {
   _ << "--architecture=#{switches_and_options.architecture}"
   _ << "--toolchain=#{switches_and_options.toolchain}"
   _ << "--platform=#{switches_and_options.platform}"
+  _ << "--linkage=statically"
   _ << "--windows-sdk=\"#{switches_and_options.windows_sdk}\""
   _ << "--vs-path=\"#{switches_and_options.vs_path}\""
   _.join(' ')
 }.call
 
-if switches_and_options.foundation == "deps/foundation"
-  puts "Configuring deps/foundation..."
-  begin
-    Dir.chdir("deps/foundation")
-    print "\n"
-    puts `ruby configure #{ARGS}`
-    print "\n"
-    if not $?.success?
-      raise "Configuration of deps/foundation unsuccesful!"
-    end
-  rescue
-    raise
-  ensure
-    Dir.chdir("../..")
+puts "Configuring deps/foundation..."
+begin
+  Dir.chdir("deps/foundation")
+  print "\n"
+  puts `ruby configure #{FOUNDATION}`
+  print "\n"
+  if not $?.success?
+    raise "Configuration of deps/foundation unsuccesful!"
   end
+rescue
+  raise
+ensure
+  Dir.chdir("../..")
 end
 
 puts "Configuration successful!"

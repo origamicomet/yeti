@@ -2,7 +2,7 @@
 *.sublime-workspace
 
 # Configuration dependent files:
-build/config
+conf.mk
 
 # Binary and object files:
 bin/

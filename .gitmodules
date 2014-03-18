@@ -2,6 +2,3 @@
 	path = deps/foundation
 	url = git@github.com:mtwilliams/foundation.git
 	branch = master
-[submodule "deps/agl"]
-	path = deps/agl
-	url = https://github.com/mtwilliams/agl.git
