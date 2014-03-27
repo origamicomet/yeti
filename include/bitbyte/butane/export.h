@@ -1,4 +1,4 @@
-//=== bitbyte/foundation/butane/export.h =====================================//
+//=== bitbyte/butane/export.h ================================================//
 //                                                                            //
 //  Butane                                                                    //
 //                                                                            //
@@ -9,7 +9,7 @@
 //                                                                            //
 //===----------------------------------------------------------------------===//
 
-/// @file bitbyte/foundation/butane/export.h
+/// @file bitbyte/butane/export.h
 /// @brief Defines BITBYTE_BUTANE_EXPORT based on configuration.
 ///
 

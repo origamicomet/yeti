@@ -1,4 +1,4 @@
-//=== bitbyte/foundation/butane/butane.cc ====================================//
+//=== bitbyte/butane/butane.cc ===============================================//
 //                                                                            //
 //  Butane                                                                    //
 //                                                                            //

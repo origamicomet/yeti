@@ -1,4 +1,4 @@
-//=== bitbyte/foundation/butane/application.h ================================//
+//=== bitbyte/butane/application.h ===========================================//
 //                                                                            //
 //  Butane                                                                    //
 //                                                                            //
@@ -9,7 +9,7 @@
 //                                                                            //
 //===----------------------------------------------------------------------===//
 
-/// @file bitbyte/foundation/butane/application.h
+/// @file bitbyte/butane/application.h
 /// @brief ...
 ///
 

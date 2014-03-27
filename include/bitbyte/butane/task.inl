@@ -1,4 +1,4 @@
-//=== bitbyte/foundation/butane/task.inl =====================================//
+//=== bitbyte/butane/task.inl ================================================//
 //                                                                            //
 //  Butane                                                                    //
 //                                                                            //
@@ -9,7 +9,7 @@
 //                                                                            //
 //===----------------------------------------------------------------------===//
 
-/// @file bitbyte/foundation/butane/task.inl
+/// @file bitbyte/butane/task.inl
 /// @brief ...
 ///
 

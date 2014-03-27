@@ -1,4 +1,4 @@
-//=== bitbyte/foundation/butane/foundation.h =================================//
+//=== bitbyte/butane/foundation.h ============================================//
 //                                                                            //
 //  Butane                                                                    //
 //                                                                            //
@@ -9,7 +9,7 @@
 //                                                                            //
 //===----------------------------------------------------------------------===//
 
-/// @file bitbyte/foundation/butane/foundation.h
+/// @file bitbyte/butane/foundation.h
 /// @brief Includes Foundation.
 ///
 
