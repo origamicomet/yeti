@@ -23,6 +23,8 @@
 namespace bitbyte {
 namespace butane {
 
+/// @brief
+///
 class BITBYTE_BUTANE_EXPORT Application {
   protected: // constructors:
     Application();

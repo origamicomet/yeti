@@ -16,18 +16,38 @@
 namespace bitbyte {
 namespace butane {
 
+//===----------------------------------------------------------------------===//
+// Constructors
+//
+
 Application::Application() {
 }
 
+//===----------------------------------------------------------------------===//
+// Copy constructors
+//
+
 Application::Application(const Application &application) {
 }
+
+//===----------------------------------------------------------------------===//
+// Assignment operators
+//
 
 Application &Application::operator=(const Application &application) {
   return *this;
 }
 
+//===----------------------------------------------------------------------===//
+// Destructor
+//
+
 Application::~Application() {
 }
+
+//===----------------------------------------------------------------------===//
+// Application::platform
+//
 
 const char *Application::platform() const {
 #if (BITBYTE_FOUNDATION_TARGET_PLATFORM == BITBYTE_FOUNDATION_PLATFORM_WINDOWS)
@@ -43,6 +63,10 @@ const char *Application::platform() const {
 #endif
 }
 
+//===----------------------------------------------------------------------===//
+// Application::build
+//
+
 const char *Application::build() const {
 #if (BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_DEBUG)
   return "debug";
@@ -53,22 +77,42 @@ const char *Application::build() const {
 #endif
 }
 
+//===----------------------------------------------------------------------===//
+// Application::initialize
+//
+
 bool Application::initialize() {
   bitbyte_butane_assert(always, "Application::initialize() is not overriden!");
   return false;
 }
 
+//===----------------------------------------------------------------------===//
+// Application::update
+//
+
 void Application::update(const float delta_time) {
   bitbyte_butane_assert(always, "Application::update() is not overriden!");
 }
+
+//===----------------------------------------------------------------------===//
+// Application::render
+//
 
 void Application::render() const {
   bitbyte_butane_assert(always, "Application::render() is not overriden!");
 }
 
+//===----------------------------------------------------------------------===//
+// Application::shutdown
+//
+
 void Application::shutdown() {
   bitbyte_butane_assert(always, "Application::shutdown() is not overriden!");
 }
+
+//===----------------------------------------------------------------------===//
+// Application::run
+//
 
 void Application::run() {
   this->initialize();
@@ -82,6 +126,10 @@ void Application::run() {
   //   frame.reset();
   // }
 }
+
+//===----------------------------------------------------------------------===//
+// Application::quit
+//
 
 void Application::quit() {
   this->shutdown();

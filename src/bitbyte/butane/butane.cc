@@ -8,3 +8,5 @@
 //   Michael Williams <mwilliams@bitbyte.ca>                                  //
 //                                                                            //
 //===----------------------------------------------------------------------===//
+
+#include <bitbyte/butane/butane.h>
