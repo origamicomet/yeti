@@ -53,8 +53,8 @@ void TaskScheduler::initialize(size_t internal_queue_sz)
   task_scheduler_ =
     bitbyte_butane_new(foundation::heap(), TaskScheduler)(internal_queue_sz);
 
+  // TODO(mtwilliams): Don't hardcode main threads (update and render) count.
   const size_t num_logical_processors = foundation::system::num_logical_processors();
-
   if (num_logical_processors <= 2)
     task_scheduler_->num_worker_threads_ = 0;
   else
