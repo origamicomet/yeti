@@ -35,6 +35,22 @@ TaskScheduler::TaskScheduler(size_t qsz)
 }
 
 //===----------------------------------------------------------------------===//
+// Copy constructors:
+//
+
+#if 0
+TaskScheduler::TaskScheduler(const TaskScheduler &task_scheduler) {}
+#endif
+
+//===----------------------------------------------------------------------===//
+// Assignment operators:
+//
+
+#if 0
+TaskScheduler &TaskScheduler::operator=(const TaskScheduler &task_scheduler) {}
+#endif
+
+//===----------------------------------------------------------------------===//
 // Destructor
 //
 
