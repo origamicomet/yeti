@@ -41,6 +41,18 @@ struct BITBYTE_BUTANE_EXPORT Task {
       Task *task;
     };
 
+  private: // constructors:
+    Task();
+
+  private: // copy-constructors:
+    Task(const Task &task);
+
+  private: // assignment operators:
+    Task &operator=(const Task &task);
+
+  private: // destructor:
+    ~Task();
+
   public: // static methods:
     /// ...
     static Task &describe();
@@ -63,7 +75,5 @@ struct BITBYTE_BUTANE_EXPORT Task {
 
 } // butane
 } // bitbyte
-
-#include <bitbyte/butane/task.inl>
 
 #endif // _BITBYTE_BUTANE_TASK_H_
