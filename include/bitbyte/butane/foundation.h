@@ -167,4 +167,20 @@ namespace butane {
   #define bitbyte_butane_logf_release(_Format, ...) do {} while (0)
 #endif
 
+//===----------------------------------------------------------------------===//
+// Allocations
+//
+
+/// @def bitbyte_butane_new
+/// @brief
+///
+#define bitbyte_butane_new(_Allocator, _Type) \
+  new ((_Allocator).alloc(sizeof(_Type), alignof(_Type))) _Type
+
+/// @def bitbyte_butane_delete
+/// @brief
+///
+#define bitbyte_butane_delete(_Allocator, _Type, _Ptr) \
+  do { if (_Ptr) { (_Ptr)->~_Type(); _Allocator.free((void *)_Ptr); } } while (0)
+
 #endif // _BITBYTE_BUTANE_FOUNDATION_H_

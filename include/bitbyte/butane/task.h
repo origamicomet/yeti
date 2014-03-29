@@ -25,14 +25,21 @@ namespace butane {
 
 /// @brief
 ///
-///
 struct BITBYTE_BUTANE_EXPORT Task {
+  friend class TaskScheduler;
+
   public: // types:
     /// ...
-    typedef foundation::tier3::Function<void, Task &> Kernel;
+    typedef foundation::tier3::Function<void> Kernel;
 
     /// ...
-    typedef foundation::atomic::u32 RefCount;
+    typedef foundation::atomic::s32 Permission;
+
+    /// ...
+    struct Permit {
+      Permit *next;
+      Task *task;
+    };
 
   public: // static methods:
     /// ...
@@ -40,20 +47,18 @@ struct BITBYTE_BUTANE_EXPORT Task {
 
   public: // methods:
     /// ...
-    Task &parent(Task *parent);
+    Task &parent(Task &parent);
 
     /// ...
-    Task &dependency(Task *dependency);
+    Task &dependency(Task &dependency);
 
     /// ...
     Task &kernel(Kernel &kernel);
 
   private: // members:
-    Task *parent_;
-    Task *dependency_;
+    Task::Permission permissions_;
+    Task::Permit *permits_;
     Task::Kernel kernel_;
-    Task::RefCount refs_by_children_and_self_;
-    Task::RefCount refs_by_dependencies_;
 };
 
 } // butane

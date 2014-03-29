@@ -24,12 +24,11 @@ namespace butane {
 //
 
 Task &Task::describe() {
-  Task &task = *((Task *)foundation::heap().alloc(sizeof(Task), alignof(Task)));
-  task.parent_ = NULL;
-  task.dependency_ = NULL;
-  task.kernel_ = [](Task &) -> void {};
-  foundation::atomic::relaxed::store(&task.refs_by_children_and_self_, 2);
-  foundation::atomic::relaxed::store(&task.refs_by_dependencies_, 0);
+  // OPTIMIZATION(mwilliams): Reuse tasks via an object pool.
+  Task &task = *(new (foundation::heap().alloc(sizeof(Task), alignof(Task))) Task);
+  foundation::atomic::relaxed::store(&task.permissions_, 0);
+  task.permits_ = NULL;
+  task.kernel_ = []() -> void {};
   return task;
 }
 
@@ -37,10 +36,16 @@ Task &Task::describe() {
 // Task::parent
 //
 
-Task &Task::parent(Task *parent) {
-  bitbyte_butane_assert(debug, parent != NULL);
-  this->parent_ = parent;
-  foundation::atomic::relaxed::increment(&parent->refs_by_children_and_self_);
+Task &Task::parent(Task &parent) {
+  // OPTIMIZATION(mwilliams): Reuse permits via an object pool.
+  Task::Permit *permit =
+    (Task::Permit *)foundation::heap().alloc(
+      sizeof(Task::Permit),
+      alignof(Task::Permit));
+  permit->next = permits_;
+  permit->task = &parent;
+  permits_ = permit;
+  foundation::atomic::relaxed::decrement(&parent.permissions_);
   return *this;
 }
 
@@ -48,10 +53,16 @@ Task &Task::parent(Task *parent) {
 // Task::dependency
 //
 
-Task &Task::dependency(Task *dependency) {
-  bitbyte_butane_assert(debug, dependency != NULL);
-  this->dependency_ = dependency;
-  foundation::atomic::relaxed::increment(&dependency->refs_by_dependencies_);
+Task &Task::dependency(Task &dependency) {
+  // OPTIMIZATION(mwilliams): Reuse permits via an object pool.
+  Task::Permit *permit =
+    (Task::Permit *)foundation::heap().alloc(
+      sizeof(Task::Permit),
+      alignof(Task::Permit));
+  permit->next = dependency.permits_;
+  permit->task = this;
+  dependency.permits_ = permit;
+  foundation::atomic::relaxed::decrement(&permissions_);
   return *this;
 }
 
