@@ -29,7 +29,7 @@ extern BITBYTE_BUTANE_EXPORT class TaskScheduler &task_scheduler();
 
 /// @brief
 ///
-struct BITBYTE_BUTANE_EXPORT TaskScheduler {
+class BITBYTE_BUTANE_EXPORT TaskScheduler {
   private: // constructors:
     TaskScheduler(size_t qsz);
 

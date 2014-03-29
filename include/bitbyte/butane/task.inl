@@ -26,7 +26,7 @@ namespace butane {
 Task &Task::describe() {
   // OPTIMIZATION(mwilliams): Reuse tasks via an object pool.
   Task &task = *(new (foundation::heap().alloc(sizeof(Task), alignof(Task))) Task);
-  foundation::atomic::relaxed::store(&task.permissions_, 0);
+  foundation::atomic::relaxed::store(&task.permissions_, -1);
   task.permits_ = NULL;
   task.kernel_ = []() -> void {};
   return task;

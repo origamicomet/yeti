@@ -123,7 +123,8 @@ void TaskScheduler::shutdown()
 
 void TaskScheduler::submit(Task &task)
 {
-  this->schedule(&task);
+  if (foundation::atomic::relaxed::compare_and_swap(&task.permissions_, -1, 0xFFFFFFFF) == -1)
+    schedulable_.enqueue(&task);
 }
 
 void TaskScheduler::do_work_while_waiting_for(foundation::Event &event)
