@@ -1,4 +1,4 @@
-#=== deps/foundation.mk =======================================================#
+#=== bitbyte/butane/deps.mk ===================================================#
 #                                                                              #
 #  Butane                                                                      #
 #                                                                              #
@@ -9,9 +9,9 @@
 #                                                                              #
 #===------------------------------------------------------------------------===#
 
-## @file deps/foundation.mk
-## @brief ...
-##
+#===------------------------------------------------------------------------===#
+# Foundation
+#
 
 BITBYTE_FOUNDATION_CONFIGURATION := $(BITBYTE_BUTANE_CONFIGURATION)
 BITBYTE_FOUNDATION_LINKAGE := statically

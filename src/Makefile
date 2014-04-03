@@ -1,6 +1,6 @@
 #=== Makefile =================================================================#
 #                                                                              #
-#  Foundation                                                                  #
+#  Butane                                                                      #
 #                                                                              #
 #  This file is distributed under the terms described in LICENSE.              #
 #                                                                              #

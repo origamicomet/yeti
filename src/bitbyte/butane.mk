@@ -1,6 +1,6 @@
 #=== bitbyte/butane.mk ========================================================#
 #                                                                              #
-#  Foundation                                                                  #
+#  Butane                                                                      #
 #                                                                              #
 #  This file is distributed under the terms described in LICENSE.              #
 #                                                                              #
@@ -72,7 +72,7 @@ BITBYTE_BUTANE_OBJECTS += obj/bitbyte/butane.o
 
 BITBYTE_BUTANE_DEFINES := $(call cc-define,BITBYTE_BUTANE_COMPILING)
 
-include deps/foundation.mk
+include src/bitbyte/butane/deps.mk
 
 -include $(BITBYTE_BUTANE_OBJECTS:%.o=%.d)
 obj/bitbyte/butane/%.o: src/bitbyte/butane/%.cc
