@@ -32,5 +32,6 @@
 
 
 #include <bitbyte/butane/application.h>
+#include <bitbyte/butane/console.h>
 #include <bitbyte/butane/task.h>
 #include <bitbyte/butane/task_scheduler.h>
