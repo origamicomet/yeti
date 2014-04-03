@@ -17,39 +17,39 @@ namespace bitbyte {
 namespace butane {
 
 //===----------------------------------------------------------------------===//
-// Constructors
+// Constructors:
 //
 
-Application::Application() {
-}
+Application::Application() {}
 
 //===----------------------------------------------------------------------===//
-// Copy constructors
+// Copy constructors:
 //
 
-Application::Application(const Application &application) {
-}
+#if 0
+Application::Application(const Application &) {}
+#endif
 
 //===----------------------------------------------------------------------===//
-// Assignment operators
+// Assignment operators:
 //
 
-Application &Application::operator=(const Application &application) {
-  return *this;
-}
+#if 0
+Application &Application::operator=(const Application &) { return *this; }
+#endif
 
 //===----------------------------------------------------------------------===//
-// Destructor
+// Destructor:
 //
 
-Application::~Application() {
-}
+Application::~Application() {}
 
 //===----------------------------------------------------------------------===//
 // Application::platform
 //
 
-const char *Application::platform() const {
+const char *Application::platform() const
+{
 #if (BITBYTE_FOUNDATION_TARGET_PLATFORM == BITBYTE_FOUNDATION_PLATFORM_WINDOWS)
   return "windows";
 #elif (BITBYTE_FOUNDATION_TARGET_PLATFORM == BITBYTE_FOUNDATION_PLATFORM_MACOSX)
@@ -81,7 +81,8 @@ const char *Application::build() const {
 // Application::initialize
 //
 
-bool Application::initialize() {
+bool Application::initialize()
+{
   bitbyte_butane_assert(always, "Application::initialize() is not overriden!");
   return false;
 }
@@ -90,7 +91,8 @@ bool Application::initialize() {
 // Application::update
 //
 
-void Application::update(const float delta_time) {
+void Application::update(const float delta_time)
+{
   bitbyte_butane_assert(always, "Application::update() is not overriden!");
 }
 
@@ -98,7 +100,8 @@ void Application::update(const float delta_time) {
 // Application::render
 //
 
-void Application::render() const {
+void Application::render() const
+{
   bitbyte_butane_assert(always, "Application::render() is not overriden!");
 }
 
@@ -106,7 +109,8 @@ void Application::render() const {
 // Application::shutdown
 //
 
-void Application::shutdown() {
+void Application::shutdown()
+{
   bitbyte_butane_assert(always, "Application::shutdown() is not overriden!");
 }
 
@@ -114,8 +118,10 @@ void Application::shutdown() {
 // Application::run
 //
 
-void Application::run() {
+void Application::run()
+{
   this->initialize();
+
   // foundation::MonotonicClock wall, frame;
   // while (true) {
   //   TimeStepPolicy &time_step_policy = this->time_step_policy();
@@ -125,13 +131,16 @@ void Application::run() {
   //   this->render();
   //   frame.reset();
   // }
+
+  this->quit();
 }
 
 //===----------------------------------------------------------------------===//
 // Application::quit
 //
 
-void Application::quit() {
+void Application::quit()
+{
   this->shutdown();
   ::exit(EXIT_SUCCESS);
 }
