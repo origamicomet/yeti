@@ -1,52 +1,51 @@
-//=== bitbyte/butane/console.h ===============================================//
-//                                                                            //
-//  Butane                                                                    //
-//                                                                            //
-//  This file is distributed under the terms described in LICENSE.            //
-//                                                                            //
-//  Author(s):                                                                //
-//   Michael Williams <mwilliams@bitbyte.ca>                                  //
-//                                                                            //
+//===-- bitbyte/butane/console.h --------------------------------*- C++ -*-===//
+//
+//  Butane, a data-driven game engine.
+//
+//  This file is distributed under the terms described in LICENSE.
+//
+//  Author(s):
+//
+//    * Michael Williams <mwilliams@bitbyte.ca>
+//
 //===----------------------------------------------------------------------===//
-
-/// @file bitbyte/butane/console.h
-/// @brief ...
 ///
+/// \file
+/// \brief Exposes a logger that writes to stdout and connected consoles.
+///
+//===----------------------------------------------------------------------===//
 
 #ifndef _BITBYTE_BUTANE_CONSOLE_H_
 #define _BITBYTE_BUTANE_CONSOLE_H_
+
+//===----------------------------------------------------------------------===//
 
 #include <bitbyte/butane/config.h>
 #include <bitbyte/butane/export.h>
 #include <bitbyte/butane/foundation.h>
 
+//===----------------------------------------------------------------------===//
+
 namespace bitbyte {
 namespace butane {
 
-/// ...
-extern BITBYTE_BUTANE_EXPORT class Console &console();
-
-/// @brief
+/// \brief Represents stdout and connected consoles.
 ///
-class BITBYTE_BUTANE_EXPORT Console {
-  private: // constructors:
-    Console();
+namespace Console {
+  //===--------------------------------------------------------------------===//
 
-  private: // copy-constructors:
-    Console(const Console &);
+  /// \brief Installs the console-proxying logger.
+  ///
+  extern BITBYTE_BUTANE_EXPORT void install();
 
-  private: // assignment operators:
-    Console &operator=(const Console &);
-
-  private: // destructor:
-    ~Console();
-
-  public: // management:
-    /// ...
-    static void initialize();
-};
+  //===--------------------------------------------------------------------===//
+}
 
 } // butane
 } // bitbyte
 
+//===----------------------------------------------------------------------===//
+
 #endif // _BITBYTE_BUTANE_CONSOLE_H_
+
+//===----------------------------------------------------------------------===//

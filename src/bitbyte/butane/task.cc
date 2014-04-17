@@ -1,103 +1,97 @@
-//=== bitbyte/butane/task.cc =================================================//
-//                                                                            //
-//  Butane                                                                    //
-//                                                                            //
-//  This file is distributed under the terms described in LICENSE.            //
-//                                                                            //
-//  Author(s):                                                                //
-//   Michael Williams <mwilliams@bitbyte.ca>                                  //
-//                                                                            //
+//===-- bitbyte/butane/task.cc ----------------------------------*- C++ -*-===//
+//
+//  Butane, a data-driven game engine.
+//
+//  This file is distributed under the terms described in LICENSE.
+//
+//  Author(s):
+//
+//    * Michael Williams <mwilliams@bitbyte.ca>
+//
 //===----------------------------------------------------------------------===//
 
 #include <bitbyte/butane/task.h>
+#include <bitbyte/butane/task_scheduler.h>
+
+//===----------------------------------------------------------------------===//
 
 namespace bitbyte {
 namespace butane {
 
 //===----------------------------------------------------------------------===//
-// Constructors:
-//
 
-Task::Task() {}
+/// \brief Creates a task with no work and no outstanding permissions that
+/// can only be scheduled after being explictly submitted.
+///
+Task *Task::describe()
+{
+  // TODO(mtwilliams): Reuse tasks via an object pool.
+  Task *task = (Task *)foundation::heap().alloc(sizeof(Task), alignof(Task));
 
-//===----------------------------------------------------------------------===//
-// Copy constructors:
-//
+  memset((void *)task, 0, sizeof(Task));
+  task->work.kind = Task::Work::None;
+  task->permits = NULL;
 
-#if 0
-Task::Task(const Task &task) {}
-#endif
+  // To prevent execution until explictly submitted task->permissions is
+  // initially set to -1.
+  foundation::atomic::relaxed::store(&task->permissions, -1);
 
-//===----------------------------------------------------------------------===//
-// Assignment operators:
-//
-
-#if 0
-Task &Task::operator=(const Task &task) { return *this; }
-#endif
-
-//===----------------------------------------------------------------------===//
-// Destructor:
-//
-
-Task::~Task() {}
-
-//===----------------------------------------------------------------------===//
-// Task::describe
-//
-
-Task &Task::describe() {
-  // OPTIMIZATION(mwilliams): Reuse tasks via an object pool.
-  Task &task = *(new (foundation::heap().alloc(sizeof(Task), alignof(Task))) Task);
-  foundation::atomic::relaxed::store(&task.permissions_, -1);
-  task.permits_ = NULL;
-  task.kernel_ = []() -> void {};
   return task;
 }
 
-//===----------------------------------------------------------------------===//
-// Task::parent
-//
+/// \brief Specifies a parent task that this task is a child of.
+///
+Task *Task::parent(Task *parent)
+{
+  bitbyte_butane_assert(debug, parent != NULL);
 
-Task &Task::parent(Task &parent) {
-  // OPTIMIZATION(mwilliams): Reuse permits via an object pool.
+  // TODO(mtwilliams): Reuse task permits via an object pool.
   Task::Permit *permit =
     (Task::Permit *)foundation::heap().alloc(
       sizeof(Task::Permit),
       alignof(Task::Permit));
-  permit->next = permits_;
-  permit->task = &parent;
-  permits_ = permit;
-  foundation::atomic::relaxed::decrement(&parent.permissions_);
-  return *this;
+
+  memset((void *)permit, 0, sizeof(Task::Permit));
+  permit->next = this->permits;
+  permit->task = parent;
+  this->permits = permit;
+
+  return this;
 }
 
-//===----------------------------------------------------------------------===//
-// Task::dependency
-//
+/// \brief Specifies a dependency that this task depends on.
+///
+Task *Task::dependency(Task *dependency)
+{
+  bitbyte_butane_assert(debug, dependency != NULL);
 
-Task &Task::dependency(Task &dependency) {
-  // OPTIMIZATION(mwilliams): Reuse permits via an object pool.
+  // TODO(mtwilliams): Reuse task permits via an object pool.
   Task::Permit *permit =
     (Task::Permit *)foundation::heap().alloc(
       sizeof(Task::Permit),
       alignof(Task::Permit));
-  permit->next = dependency.permits_;
+
+  memset((void *)permit, 0, sizeof(Task::Permit));
+  permit->next = dependency->permits;
   permit->task = this;
-  dependency.permits_ = permit;
-  foundation::atomic::relaxed::decrement(&permissions_);
-  return *this;
+  dependency->permits = permit;
+
+  return this;
 }
 
 //===----------------------------------------------------------------------===//
-// Task::kernel
-//
 
-Task &Task::kernel(Task::Kernel &kernel) {
-  bitbyte_butane_assert(debug, kernel);
-  this->kernel_ = kernel;
-  return *this;
+/// \brief Submits this task to the task scheduler.
+/// \see bitbyte::butane::TaskScheduler::submit
+///
+void Task::submit()
+{
+  TaskScheduler::submit(this);
 }
+
+//===----------------------------------------------------------------------===//
 
 } // butane
 } // bitbyte
+
+//===----------------------------------------------------------------------===//

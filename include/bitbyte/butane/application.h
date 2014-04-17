@@ -1,72 +1,95 @@
-//=== bitbyte/butane/application.h ===========================================//
-//                                                                            //
-//  Butane                                                                    //
-//                                                                            //
-//  This file is distributed under the terms described in LICENSE.            //
-//                                                                            //
-//  Author(s):                                                                //
-//   Michael Williams <mwilliams@bitbyte.ca>                                  //
-//                                                                            //
+//===-- bitbyte/butane/application.h ----------------------------*- C++ -*-===//
+//
+//  Butane, a data-driven game engine.
+//
+//  This file is distributed under the terms described in LICENSE.
+//
+//  Author(s):
+//
+//    * Michael Williams <mwilliams@bitbyte.ca>
+//
 //===----------------------------------------------------------------------===//
-
-/// @file bitbyte/butane/application.h
-/// @brief ...
 ///
+/// \file
+/// \brief Defines the base-class that is sub-classed to "run" the engine.
+///
+//===----------------------------------------------------------------------===//
 
 #ifndef _BITBYTE_BUTANE_APPLICATION_H_
 #define _BITBYTE_BUTANE_APPLICATION_H_
+
+//===----------------------------------------------------------------------===//
 
 #include <bitbyte/butane/config.h>
 #include <bitbyte/butane/export.h>
 #include <bitbyte/butane/foundation.h>
 
+//===----------------------------------------------------------------------===//
+
 namespace bitbyte {
 namespace butane {
 
-/// @brief
+/// \brief
 ///
 class BITBYTE_BUTANE_EXPORT Application {
-  protected: // constructors:
+  //===--------------------------------------------------------------------===//
+
+  protected:
     Application();
 
-  protected: // copy-constructors:
-    Application(const Application &application);
+  //===--------------------------------------------------------------------===//
 
-  protected: // assignment operators:
+  private:
+    Application(const Application &application);
     Application &operator=(const Application &application);
 
-  public: // destructor:
+  //===--------------------------------------------------------------------===//
+
+  public:
     virtual ~Application();
 
-  public: // accessors:
-    /// ...
-    const char *platform() const;
+  //===--------------------------------------------------------------------===//
 
-    /// ...
-    const char *build() const;
-
-  public: // callbacks:
-    /// ...
+  public:
+    /// \brief Called before entering the update-then-render loop.
+    ///
     virtual bool initialize();
 
-    /// ...
+    /// \brief Called every frame to update.
+    ///
     virtual void update(const float delta_time);
 
-    /// ...
+    /// \brief Called every frame to render.
+    ///
     virtual void render() const;
 
-    /// ...
+    /// \brief Called before terminating the application.
+    ///
     virtual void shutdown();
 
-  public: // methods:
-    /// ...
+  //===--------------------------------------------------------------------===//
+
+  public:
+    /// \brief Initializes then enters the update-then-render loop.
+    ///
+    void start();
+
+    /// \brief The update-then-render loop.
+    ///
     void run();
 
-    /// ...
+    /// \brief Shutsdown then terminates the application.
+    ///
     void quit();
+
+  //===--------------------------------------------------------------------===//
 };
 
 } // butane
 } // bitbyte
 
+//===----------------------------------------------------------------------===//
+
 #endif // _BITBYTE_BUTANE_APPLICATION_H_
+
+//===----------------------------------------------------------------------===//

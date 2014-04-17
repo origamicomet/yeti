@@ -1,17 +1,14 @@
-#=== bitbyte/butane.mk ========================================================#
-#                                                                              #
-#  Butane                                                                      #
-#                                                                              #
-#  This file is distributed under the terms described in LICENSE.              #
-#                                                                              #
-#  Author(s):                                                                  #
-#   Michael Williams <mwilliams@bitbyte.ca>                                    #
-#                                                                              #
+#===-- bitbyte/butane.mk ------------------------------------*- Makefile -*-===#
+#
+#  Butane, a data-driven game engine.
+#
+#  This file is distributed under the terms described in LICENSE.
+#
+#  Author(s):
+#
+#    * Michael Williams <mwilliams@bitbyte.ca>
+#
 #===------------------------------------------------------------------------===#
-
-## @file bitbyte/butane.mk
-## @brief ...
-##
 
 BITBYTE_BUTANE_CONFIGURATION := $(CONFIGURATION)
 BITBYTE_BUTANE_LINKAGE := $(LINKAGE)
@@ -46,9 +43,7 @@ ifeq ($(BITBYTE_BUTANE_CONFIGURATION),release)
   BITBYTE_BUTANE_ARFLAGS += $(call ar-release)
 endif
 
-#==============================================================================#
-# Rules
-#
+#===------------------------------------------------------------------------===#
 
 ifeq ($(BITBYTE_BUTANE_LINKAGE),statically)
   BUTANE := lib/$(STATIC_LIB_PREFIX)butane$(STATIC_LIB_SUFFIX)$(STATIC_LIB_EXTENSION)
@@ -96,3 +91,5 @@ endif
 ifeq ($(BITBYTE_BUTANE_LINKAGE),dynamically)
 	$(call ld++) $(call ld-shared) $(BITBYTE_BUTANE_LDFLAGS) $(call ld-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ld-input,$(input))) $(BITBYTE_BUTANE_DEPENDENCIES)
 endif
+
+#===------------------------------------------------------------------------===#
