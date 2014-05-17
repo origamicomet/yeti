@@ -252,7 +252,7 @@ class SwitchesAndOptions
                                         end
       end
 
-      opts.on("--linkage=LINKAGE", "Specifies statica or dynamic linkage.") do |linkage|
+      opts.on("--linkage=LINKAGE", "Specifies static or dynamic linkage.") do |linkage|
         switches_and_options.linkage = linkage.downcase
       end
 

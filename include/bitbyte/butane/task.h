@@ -69,7 +69,7 @@ struct BITBYTE_BUTANE_EXPORT Task {
   ///      any non-queued tasks in butane_task_permit_t any submitted tasks are
   ///      guaranteed to be scheduled without an additional lock-free
   ///      data-structure; either by being inserted into the schedulable queue
-  ///      immediately, or by being inserted later upon the completion of the
+  ///      immediately or by being inserted later upon the completion of the
   ///      final permitting task.
   ///
   ///  (3) Improved scheduling characteristics--reverse dependencies allow simple

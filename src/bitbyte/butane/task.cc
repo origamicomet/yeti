@@ -20,9 +20,6 @@ namespace butane {
 
 //===----------------------------------------------------------------------===//
 
-/// \brief Creates a task with no work and no outstanding permissions that
-/// can only be scheduled after being explictly submitted.
-///
 Task *Task::describe()
 {
   // TODO(mtwilliams): Reuse tasks via an object pool.
@@ -39,8 +36,6 @@ Task *Task::describe()
   return task;
 }
 
-/// \brief Specifies a parent task that this task is a child of.
-///
 Task *Task::parent(Task *parent)
 {
   bitbyte_butane_assert(debug, parent != NULL);
@@ -59,8 +54,6 @@ Task *Task::parent(Task *parent)
   return this;
 }
 
-/// \brief Specifies a dependency that this task depends on.
-///
 Task *Task::dependency(Task *dependency)
 {
   bitbyte_butane_assert(debug, dependency != NULL);
@@ -81,9 +74,6 @@ Task *Task::dependency(Task *dependency)
 
 //===----------------------------------------------------------------------===//
 
-/// \brief Submits this task to the task scheduler.
-/// \see bitbyte::butane::TaskScheduler::submit
-///
 void Task::submit()
 {
   TaskScheduler::submit(this);

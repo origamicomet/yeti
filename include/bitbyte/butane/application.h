@@ -50,7 +50,7 @@ class BITBYTE_BUTANE_EXPORT Application {
 
   //===--------------------------------------------------------------------===//
 
-  public:
+  protected:
     /// \brief Called before entering the update-then-render loop.
     ///
     virtual bool initialize();
