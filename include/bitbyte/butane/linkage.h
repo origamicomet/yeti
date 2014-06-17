@@ -1,6 +1,6 @@
-//===-- bitbyte/foundation/linakge.h ----------------------------*- C++ -*-===//
+//===-- bitbyte/butane/linakge.h --------------------------------*- C++ -*-===//
 //
-//  Foundation
+//  Butane
 //
 //  This file is distributed under the terms described in LICENSE.
 //
