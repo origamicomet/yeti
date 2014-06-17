@@ -1,25 +1,26 @@
-#=== build/msvc.mk ============================================================#
-#                                                                              #
-#  Butane                                                                      #
-#                                                                              #
-#  This file is distributed under the terms described in LICENSE.              #
-#                                                                              #
-#  Author(s):                                                                  #
-#   Michael Williams <mwilliams@bitbyte.ca>                                    #
-#                                                                              #
+#===-- mk/msvc.mk ----------------------------------------------------------===#
+#
+#  Butane
+#
+#  This file is distributed under the terms described in LICENSE.
+#
+#  Author(s):
+#
+#    * Michael Williams <mwilliams@bitbyte.ca>
+#
 #===------------------------------------------------------------------------===#
 
-## @file build/msvc.mk
-## @brief Provides the standardized toolchain interface for Visual Studio.
+## \file mk/msvc.mk
+## \brief Provides the standardized toolchain interface for Visual Studio.
 ##
 
 ifndef _BITBYTE_BUTANE_BUILD_MSVC_MK_
 _BITBYTE_BUTANE_BUILD_MSVC_MK_ := 1
 
-include build/detect/platform.mk
-include build/detect/architecture.mk
+include mk/detect/platform.mk
+include mk/detect/architecture.mk
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Check for support
 #
 
@@ -53,7 +54,7 @@ ifeq ($(TARGET_ARCHITECTURE),arm)
   $(error Compilation on 'windows-mingw' with 'msvc' targeting 'arm' is not supported.)
 endif
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Define CLFAGS, LDFLAGS, and ARFLAGS
 #
 
@@ -73,16 +74,17 @@ ifeq ($(TARGET_ARCHITECTURE),x86-64)
   ARFLAGS += -machine:X64
 endif
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Implement the standardized interface
 #
 
-cc                           = build/msvc -TC $(CFLAGS)
-c++                          = build/msvc -TP $(CFLAGS)
+cc                           = mk/msvc -TC $(CFLAGS)
+c++                          = mk/msvc -TP $(CFLAGS)
 cc-input                     = "$(1)"
 cc-output                    = -Fo"$(1)" -Fd"$(patsubst %.o,%.pdb,$(1))"
 cc-includes                  = -I"$(1)"
 cc-define                    = -D$(1)
+cc-define-str                = -D$(1)="\"\\\"$(2)\\\"\""
 cc-position-independent-code =
 cc-generate-dependencies     = -MM -MT"$(1)"
 cc-debug                     = -MDd -Od -Zi -RTCsu -fp:precise -fp:except -D_DEBUG
@@ -108,7 +110,7 @@ ld-debug                     = -DEBUG
 ld-development               = -DEBUG
 ld-release                   = -LTCG
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Platform-specific hacks
 #
 
@@ -126,6 +128,11 @@ ifeq ($(TARGET_ARCHITECTURE),x86-64)
   export PATH := $(WINDOWS_SDK_)/Bin/x64:$(VS_PATH_)/Common7/IDE:$(VS_PATH_)/VC/Bin/x86_amd64:$(VS_PATH_)/VC/Bin:$(PATH)
   CFLAGS      += -I"$(WINDOWS_SDK)/Include" -I"$(VS_PATH)/VC/include"
   LDFLAGS     += -LIBPATH:"$(WINDOWS_SDK)/Lib/x64" -LIBPATH:"$(VS_PATH)/VC/Lib/amd64"
+endif
+
+# See http://stackoverflow.com/questions/14363929.
+ifeq ($(findstring 12.0,$(VS_PATH)),12.0)
+  CFLAGS += -D"_USING_V110_SDK71_=1"
 endif
 
 endif # _BITBYTE_BUTANE_BUILD_MSVC_MK_

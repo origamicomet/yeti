@@ -1,16 +1,17 @@
-#=== build/detect/architecture.mk =============================================#
-#                                                                              #
-#  Butane                                                                      #
-#                                                                              #
-#  This file is distributed under the terms described in LICENSE.              #
-#                                                                              #
-#  Author(s):                                                                  #
-#   Michael Williams <mwilliams@bitbyte.ca>                                    #
-#                                                                              #
+#===-- mk/detect/architecture.mk -------------------------------------------===#
+#
+#  Butane
+#
+#  This file is distributed under the terms described in LICENSE.
+#
+#  Author(s):
+#
+#    * Michael Williams <mwilliams@bitbyte.ca>
+#
 #===------------------------------------------------------------------------===#
 
-## @file build/detect/architecture.mk
-## @brief Detects the current architecture based on the output of `uname -m`.
+## \file mk/detect/architecture.mk
+## \brief Detects the current architecture based on the output of `uname -m`.
 ##
 
 ifndef _BITBYTE_BUTANE_BUILD_DETECT_ARCHITECTURE_MK_

@@ -1,25 +1,26 @@
-#=== build/gcc.mk =============================================================#
-#                                                                              #
-#  Butane                                                                      #
-#                                                                              #
-#  This file is distributed under the terms described in LICENSE.              #
-#                                                                              #
-#  Author(s):                                                                  #
-#   Michael Williams <mwilliams@bitbyte.ca>                                    #
-#                                                                              #
+#===-- mk/gcc.mk -----------------------------------------------------------===#
+#
+#  Butane
+#
+#  This file is distributed under the terms described in LICENSE.
+#
+#  Author(s):
+#
+#    * Michael Williams <mwilliams@bitbyte.ca>
+#
 #===------------------------------------------------------------------------===#
 
-## @file build/gcc.mk
-## @brief Provides the standardized toolchain interface for Visual Studio.
+## \file mk/gcc.mk
+## \brief Provides the standardized toolchain interface for Visual Studio.
 ##
 
 ifndef _BITBYTE_BUTANE_BUILD_GCC_MK_
 _BITBYTE_BUTANE_BUILD_GCC_MK_ := 1
 
-include build/detect/platform.mk
-include build/detect/architecture.mk
+include mk/detect/platform.mk
+include mk/detect/architecture.mk
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Check for support
 #
 
@@ -53,7 +54,7 @@ ifeq ($(TARGET_ARCHITECTURE),arm)
   $(error Compilation on '$(HOST_PLATFORM)' with 'gcc' targeting 'arm' is not supported.)
 endif
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Define CFLAGS, LDFLAGS, and ARFLAGS
 #
 
@@ -73,7 +74,7 @@ ifeq ($(TARGET_ARCHITECTURE),x86-64)
   CFLAGS += -march=x86-64
 endif
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Implement the standardized interface
 #
 
@@ -83,6 +84,7 @@ cc-input                     = -c "$(1)"
 cc-output                    = -o "$(1)"
 cc-includes                  = -I"$(1)"
 cc-define                    = -D$(1)
+cc-define-str                = -D$(1)="\"$(2)\""
 cc-position-independent-code = -fPIC
 cc-generate-dependencies     = -MM -MT"$(1)"
 cc-debug                     = -g

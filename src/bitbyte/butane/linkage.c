@@ -1,6 +1,6 @@
-//===-- bitbyte/butane/foundation.cc ----------------------------*- C++ -*-===//
+//===-- bitbyte/butane/linkage.c --------------------------------*- C++ -*-===//
 //
-//  Butane, a data-driven game engine.
+//  Butane
 //
 //  This file is distributed under the terms described in LICENSE.
 //
@@ -10,4 +10,4 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include <bitbyte/butane/foundation.h>
+#include "bitbyte/butane/linkage.h"

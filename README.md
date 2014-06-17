@@ -55,7 +55,7 @@ TODO
 
 ## Configuring
 
-Foundations's compile-, link-, and runtime behaviour is controlled by `./configure` switches and options, as well as various pre-processor defines.
+Compile-time, link-time, and runtime behaviour is controlled by `./configure` switches and options as well as various pre-processor defines (which are documented in `include/bitbyte/butane/config.h`).
 
 ### via switches and options
 

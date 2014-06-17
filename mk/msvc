@@ -1,23 +1,24 @@
 #!/usr/bin/env ruby
 
-#=== build/msvc ===============================================================#
-#                                                                              #
-#  Butane                                                                      #
-#                                                                              #
-#  This file is distributed under the terms described in LICENSE.              #
-#                                                                              #
-#  Author(s):                                                                  #
-#   Michael Williams <mwilliams@bitbyte.ca>                                    #
-#                                                                              #
+#===-- mk/msvc -------------------------------------------------------------===#
+#
+#  Butane
+#
+#  This file is distributed under the terms described in LICENSE.
+#
+#  Author(s):
+#
+#    * Michael Williams <mwilliams@bitbyte.ca>
+#
 #===------------------------------------------------------------------------===#
 
-## @file build/msvc
-## @brief Handles 'inconsistencies' when dealing with `cl.exe`.
+## \file mk/msvc
+## \brief Handles 'inconsistencies' when dealing with `cl.exe`.
 ##
 
 M_OR_MM = (!ARGV.grep(/^-M\z/).empty? || !ARGV.grep(/^-MM\z/).empty?)
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Sanity checks
 #
 
@@ -63,7 +64,7 @@ if not M_OR_MM
   end
 end
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Command reconstruction and massaging
 #
 
@@ -96,8 +97,6 @@ _ = _.map { |argument|
     "\"#{argument}\""
   elsif argument[0..1] == "-I"
     "-I\"#{argument[2..-1]}\""
-  elsif argument[0..1] == "-D"
-    "-D\"#{argument[2..-1]}\""
   elsif argument[0..2] == "-Fo"
     "-Fo\"#{argument[3..-1]}\""
   elsif argument[0..2] == "-Fd"
@@ -107,7 +106,7 @@ _ = _.map { |argument|
   end
 }
 
-#==============================================================================#
+#===------------------------------------------------------------------------===#
 # Execution, parsing, and cleanup
 #
 

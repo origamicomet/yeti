@@ -1,16 +1,17 @@
-#=== build/detect/platform.mk =================================================#
-#                                                                              #
-#  Butane                                                                      #
-#                                                                              #
-#  This file is distributed under the terms described in LICENSE.              #
-#                                                                              #
-#  Author(s):                                                                  #
-#   Michael Williams <mwilliams@bitbyte.ca>                                    #
-#                                                                              #
+#===-- mk/detect/platform.mk -----------------------------------------------===#
+#
+#  Butane
+#
+#  This file is distributed under the terms described in LICENSE.
+#
+#  Author(s):
+#
+#    * Michael Williams <mwilliams@bitbyte.ca>
+#
 #===------------------------------------------------------------------------===#
 
-## @file build/detect/platform.mk
-## @brief Detects the current platform based on the output of `uname -s`.
+## \file mk/detect/platform.mk
+## \brief Detects the current platform based on the output of `uname -s`.
 ##
 
 ifndef _BITBYTE_BUTANE_BUILD_DETECT_PLATFORM_MK_

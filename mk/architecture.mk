@@ -1,4 +1,4 @@
-#===-- Makefile ------------------------------------------------------------===#
+#===-- mk/architecture.mk --------------------------------------------------===#
 #
 #  Butane
 #
@@ -10,8 +10,11 @@
 #
 #===------------------------------------------------------------------------===#
 
-## \file src/Makefile
+## \file mk/architecture.mk
 ## \brief ...
 ##
 
-include src/bitbyte/Makefile
+ifndef _BITBYTE_BUTANE_BUILD_ARCHITECTURE_MK_
+_BITBYTE_BUTANE_BUILD_ARCHITECTURE_MK_ := 1
+
+endif # _BITBYTE_BUTANE_BUILD_ARCHITECTURE_MK_

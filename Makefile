@@ -1,6 +1,6 @@
-#===-- Makefile ---------------------------------------------*- Makefile -*-===#
+#===-- Makefile ------------------------------------------------------------===#
 #
-#  Butane, a data-driven game engine.
+#  Butane
 #
 #  This file is distributed under the terms described in LICENSE.
 #
@@ -10,25 +10,22 @@
 #
 #===------------------------------------------------------------------------===#
 
--include conf.mk
+-include config.mk
 ifndef _BITBYTE_BUTANE_BUILD_CONFIG_
   $(error Please ./configure first.)
 endif
 
-include build/detect/platform.mk
-include build/detect/architecture.mk
-include build/toolchain.mk
-include build/platform.mk
-include build/architecture.mk
+include mk/detect/platform.mk
+include mk/detect/architecture.mk
+include mk/toolchain.mk
+include mk/platform.mk
+include mk/architecture.mk
 
-.PHONY: all docs clean butane foundation
+.PHONY: all docs clean butane
 
 all: butane
 
 include src/Makefile
-
-foundation:
-	cd deps/foundation; make all
 
 butane: $(BUTANE)
 
@@ -41,7 +38,4 @@ clean:
 	@rm -R -f bin
 	@rm -R -f lib
 	@rm -R -f obj
-	@rm -R -f docs/html
-	@cd deps/foundation; make clean
-
-#===------------------------------------------------------------------------===#
+	@rm -R -f documentation/html
