@@ -67,6 +67,38 @@ bitbyte_butane_application_quit(
 
 //===----------------------------------------------------------------------===//
 
+const char *
+bitbyte_butane_application_platform()
+{
+#if BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_WINDOWS__
+  return "windows";
+#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_MACOSX__
+  return "macosx";
+#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_LINUX__
+  return "linux";
+#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_IOS__
+  return "ios";
+#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_ANDROID__
+  return "android";
+#endif
+}
+
+//===----------------------------------------------------------------------===//
+
+const char *
+bitbyte_butane_application_build()
+{
+#if BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_CONFIGURATION_DEBUG
+  return "debug";
+#elif BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_CONFIGURATION_DEVELOPMENT
+  return "development";
+#elif BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_CONFIGURATION_RELEASE
+  return "release";
+#endif
+}
+
+//===----------------------------------------------------------------------===//
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
@@ -160,28 +192,12 @@ void Application::quit(void)
 
 const char *Application::platform()
 {
-#if BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_WINDOWS__
-  return "windows";
-#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_MACOSX__
-  return "macosx";
-#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_LINUX__
-  return "linux";
-#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_IOS__
-  return "ios";
-#elif BITBYTE_FOUNDATION_PLATFORM == __BITBYTE_FOUNDATION_PLATFORM_ANDROID__
-  return "android";
-#endif
+  return ::bitbyte_butane_application_platform();
 }
 
 const char *Application::build()
 {
-#if BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_CONFIGURATION_DEBUG
-  return "debug";
-#elif BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_CONFIGURATION_DEVELOPMENT
-  return "development";
-#elif BITBYTE_BUTANE_CONFIGURATION == BITBYTE_BUTANE_CONFIGURATION_RELEASE
-  return "release";
-#endif
+  return ::bitbyte_butane_application_build();
 }
 
 //===----------------------------------------------------------------------===//

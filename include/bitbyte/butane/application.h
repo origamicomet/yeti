@@ -149,6 +149,37 @@ bitbyte_butane_application_quit(
 
 //===----------------------------------------------------------------------===//
 
+/// \brief Returns the name of the current platform.
+///
+extern
+BITBYTE_BUTANE_EXPORT
+const char *
+bitbyte_butane_application_platform();
+
+/// \def bitbyte_butane_application_platform
+/// \copydoc bitbyte_butane_application_platform
+#ifdef __BITBYTE_BUTANE_IMPORT__
+  #define butane_application_platform bitbyte_butane_application_platform
+#endif // __BITBYTE_BUTANE_IMPORT__
+
+//===----------------------------------------------------------------------===//
+
+/// \brief Returns the name of the current build, i.e., "debug" or "development"
+/// or "release".
+///
+extern
+BITBYTE_BUTANE_EXPORT
+const char *
+bitbyte_butane_application_build();
+
+/// \def bitbyte_butane_application_build
+/// \copydoc bitbyte_butane_application_build
+#ifdef __BITBYTE_BUTANE_IMPORT__
+  #define butane_application_build bitbyte_butane_application_build
+#endif // __BITBYTE_BUTANE_IMPORT__
+
+//===----------------------------------------------------------------------===//
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
