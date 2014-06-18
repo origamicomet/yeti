@@ -24,20 +24,20 @@
 /// \brief Enables paranoid checks.
 ///
 
-/// \def BITBYTE_BUTANE_DEBUG
+/// \def BITBYTE_BUTANE_CONFIGURATION_DEBUG
 /// \brief Enables debugging, development, and release features.
 ///
-#define BITBYTE_BUTANE_DEBUG 1
+#define BITBYTE_BUTANE_CONFIGURATION_DEBUG 1
 
-/// \def BITBYTE_BUTANE_DEVELOPMENT
+/// \def BITBYTE_BUTANE_CONFIGURATION_DEVELOPMENT
 /// \brief Enables development and release features.
 ///
-#define BITBYTE_BUTANE_DEVELOPMENT 2
+#define BITBYTE_BUTANE_CONFIGURATION_DEVELOPMENT 2
 
-/// \def BITBYTE_BUTANE_RELEASE
+/// \def BITBYTE_BUTANE_CONFIGURATION_RELEASE
 /// \brief Enables release features.
 ///
-#define BITBYTE_BUTANE_RELEASE 3
+#define BITBYTE_BUTANE_CONFIGURATION_RELEASE 3
 
 /// \def BITBYTE_BUTANE_CONFIGURATION
 /// \brief Specifies how "loose and fast" Butane is.

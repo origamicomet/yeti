@@ -21,9 +21,12 @@ include mk/toolchain.mk
 include mk/platform.mk
 include mk/architecture.mk
 
-.PHONY: all docs clean butane
+.PHONY: all docs clean butane foundation
 
 all: butane
+
+foundation:
+	cd deps/foundation; make all
 
 include src/Makefile
 
@@ -39,3 +42,4 @@ clean:
 	@rm -R -f lib
 	@rm -R -f obj
 	@rm -R -f documentation/html
+	@cd deps/foundation; make clean

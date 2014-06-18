@@ -76,7 +76,7 @@ BITBYTE_BUTANE_DEPENDENCIES := $(call ld-link,$(FOUNDATION_TIER0_IMPORT_LIB)) \
                                $(call ld-link,$(FOUNDATION_TIER2_IMPORT_LIB))
 
 ifeq ($(TOOLCHAIN),msvc)
-  BITBYTE_FOUNDATION_TIER2_DEPENDENCIES += $(call ld-link,dbghelp)
+  BITBYTE_BUTANE_DEPENDENCIES += $(call ld-link,dbghelp)
 endif
 
 BITBYTE_BUTANE_SOURCES := $(shell find src/bitbyte/butane -name '*.c')
@@ -99,14 +99,14 @@ obj/bitbyte/butane.o: src/bitbyte/butane.c
 	$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) $(call cc-output,$@)
 	$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) -MM -MT $@ >$(patsubst %.o,%.d,$@)
 
-$(BUTANE): $(BITBYTE_BUTANE_OBJECTS)
+$(BUTANE): foundation $(BITBYTE_BUTANE_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
 ifeq ($(BITBYTE_BUTANE_LINKAGE),static)
-	$(call ar++) $(BITBYTE_BUTANE_ARFLAGS) $(call ar-output,$@) $(foreach input,$^,$(call ar-input,$(input)))
+	$(call ar++) $(BITBYTE_BUTANE_ARFLAGS) $(call ar-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ar-input,$(input)))
 endif
 ifeq ($(BITBYTE_BUTANE_LINKAGE),dynamic)
-	$(call ld++) $(call ld-shared) $(BITBYTE_BUTANE_LDFLAGS) $(call ld-output,$@) $(foreach input,$^,$(call ld-input,$(input))) $(BITBYTE_BUTANE_DEPENDENCIES)
+	$(call ld++) $(call ld-shared) $(BITBYTE_BUTANE_LDFLAGS) $(call ld-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ld-input,$(input))) $(BITBYTE_BUTANE_DEPENDENCIES)
 endif
 
 #==============================================================================#

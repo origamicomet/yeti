@@ -24,6 +24,8 @@
 
 //===----------------------------------------------------------------------===//
 
+#define __BITBYTE_FOUNDATION_IMPORT__
+
 #include "bitbyte/foundation/tier0.h"
 #include "bitbyte/foundation/tier1.h"
 #include "bitbyte/foundation/tier2.h"
@@ -32,9 +34,9 @@
 
 /// \def butane_assert
 /// \copydoc bitbyte_butane_assert
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assert bitbyte_butane_assert
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assert
 /// \copydoc bitbyte_foundation_assert
@@ -44,9 +46,9 @@
 
 /// \def butane_assertf
 /// \copydoc bitbyte_butane_assertf
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
-  #define butane_assert bitbyte_butane_assertf
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
+  #define butane_assertf bitbyte_butane_assertf
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assertf
 /// \copydoc bitbyte_foundation_assertf
@@ -54,11 +56,11 @@
 
 //===----------------------------------------------------------------------===//
 
-/// \def butane_assertf
+/// \def butane_assertf_always
 /// \copydoc bitbyte_butane_assertf_always
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
-  #define butane_assert bitbyte_butane_assertf_always
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
+  #define butane_assertf_always bitbyte_butane_assertf_always
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assertf_always
 /// \copydoc bitbyte_foundation_assertf
@@ -69,9 +71,9 @@
 
 /// \def butane_assert_debug
 /// \copydoc bitbyte_butane_assert_debug
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assert_debug bitbyte_butane_assert_debug
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assert_debug
 /// \copydoc bitbyte_foundation_assert
@@ -83,9 +85,9 @@
 
 /// \def butane_assertf_debug
 /// \copydoc bitbyte_butane_assertf_debug
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assertf_debug bitbyte_butane_assertf_debug
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assertf_debug
 /// \copydoc bitbyte_foundation_assertf
@@ -99,9 +101,9 @@
 
 /// \def butane_assert_development
 /// \copydoc bitbyte_butane_assert_development
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assert_development bitbyte_butane_assert_development
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assert_development
 /// \copydoc bitbyte_foundation_assert
@@ -113,9 +115,9 @@
 
 /// \def butane_assertf_development
 /// \copydoc bitbyte_butane_assertf_development
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assertf_development bitbyte_butane_assertf_development
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assertf_development
 /// \copydoc bitbyte_foundation_assertf
@@ -129,9 +131,9 @@
 
 /// \def butane_assert_release
 /// \copydoc bitbyte_butane_assert_release
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assert_release bitbyte_butane_assert_release
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assert_release
 /// \copydoc bitbyte_foundation_assert
@@ -143,9 +145,9 @@
 
 /// \def butane_assertf_release
 /// \copydoc bitbyte_butane_assertf_release
-#ifdef __BITBYTE_FOUNDATION_IMPORT__
+#ifdef __BITBYTE_BUTANE_IMPORT__
   #define butane_assertf_release bitbyte_butane_assertf_release
-#endif // __BITBYTE_FOUNDATION_IMPORT__
+#endif // __BITBYTE_BUTANE_IMPORT__
 
 /// \def bitbyte_butane_assertf_release
 /// \copydoc bitbyte_foundation_assertf

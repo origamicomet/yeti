@@ -20,12 +20,12 @@
 
 //============================================================================//
 
-/// \def __BITBYTE_FOUNDATION_IMPORT__
+/// \def __BITBYTE_BUTANE_IMPORT__
 /// \brief Defined implictly by bitbyte/butane.h it results in the C-api
 /// of Butane being "imported" into the global namespace, that is to say,
 /// bitbyte_butane_xxx() becomes butane_xxx().
 ///
-#define __BITBYTE_FOUNDATION_IMPORT__
+#define __BITBYTE_BUTANE_IMPORT__
 
 //============================================================================//
 
@@ -45,7 +45,13 @@ using namespace ::bitbyte::butane;
 
 //============================================================================//
 
+#include "bitbyte/butane/config.h"
 #include "bitbyte/butane/linkage.h"
+#include "bitbyte/butane/foundation.h"
+
+//===----------------------------------------------------------------------===//
+
+#include "bitbyte/butane/application.h"
 
 //============================================================================//
 

@@ -20,6 +20,7 @@
 
 //============================================================================//
 
+#include "bitbyte/butane/config.h"
 #include "bitbyte/butane/foundation.h"
 #include "bitbyte/butane/linkage.h"
 
@@ -194,6 +195,13 @@ class BITBYTE_BUTANE_EXPORT Application
 
   /// \copydoc ::bitbyte_butane_application_quit
   void quit(void);
+
+ public:
+  /// \copydoc ::bitbyte_butane_application_platform
+  static const char *platform();
+
+  /// \copydoc ::bitbyte_butane_application_build
+  static const char *build();
 
  private:
   bitbyte_butane_application_t __proxy__;
