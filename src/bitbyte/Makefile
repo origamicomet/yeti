@@ -90,23 +90,23 @@ BITBYTE_BUTANE_DEFINES := $(call cc-define,BITBYTE_BUTANE_COMPILING)
 obj/bitbyte/butane/%.o: src/bitbyte/butane/%.c
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
-	$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) $(call cc-output,$@)
-	$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) -MM -MT $@ >$(patsubst %.o,%.d,$@)
+	@$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) $(call cc-output,$@)
+	@$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) -MM -MT $@ >$(patsubst %.o,%.d,$@)
 
 obj/bitbyte/butane.o: src/bitbyte/butane.c
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
-	$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) $(call cc-output,$@)
-	$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) -MM -MT $@ >$(patsubst %.o,%.d,$@)
+	@$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) $(call cc-output,$@)
+	@$(call c++) $(BITBYTE_BUTANE_INCLUDES) $(BITBYTE_BUTANE_DEFINES) $(BITBYTE_BUTANE_CFLAGS) $(call cc-input,$<) -MM -MT $@ >$(patsubst %.o,%.d,$@)
 
 $(BUTANE): foundation $(BITBYTE_BUTANE_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
 ifeq ($(BITBYTE_BUTANE_LINKAGE),static)
-	$(call ar++) $(BITBYTE_BUTANE_ARFLAGS) $(call ar-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ar-input,$(input)))
+	@$(call ar++) $(BITBYTE_BUTANE_ARFLAGS) $(call ar-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ar-input,$(input)))
 endif
 ifeq ($(BITBYTE_BUTANE_LINKAGE),dynamic)
-	$(call ld++) $(call ld-shared) $(BITBYTE_BUTANE_LDFLAGS) $(call ld-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ld-input,$(input))) $(BITBYTE_BUTANE_DEPENDENCIES)
+	@$(call ld++) $(call ld-shared) $(BITBYTE_BUTANE_LDFLAGS) $(call ld-output,$@) $(foreach input,$(BITBYTE_BUTANE_OBJECTS),$(call ld-input,$(input))) $(BITBYTE_BUTANE_DEPENDENCIES)
 endif
 
 #==============================================================================#
