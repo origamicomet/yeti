@@ -39,6 +39,8 @@ class SwitchesAndOptions
     case configuration.downcase
     when "debug"
       true
+    when "development"
+      true
     when "release"
       true
     else
