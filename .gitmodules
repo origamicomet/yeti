@@ -1,4 +1,0 @@
-[submodule "deps/foundation"]
-	path = deps/foundation
-	url = git@github.com:mtwilliams/foundation.git
-	branch = master
