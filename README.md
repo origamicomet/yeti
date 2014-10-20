@@ -1,67 +1,44 @@
 # Butane
 
-A data-driven game engine.
+[![Build Status](https://travis-ci.org/bitbytestudios/butane.png?branch=master)](http://travis-ci.org/bitbytestudios/butane)
 
-## Supports
+Data-driven game engine.
+
+What platforms does it support?
+-------------------------------
 
 | Platform  | Toolchain               | Supported             |
-|:--------- |:----------------------- |:---------------------:|
+|:---------:|:-----------------------:|:---------------------:|
 | Windows   | Microsoft Visual Studio | <span>&#10003;</span> |
 | Windows   | MinGW/MSYS              | <span>&#10003;</span> |
 | Windows   | Cygwin                  |         Never         |
-| Mac OSX   | GCC or Clang            |                       |
-| Linux     | GCC or Clang            |                       |
-| BSD       | GCC or Clang            |                       |
-| Android   | GCC or Clang            |                       |
-| iOS       | GCC or Clang            |                       |
-| Web       | Native Client           |                       |
-| Web       | emscripten              |                       |
+| Mac OS X  | GCC or Clang            |        Planned        |
+| Linux     | GCC or Clang            | <span>&#10003;</span> |
+| BSD       | GCC or Clang            |        Planned        |
+| Android   | GCC or Clang            |        Planned        |
+| iOS       | GCC or Clang            |        Planned        |
+| Web       | Native Client           |        Planned        |
+| Web       | emscripten              |        Planned        |
 
-## Building
+How do I build it?
+------------------
 
-### Windows
+    $ git clone https://github.com/bitbytestudios/butane.git
+    $ cd butane
+    $ ./configure
+    $ make
 
-TODO
+For more details please go [here](https://github.com/bitbytestudios/butane/wiki/Building).
 
-### Mac OSX
+How do I contribute?
+--------------------
 
-TODO
+See our contribution guide [here](https://github.com/bitbytestudios/meta/wiki/Contributing).
 
-### Linux
+How is it licensed?
+-------------------
 
-TODO
-
-### BSD
-
-TODO
-
-### Android
-
-TODO
-
-### iOS
-
-TODO
-
-### Web
-
-#### via [Native Client](https://developers.google.com/native-client/)
-
-TODO
-
-#### via [emscripten](https://github.com/kripken/emscripten)
-
-TODO
-
-## Configuring
-
-Compile-time, link-time, and runtime behaviour is controlled by `./configure` switches and options as well as various pre-processor defines (which are documented in `include/bitbyte/butane/config.h`).
-
-### via switches and options
-
-TODO
-
-## License
+Attribution based licensing.
 
 ```
 Copyright (c) 2012-2014 Bitbyte Studios, Inc.
