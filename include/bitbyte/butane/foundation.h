@@ -6,7 +6,7 @@
 //
 //  Author(s):
 //
-//    * Michael Williams <mwilliams@bitbyte.ca>
+//    * Michael Williams <mike@bitbyte.ca>
 //
 //===----------------------------------------------------------------------===//
 ///
