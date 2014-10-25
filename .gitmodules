@@ -1,0 +1,3 @@
+[submodule "deps/foundation"]
+	path = deps/foundation
+	url = https://github.com/bitbytestudios/foundation.git

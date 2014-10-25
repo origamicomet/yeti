@@ -1,0 +1,173 @@
+#!/usr/bin/env ruby
+
+M_OR_MM = (!ARGV.grep(/^-M\z/).empty? || !ARGV.grep(/^-MM\z/).empty?)
+
+# This should not be an issue, but being explict is better than being implict.
+# Furthermore, this script assumes that input and output files are specified...
+#
+inputs = []
+ARGV.each_with_index { |argument, index|
+  if argument =~ /^[^->]/
+    if index > 0
+      if ARGV[index - 1] =~ /^>\z/
+        # Ignore redirections.
+      elsif ARGV[index - 1] =~ /^-MT\z/
+        # Ignore target specification.
+      else
+        inputs << ARGV[index]
+      end
+    else
+      inputs << ARGV[index]
+    end
+  end
+}
+
+if inputs.empty?
+  puts "No input file specified!"
+  exit false
+elsif inputs.length > 1
+  # TODO(mwilliams): Handle more than one input file. This is only an issue
+  # because the dependency generation code assumes only one input file.
+  # Instead, it should error if more than one input file is specified.
+  #
+  puts "More than one input file specified!"
+  exit false
+end
+
+outputs = ARGV.grep(/^-Fo/)
+
+if not M_OR_MM
+  if outputs.empty?
+    puts "No output file specified!"
+    exit false
+  elsif outputs.length > 1
+    puts "Too many output files specified!"
+    exit false
+  end
+end
+
+# ===----------------------------------------------------------------------=== #
+
+_ = ARGV.dup
+
+# Dependency generation is not supported by `cl.exe`, but is instead mimiced by
+# parsing the notes that are generated as a result of specifying -showIncludes.
+# This obviously requires the -M, -MM, and -MT options to be removed from
+# invocation lest `cl.exe` misinterprets them or freaks out.
+#
+
+_.reject! { |argument|
+  (argument =~ /^-M\z/) or (argument =~ /^-MM\z/)
+}
+
+while not _.grep(/^-MT\z/).empty? do
+  _.slice!(_.index { |argument| argument =~ /^-MT\z/ }, 2)
+end
+
+if M_OR_MM
+  _.reject! { |argument| argument =~ /^-Z.+?\z/ }
+  _.reject! { |argument| argument == /^-DEBUG\z/i }
+  _.unshift("-Zs")
+  _.unshift("-showIncludes")
+end
+
+# Wrap any paths just in case there are spaces in them.
+
+_ = _.map { |argument|
+  if argument[0] != "-"
+    "\"#{argument}\""
+  elsif argument[0..1] == "-I"
+    "-I\"#{argument[2..-1]}\""
+  elsif argument[0..2] == "-Fo"
+    "-Fo\"#{argument[3..-1]}\""
+  elsif argument[0..2] == "-Fd"
+    "-Fd\"#{argument[3..-1]}\""
+  else
+    argument
+  end
+}
+
+# ===----------------------------------------------------------------------=== #
+
+begin
+  COMMAND = {
+    :output => `#{_.unshift("cl.exe").join(' ')}`,
+    :successful => $?.success?
+  }
+rescue => e
+  puts "Is `cl.exe` in PATH?\n  #{e.to_s}"
+  exit false
+end
+
+# Proxy the output, unless -M or -MM was specified.
+# Otherwise invalid rules are generated, which freaks out make.
+#
+
+if not M_OR_MM
+  print COMMAND[:output].lines.to_a[1..-1].join("")
+end
+
+# Due to the nature of how debug information is generated any resulting .pdb
+# files are not removed if compilation fails. This is inconsistent, or at least
+# unexpected behaviour. Thus, there is the possibility that a tool might
+# assume debugging information to be present. So it is just best to delete
+# debug information on compilation failure.
+#
+
+if not COMMAND[:successful]
+  begin
+    File.delete(ARGV.grep(/-Fd/)[3..-1])
+  rescue
+  end
+end
+
+if M_OR_MM
+  if ARGV.grep(/^-MT\z/).empty?
+    TARGET = ARGV.grep(/^-Fo/).first[3..-1].gsub('"', '')
+  else
+    TARGET = ARGV[ARGV.index { |argument| argument =~ /^-MT\z/ } + 1].gsub('"', '')
+  end
+
+  SOURCE = ARGV.grep(/^[^\-].+?/).first
+
+  if TARGET =~ /^[a-z]:\/.+?\z/i
+    target = "/#{TARGET[0]}/#{TARGET[3..-1]}"
+  else
+    target = TARGET
+  end
+
+  if SOURCE =~ /^[a-z]:\/.+?\z/i
+    source = "/#{SOURCE[0]}/#{SOURCE[3..-1]}"
+  else
+    source = SOURCE
+  end
+
+  print "#{target}: #{source}"
+
+  DEPENDENCIES = COMMAND[:output].lines.to_a.select { |line|
+    line.start_with? "Note: including file: "
+  }.map { |line|
+    line.sub("Note: including file: ", "").strip.gsub("\\", "/")
+  }.map { |line|
+    if line =~ /^[a-z]:\/.+?\z/i
+      if line.start_with? Dir.pwd
+        "$(ROOT)/#{line.sub(/^#{Dir.pwd}/, '')[1..-1]}"
+      else
+        # Ignore system includes.
+        # "/#{line[0]}/#{line[3..-1]}"
+      end
+    else
+      "$(ROOT)/#{line}"
+    end
+  }.reject { |line|
+    line.nil? || line.empty?
+  }.compact.map { |line|
+    line.gsub("\\", "/")
+  }.uniq
+
+  DEPENDENCIES.each { |dependency| print " \\\n  #{dependency}" }
+
+  puts ""
+end
+
+exit COMMAND[:successful]
