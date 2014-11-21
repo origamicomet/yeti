@@ -58,6 +58,8 @@ bitbyte_butane_application_run(
     for (size_t step = 0; step < time_step_policy->steps; ++step)
       application->update(application, time_step_policy->delta_time_per_step);
     application->render(application);
+    // BUG: This may result in all frames taking "zero" microseconds, due to
+    // Due to inadequate timing resolution.
     bitbyte_foundation_timer_reset(frame);
   }
 }
