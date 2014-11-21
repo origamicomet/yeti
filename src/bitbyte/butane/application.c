@@ -31,6 +31,14 @@ bitbyte_butane_application_start(
   bitbyte_butane_assert_debug(application != NULL);
   const bool initialized = application->initialize(application);
   bitbyte_butane_assertf(initialized, "Application initialization failed!");
+  if (application->time_step_policy == NULL) {
+    bitbyte_foundation_log_unformatted(
+      BITBYTE_FOUNDATION_LOG_LEVEL_WARNING,
+      "No time-step policy specified, defaulting to `variable`!");
+    bitbyte_butane_time_step_policy_opts_t tspo;
+    tspo.type = BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE;
+    application->time_step_policy = bitbyte_butane_time_step_policy_create(&tspo);
+  }
   bitbyte_butane_application_run(application);
 }
 
@@ -42,16 +50,16 @@ bitbyte_butane_application_run(
 {
   bitbyte_butane_assert_debug(application != NULL);
 
-  // bitbyte_foundation_monotonic_clock_t *wall = bitbyte_foundation_monotonic_clock_create();
-  // bitbyte_foundation_monotonic_clock_t *frame = bitbyte_foundation_monotonic_clock_create();
-  // while (true) {
-  //   bitbyte_butane_time_step_policy_t *time_step_policy = application->time_step_policy;
-  //   bitbyte_butane_time_step_policy_update(time_step_policy, wall, frame);
-  //   for (size_t step = 0; step < time_step_policy->steps; ++step)
-  //     application->update(application, time_step_policy->delta_time_per_step);
-  //   application->render(application);
-  //   bitbyte_foundation_monotonic_clock_reset(frame);
-  // }
+  bitbyte_foundation_timer_t *frame = bitbyte_foundation_timer_create();
+  bitbyte_foundation_timer_t *wall = bitbyte_foundation_timer_create();
+  while (true) {
+    bitbyte_butane_time_step_policy_t *time_step_policy = application->time_step_policy;
+    bitbyte_butane_time_step_policy_update(time_step_policy, frame, wall);
+    for (size_t step = 0; step < time_step_policy->steps; ++step)
+      application->update(application, time_step_policy->delta_time_per_step);
+    application->render(application);
+    bitbyte_foundation_timer_reset(frame);
+  }
 }
 
 //===----------------------------------------------------------------------===//

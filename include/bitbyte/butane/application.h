@@ -24,6 +24,10 @@
 #include "bitbyte/butane/foundation.h"
 #include "bitbyte/butane/linkage.h"
 
+//===----------------------------------------------------------------------===//
+
+#include "bitbyte/butane/time_step_policy.h"
+
 //============================================================================//
 
 #ifdef __cplusplus
@@ -92,6 +96,8 @@ typedef struct bitbyte_butane_application {
   bitbyte_butane_application_render_fn render;
   /// \copydoc bitbyte_butane_application_shutdown_fn
   bitbyte_butane_application_shutdown_fn shutdown;
+  /// \brief QQQ.
+  bitbyte_butane_time_step_policy_t *time_step_policy;
 } bitbyte_butane_application_t;
 
 #ifdef __BITBYTE_BUTANE_IMPORT__
