@@ -30,6 +30,15 @@ static bitbyte_butane_time_step_policy_variable_t *variable(void) {
     malloc(sizeof(bitbyte_butane_time_step_policy_variable_t));
 }
 
+typedef struct {
+  bitbyte_butane_time_step_policy_t time_step_policy;
+  float accumulator;
+} bitbyte_butane_time_step_policy_fixed_t;
+static bitbyte_butane_time_step_policy_fixed_t *fixed(void) {
+  return (bitbyte_butane_time_step_policy_fixed_t *)
+    malloc(sizeof(bitbyte_butane_time_step_policy_fixed_t));
+}
+
 bitbyte_butane_time_step_policy_t *
 bitbyte_butane_time_step_policy_create(
   const bitbyte_butane_time_step_policy_opts_t *opts)
@@ -40,10 +49,20 @@ bitbyte_butane_time_step_policy_create(
   switch (opts->type) {
     case BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE: {
       bitbyte_butane_time_step_policy_variable_t *time_step_policy = variable();
-      memcpy((void *)&time_step_policy->opts, (const void *)opts, sizeof(bitbyte_butane_time_step_policy_opts_t));
-      time_step_policy->steps = 0;
-      time_step_policy->delta_time_per_step = 0.f;
-      return time_step_policy;
+      bitbyte_butane_time_step_policy_t *time_step_policy_ = (bitbyte_butane_time_step_policy_t *)time_step_policy;
+      memcpy((void *)&time_step_policy_->opts, (const void *)opts, sizeof(bitbyte_butane_time_step_policy_opts_t));
+      time_step_policy_->steps = 0;
+      time_step_policy_->delta_time_per_step = 0.f;
+      return time_step_policy_;
+    } break;
+    case BITBYTE_BUTANE_TIME_STEP_POLICY_FIXED: {
+      bitbyte_butane_time_step_policy_fixed_t *time_step_policy = fixed();
+      bitbyte_butane_time_step_policy_t *time_step_policy_ = (bitbyte_butane_time_step_policy_t *)time_step_policy;
+      memcpy((void *)&time_step_policy_->opts, (const void *)opts, sizeof(bitbyte_butane_time_step_policy_opts_t));
+      time_step_policy_->steps = 0;
+      time_step_policy_->delta_time_per_step = 0.f;
+      time_step_policy->accumulator = 0.f;
+      return time_step_policy_;
     } break;
     default: {
       bitbyte_butane_assertf(0, "Unknown or unsupported time-step policy!");
@@ -69,8 +88,16 @@ bitbyte_butane_time_step_policy_update(
     case BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE: {
       bitbyte_butane_time_step_policy_variable_t *time_step_policy =
         (bitbyte_butane_time_step_policy_variable_t *)time_step_policy_;
-      time_step_policy->steps = 1;
-      time_step_policy->delta_time_per_step = bitbyte_foundation_timer_msecs(frame) / 1000000.f;
+      time_step_policy_->steps = 1;
+      time_step_policy_->delta_time_per_step = bitbyte_foundation_timer_msecs(frame) / 1000000.f;
+    } break;
+    case BITBYTE_BUTANE_TIME_STEP_POLICY_FIXED: {
+      bitbyte_butane_time_step_policy_fixed_t *time_step_policy =
+        (bitbyte_butane_time_step_policy_fixed_t *)time_step_policy_;
+      time_step_policy->accumulator += bitbyte_foundation_timer_msecs(frame) / 1000000.f;
+      time_step_policy_->steps = time_step_policy->accumulator / time_step_policy_->opts.fixed.delta_time_per_frame;
+      time_step_policy->accumulator -= time_step_policy_->steps * time_step_policy_->opts.fixed.delta_time_per_frame;
+      time_step_policy_->delta_time_per_step = time_step_policy_->opts.fixed.delta_time_per_frame;
     } break;
     default: {
       // Unreachable.

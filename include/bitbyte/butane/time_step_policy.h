@@ -38,7 +38,9 @@ typedef enum bitbyte_butane_time_step_policy_type {
   /// Unknown.
   BITBYTE_BUTANE_TIME_STEP_POLICY_UNKNOWN = 0,
   /// Variable.
-  BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE = 1
+  BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE = 1,
+  /// Fixed.
+  BITBYTE_BUTANE_TIME_STEP_POLICY_FIXED = 2
 } bitbyte_butane_time_step_policy_type_t;
 
 //===----------------------------------------------------------------------===//
@@ -52,6 +54,10 @@ typedef struct bitbyte_butane_time_step_policy_opts {
   union {
     struct {
     } variable;
+    struct {
+      /// \brief
+      float delta_time_per_frame;
+    } fixed;
   };
 } bitbyte_butane_time_step_policy_opts_t;
 
@@ -159,6 +165,8 @@ class BITBYTE_BUTANE_EXPORT TimeStepPolicy
   static const Type Unknown = BITBYTE_BUTANE_TIME_STEP_POLICY_UNKNOWN;
   /// \copydoc BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE
   static const Type Variable = BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE;
+  /// \copydoc BITBYTE_BUTANE_TIME_STEP_POLICY_FIXED
+  static const Type Fixed = BITBYTE_BUTANE_TIME_STEP_POLICY_FIXED;
 
  protected:
   TimeStepPolicy();
