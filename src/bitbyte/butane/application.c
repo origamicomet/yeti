@@ -35,7 +35,8 @@ bitbyte_butane_application_start(
   if (application->time_step_policy == NULL) {
     bitbyte_foundation_log_unformatted(
       BITBYTE_FOUNDATION_LOG_LEVEL_WARNING,
-      "No time-step policy specified, defaulting to `variable`!");
+      "No time-step policy specified!\n"
+      " => defaulting to `variable`\n");
     bitbyte_butane_time_step_policy_opts_t tspo;
     tspo.type = BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE;
     application->time_step_policy = bitbyte_butane_time_step_policy_create(&tspo);
