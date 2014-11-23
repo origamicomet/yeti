@@ -147,12 +147,12 @@ Application::Application()
     }
   };
 
-  memset((void *)&__proxy__, 0, sizeof(::bitbyte_butane_application_t));
+  memset((void *)&__application__, 0, sizeof(::bitbyte_butane_application_t));
 
-  __proxy__.initialize = &Proxy::initialize;
-  __proxy__.update = &Proxy::update;
-  __proxy__.render = &Proxy::render;
-  __proxy__.shutdown = &Proxy::shutdown;
+  __application__.initialize = &Proxy::initialize;
+  __application__.update = &Proxy::update;
+  __application__.render = &Proxy::render;
+  __application__.shutdown = &Proxy::shutdown;
 }
 
 Application::~Application()
@@ -187,19 +187,19 @@ void Application::shutdown(void)
 void Application::start(void)
 {
   ::bitbyte_butane_application_start(
-    (::bitbyte_butane_application_t *)&__proxy__);
+    (::bitbyte_butane_application_t *)&__application__);
 }
 
 void Application::run(void)
 {
   ::bitbyte_butane_application_run(
-    (::bitbyte_butane_application_t *)&__proxy__);
+    (::bitbyte_butane_application_t *)&__application__);
 }
 
 void Application::quit(void)
 {
   ::bitbyte_butane_application_quit(
-    (::bitbyte_butane_application_t *)&__proxy__);
+    (::bitbyte_butane_application_t *)&__application__);
 }
 
 //===----------------------------------------------------------------------===//

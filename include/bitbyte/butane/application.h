@@ -241,7 +241,7 @@ class BITBYTE_BUTANE_EXPORT Application
   static const char *build();
 
  private:
-  bitbyte_butane_application_t __proxy__;
+  bitbyte_butane_application_t __application__;
   Application *__self__;
 };
 
