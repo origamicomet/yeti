@@ -15,6 +15,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <stdlib.h>
+#include <string.h>
 
 //============================================================================//
 
@@ -144,6 +145,8 @@ Application::Application()
       (*(Application **)(((uintptr_t)application) + sizeof(::bitbyte_butane_application_t)))->shutdown();
     }
   };
+
+  memset((void *)&__proxy__, 0, sizeof(::bitbyte_butane_application_t));
 
   __proxy__.initialize = &Proxy::initialize;
   __proxy__.update = &Proxy::update;
