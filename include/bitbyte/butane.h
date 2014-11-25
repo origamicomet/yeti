@@ -53,6 +53,7 @@ using namespace ::bitbyte::butane;
 
 #include "bitbyte/butane/application.h"
 #include "bitbyte/butane/time_step_policy.h"
+#include "bitbyte/butane/window.h"
 
 //============================================================================//
 
