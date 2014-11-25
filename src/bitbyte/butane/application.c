@@ -67,6 +67,8 @@ bitbyte_butane_application_run(
   bitbyte_foundation_timer_t *frame = bitbyte_foundation_timer_create();
   bitbyte_foundation_timer_t *wall = bitbyte_foundation_timer_create();
   while (true) {
+    bitbyte_butane_window_update(application->window);
+
     bitbyte_butane_time_step_policy_t *time_step_policy = application->time_step_policy;
     bitbyte_butane_time_step_policy_update(time_step_policy, frame, wall);
 
