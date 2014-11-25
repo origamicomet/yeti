@@ -69,9 +69,16 @@ bitbyte_butane_application_run(
   while (true) {
     bitbyte_butane_time_step_policy_t *time_step_policy = application->time_step_policy;
     bitbyte_butane_time_step_policy_update(time_step_policy, frame, wall);
-    for (size_t step = 0; step < time_step_policy->steps; ++step)
-      application->update(application, time_step_policy->delta_time_per_step);
+
+    // It's important that these are pulled out prior to updating, in case the
+    // time-step policy is changed during a step.
+    const size_t steps = time_step_policy->steps;
+    const float delta_time_per_step = time_step_policy->delta_time_per_step;
+
+    for (size_t step = 0; step < steps; ++step)
+      application->update(application, delta_time_per_step);
     application->render(application);
+
     // BUG: This may result in all frames taking "zero" microseconds, due to
     // inadequate timing resolution.
     bitbyte_foundation_timer_reset(frame);
