@@ -41,6 +41,18 @@ bitbyte_butane_application_start(
     tspo.type = BITBYTE_BUTANE_TIME_STEP_POLICY_VARIABLE;
     application->time_step_policy = bitbyte_butane_time_step_policy_create(&tspo);
   }
+  if(application->window == NULL) {
+    bitbyte_foundation_log_unformatted(
+     BITBYTE_FOUNDATION_LOG_LEVEL_WARNING,
+     "No application window created!\n"
+     " => defaulting to 1280x720\n");
+    bitbyte_butane_window_opts_t wo;
+    wo.title = "Untitled";
+    wo.width = 1280;
+    wo.height = 720;
+    application->window = bitbyte_butane_window_create(&wo);
+    bitbyte_butane_window_show(application->window);
+  }
   bitbyte_butane_application_run(application);
 }
 

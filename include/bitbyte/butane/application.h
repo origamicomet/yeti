@@ -27,6 +27,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "bitbyte/butane/time_step_policy.h"
+#include "bitbyte/butane/window.h"
 
 //============================================================================//
 
@@ -98,6 +99,8 @@ typedef struct bitbyte_butane_application {
   bitbyte_butane_application_shutdown_fn shutdown;
   /// \brief QQQ.
   bitbyte_butane_time_step_policy_t *time_step_policy;
+  /// \brief QQQ.
+  bitbyte_butane_window_t *window;
 } bitbyte_butane_application_t;
 
 #ifdef __BITBYTE_BUTANE_IMPORT__
