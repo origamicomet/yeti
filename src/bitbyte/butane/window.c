@@ -54,6 +54,28 @@ bitbyte_butane_window_open(
     (bitbyte_butane_window_t *)malloc(sizeof(bitbyte_butane_window_t));
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
+  char szUUID[21];
+  bitbyte_foundation_uuid_t uuid;
+  bitbyte_foundation_uuid_generate(&uuid);
+  bitbyte_foundation_uuid_to_s(&uuid, szUUID);
+
+  const LPWSTR szClassName = (WCHAR *)alloca(21 * sizeof(WCHAR));
+  if (!MultiByteToWideChar(CP_UTF8, 0, szUUID, -1, (LPWSTR)szClassName, 21))
+    bitbyte_butane_assertf_always("Generated class name exceeds buffer size!");
+
+  WNDCLASSEXW wcx;
+  memset(&wcx, 0, sizeof(WNDCLASSEX));
+  wcx.cbSize        = sizeof(WNDCLASSEX);
+  wcx.style         = CS_VREDRAW | CS_HREDRAW;
+  // TODO(mwilliams): Use our own custom window procedure.
+  wcx.lpfnWndProc   = &DefWindowProcW;
+  wcx.hInstance     = GetModuleHandle(NULL);
+  wcx.hCursor       = LoadCursor(NULL, IDC_ARROW);
+  // TODO(mwilliams): Use our own icon, IDI_ENGINE_ICON.
+  wcx.hIcon         = LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
+  wcx.hIconSm       = LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
+  wcx.lpszClassName = szClassName;
+
   const DWORD dwStyles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
   const DWORD dwExStyles = WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW;
 
@@ -66,10 +88,9 @@ bitbyte_butane_window_open(
   const DWORD dwAdjustedWidth = rClientArea.right - rClientArea.left;
   const DWORD dwAdjustedHeight = rClientArea.bottom - rClientArea.top;
 
-  window->hndl = CreateWindowExW(dwExStyles, L"1b3549248a2545ccaa0806c14a9387b1",
-                                 szTitle, dwStyles, 0, 0, dwAdjustedWidth,
-                                 dwAdjustedHeight, NULL, NULL,
-                                 GetModuleHandle(NULL), NULL);
+  window->hndl = CreateWindowExW(dwExStyles, szClassName, szTitle, dwStyles,
+                                 0, 0, dwAdjustedWidth, dwAdjustedHeight, NULL,
+                                 NULL, GetModuleHandle(NULL), NULL);
 
   bitbyte_butane_assertf(window->hndl != NULL,
                          "Unable to open window at CreateWindowExW! (%d)",
