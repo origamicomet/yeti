@@ -66,13 +66,13 @@ typedef struct bitbyte_butane_window bitbyte_butane_window_t;
 extern
 BITBYTE_BUTANE_EXPORT
 bitbyte_butane_window_t *
-bitbyte_butane_window_create(
+bitbyte_butane_window_open(
   const bitbyte_butane_window_opts_t *opts);
 
-/// \def bitbyte_butane_window_create
-/// \copydoc bitbyte_butane_window_create
+/// \def bitbyte_butane_window_open
+/// \copydoc bitbyte_butane_window_open
 #ifdef __BITBYTE_BUTANE_IMPORT__
-  #define butane_window_create bitbyte_butane_window_create
+  #define butane_window_open bitbyte_butane_window_open
 #endif // __BITBYTE_BUTANE_IMPORT__
 
 //===----------------------------------------------------------------------===//

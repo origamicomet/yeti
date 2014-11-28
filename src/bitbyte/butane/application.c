@@ -50,7 +50,7 @@ bitbyte_butane_application_start(
     wo.title = "Untitled";
     wo.width = 1280;
     wo.height = 720;
-    application->window = bitbyte_butane_window_create(&wo);
+    application->window = bitbyte_butane_window_open(&wo);
     bitbyte_butane_window_show(application->window);
   }
   bitbyte_butane_application_run(application);
