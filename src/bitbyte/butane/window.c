@@ -59,8 +59,8 @@ bitbyte_butane_window_open(
   bitbyte_foundation_uuid_generate(&uuid);
   bitbyte_foundation_uuid_to_s(&uuid, szUUID);
 
-  const LPWSTR szClassName = (WCHAR *)alloca(37 * sizeof(WCHAR));
-  if (!MultiByteToWideChar(CP_UTF8, 0, szUUID, -1, (LPWSTR)szClassName, 37))
+  WCHAR szClassName[37];
+  if (!MultiByteToWideChar(CP_UTF8, 0, szUUID, -1, szClassName, 37))
     bitbyte_butane_assertf_always("Generated class name exceeds buffer size!");
 
   WNDCLASSEXW wcx;
@@ -84,8 +84,8 @@ bitbyte_butane_window_open(
   const DWORD dwStyles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
   const DWORD dwExStyles = WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW;
 
-  const LPWSTR szTitle = (WCHAR *)alloca(256 * sizeof(WCHAR));
-  if (!MultiByteToWideChar(CP_UTF8, 0, opts->title, -1, (LPWSTR)szTitle, 256))
+  WCHAR szTitle[256];
+  if (!MultiByteToWideChar(CP_UTF8, 0, opts->title, -1, szTitle, 256))
     bitbyte_butane_assertf_always("Specified title exceeds buffer size!");
 
   RECT rClientArea = { 0, 0, opts->width, opts->height };
@@ -210,8 +210,8 @@ bitbyte_butane_window_rename(
   bitbyte_butane_assert_debug(title != NULL);
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
-  const LPWSTR szTitle = (WCHAR *)alloca(256 * sizeof(WCHAR));
-  if (!MultiByteToWideChar(CP_UTF8, 0, title, -1, (LPWSTR)szTitle, 256))
+  WCHAR szTitle[256];
+  if (!MultiByteToWideChar(CP_UTF8, 0, title, -1, szTitle, 256))
     bitbyte_butane_assertf_always("Specified title exceeds buffer size!");
   SetWindowTextW(window->hndl, szTitle);
 #elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_MAC_OS_X__
@@ -330,7 +330,7 @@ bitbyte_butane_window_title(
   bitbyte_butane_assert_debug(window != NULL);
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
-  const LPWSTR szTitle = (WCHAR *)alloca(256 * sizeof(WCHAR));
+  WCHAR szTitle[256];
   const BOOL bGotTitle = GetWindowTextW(window->hndl, (LPWSTR)szTitle, 256);
   bitbyte_butane_assertf(bGotTitle,
                          "Unable to get window title at GetWindowTextW! (%d)",
