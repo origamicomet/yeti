@@ -103,6 +103,28 @@ bitbyte_butane_window_open(
 
   SetPropA(window->hndl, "bitbyte_butane_window_t", (HANDLE)window);
 
+  // Register for keyboard and mouse raw-input events:
+  // See http://www.usb.org/developers/devclass_docs/Hut1_11.pdf.
+  RAWINPUTDEVICE RawInputDevices[2];
+
+  // Keyboard:
+  RawInputDevices[0].usUsagePage = 0x01;
+  RawInputDevices[0].usUsage = 0x06;
+  RawInputDevices[0].hwndTarget = window->hndl;
+  RawInputDevices[0].dwFlags = 0;
+
+  // Mouse:
+  RawInputDevices[1].usUsagePage = 0x01;
+  RawInputDevices[1].usUsage = 0x02;
+  RawInputDevices[1].hwndTarget = window->hndl;
+  RawInputDevices[1].dwFlags = 0;
+
+  const BOOL bRegisteredRawInputDevices =
+    RegisterRawInputDevices(&RawInputDevices[0], 2, sizeof(RAWINPUTDEVICE));
+  bitbyte_butane_assertf(bRegisteredRawInputDevices,
+                         "Unable to open window at RegisterRawInputDevices! (%d)",
+                         GetLastError());
+
   HMONITOR hMonitor = MonitorFromWindow(window->hndl, MONITOR_DEFAULTTONULL);
 
   bitbyte_butane_assertf(hMonitor != NULL,
