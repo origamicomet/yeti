@@ -54,13 +54,13 @@ bitbyte_butane_window_open(
     (bitbyte_butane_window_t *)malloc(sizeof(bitbyte_butane_window_t));
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
-  char szUUID[21];
+  char szUUID[37];
   bitbyte_foundation_uuid_t uuid;
   bitbyte_foundation_uuid_generate(&uuid);
   bitbyte_foundation_uuid_to_s(&uuid, szUUID);
 
-  const LPWSTR szClassName = (WCHAR *)alloca(21 * sizeof(WCHAR));
-  if (!MultiByteToWideChar(CP_UTF8, 0, szUUID, -1, (LPWSTR)szClassName, 21))
+  const LPWSTR szClassName = (WCHAR *)alloca(37 * sizeof(WCHAR));
+  if (!MultiByteToWideChar(CP_UTF8, 0, szUUID, -1, (LPWSTR)szClassName, 37))
     bitbyte_butane_assertf_always("Generated class name exceeds buffer size!");
 
   WNDCLASSEXW wcx;
@@ -75,6 +75,11 @@ bitbyte_butane_window_open(
   wcx.hIcon         = LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.hIconSm       = LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.lpszClassName = szClassName;
+
+  const BOOL bRegisteredClass = (RegisterClassExW(&wcx) != 0);
+  bitbyte_butane_assertf(bRegisteredClass,
+                         "Unable to open window at RegisterClassExW! (%d)",
+                         GetLastError());
 
   const DWORD dwStyles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
   const DWORD dwExStyles = WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW;
