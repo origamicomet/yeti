@@ -67,11 +67,11 @@ bitbyte_butane_window_open(
   memset(&wcx, 0, sizeof(WNDCLASSEX));
   wcx.cbSize        = sizeof(WNDCLASSEX);
   wcx.style         = CS_VREDRAW | CS_HREDRAW;
-  // TODO(mwilliams): Use our own custom window procedure.
+  // TODO(mike): Use our own custom window procedure.
   wcx.lpfnWndProc   = &DefWindowProcW;
   wcx.hInstance     = GetModuleHandle(NULL);
   wcx.hCursor       = LoadCursor(NULL, IDC_ARROW);
-  // TODO(mwilliams): Use our own icon, IDI_ENGINE_ICON.
+  // TODO(mike): Use our own icon, IDI_ENGINE_ICON.
   wcx.hIcon         = LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.hIconSm       = LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.lpszClassName = szClassName;

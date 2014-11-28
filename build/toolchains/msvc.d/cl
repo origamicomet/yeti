@@ -26,9 +26,9 @@ if inputs.empty?
   puts "No input file specified!"
   exit false
 elsif inputs.length > 1
-  # TODO(mwilliams): Handle more than one input file. This is only an issue
-  # because the dependency generation code assumes only one input file.
-  # Instead, it should error if more than one input file is specified.
+  # TODO(mike): Handle more than one input file. This is only an issue because
+  # the dependency generation code assumes only one input file. Instead, it
+  # should error if more than one input file is specified.
   #
   puts "More than one input file specified!"
   exit false
