@@ -184,7 +184,7 @@ ifeq ($(LINKAGE),dynamic)
 $(BUILD)/bin/butane.dll: $(BUTANE_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib dbghelp.lib $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
+	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib dbghelp.lib kernel32.lib user32.lib gdi32.lib $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
 
 $(BUILD)/lib/butane.lib: $(BUILD)/bin/butane.dll
 	@echo "[AR] $@"
