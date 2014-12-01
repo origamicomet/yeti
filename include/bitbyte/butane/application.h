@@ -243,6 +243,13 @@ class BITBYTE_BUTANE_EXPORT Application
   /// \copydoc ::bitbyte_butane_application_build
   static const char *build();
 
+ public:
+  /// \brief QQQ
+  ::bitbyte_butane_window_t *window(void) { return __application__.window; }
+
+  /// \brief QQQ
+  void set_window(::bitbyte_butane_window_t *window) { __application__.window = window; }
+
  private:
   bitbyte_butane_application_t __application__;
   Application *__self__;
