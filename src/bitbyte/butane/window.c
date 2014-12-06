@@ -121,7 +121,11 @@ bitbyte_butane_window_open(
                          GetLastError());
 
   // TODO(mike): Use the global atom table.
-  SetPropA(window->hndl, "bitbyte_butane_window_t", (HANDLE)window);
+  const BOOL bInsertedReferenceToInstance =
+    SetPropA(window->hndl, "bitbyte_butane_window_t", (HANDLE)window);
+  bitbyte_butane_assertf(bInsertedReferenceToInstance,
+                         "Unable to open window at SetPropA! (%d)",
+                         GetLastError());
 
   // Register for keyboard and mouse raw-input events:
   // See http://www.usb.org/developers/devclass_docs/Hut1_11.pdf.
