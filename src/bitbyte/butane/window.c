@@ -41,6 +41,15 @@ struct bitbyte_butane_window {
 
 //===----------------------------------------------------------------------===//
 
+#if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
+static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  bitbyte_butane_window_t *window =
+    (bitbyte_butane_window_t *)GetPropA(hWnd, "bitbyte_butane_window_t");
+  bitbyte_butane_assert_debug(window != NULL);
+  return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+}
+#endif
+
 bitbyte_butane_window_t *
 bitbyte_butane_window_open(
   const bitbyte_butane_window_opts_t *opts)
@@ -68,7 +77,7 @@ bitbyte_butane_window_open(
   wcx.cbSize        = sizeof(WNDCLASSEX);
   wcx.style         = CS_VREDRAW | CS_HREDRAW;
   // TODO(mike): Use our own custom window procedure.
-  wcx.lpfnWndProc   = &DefWindowProcW;
+  wcx.lpfnWndProc   = &_WindowProcW;
   wcx.hInstance     = GetModuleHandle(NULL);
   wcx.hCursor       = LoadCursor(NULL, IDC_ARROW);
   // TODO(mike): Use our own icon, IDI_ENGINE_ICON.
