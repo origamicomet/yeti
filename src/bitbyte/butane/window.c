@@ -46,6 +46,16 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
   bitbyte_butane_window_t *window =
     (bitbyte_butane_window_t *)GetPropA(hWnd, "bitbyte_butane_window_t");
   bitbyte_butane_assert_debug(window != NULL);
+
+  switch (uMsg) {
+    case WM_NCDESTROY: {
+      // According to MSDN, all entries in the property list of a window must
+      // be removed (via RemoveProp) before it is destroyed. In practice, this
+      // doesn't make any material difference--perhaps a (small) memory leak.
+      RemovePropA(hWnd, "bitbyte_butane_window_t");
+    } break;
+  }
+
   return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 #endif
