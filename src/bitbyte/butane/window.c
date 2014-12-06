@@ -120,6 +120,7 @@ bitbyte_butane_window_open(
                          "Unable to open window at CreateWindowExW! (%d)",
                          GetLastError());
 
+  // TODO(mike): Use the global atom table.
   SetPropA(window->hndl, "bitbyte_butane_window_t", (HANDLE)window);
 
   // Register for keyboard and mouse raw-input events:
