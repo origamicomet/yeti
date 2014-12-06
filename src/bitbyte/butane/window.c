@@ -45,7 +45,6 @@ struct bitbyte_butane_window {
 static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   bitbyte_butane_window_t *window =
     (bitbyte_butane_window_t *)GetPropA(hWnd, "bitbyte_butane_window_t");
-  bitbyte_butane_assert_debug(window != NULL);
 
   switch (uMsg) {
     case WM_NCDESTROY: {
