@@ -52,7 +52,14 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       // be removed (via RemoveProp) before it is destroyed. In practice, this
       // doesn't make any material difference--perhaps a (small) memory leak.
       RemovePropA(hWnd, "bitbyte_butane_window_t");
-    } break;
+      // And of course, we free any memory we've associated with |hWnd|.
+      free((void *)window);
+    } return 0;
+
+    case WM_CLOSE: {
+      // Destruction is inevitable!
+      DestroyWindow(window->hndl);
+    } return 0;
   }
 
   return DefWindowProcW(hWnd, uMsg, wParam, lParam);
@@ -195,12 +202,15 @@ bitbyte_butane_window_close(
   bitbyte_butane_assert_debug(window != NULL);
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
-  DestroyWindow(window->hndl);
+  // We destroy the window in WM_CLOSE (and free |window| in WM_NCDESTROY) so
+  // that we don't have to handle programmatically closing the window
+  // differently. This actually creates some complexity, notably with multi-
+  // threaded rendering, but reduces the complexity of window management for
+  // users, specifically when embedding engine windows inside tools.
+  CloseWindow(window->hndl);
 #elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_MAC_OS_X__
 #elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_LINUX__
 #endif
-
-  free((void *)window);
 }
 
 //===----------------------------------------------------------------------===//
