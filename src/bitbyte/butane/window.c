@@ -54,6 +54,8 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       RemovePropA(hWnd, "bitbyte_butane_window_t");
       // And of course, we free any memory we've associated with |hWnd|.
       free((void *)window);
+      // TODO(mike): Insert a hook window procedure that results in graceful
+      // termination of multi-threaded rendering.
     } return 0;
 
     case WM_CLOSE: {
