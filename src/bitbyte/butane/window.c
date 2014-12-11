@@ -42,6 +42,8 @@ struct bitbyte_butane_window {
 //===----------------------------------------------------------------------===//
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
+// TODO(mike): Move this out into bitbyte_butane_window_update.
+// TODO(mike): Put this on a seperate thread?
 static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   bitbyte_butane_window_t *window =
     (bitbyte_butane_window_t *)GetPropA(hWnd, "bitbyte_butane_window_t");
