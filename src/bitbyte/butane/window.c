@@ -93,7 +93,7 @@ bitbyte_butane_window_open(
   WNDCLASSEXW wcx;
   memset(&wcx, 0, sizeof(WNDCLASSEX));
   wcx.cbSize        = sizeof(WNDCLASSEX);
-  wcx.style         = CS_VREDRAW | CS_HREDRAW;
+  wcx.style         = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
   // TODO(mike): Use our own custom window procedure.
   wcx.lpfnWndProc   = &_WindowProcW;
   wcx.hInstance     = GetModuleHandle(NULL);
