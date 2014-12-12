@@ -245,10 +245,14 @@ class BITBYTE_BUTANE_EXPORT Application
 
  public:
   /// \brief QQQ
-  ::bitbyte_butane_window_t *window(void) { return __application__.window; }
+  ::bitbyte_butane_window_t *window(void) {
+    return __application__.window;
+  }
 
   /// \brief QQQ
-  void set_window(::bitbyte_butane_window_t *window) { __application__.window = window; }
+  void set_window(::bitbyte_butane_window_t *window) {
+    __application__.window = window;
+  }
 
   /// \brief QQQ
   ::bitbyte_butane_time_step_policy_t *time_step_policy(void) {
