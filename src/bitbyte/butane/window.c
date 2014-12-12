@@ -71,8 +71,25 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       // TODO(mike): Return application specific icons.
     } return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 
+    case WM_ACTIVATEAPP: {
+      // TODO(mike): Toggle rendering based on this.
+    } return 0;
+
+    case WM_SHOWWINDOW: {
+      // TODO(mike): Toggle rendering based on this.
+    } return 0;
+
     case WM_ERASEBKGND: {
       // Avoid any potential flickering. Shouldn't be an isssue though.
+    } return TRUE;
+
+    case WM_SIZE: {
+      // TODO(mike): Resize swap-chains based on this? Or should a hook be
+      // used that listens for this, instead?
+    } return 0;
+
+    case WM_INPUTLANGCHANGE: {
+      // TODO(mike): Handle different keyboard layouts.
     } return TRUE;
 
     case WM_CLOSE: {
