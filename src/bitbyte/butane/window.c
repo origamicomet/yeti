@@ -230,10 +230,10 @@ bitbyte_butane_window_update(
   bitbyte_butane_assert_debug(window != NULL);
 
 #if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
-  MSG Message;
-  while (PeekMessage(&Message, window->hndl, 0, 0, PM_REMOVE)) {
-    TranslateMessage(&Message);
-    DispatchMessage(&Message);
+  MSG Msg;
+  while (PeekMessage(&Msg, window->hndl, 0, 0, PM_REMOVE)) {
+    TranslateMessage(&Msg);
+    DispatchMessage(&Msg);
   }
 #elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_MAC_OS_X__
 #elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_LINUX__
