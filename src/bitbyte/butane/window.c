@@ -56,7 +56,7 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       free((void *)window);
       // TODO(mike): Insert a hook window procedure that results in graceful
       // termination of multi-threaded rendering.
-    } return 0;
+    } return TRUE;
 
     case WM_ERASEBKGND: {
       // Avoid any potential flickering. Shouldn't be an isssue though.
@@ -65,7 +65,7 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_CLOSE: {
       // Destruction is inevitable!
       DestroyWindow(hWnd);
-    } return 0;
+    } return TRUE;
   }
 
   return DefWindowProcW(hWnd, uMsg, wParam, lParam);
