@@ -64,7 +64,7 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
     case WM_CLOSE: {
       // Destruction is inevitable!
-      DestroyWindow(window->hndl);
+      DestroyWindow(hWnd);
     } return 0;
   }
 
