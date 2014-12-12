@@ -43,9 +43,9 @@ bitbyte_butane_application_start(
   }
   if(application->window == NULL) {
     bitbyte_foundation_log_unformatted(
-     BITBYTE_FOUNDATION_LOG_LEVEL_WARNING,
-     "No application window created!\n"
-     " => defaulting to 1280x720\n");
+      BITBYTE_FOUNDATION_LOG_LEVEL_WARNING,
+      "No application window created!\n"
+      " => defaulting to 1280x720\n");
     bitbyte_butane_window_opts_t wo;
     wo.title = "Untitled";
     wo.width = 1280;
