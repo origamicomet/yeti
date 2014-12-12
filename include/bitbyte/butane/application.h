@@ -250,6 +250,16 @@ class BITBYTE_BUTANE_EXPORT Application
   /// \brief QQQ
   void set_window(::bitbyte_butane_window_t *window) { __application__.window = window; }
 
+  /// \brief QQQ
+  ::bitbyte_butane_time_step_policy_t *time_step_policy(void) {
+    return __application__.time_step_policy;
+  }
+
+  /// \brief QQQ
+  void set_time_step_policy(::bitbyte_butane_time_step_policy_t *time_step_policy) {
+    __application__.time_step_policy = time_step_policy;
+  }
+
  private:
   bitbyte_butane_application_t __application__;
   Application *__self__;
