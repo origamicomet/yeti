@@ -60,6 +60,10 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       // termination of multi-threaded rendering.
     } return 0;
 
+    case WM_ERASEBKGND: {
+      // Avoid any potential flickering. Shouldn't be an isssue though.
+    } return TRUE;
+
     case WM_CLOSE: {
       // Destruction is inevitable!
       DestroyWindow(window->hndl);
