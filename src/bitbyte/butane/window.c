@@ -47,6 +47,15 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     (bitbyte_butane_window_t *)GetPropA(hWnd, "bitbyte_butane_window_t");
 
   switch (uMsg) {
+    case WM_NCCREATE: {
+    } return TRUE;
+
+    case WM_CREATE: {
+    } return 0;
+
+    case WM_DESTROY: {
+    } return TRUE;
+
     case WM_NCDESTROY: {
       // According to MSDN, all entries in the property list of a window must
       // be removed (via RemoveProp) before it is destroyed. In practice, this
