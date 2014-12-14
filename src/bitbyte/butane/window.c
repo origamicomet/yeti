@@ -48,13 +48,13 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
   switch (uMsg) {
     case WM_NCCREATE: {
-    } return TRUE;
+    } break;
 
     case WM_CREATE: {
-    } return 0;
+    } break;
 
     case WM_DESTROY: {
-    } return TRUE;
+    } break;
 
     case WM_NCDESTROY: {
       // According to MSDN, all entries in the property list of a window must
@@ -73,11 +73,11 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
     case WM_ACTIVATEAPP: {
       // TODO(mike): Toggle rendering based on this.
-    } return 0;
+    } break;
 
     case WM_SHOWWINDOW: {
       // TODO(mike): Toggle rendering based on this.
-    } return 0;
+    } break;
 
     case WM_ERASEBKGND: {
       // Avoid any potential flickering. Shouldn't be an isssue though.
@@ -86,11 +86,11 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_SIZE: {
       // TODO(mike): Resize swap-chains based on this? Or should a hook be
       // used that listens for this, instead?
-    } return 0;
+    } break;
 
     case WM_INPUTLANGCHANGE: {
       // TODO(mike): Handle different keyboard layouts.
-    } return TRUE;
+    } break;
 
     case WM_CLOSE: {
       // Destruction is inevitable!
