@@ -1,3 +1,6 @@
 [submodule "deps/foundation"]
 	path = deps/foundation
 	url = https://github.com/origamicomet/foundation.git
+[submodule "deps/gala"]
+	path = deps/gala
+	url = https://github.com/origamicomet/gala.git
