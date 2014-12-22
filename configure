@@ -169,7 +169,7 @@ export LINKAGE := ${linkage}
 export PLATFORM := ${platform}
 export ARCHITECTURE := ${architecture}
 
-export FOUNDATION := ${foundation}
+export FOUNDATION := `grep -e '^export\ ROOT\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 export FOUNDATION_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 
 include ${ROOT}/Makefile.any
