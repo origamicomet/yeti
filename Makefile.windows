@@ -112,6 +112,7 @@ ifeq ($(CONFIGURATION),debug)
   CFLAGS += -MDd -Od -Zi -RTCsu -fp:precise -fp:except -D_DEBUG
   CFLAGS += -DBITBYTE_BUTANE_CONFIGURATION=BITBYTE_BUTANE_CONFIGURATION_DEBUG
   CFLAGS += -DBITBYTE_FOUNDATION_CONFIGURATION=BITBYTE_FOUNDATION_CONFIGURATION_DEBUG
+  CFLAGS += -DGALA_CONFIGURATION=GALA_CONFIGURATION_DEBUG
   LDFLAGS += -DEBUG
   ARFLAGS +=
 endif
@@ -119,6 +120,7 @@ ifeq ($(CONFIGURATION),development)
   CFLAGS += -MD -Zi -fp:fast -fp:except- -D_NDEBUG
   CFLAGS += -DBITBYTE_BUTANE_CONFIGURATION=BITBYTE_BUTANE_CONFIGURATION_DEVELOPMENT
   CFLAGS += -DBITBYTE_FOUNDATION_CONFIGURATION=BITBYTE_FOUNDATION_CONFIGURATION_DEVELOPMENT
+  CFLAGS += -DGALA_CONFIGURATION=GALA_CONFIGURATION_DEVELOPMENT
   LDFLAGS += -DEBUG
   ARFLAGS +=
 endif
@@ -126,6 +128,7 @@ ifeq ($(CONFIGURATION),release)
   CFLAGS += -MD -GL -Ox -fp:fast -fp:except- -D_NDEBUG
   CFLAGS += -DBITBYTE_BUTANE_CONFIGURATION=BITBYTE_BUTANE_CONFIGURATION_RELEASE
   CFLAGS += -DBITBYTE_FOUNDATION_CONFIGURATION=BITBYTE_FOUNDATION_CONFIGURATION_RELEASE
+  CFLAGS += -DGALA_CONFIGURATION=GALA_CONFIGURATION_RELEASE
   LDFLAGS += -LTCG
   ARFLAGS += -LTCG
 endif
@@ -137,6 +140,7 @@ ifeq ($(LINKAGE),static)
   CFLAGS += -DBITBYTE_FOUNDATION_TIER2_LINKAGE=BITBYTE_FOUNDATION_TIER2_STATIC_LINKAGE
   CFLAGS += -DBITBYTE_FOUNDATION_TIER3_LINKAGE=BITBYTE_FOUNDATION_TIER3_STATIC_LINKAGE
   CFLAGS += -DBITBYTE_FOUNDATION_TIER4_LINKAGE=BITBYTE_FOUNDATION_TIER4_STATIC_LINKAGE
+  CFLAGS += -DGALA_LINKAGE=GALA_STATIC_LINKAGE
 endif
 ifeq ($(LINKAGE),dynamic)
   CFLAGS += -DBITBYTE_BUTANE_LINKAGE=BITBYTE_BUTANE_DYNAMIC_LINKAGE
@@ -145,10 +149,13 @@ ifeq ($(LINKAGE),dynamic)
   CFLAGS += -DBITBYTE_FOUNDATION_TIER2_LINKAGE=BITBYTE_FOUNDATION_TIER2_DYNAMIC_LINKAGE
   CFLAGS += -DBITBYTE_FOUNDATION_TIER3_LINKAGE=BITBYTE_FOUNDATION_TIER3_DYNAMIC_LINKAGE
   CFLAGS += -DBITBYTE_FOUNDATION_TIER4_LINKAGE=BITBYTE_FOUNDATION_TIER4_DYNAMIC_LINKAGE
+  CFLAGS += -DGALA_LINKAGE=GALA_DYNAMIC_LINKAGE
 endif
 
 CFLAGS += -I"$(call posix-to-windows,$(FOUNDATION)/include)"
 LDFLAGS += -LIBPATH:"$(call posix-to-windows,$(FOUNDATION_BUILD)/bin)" -LIBPATH:"$(call posix-to-windows,$(FOUNDATION_BUILD)/lib)"
+CFLAGS += -I"$(call posix-to-windows,$(GALA)/include)"
+LDFLAGS += -LIBPATH:"$(call posix-to-windows,$(GALA_BUILD)/bin)" -LIBPATH:"$(call posix-to-windows,$(GALA_BUILD)/lib)"
 
 #
 # Rules:
@@ -173,25 +180,25 @@ $(BUILD)/obj/bitbyte/butane.obj: $(ROOT)/src/bitbyte/butane.c
 	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -DBITBYTE_BUTANE_COMPILING=3 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
 
 ifeq ($(LINKAGE),static)
-$(BUILD)/lib/butane.lib: foundation $(BUTANE_OBJECTS)
+$(BUILD)/lib/butane.lib: foundation gala $(BUTANE_OBJECTS)
 	@echo "[AR] $@"
 	@mkdir -p ${@D}
 	@lib $(ARFLAGS) -OUT:"$(call posix-to-windows,$@)" $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
 
-butane: foundation $(BUILD)/lib/butane.lib
+butane: foundation gala $(BUILD)/lib/butane.lib
 endif
 ifeq ($(LINKAGE),dynamic)
-$(BUILD)/bin/butane.dll: foundation $(BUTANE_OBJECTS)
+$(BUILD)/bin/butane.dll: foundation gala $(BUTANE_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib dbghelp.lib kernel32.lib user32.lib gdi32.lib ole32.lib $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
+	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib gala.lib dbghelp.lib kernel32.lib user32.lib gdi32.lib ole32.lib $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
 
 $(BUILD)/lib/butane.lib: $(BUILD)/bin/butane.dll
 	@echo "[AR] $@"
 	@mkdir -p ${@D}
 	@-mv -f -u $(basename $<).lib $@
 
-butane: foundation $(BUILD)/bin/butane.dll $(BUILD)/lib/butane.lib
+butane: foundation gala $(BUILD)/bin/butane.dll $(BUILD)/lib/butane.lib
 endif
 
 package-butane: butane

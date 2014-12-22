@@ -66,10 +66,15 @@ ifndef FOUNDATION
   FOUNDATION_BUILD := deps/foundation/_build
 endif
 
+ifndef GALA
+  GALA := deps/gala
+  GALA_BUILD := deps/gala/_build
+endif
+
 export
 
 .PHONY: all test docs package clean \
-        butane foundation
+        butane foundation gala
 
 all: butane
 
@@ -78,6 +83,13 @@ foundation:
 
 package-foundation: foundation
 	@cd $(FOUNDATION) && make package
+
+gala:
+	@cd $(GALA) && make all
+
+# TODO(mike): Package Gala.
+# package-gala: gala
+# 	@cd $(GALA) && make package
 
 test:
 	# TODO: Add testing.
@@ -93,6 +105,7 @@ package:
 
 clean:
 	@cd $(FOUNDATION) && make clean
+	@cd $(GALA) && make clean
 	@echo "[RM] $(BUILD)/obj"
 	@rm -R -f $(BUILD)/obj
 	@echo "[RM] $(BUILD)/lib"

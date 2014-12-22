@@ -14,6 +14,7 @@ linkage=${BUTANE_CONFIG_LINKAGE:-static}
 platform=${BUTANE_CONFIG_PLATFORM:-`$ROOT/build/platform.sh`}
 architecture=${BUTANE_CONFIG_ARCHITECTURE:-`$ROOT/build/architecture.sh`}
 foundation=${BUTANE_CONFIG_FOUNDATION:-$ROOT/deps/foundation}
+gala=${BUTANE_CONFIG_FOUNDATION:-$ROOT/deps/gala}
 
 function usage {
   echo "Usage: configure [OPTIONS]"
@@ -32,12 +33,15 @@ function usage {
   echo "  --architecture=[architecture]     x86-64, arm, etc."
   echo ""
   echo "  --foundation [foundation]         Force the use of an external copy of"
-  echo "  --foundation=[foundation]         foundation."
+  echo "  --foundation=[foundation]         Foundation."
+  echo ""
+  echo "  --gala [gala]                     Force the use of an external copy of"
+  echo "  --gala=[gala]                     Gala."
   echo ""
   echo "  --help, --usage                   Displays this."
   echo ""
   echo "Report bugs on our issue tracker at:"
-  echo " https://github.com/bitbytestudios/butane/issues"
+  echo " https://github.com/origamicomet/butane/issues"
   exit 1
 }
 
@@ -171,6 +175,9 @@ export ARCHITECTURE := ${architecture}
 
 export FOUNDATION := `grep -e '^export\ ROOT\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 export FOUNDATION_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
+
+export GALA := `grep -e '^export\ ROOT\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
+export GALA_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
 
 include ${ROOT}/Makefile.any
 EOF
