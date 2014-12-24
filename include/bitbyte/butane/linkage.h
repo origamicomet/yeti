@@ -6,7 +6,7 @@
 //
 //  Author(s):
 //
-//    * Michael Williams <mike@bitbyte.ca>
+//    * Michael Williams <mike@origamicomet.com>
 //
 //===----------------------------------------------------------------------===//
 ///
