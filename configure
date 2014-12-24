@@ -175,9 +175,17 @@ export ARCHITECTURE := ${architecture}
 
 export FOUNDATION := `grep -e '^export\ ROOT\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 export FOUNDATION_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
+export FOUNDATION_CONFIGURATION := `grep -e '^export\ CONFIGURATION\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
+export FOUNDATION_LINKAGE := `grep -e '^export\ LINKAGE\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
+export FOUNDATION_PLATFORM := `grep -e '^export\ PLATFORM\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
+export FOUNDATION_ARCHITECTURE := `grep -e '^export\ ARCHITECTURE\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 
 export GALA := `grep -e '^export\ ROOT\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
 export GALA_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
+export GALA_CONFIGURATION := `grep -e '^export\ CONFIGURATION\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
+export GALA_LINKAGE := `grep -e '^export\ LINKAGE\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
+export GALA_PLATFORM := `grep -e '^export\ PLATFORM\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
+export GALA_ARCHITECTURE := `grep -e '^export\ ARCHITECTURE\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
 
 include ${ROOT}/Makefile.any
 EOF
