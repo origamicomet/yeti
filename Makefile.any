@@ -85,11 +85,11 @@ package-foundation: foundation
 	@cd $(FOUNDATION) && make package
 
 gala:
-	@cd $(GALA) && make all
+	@cd $(GALA) && make all SKIP_FOUNDATION=1
 
 # TODO(mike): Package Gala.
 # package-gala: gala
-# 	@cd $(GALA) && make package
+# 	@cd $(GALA) && make package SKIP_FOUNDATION=1
 
 test:
 	# TODO: Add testing.
@@ -105,7 +105,7 @@ package:
 
 clean:
 	@cd $(FOUNDATION) && make clean
-	@cd $(GALA) && make clean
+	@cd $(GALA) && make clean SKIP_FOUNDATION=1
 	@echo "[RM] $(BUILD)/obj"
 	@rm -R -f $(BUILD)/obj
 	@echo "[RM] $(BUILD)/lib"
