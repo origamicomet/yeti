@@ -81,7 +81,7 @@ endif
 #
 
 CFLAGS  := -nologo -c -favor:blend -GF -GR- -W4
-LDFLAGS := -nologo -manifest:embed -LIBPATH:"$(call posix-to-windows,$(BUILD)/bin)" -LIBPATH:"$(call posix-to-windows,$(BUILD)/lib)"
+LDFLAGS := -nologo -manifest:no -LIBPATH:"$(call posix-to-windows,$(BUILD)/bin)" -LIBPATH:"$(call posix-to-windows,$(BUILD)/lib)"
 ARFLAGS := -nologo
 
 ifeq ($(ARCHITECTURE),x86)
