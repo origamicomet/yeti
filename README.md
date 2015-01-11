@@ -41,7 +41,7 @@ How is it licensed?
 Attribution based licensing.
 
 ```
-Copyright (c) 2012-2014 Bitbyte Studios, Inc.
+Copyright (c) 2012-2015 Bitbyte Studios, Inc.
 
 Author(s):
 
