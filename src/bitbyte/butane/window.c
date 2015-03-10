@@ -437,6 +437,20 @@ bitbyte_butane_window_dimensions(
 #endif
 }
 
+//===----------------------------------------------------------------------===//
+
+uintptr_t
+bitbyte_butane_window_to_native(
+  const bitbyte_butane_window_t *window)
+{
+  bitbyte_butane_assert_debug(window != NULL);
+
+#if BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_WINDOWS__
+  return (uintptr_t)window->hndl;
+#elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_MAC_OS_X__
+#elif BITBYTE_FOUNDATION_TIER0_SYSTEM == __BITBYTE_FOUNDATION_TIER0_SYSTEM_LINUX__
+#endif
+}
 
 //===----------------------------------------------------------------------===//
 

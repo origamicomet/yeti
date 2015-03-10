@@ -258,6 +258,22 @@ bitbyte_butane_window_dimensions(
 
 //===----------------------------------------------------------------------===//
 
+/// \brief
+///
+extern
+BITBYTE_BUTANE_EXPORT
+uintptr_t
+bitbyte_butane_window_to_native(
+  const bitbyte_butane_window_t *window);
+
+/// \def bitbyte_butane_window_to_native
+/// \copydoc bitbyte_butane_window_to_native
+#ifdef __BITBYTE_BUTANE_IMPORT__
+  #define butane_window_to_native bitbyte_butane_window_to_native
+#endif // __BITBYTE_BUTANE_IMPORT__
+
+//===----------------------------------------------------------------------===//
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
