@@ -1,8 +1,8 @@
 # ===----------------------------------------------------------------------=== #
 #
-#  Butane
+#  Yeti
 #
-#  Copyright (c) 2012-2015 Bitbyte Studios, Inc.
+#  Copyright (c) 2012-2015 Origami Comet Games, Inc.
 #
 #  Author(s):
 #
@@ -110,28 +110,28 @@ endif
 
 ifeq ($(CONFIGURATION),debug)
   CFLAGS += -MDd -Od -Zi -RTCsu -fp:precise -fp:except -D_DEBUG
-  CFLAGS += -DBITBYTE_BUTANE_CONFIGURATION=BITBYTE_BUTANE_CONFIGURATION_DEBUG
+  CFLAGS += -DYETI_CONFIGURATION=YETI_CONFIGURATION_DEBUG
   LDFLAGS += -DEBUG
   ARFLAGS +=
 endif
 ifeq ($(CONFIGURATION),development)
   CFLAGS += -MD -Zi -fp:fast -fp:except- -D_NDEBUG
-  CFLAGS += -DBITBYTE_BUTANE_CONFIGURATION=BITBYTE_BUTANE_CONFIGURATION_DEVELOPMENT
+  CFLAGS += -DYETI_CONFIGURATION=YETI_CONFIGURATION_DEVELOPMENT
   LDFLAGS += -DEBUG
   ARFLAGS +=
 endif
 ifeq ($(CONFIGURATION),release)
   CFLAGS += -MD -GL -Ox -fp:fast -fp:except- -D_NDEBUG
-  CFLAGS += -DBITBYTE_BUTANE_CONFIGURATION=BITBYTE_BUTANE_CONFIGURATION_RELEASE
+  CFLAGS += -DYETI_CONFIGURATION=YETI_CONFIGURATION_RELEASE
   LDFLAGS += -LTCG
   ARFLAGS += -LTCG
 endif
 
 ifeq ($(LINKAGE),static)
-  CFLAGS += -DBITBYTE_BUTANE_LINKAGE=BITBYTE_BUTANE_STATIC_LINKAGE
+  CFLAGS += -DYETI_LINKAGE=YETI_STATIC_LINKAGE
 endif
 ifeq ($(LINKAGE),dynamic)
-  CFLAGS += -DBITBYTE_BUTANE_LINKAGE=BITBYTE_BUTANE_DYNAMIC_LINKAGE
+  CFLAGS += -DYETI_LINKAGE=YETI_DYNAMIC_LINKAGE
 endif
 
 ifeq ($(FOUNDATION_CONFIGURATION),debug)
@@ -186,47 +186,47 @@ LDFLAGS += -LIBPATH:"$(call posix-to-windows,$(GALA_BUILD)/bin)" -LIBPATH:"$(cal
 # Rules:
 #
 
-BUTANE_SOURCES := $(shell find $(ROOT)/src/bitbyte/butane -name '*.c')
-BUTANE_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(BUTANE_SOURCES:%.c=%.obj))
-BUTANE_OBJECTS += $(BUILD)/obj/bitbyte/butane.obj
+YETI_SOURCES := $(shell find $(ROOT)/src/yeti -name '*.c')
+YETI_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(YETI_SOURCES:%.c=%.obj))
+YETI_OBJECTS += $(BUILD)/obj/yeti.obj
 
--include $(BUTANE_OBJECTS:%.obj=%.d)
+-include $(YETI_OBJECTS:%.obj=%.d)
 
-$(BUILD)/obj/bitbyte/butane/%.obj: $(ROOT)/src/bitbyte/butane/%.c
+$(BUILD)/obj/yeti/%.obj: $(ROOT)/src/yeti/%.c
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
-	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -DBITBYTE_BUTANE_COMPILING=3 -Fo"$(call posix-to-windows,$@)" -Fd"$(call posix-to-windows,$(patsubst %.obj,%.pdb,$@))" "$<"
-	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -DBITBYTE_BUTANE_COMPILING=3 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
+	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 -Fo"$(call posix-to-windows,$@)" -Fd"$(call posix-to-windows,$(patsubst %.obj,%.pdb,$@))" "$<"
+	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
 
-$(BUILD)/obj/bitbyte/butane.obj: $(ROOT)/src/bitbyte/butane.c
+$(BUILD)/obj/yeti.obj: $(ROOT)/src/yeti.c
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
-	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -DBITBYTE_BUTANE_COMPILING=3 -Fo"$(call posix-to-windows,$@)" -Fd"$(call posix-to-windows,$(patsubst %.obj,%.pdb,$@))" "$<"
-	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -DBITBYTE_BUTANE_COMPILING=3 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
+	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 -Fo"$(call posix-to-windows,$@)" -Fd"$(call posix-to-windows,$(patsubst %.obj,%.pdb,$@))" "$<"
+	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
 
 ifeq ($(LINKAGE),static)
-$(BUILD)/lib/butane.lib: foundation gala $(BUTANE_OBJECTS)
+$(BUILD)/lib/yeti.lib: foundation $(YETI_OBJECTS)
 	@echo "[AR] $@"
 	@mkdir -p ${@D}
-	@lib $(ARFLAGS) -OUT:"$(call posix-to-windows,$@)" $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
+	@lib $(ARFLAGS) -OUT:"$(call posix-to-windows,$@)" $(foreach obj,$(YETI_OBJECTS),"$(call posix-to-windows,$(obj))")
 
-butane: foundation gala $(BUILD)/lib/butane.lib
+yeti: foundation $(BUILD)/lib/yeti.lib
 endif
 ifeq ($(LINKAGE),dynamic)
-$(BUILD)/bin/butane.dll: foundation gala $(BUTANE_OBJECTS)
+$(BUILD)/bin/yeti.dll: foundation $(YETI_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib gala.lib dbghelp.lib kernel32.lib user32.lib gdi32.lib ole32.lib $(foreach obj,$(BUTANE_OBJECTS),"$(call posix-to-windows,$(obj))")
+	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib dbghelp.lib kernel32.lib user32.lib gdi32.lib ole32.lib $(foreach obj,$(YETI_OBJECTS),"$(call posix-to-windows,$(obj))")
 
-$(BUILD)/lib/butane.lib: $(BUILD)/bin/butane.dll
+$(BUILD)/lib/yeti.lib: $(BUILD)/bin/yeti.dll
 	@echo "[AR] $@"
 	@mkdir -p ${@D}
 	@-mv -f -u $(basename $<).lib $@
 
-butane: foundation gala $(BUILD)/bin/butane.dll $(BUILD)/lib/butane.lib
+yeti: foundation $(BUILD)/bin/yeti.dll $(BUILD)/lib/yeti.lib
 endif
 
-package-butane: butane
+package-yeti: yeti
 	@mkdir -p $(BUILD)/pkg
 	@-cp $(FOUNDATION_BUILD)/pkg/* $(BUILD)/pkg/
 	@-cp $(BUILD)/bin/*.dll $(BUILD)/pkg/

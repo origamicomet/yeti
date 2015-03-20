@@ -1,8 +1,8 @@
-# Butane
+# Yeti
 
-[![Build Status](https://travis-ci.org/bitbytestudios/butane.png?branch=master)](http://travis-ci.org/bitbytestudios/butane)
+[![Build Status](https://travis-ci.org/origamicomet/yeti.png?branch=master)](http://travis-ci.org/origamicomet/yeti)
 
-Data-driven game engine.
+A general-purpose, data-driven game engine and tools.
 
 What platforms does it support?
 -------------------------------
@@ -23,17 +23,17 @@ What platforms does it support?
 How do I build it?
 ------------------
 
-    $ git clone https://github.com/bitbytestudios/butane.git
-    $ cd butane
+    $ git clone https://github.com/origamicomet/yeti.git
+    $ cd yeti
     $ ./configure
     $ make
 
-For more details please go [here](https://github.com/bitbytestudios/butane/wiki/Building).
+For more details please go [here](https://github.com/origamicomet/yeti/wiki/Building).
 
 How do I contribute?
 --------------------
 
-See our contribution guide [here](https://github.com/bitbytestudios/meta/wiki/Contributing).
+See our contribution guide [here](https://github.com/origamicomet/meta/wiki/Contributing).
 
 How is it licensed?
 -------------------
@@ -41,7 +41,7 @@ How is it licensed?
 Attribution based licensing.
 
 ```
-Copyright (c) 2012-2015 Bitbyte Studios, Inc.
+Copyright (c) 2012-2015 Origami Comet Games, Inc.
 
 Author(s):
 

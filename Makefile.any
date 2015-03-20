@@ -1,8 +1,8 @@
 # ===----------------------------------------------------------------------=== #
 #
-#  Butane
+#  Yeti
 #
-#  Copyright (c) 2012-2015 Bitbyte Studios, Inc.
+#  Copyright (c) 2012-2015 Origami Comet Games, Inc.
 #
 #  Author(s):
 #
@@ -66,30 +66,18 @@ ifndef FOUNDATION
   FOUNDATION_BUILD := deps/foundation/_build
 endif
 
-ifndef GALA
-  GALA := deps/gala
-  GALA_BUILD := deps/gala/_build
-endif
-
 export
 
 .PHONY: all test docs package clean \
-        butane foundation gala
+        yeti foundation
 
-all: butane
+all: yeti
 
 foundation:
 	@cd $(FOUNDATION) && make all
 
 package-foundation: foundation
 	@cd $(FOUNDATION) && make package
-
-gala:
-	@cd $(GALA) && make all SKIP_FOUNDATION=1
-
-# TODO(mike): Package Gala.
-# package-gala: gala
-# 	@cd $(GALA) && make package SKIP_FOUNDATION=1
 
 test:
 	# TODO: Add testing.
@@ -100,12 +88,11 @@ docs:
 
 package:
 	@make package-foundation
-	@echo "[PACKAGE] butane"
-	@make package-butane
+	@echo "[PACKAGE] yeti"
+	@make package-yeti
 
 clean:
 	@cd $(FOUNDATION) && make clean
-	@cd $(GALA) && make clean SKIP_FOUNDATION=1
 	@echo "[RM] $(BUILD)/obj"
 	@rm -R -f $(BUILD)/obj
 	@echo "[RM] $(BUILD)/lib"

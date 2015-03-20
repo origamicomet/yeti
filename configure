@@ -9,12 +9,11 @@ if [[ "$ROOT" == "$BUILD" ]]; then
   BUILD=$ROOT/_build
 fi
 
-configuration=${BUTANE_CONFIG_CONFIGURATION:-debug}
-linkage=${BUTANE_CONFIG_LINKAGE:-static}
-platform=${BUTANE_CONFIG_PLATFORM:-`$ROOT/build/platform.sh`}
-architecture=${BUTANE_CONFIG_ARCHITECTURE:-`$ROOT/build/architecture.sh`}
-foundation=${BUTANE_CONFIG_FOUNDATION:-$ROOT/deps/foundation}
-gala=${BUTANE_CONFIG_FOUNDATION:-$ROOT/deps/gala}
+configuration=${YETI_CONFIG_CONFIGURATION:-debug}
+linkage=${YETI_CONFIG_LINKAGE:-static}
+platform=${YETI_CONFIG_PLATFORM:-`$ROOT/build/platform.sh`}
+architecture=${YETI_CONFIG_ARCHITECTURE:-`$ROOT/build/architecture.sh`}
+foundation=${YETI_CONFIG_FOUNDATION:-$ROOT/deps/foundation}
 
 function usage {
   echo "Usage: configure [OPTIONS]"
@@ -35,13 +34,10 @@ function usage {
   echo "  --foundation [foundation]         Force the use of an external copy of"
   echo "  --foundation=[foundation]         Foundation."
   echo ""
-  echo "  --gala [gala]                     Force the use of an external copy of"
-  echo "  --gala=[gala]                     Gala."
-  echo ""
   echo "  --help, --usage                   Displays this."
   echo ""
   echo "Report bugs on our issue tracker at:"
-  echo " https://github.com/origamicomet/butane/issues"
+  echo " https://github.com/origamicomet/yeti/issues"
   exit 1
 }
 
@@ -139,8 +135,8 @@ case "$platform" in
     echo "Unknown or unsupported platform '$platform'!"
     echo ""
     echo "If you're trying to target closed platforms, like consoles, please do contact"
-    echo "us at <licensing@bitbyte.ca> as we may support it, but for obvious reasons"
-    echo "cannot open-source the relevant code."
+    echo "us at <licensing@origamicomet.com> as we may support it, but for obvious"
+    echo "reasons cannot open-source the relevant code."
     echo ""
     usage
     ;;
@@ -154,9 +150,9 @@ case "$architecture" in
   *)
     echo "Unknown or unsupported architecture '$architecture'!"
     echo ""
-    echo "If you're trying to target closed architectures, like larrabee, please do"
-    echo "contact us at <licensing@bitbyte.ca> as we may support it, but for obvious"
-    echo "reasons cannot open-source the relevant code."
+    echo "If you're trying to target closed architectures, like Larrabee, please do"
+    echo "contact us at <licensing@origamicomet.com> as we may support it, but for"
+    echo "obvious reasons cannot open-source the relevant code."
     echo ""
     usage
     ;;
@@ -179,13 +175,6 @@ export FOUNDATION_CONFIGURATION := `grep -e '^export\ CONFIGURATION\ \:\=\ ' ${f
 export FOUNDATION_LINKAGE := `grep -e '^export\ LINKAGE\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 export FOUNDATION_PLATFORM := `grep -e '^export\ PLATFORM\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 export FOUNDATION_ARCHITECTURE := `grep -e '^export\ ARCHITECTURE\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
-
-export GALA := `grep -e '^export\ ROOT\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
-export GALA_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
-export GALA_CONFIGURATION := `grep -e '^export\ CONFIGURATION\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
-export GALA_LINKAGE := `grep -e '^export\ LINKAGE\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
-export GALA_PLATFORM := `grep -e '^export\ PLATFORM\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
-export GALA_ARCHITECTURE := `grep -e '^export\ ARCHITECTURE\ \:\=\ ' ${gala}/Makefile | sed s/^.*\:\=\ // | cat`
 
 include ${ROOT}/Makefile.any
 EOF
