@@ -60,13 +60,13 @@ LDFLAGS := -L"$(BUILD)/bin" -L"$(BUILD)/lib"
 ARFLAGS :=
 
 ifeq ($(ARCHITECTURE),x86)
-  CFLAGS += -m32
-  LDFLAGS += -m32
+  CFLAGS += -march=i686
+  LDFLAGS += -march=i686
   ARFLAGS +=
 endif
 ifeq ($(ARCHITECTURE),x86-64)
-  CFLAGS += -m64
-  LDFLAGS += -m64
+  CFLAGS += -march=x86-64
+  LDFLAGS += -march=x86-64
   ARFLAGS +=
 endif
 
@@ -100,23 +100,23 @@ endif
 # Rules:
 #
 
-YETI_SOURCES := $(shell find $(ROOT)/src/yeti -name '*.c')
-YETI_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(YETI_SOURCES:%.c=%.o))
+YETI_SOURCES := $(shell find $(ROOT)/src/yeti -name '*.cc')
+YETI_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(YETI_SOURCES:%.cc=%.o))
 YETI_OBJECTS += $(BUILD)/obj/yeti.o
 
 -include $(YETI_OBJECTS:%.o=%.d)
 
-$(BUILD)/obj/yeti/%.o: $(ROOT)/src/yeti/%.c
+$(BUILD)/obj/yeti/%.o: $(ROOT)/src/yeti/%.cc
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
-	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<"
-	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<" -MM -MT $@ >$(patsubst %.o,%.d,$@)
+	@g++ -std=gnu++0x $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<"
+	@g++ -std=gnu++0x $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -c "$<" -MM -MT"$(patsubst %.o,%.d,$@)" 1>/dev/null
 
-$(BUILD)/obj/yeti.o: $(ROOT)/src/yeti.c
+$(BUILD)/obj/yeti.o: $(ROOT)/src/yeti.cc
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
-	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<"
-	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<" -MM -MT $@ >$(patsubst %.o,%.d,$@)
+	@g++ -std=gnu++0x $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<"
+	@g++ -std=gnu++0x $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -c "$<" -MM -MT"$(patsubst %.o,%.d,$@)" 1>/dev/null
 
 ifeq ($(LINKAGE),static)
 $(BUILD)/lib/libyeti: $(YETI_OBJECTS)
@@ -130,14 +130,9 @@ ifeq ($(LINKAGE),dynamic)
 $(BUILD)/bin/libyeti.so: $(YETI_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@gcc -shared $(LDFLAGS) -o "$@" $(foreach obj,$(YETI_OBJECTS),"$(obj)")
+	@g++ -shared -fPIC $(LDFLAGS) -o "$@" $(foreach obj,$(YETI_OBJECTS),"$(obj)")
 
-$(BUILD)/lib/libyeti: $(BUILD)/bin/libyeti.so
-	@echo "[AR] $@"
-	@mkdir -p ${@D}
-	@-mv -f -u $(basename $<) $@
-
-yeti: $(BUILD)/bin/libyeti.so $(BUILD)/lib/libyeti
+yeti: $(BUILD)/bin/libyeti.so
 endif
 
 package-yeti: yeti

@@ -1,46 +1,41 @@
-/*===-- yeti/linkage.h --------------------------------------*- mode: C -*-===*\
-|*                                                                            *|
-|*                             __ __     _   _                                *|
-|*                            |  |  |___| |_|_|                               *|
-|*                            |_   _| -_|  _| |                               *|
-|*                              |_| |___|_| |_|                               *|
-|*                                                                            *|
-|*       This file is distributed under the terms described in LICENSE.       *|
-|*                                                                            *|
-|*===----------------------------------------------------------------------===*|
-|*                                                                            *|
-|* Defines pre-processor macros that specify symbol visibility.               *|
-|*                                                                            *|
-\*===----------------------------------------------------------------------===*/
+//===-- yeti/linkage.h ------------------------------------*- mode: C++ -*-===//
+//
+//                             __ __     _   _
+//                            |  |  |___| |_|_|
+//                            |_   _| -_|  _| |
+//                              |_| |___|_| |_|
+//
+//       This file is distributed under the terms described in LICENSE.
+//
+//===----------------------------------------------------------------------===//
+//
+// Defines pre-processor macros that specify symbol visibility.
+//
+//===----------------------------------------------------------------------===//
 
 #ifndef _YETI_LINKAGE_H_
 #define _YETI_LINKAGE_H_
 
-/*! \def YETI_INTERNAL_LINKAGE
- *  \brief Exports symbols for inclusion of Yeti via objects.
- */
+//! \def YETI_INTERNAL_LINKAGE
+//! \brief Exports symbols for inclusion of Yeti via objects.
 #define YETI_INTERNAL_LINKAGE 0
 
-/*! \def YETI_STATIC_LINKAGE
- *  \brief Exports symbols for inclusion of Yeti via static library.
- */
+//! \def YETI_STATIC_LINKAGE
+//! \brief Exports symbols for inclusion of Yeti via static library.
 #define YETI_STATIC_LINKAGE 1
 
-/*! \def YETI_DYNAMIC_LINKAGE
- *  \brief Exports symbols for inclusion of Yeti via dynamic library.
- */
+//! \def YETI_DYNAMIC_LINKAGE
+//! \brief Exports symbols for inclusion of Yeti via dynamic library.
 #define YETI_DYNAMIC_LINKAGE 2
 
-/*! \def YETI_LINKAGE
- *  \brief Specifies how you intend to link to Yeti.
- */
+//! \def YETI_LINKAGE
+//! \brief Specifies how you intend to link to Yeti.
 #ifndef YETI_LINKAGE
   #error ("Please specify how you intend on linking to Yei by defining `YETI_LINKAGE'.")
 #endif
 
-/*! \def YETI_LOCAL
- *  \brief Marks a symbol for internal usage.
- */
+//! \def YETI_LOCAL
+//! \brief Marks a symbol for internal usage.
 #ifdef DOXYGEN
   #define YETI_LOCAL
 #else /* #ifndef DOXYGEN */
@@ -67,15 +62,14 @@
   #endif
 #endif
 
-/*! \def YETI_PUBLIC
- *  \brief Marks a symbol for public usage.
- */
+//! \def YETI_PUBLIC
+//! \brief Marks a symbol for public usage.
 #ifdef DOXYGEN
   #define YETI_PUBLIC
 #else /* #ifndef DOXYGEN */
   #if YETI_LINKAGE == YETI_STATIC_LINKAGE
     #define YETI_PUBLIC
-  #elif YETI_LINKAGE == YETI_DYNAMIC_LINAKGE
+  #elif YETI_LINKAGE == YETI_DYNAMIC_LINKAGE
     #ifdef __YETI_IS_BEING_COMPILED__
       #if defined(__GNUC__)
         #if __GNUC__ >= 4
@@ -104,12 +98,10 @@
   #endif
 #endif
 
-/*! \def YETI_BEGIN_EXTERN_C
- *  \internal
- */
-/*! \def YETI_END_EXTERN_C
- *  \internal
- */
+//! \def YETI_BEGIN_EXTERN_C
+//! \internal
+//! \def YETI_END_EXTERN_C
+//! \internal
 #ifdef DOXYGEN
   #define YETI_BEGIN_EXTERN_C
   #define YETI_END_EXTERN_C
@@ -125,4 +117,4 @@
 
 #endif /* _YETI_LINKAGE_H_ */
 
-/*============================================================================*/
+//===----------------------------------------------------------------------===//
