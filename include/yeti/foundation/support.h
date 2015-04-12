@@ -16,6 +16,7 @@
 #ifndef _YETI_FOUNDATION_SUPPORT_H_
 #define _YETI_FOUNDATION_SUPPORT_H_
 
+#include "yeti/foundation/support/code_gen.h"
 #include "yeti/foundation/support/rule_of_three.h"
 
 #endif /* _YETI_FOUNDATION_SUPPORT_H_ */
