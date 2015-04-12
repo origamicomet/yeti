@@ -1,4 +1,4 @@
-//===-- yeti.h --------------------------------------------*- mode: C++ -*-===//
+//===-- yeti/foundation/support.h -------------------------*- mode: C++ -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -9,17 +9,15 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// Your sherpa for the journey to the centre of Yeti.
+// TODO(mtwilliams): Document the purpose of this file.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef _YETI_H_
-#define _YETI_H_
+#ifndef _YETI_FOUNDATION_SUPPORT_H_
+#define _YETI_FOUNDATION_SUPPORT_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/foundation/support/rule_of_three.h"
 
-#endif /* _YETI_H_ */
+#endif /* _YETI_FOUNDATION_SUPPORT_H_ */
 
 //===----------------------------------------------------------------------===//
