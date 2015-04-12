@@ -16,7 +16,8 @@
 #ifndef _YETI_H_
 #define _YETI_H_
 
-#include "yeti/common.h"
+#include "yeti/config.h"
+#include "yeti/linkage.h"
 
 #endif /* _YETI_H_ */
 

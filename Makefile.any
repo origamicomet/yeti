@@ -61,23 +61,12 @@ ifndef CONFIGURATION
   $(warning No configuration specified, assuming default configuration '$(CONFIGURATION)'.)
 endif
 
-ifndef FOUNDATION
-  FOUNDATION := deps/foundation
-  FOUNDATION_BUILD := deps/foundation/_build
-endif
-
 export
 
 .PHONY: all test docs package clean \
-        yeti foundation
+        yeti
 
 all: yeti
-
-foundation:
-	@cd $(FOUNDATION) && make all
-
-package-foundation: foundation
-	@cd $(FOUNDATION) && make package
 
 test:
 	# TODO: Add testing.
@@ -87,12 +76,10 @@ docs:
 	@doxygen Doxyfile
 
 package:
-	@make package-foundation
 	@echo "[PACKAGE] yeti"
 	@make package-yeti
 
 clean:
-	@cd $(FOUNDATION) && make clean
 	@echo "[RM] $(BUILD)/obj"
 	@rm -R -f $(BUILD)/obj
 	@echo "[RM] $(BUILD)/lib"

@@ -104,6 +104,25 @@
   #endif
 #endif
 
+/*! \def YETI_BEGIN_EXTERN_C
+ *  \internal
+ */
+/*! \def YETI_END_EXTERN_C
+ *  \internal
+ */
+#ifdef DOXYGEN
+  #define YETI_BEGIN_EXTERN_C
+  #define YETI_END_EXTERN_C
+#else /* #ifndef DOXYGEN */
+  #if defined(__cplusplus)
+    #define YETI_BEGIN_EXTERN_C extern "C" {
+    #define YETI_END_EXTERN_C }
+  #else /* #ifndef __cplusplus */
+    #define YETI_BEGIN_EXTERN_C
+    #define YETI_END_EXTERN_C
+  #endif
+#endif
+
 #endif /* _YETI_LINKAGE_H_ */
 
 /*============================================================================*/

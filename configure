@@ -13,7 +13,6 @@ configuration=${YETI_CONFIG_CONFIGURATION:-debug}
 linkage=${YETI_CONFIG_LINKAGE:-static}
 platform=${YETI_CONFIG_PLATFORM:-`$ROOT/build/platform.sh`}
 architecture=${YETI_CONFIG_ARCHITECTURE:-`$ROOT/build/architecture.sh`}
-foundation=${YETI_CONFIG_FOUNDATION:-$ROOT/deps/foundation}
 
 function usage {
   echo "Usage: configure [OPTIONS]"
@@ -30,9 +29,6 @@ function usage {
   echo ""
   echo "  --architecture [architecture]     Specify an architecture to target: x86,"
   echo "  --architecture=[architecture]     x86-64, arm, etc."
-  echo ""
-  echo "  --foundation [foundation]         Force the use of an external copy of"
-  echo "  --foundation=[foundation]         Foundation."
   echo ""
   echo "  --help, --usage                   Displays this."
   echo ""
@@ -76,13 +72,6 @@ while [[ $# > 0 ]]; do
       ;;
     --architecture=*)
       architecture=`echo "$1" | sed 's/^--architecture=//'`
-      ;;
-    --foundation)
-      shift;
-      foundation=$1
-      ;;
-    --foundation=*)
-      foundation=`echo "$1" | sed 's/^--foundation=//'`
       ;;
     *)
       usage
@@ -168,13 +157,6 @@ export CONFIGURATION := ${configuration}
 export LINKAGE := ${linkage}
 export PLATFORM := ${platform}
 export ARCHITECTURE := ${architecture}
-
-export FOUNDATION := `grep -e '^export\ ROOT\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
-export FOUNDATION_BUILD := `grep -e '^export\ BUILD\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
-export FOUNDATION_CONFIGURATION := `grep -e '^export\ CONFIGURATION\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
-export FOUNDATION_LINKAGE := `grep -e '^export\ LINKAGE\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
-export FOUNDATION_PLATFORM := `grep -e '^export\ PLATFORM\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
-export FOUNDATION_ARCHITECTURE := `grep -e '^export\ ARCHITECTURE\ \:\=\ ' ${foundation}/Makefile | sed s/^.*\:\=\ // | cat`
 
 include ${ROOT}/Makefile.any
 EOF

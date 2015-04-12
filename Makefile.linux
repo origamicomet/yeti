@@ -1,0 +1,145 @@
+# ===----------------------------------------------------------------------=== #
+#
+#  Yeti
+#
+#  Copyright (c) 2012-2015 Origami Comet Games, Inc.
+#
+#  Author(s):
+#
+#    * Michael Williams <mike@origamicomet.com>
+#
+#  This software is provided 'as-is', without any express or implied warranty.
+#  In no event will the authors be held liable for any damages arising from the
+#  use of this software.
+#
+#  Permission is granted to anyone to use this software for any purpose,
+#  including commercial applications, and to alter it and redistribute it
+#  freely, subject to the following restrictions:
+#
+#     1. The origin of this software must not be misrepresented; you must not
+#     claim that you wrote the original software. If you use this software
+#     in a product, an acknowledgment in the product in the form of a provided
+#     splash screen is required as well as an acknowledgement in the product
+#     documentation.
+#
+#     2. Altered source versions must be plainly marked as such, and must not
+#     be misrepresented as being the original software.
+#
+#     3. Altered versions may not be sublicensed.
+#
+#     4. This notice may not be removed or altered from any source distribution.
+#
+# ===----------------------------------------------------------------------=== #
+
+#
+# Verify that Linux is targetable:
+#
+
+ifneq ($(shell $(ROOT)/build/platform.sh),linux)
+  $(error Cannot cross-compile to 'linux' from '$(shell $(ROOT)/build/platform.sh)')
+endif
+
+#
+# Verify that GCC exists:
+#
+
+ifeq ($(shell $(ROOT)/build/toolchains/gcc.d/available),0)
+  $(error Compiliation with 'gcc' is not available on '$(shell $(ROOT)/build/platform.sh)'. \
+          The build system was unable to auto-detect GCC.)
+endif
+
+#
+# Define CFLAGS, LDFLAGS, and ARFLAGS:
+#
+
+CFLAGS  := -Wall -Wextra -Wfloat-equal -Wshadow -Wunsafe-loop-optimizations \
+           -Wpointer-arith -Wcast-qual -Wcast-align \
+           -Wmissing-field-initializers -Wpacked -Wpadded -Wredundant-decls \
+           -Wunreachable-code -Winline
+LDFLAGS := -L"$(BUILD)/bin" -L"$(BUILD)/lib"
+ARFLAGS :=
+
+ifeq ($(ARCHITECTURE),x86)
+  CFLAGS += -m32
+  LDFLAGS += -m32
+  ARFLAGS +=
+endif
+ifeq ($(ARCHITECTURE),x86-64)
+  CFLAGS += -m64
+  LDFLAGS += -m64
+  ARFLAGS +=
+endif
+
+ifeq ($(CONFIGURATION),debug)
+  CFLAGS += -g -O0 -D_DEBUG
+  CFLAGS += -DYETI_CONFIGURATION=YETI_CONFIGURATION_DEBUG
+  LDFLAGS +=
+  ARFLAGS +=
+endif
+ifeq ($(CONFIGURATION),development)
+  CFLAGS += -g -03 -D_NDEBUG
+  CFLAGS += -DYETI_CONFIGURATION=YETI_CONFIGURATION_DEVELOPMENT
+  LDFLAGS +=
+  ARFLAGS +=
+endif
+ifeq ($(CONFIGURATION),release)
+  CFLAGS += -g -03 -mfpmath=sse -D_NDEBUG
+  CFLAGS += -DYETI_CONFIGURATION=YETI_CONFIGURATION_RELEASE
+  LDFLAGS +=
+  ARFLAGS +=
+endif
+
+ifeq ($(LINKAGE),static)
+  CFLAGS += -DYETI_LINKAGE=YETI_STATIC_LINKAGE
+endif
+ifeq ($(LINKAGE),dynamic)
+  CFLAGS += -DYETI_LINKAGE=YETI_DYNAMIC_LINKAGE
+endif
+
+#
+# Rules:
+#
+
+YETI_SOURCES := $(shell find $(ROOT)/src/yeti -name '*.c')
+YETI_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(YETI_SOURCES:%.c=%.o))
+YETI_OBJECTS += $(BUILD)/obj/yeti.o
+
+-include $(YETI_OBJECTS:%.o=%.d)
+
+$(BUILD)/obj/yeti/%.o: $(ROOT)/src/yeti/%.c
+	@echo "[CC] $<"
+	@mkdir -p ${@D}
+	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<"
+	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<" -MM -MT $@ >$(patsubst %.o,%.d,$@)
+
+$(BUILD)/obj/yeti.o: $(ROOT)/src/yeti.c
+	@echo "[CC] $<"
+	@mkdir -p ${@D}
+	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<"
+	@gcc -std=gnu99 $(CFLAGS) -I"$(ROOT)/include" -D__YETI_IS_BEING_COMPILED__=1 -o "$@" -c "$<" -MM -MT $@ >$(patsubst %.o,%.d,$@)
+
+ifeq ($(LINKAGE),static)
+$(BUILD)/lib/libyeti: $(YETI_OBJECTS)
+	@echo "[AR] $@"
+	@mkdir -p ${@D}
+	@ar -rcs $(ARFLAGS) -o "$@" $(foreach obj,$(YETI_OBJECTS),"$(obj)")
+
+yeti: $(BUILD)/lib/libyeti
+endif
+ifeq ($(LINKAGE),dynamic)
+$(BUILD)/bin/libyeti.so: $(YETI_OBJECTS)
+	@echo "[LD] $@"
+	@mkdir -p ${@D}
+	@gcc -shared $(LDFLAGS) -o "$@" $(foreach obj,$(YETI_OBJECTS),"$(obj)")
+
+$(BUILD)/lib/libyeti: $(BUILD)/bin/libyeti.so
+	@echo "[AR] $@"
+	@mkdir -p ${@D}
+	@-mv -f -u $(basename $<) $@
+
+yeti: $(BUILD)/bin/libyeti.so $(BUILD)/lib/libyeti
+endif
+
+package-yeti: yeti
+	@mkdir -p $(BUILD)/pkg
+	@-cp $(BUILD)/bin/*.so $(BUILD)/pkg/
