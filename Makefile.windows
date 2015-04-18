@@ -134,96 +134,48 @@ ifeq ($(LINKAGE),dynamic)
   CFLAGS += -DYETI_LINKAGE=YETI_DYNAMIC_LINKAGE
 endif
 
-ifeq ($(FOUNDATION_CONFIGURATION),debug)
-  CFLAGS += -DBITBYTE_FOUNDATION_CONFIGURATION=BITBYTE_FOUNDATION_CONFIGURATION_DEBUG
-endif
-ifeq ($(FOUNDATION_CONFIGURATION),development)
-  CFLAGS += -DBITBYTE_FOUNDATION_CONFIGURATION=BITBYTE_FOUNDATION_CONFIGURATION_DEVELOPMENT
-endif
-ifeq ($(FOUNDATION_CONFIGURATION),release)
-  CFLAGS += -DBITBYTE_FOUNDATION_CONFIGURATION=BITBYTE_FOUNDATION_CONFIGURATION_RELEASE
-endif
-
-ifeq ($(FOUNDATION_LINKAGE),static)
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER0_LINKAGE=BITBYTE_FOUNDATION_TIER0_STATIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER1_LINKAGE=BITBYTE_FOUNDATION_TIER1_STATIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER2_LINKAGE=BITBYTE_FOUNDATION_TIER2_STATIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER3_LINKAGE=BITBYTE_FOUNDATION_TIER3_STATIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER4_LINKAGE=BITBYTE_FOUNDATION_TIER4_STATIC_LINKAGE
-endif
-ifeq ($(FOUNDATION_LINKAGE),dynamic)
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER0_LINKAGE=BITBYTE_FOUNDATION_TIER0_DYNAMIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER1_LINKAGE=BITBYTE_FOUNDATION_TIER1_DYNAMIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER2_LINKAGE=BITBYTE_FOUNDATION_TIER2_DYNAMIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER3_LINKAGE=BITBYTE_FOUNDATION_TIER3_DYNAMIC_LINKAGE
-  CFLAGS += -DBITBYTE_FOUNDATION_TIER4_LINKAGE=BITBYTE_FOUNDATION_TIER4_DYNAMIC_LINKAGE
-endif
-
-CFLAGS += -I"$(call posix-to-windows,$(FOUNDATION)/include)"
-LDFLAGS += -LIBPATH:"$(call posix-to-windows,$(FOUNDATION_BUILD)/bin)" -LIBPATH:"$(call posix-to-windows,$(FOUNDATION_BUILD)/lib)"
-
-ifeq ($(GALA_CONFIGURATION),debug)
-  CFLAGS += -DGALA_CONFIGURATION=GALA_CONFIGURATION_DEBUG
-endif
-ifeq ($(GALA_CONFIGURATION),development)
-  CFLAGS += -DGALA_CONFIGURATION=GALA_CONFIGURATION_DEVELOPMENT
-endif
-ifeq ($(GALA_CONFIGURATION),release)
-  CFLAGS += -DGALA_CONFIGURATION=GALA_CONFIGURATION_RELEASE
-endif
-
-ifeq ($(GALA_LINKAGE),static)
-  CFLAGS += -DGALA_LINKAGE=GALA_STATIC_LINKAGE
-endif
-ifeq ($(GALA_LINKAGE),dynamic)
-  CFLAGS += -DGALA_LINKAGE=GALA_DYNAMIC_LINAKGE
-endif
-
-CFLAGS += -I"$(call posix-to-windows,$(GALA)/include)"
-LDFLAGS += -LIBPATH:"$(call posix-to-windows,$(GALA_BUILD)/bin)" -LIBPATH:"$(call posix-to-windows,$(GALA_BUILD)/lib)"
-
 #
 # Rules:
 #
 
-YETI_SOURCES := $(shell find $(ROOT)/src/yeti -name '*.c')
-YETI_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(YETI_SOURCES:%.c=%.obj))
+YETI_SOURCES := $(shell find $(ROOT)/src/yeti -name '*.cc')
+YETI_OBJECTS := $(subst $(ROOT)/src/,$(BUILD)/obj/,$(YETI_SOURCES:%.cc=%.obj))
 YETI_OBJECTS += $(BUILD)/obj/yeti.obj
 
 -include $(YETI_OBJECTS:%.obj=%.d)
 
-$(BUILD)/obj/yeti/%.obj: $(ROOT)/src/yeti/%.c
+$(BUILD)/obj/yeti/%.obj: $(ROOT)/src/yeti/%.cc
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
 	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 -Fo"$(call posix-to-windows,$@)" -Fd"$(call posix-to-windows,$(patsubst %.obj,%.pdb,$@))" "$<"
 	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
 
-$(BUILD)/obj/yeti.obj: $(ROOT)/src/yeti.c
+$(BUILD)/obj/yeti.obj: $(ROOT)/src/yeti.cc
 	@echo "[CC] $<"
 	@mkdir -p ${@D}
 	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 -Fo"$(call posix-to-windows,$@)" -Fd"$(call posix-to-windows,$(patsubst %.obj,%.pdb,$@))" "$<"
 	@$(ROOT)/build/toolchains/msvc.d/cl -TP $(CFLAGS) -I"$(call posix-to-windows,$(ROOT)/include)" -D__YETI_IS_BEING_COMPILED__=1 "$<" -MM -MT $@ >$(patsubst %.obj,%.d,$@)
 
 ifeq ($(LINKAGE),static)
-$(BUILD)/lib/yeti.lib: foundation $(YETI_OBJECTS)
+$(BUILD)/lib/yeti.lib: $(YETI_OBJECTS)
 	@echo "[AR] $@"
 	@mkdir -p ${@D}
 	@lib $(ARFLAGS) -OUT:"$(call posix-to-windows,$@)" $(foreach obj,$(YETI_OBJECTS),"$(call posix-to-windows,$(obj))")
 
-yeti: foundation $(BUILD)/lib/yeti.lib
+yeti: $(BUILD)/lib/yeti.lib
 endif
 ifeq ($(LINKAGE),dynamic)
-$(BUILD)/bin/yeti.dll: foundation $(YETI_OBJECTS)
+$(BUILD)/bin/yeti.dll: $(YETI_OBJECTS)
 	@echo "[LD] $@"
 	@mkdir -p ${@D}
-	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" tier0.lib tier1.lib tier2.lib tier3.lib tier4.lib dbghelp.lib kernel32.lib user32.lib gdi32.lib ole32.lib $(foreach obj,$(YETI_OBJECTS),"$(call posix-to-windows,$(obj))")
+	@link -DLL $(LDFLAGS) -OUT:"$(call posix-to-windows,$@)" $(foreach obj,$(YETI_OBJECTS),"$(call posix-to-windows,$(obj))")
 
 $(BUILD)/lib/yeti.lib: $(BUILD)/bin/yeti.dll
 	@echo "[AR] $@"
 	@mkdir -p ${@D}
 	@-mv -f -u $(basename $<).lib $@
 
-yeti: foundation $(BUILD)/bin/yeti.dll $(BUILD)/lib/yeti.lib
+yeti: $(BUILD)/bin/yeti.dll $(BUILD)/lib/yeti.lib
 endif
 
 package-yeti: yeti
