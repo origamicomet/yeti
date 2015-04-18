@@ -10,8 +10,9 @@ What platforms does it support?
 | Platform  | Toolchain               | Supported             |
 |:---------:|:-----------------------:|:---------------------:|
 | Windows   | Microsoft Visual Studio | <span>&#10003;</span> |
-| Windows   | MinGW/MSYS              | <span>&#10003;</span> |
-| Windows   | Cygwin                  |         Never         |
+| Windows   | Clang                   |        Planned        |
+| Windows   | GCC (MinGW)             |        Planned        |
+| Windows   | GCC (Cygwin)            |         Never         |
 | Mac OS X  | GCC or Clang            |        Planned        |
 | Linux     | GCC or Clang            | <span>&#10003;</span> |
 | BSD       | GCC or Clang            |        Planned        |
