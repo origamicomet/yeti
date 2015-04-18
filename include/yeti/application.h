@@ -16,6 +16,10 @@
 #ifndef _YETI_APPLICATION_H_
 #define _YETI_APPLICATION_H_
 
+#include "yeti/config.h"
+#include "yeti/linkage.h"
+#include "yeti/foundation.h"
+
 namespace yeti {
 
 // See include/yeti/time_step_policy.h
@@ -56,7 +60,7 @@ class YETI_PUBLIC Application {
   Window *window_;
 #if (YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG) \
     (YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT)
-  foundation::Atomic<bool> is_paused_;
+  foundation::atomic::u32 is_paused_;
 #endif
 };
 
