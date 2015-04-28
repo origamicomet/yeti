@@ -1,6 +1,5 @@
 !.gitignore
 Makefile
-_build
 
 #
 # Windows
@@ -208,10 +207,10 @@ tramp
 /auto/
 
 #
-# SublimeText
+# Sublime Text 2/3
 #
 
-# *.sublime-project
+*.sublime-project
 *.sublime-workspace
 
 sftp-config.json
