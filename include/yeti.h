@@ -8,9 +8,10 @@
 //       This file is distributed under the terms described in LICENSE.
 //
 //===----------------------------------------------------------------------===//
-//
-// Your sherpa for the journey to the centre of Yeti.
-//
+///
+/// \file
+/// \brief Your sherpa for the journey to the center of Yeti.
+///
 //===----------------------------------------------------------------------===//
 
 #ifndef _YETI_H_
@@ -18,8 +19,7 @@
 
 #include "yeti/config.h"
 #include "yeti/linkage.h"
-#include "yeti/foundation.h"
 
-#endif /* _YETI_H_ */
+#endif // _YETI_H_
 
 //===----------------------------------------------------------------------===//

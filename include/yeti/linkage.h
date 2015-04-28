@@ -8,41 +8,42 @@
 //       This file is distributed under the terms described in LICENSE.
 //
 //===----------------------------------------------------------------------===//
-//
-// Defines pre-processor macros that specify symbol visibility.
-//
+///
+/// \file
+/// \brief Defines pre-processor macros that specify symbol visibility.
+///
 //===----------------------------------------------------------------------===//
 
 #ifndef _YETI_LINKAGE_H_
 #define _YETI_LINKAGE_H_
 
-//! \def YETI_INTERNAL_LINKAGE
-//! \brief Exports symbols for inclusion of Yeti via objects.
+/// \def YETI_INTERNAL_LINKAGE
+/// \brief Exports symbols for inclusion of Yeti via objects.
 #define YETI_INTERNAL_LINKAGE 0
 
-//! \def YETI_STATIC_LINKAGE
-//! \brief Exports symbols for inclusion of Yeti via static library.
+/// \def YETI_STATIC_LINKAGE
+/// \brief Exports symbols for inclusion of Yeti via static library.
 #define YETI_STATIC_LINKAGE 1
 
-//! \def YETI_DYNAMIC_LINKAGE
-//! \brief Exports symbols for inclusion of Yeti via dynamic library.
+/// \def YETI_DYNAMIC_LINKAGE
+/// \brief Exports symbols for inclusion of Yeti via dynamic library.
 #define YETI_DYNAMIC_LINKAGE 2
 
-//! \def YETI_LINKAGE
-//! \brief Specifies how you intend to link to Yeti.
-#ifndef YETI_LINKAGE
+/// \def YETI_LINKAGE
+/// \brief Specifies how you intend to link to Yeti.
+#if !defined(YETI_LINKAGE)
   #error ("Please specify how you intend on linking to Yei by defining `YETI_LINKAGE'.")
 #endif
 
-//! \def YETI_LOCAL
-//! \brief Marks a symbol for internal usage.
-#ifdef DOXYGEN
+/// \def YETI_LOCAL
+/// \brief Marks a symbol for internal usage.
+#if defined (DOXYGEN)
   #define YETI_LOCAL
-#else /* #ifndef DOXYGEN */
+#else // #if !defined(DOXYGEN)
   #if YETI_LINKAGE == YETI_STATIC_LINKAGE
     #define YETI_LOCAL
   #elif YETI_LINKAGE == YETI_DYNAMIC_LINAKGE
-    #ifdef __YETI_IS_BEING_COMPILED__
+    #if defined (__YETI_IS_BEING_COMPILED__)
       #if defined(__GNUC__)
         #if __GNUC__ >= 4
           #define YETI_LOCAL __attribute__ ((visibility ("hidden")))
@@ -56,21 +57,21 @@
       #else
         #error ("Unknown or unsupported toolchain!")
       #endif
-    #else /* #ifndef __YETI_IS_BEING_COMPILED__ */
+    #else // #if !defined(__YETI_IS_BEING_COMPILED__)
       #define YETI_LOCAL
     #endif
   #endif
 #endif
 
-//! \def YETI_PUBLIC
-//! \brief Marks a symbol for public usage.
-#ifdef DOXYGEN
+/// \def YETI_PUBLIC
+/// \brief Marks a symbol for public usage.
+#if defined (DOXYGEN)
   #define YETI_PUBLIC
-#else /* #ifndef DOXYGEN */
+#else // #if !defined(DOXYGEN)
   #if YETI_LINKAGE == YETI_STATIC_LINKAGE
     #define YETI_PUBLIC
   #elif YETI_LINKAGE == YETI_DYNAMIC_LINKAGE
-    #ifdef __YETI_IS_BEING_COMPILED__
+    #if defined (__YETI_IS_BEING_COMPILED__)
       #if defined(__GNUC__)
         #if __GNUC__ >= 4
           #define YETI_PUBLIC __attribute__ ((visibility ("default")))
@@ -84,7 +85,7 @@
       #else
         #error ("Unknown or unsupported toolchain!")
       #endif
-    #else /* #ifndef __YETI_IS_BEING_COMPILED__ */
+    #else // #if !defined(__YETI_IS_BEING_COMPILED__)
       #if (defined(__GNUC__) && (__GNUC__ >= 4))
         #define YETI_PUBLIC
       #elif defined(__clang__)
@@ -98,23 +99,30 @@
   #endif
 #endif
 
-//! \def YETI_BEGIN_EXTERN_C
-//! \internal
-//! \def YETI_END_EXTERN_C
-//! \internal
-#ifdef DOXYGEN
+/// \def YETI_BEGIN_EXTERN_C
+/// \internal
+/// \def YETI_END_EXTERN_C
+/// \internal
+#if defined (DOXYGEN)
   #define YETI_BEGIN_EXTERN_C
   #define YETI_END_EXTERN_C
-#else /* #ifndef DOXYGEN */
+#else // #if !defined(DOXYGEN)
   #if defined(__cplusplus)
     #define YETI_BEGIN_EXTERN_C extern "C" {
     #define YETI_END_EXTERN_C }
-  #else /* #ifndef __cplusplus */
+  #else // #if !defined(__cplusplus)
     #define YETI_BEGIN_EXTERN_C
     #define YETI_END_EXTERN_C
   #endif
 #endif
 
-#endif /* _YETI_LINKAGE_H_ */
+/// \def YETI_BEGIN_NAMESPACE
+/// \internal
+/// \def YETI_END_NAMESPACE
+/// \internal
+#define YETI_BEGIN_NAMESPACE namespace yeti {
+#define YETI_END_NAMESPACE } // yeti
+
+#endif // _YETI_LINKAGE_H_
 
 //===----------------------------------------------------------------------===//

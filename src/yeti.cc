@@ -16,8 +16,8 @@ YETI_BEGIN_EXTERN_C // {
 YETI_PUBLIC
 void __yeti__(void)
 {
-  // HACK(mtwilliams): We need to export at least on symbol for Microsoft's
-  // linker to actually produce a dynamically linked library.
+  // HACK(mtwilliams): Export at least one symbol. This is to make sure
+  // Microsoft's linker actually produces a dynamically-linked library.
 }
 
 YETI_END_EXTERN_C // }
