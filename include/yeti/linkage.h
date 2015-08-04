@@ -17,22 +17,22 @@
 #ifndef _YETI_LINKAGE_H_
 #define _YETI_LINKAGE_H_
 
-/// \def YETI_INTERNAL_LINKAGE
+/// \def YETI_LINKAGE_INTERNAL
 /// \brief Exports symbols for inclusion of Yeti via objects.
-#define YETI_INTERNAL_LINKAGE 0
+#define YETI_LINKAGE_INTERNAL 0
 
-/// \def YETI_STATIC_LINKAGE
+/// \def YETI_LINKAGE_STATIC
 /// \brief Exports symbols for inclusion of Yeti via static library.
-#define YETI_STATIC_LINKAGE 1
+#define YETI_LINKAGE_STATIC 1
 
-/// \def YETI_DYNAMIC_LINKAGE
+/// \def YETI_LINKAGE_DYNAMIC
 /// \brief Exports symbols for inclusion of Yeti via dynamic library.
-#define YETI_DYNAMIC_LINKAGE 2
+#define YETI_LINKAGE_DYNAMIC 2
 
 /// \def YETI_LINKAGE
 /// \brief Specifies how you intend to link to Yeti.
 #if !defined(YETI_LINKAGE)
-  #error ("Please specify how you intend on linking to Yei by defining `YETI_LINKAGE'.")
+  #error ("Please specify how you intend on linking to Yeti by defining `YETI_LINKAGE'.")
 #endif
 
 /// \def YETI_LOCAL
@@ -40,7 +40,7 @@
 #if defined (DOXYGEN)
   #define YETI_LOCAL
 #else // #if !defined(DOXYGEN)
-  #if YETI_LINKAGE == YETI_STATIC_LINKAGE
+  #if YETI_LINKAGE == YETI_LINKAGE_STATIC
     #define YETI_LOCAL
   #elif YETI_LINKAGE == YETI_DYNAMIC_LINAKGE
     #if defined (__YETI_IS_BEING_COMPILED__)
@@ -68,9 +68,9 @@
 #if defined (DOXYGEN)
   #define YETI_PUBLIC
 #else // #if !defined(DOXYGEN)
-  #if YETI_LINKAGE == YETI_STATIC_LINKAGE
+  #if YETI_LINKAGE == YETI_LINKAGE_STATIC
     #define YETI_PUBLIC
-  #elif YETI_LINKAGE == YETI_DYNAMIC_LINKAGE
+  #elif YETI_LINKAGE == YETI_LINKAGE_DYNAMIC
     #if defined (__YETI_IS_BEING_COMPILED__)
       #if defined(__GNUC__)
         #if __GNUC__ >= 4
