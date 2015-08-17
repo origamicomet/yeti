@@ -1,5 +1,11 @@
 !.gitignore
 
+_build/
+Makefile
+build.ninja
+.ninja_deps
+.ninja_log
+
 # Sublime Text 2/3
 *.sublime-project
 *.sublime-workspace

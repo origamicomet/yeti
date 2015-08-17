@@ -1,6 +1,6 @@
 Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
   # Statically link to Yeti for the (small) optimization wins.
-  proj.define 'YETI_LINKAGE' => 'YETI_STATIC_LINKAGE'
+  proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_STATIC'
 
   # Supress all of Visual Studio's bullshit.
   proj.define '_HAS_EXCEPTIONS' => false,
@@ -8,7 +8,9 @@ Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
               '_CRT_SECURE_NO_WARNINGS' => true,
               '_CRT_SECURE_NO_DEPRECATE' => true,
               '_SECURE_SCL_THROWS' => false,
-              '_SILENCE_DEPRECATION_OF_SECURE_SCL_THROWS' => true
+              '_SILENCE_DEPRECATION_OF_SECURE_SCL_THROWS' => true,
+              # See http://stackoverflow.com/questions/14363929
+              '_USING_V110_SDK71_' => true
 
   # Suffix builds in the form: _{configuration}_{target}_{32,64}.
    # e.g. level_editor_debug_macosx_64.app or level_editor_windows_32.exe
@@ -58,7 +60,6 @@ Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
                   '_SECURE_SCL' => false
 
     config.generate_debug_symbols = true
-    # TODO(mtwilliams): Use link-time code generation.
     # config.link_time_code_generation = true
     config.optimize = :speed
   end
