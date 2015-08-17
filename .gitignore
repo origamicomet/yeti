@@ -7,7 +7,6 @@ build.ninja
 .ninja_log
 
 # Sublime Text 2/3
-*.sublime-project
 *.sublime-workspace
 
 # TextMate

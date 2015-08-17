@@ -1,0 +1,20 @@
+{
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"*.sublime-project",
+				"*.ninja*",
+				"Makefile"
+			],
+			"folder_exclude_patterns":
+			[
+				"_build",
+				"docs"
+			],
+			"follow_symlinks": true,
+			"path": "."
+		}
+	]
+}
