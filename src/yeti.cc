@@ -17,7 +17,7 @@ YETI_PUBLIC
 void __yeti__(void)
 {
   // HACK(mtwilliams): Export at least one symbol. This is to make sure shitty
-  // linkers, like Microsoft's, actually produce a dynamically-linked library.
+  // linkers like Microsoft's actually produce a dynamically-linked library.
 }
 
 YETI_END_EXTERN_C // }
