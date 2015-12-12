@@ -1,8 +1,9 @@
-Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
+project :yeti, pretty: 'Yeti' do |proj|
   # Statically link to Yeti for the (small) optimization wins.
   proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_STATIC'
 
   # Supress all of Visual Studio's bullshit.
+  # TODO(mtwilliams): Refactor into Ryb.
   proj.define '_HAS_EXCEPTIONS' => false,
               '_SCL_SECURE_NO_WARNINGS' => true,
               '_CRT_SECURE_NO_WARNINGS' => true,
@@ -12,25 +13,25 @@ Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
               # See http://stackoverflow.com/questions/14363929
               '_USING_V110_SDK71_' => true
 
-  # Suffix builds in the form: _{configuration}_{target}_{32,64}.
+  # Suffix builds in the form: _{configuration}_{platform}_{32,64}.
    # e.g. level_editor_debug_macosx_64.app or level_editor_windows_32.exe
   proj.architecture :x86 do |arch| arch.suffix = '_32'; end
   proj.architecture :x86_64 do |arch| arch.suffix = '_64'; end
-  proj.target :windows do |target| target.suffix = '_windows'; end
-  proj.target :macosx do |target| target.suffix = '_macosx'; end
-  proj.target :linux do |target| target.suffix = '_linux'; end
+  proj.platform :windows do |platform| platform.suffix = '_windows'; end
+  proj.platform :macosx do |platform| platform.suffix = '_macosx'; end
+  proj.platform :linux do |platform| platform.suffix = '_linux'; end
   proj.configuration 'debug' do |config| config.suffix = '_debug'; end
   proj.configuration 'development' do |config| config.suffix = '_development'; end
-  proj.configuration 'release' do |config| config.suffix = '_release' end
+  proj.configuration 'release' do |config| config.suffix = '_release'; end
 
   # We target Windows 7 and later.
-  proj.target :windows do |target| target.sdk = '7.1'; end
+  proj.platform :windows do |platform| platform.sdk = '7.1'; end
   # We target Lion and later.
-  proj.target :macosx do |target| target.version = '10.7'; end
+  proj.platform :macosx do |platform| platform.version = '10.7'; end
   # TODO(mtwilliams): Determine the minimum kernel we'll support.
-  proj.target :linux do |target| end
+  proj.platform :linux do |platform| end
 
-  proj.configuration 'debug', pretty: 'Debug' do |config|
+  proj.configuration :debug, pretty: 'Debug' do
     config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
 
     config.define '_DEBUG' => true,
@@ -38,33 +39,35 @@ Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
                   '_SECURE_SCL' => true
 
     config.generate_debug_symbols = true
-    config.optimize = :none
+    config.link_time_code_generation = false
+    config.optimize = :nothing
   end
 
-  proj.configuration 'development', pretty: 'Development' do |config|
-    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEVELOPMENT'
+  proj.configuration :development, pretty: 'Development' do
+    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
 
     config.define 'NDEBUG' => true,
                   '_HAS_ITERATOR_DEBUGGING' => false,
                   '_SECURE_SCL' => false
 
     config.generate_debug_symbols = true
+    config.link_time_code_generation = false
     config.optimize = :speed
   end
 
-  proj.configuration 'release', pretty: 'Release' do |config|
-    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_RELEASE'
+  proj.configuration :release, pretty: 'Release' do |config|
+    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
 
     config.define 'NDEBUG' => true,
                   '_HAS_ITERATOR_DEBUGGING' => false,
                   '_SECURE_SCL' => false
 
     config.generate_debug_symbols = true
-    # config.link_time_code_generation = true
+    config.link_time_code_generation = true
     config.optimize = :speed
   end
 
-  proj.library 'yeti', pretty: 'Yeti' do |lib|
+  proj.library :yeti, pretty: 'Yeti' do |lib|
     lib.define '__YETI_IS_BEING_COMPILED__' => true
     lib.linkage = :static
 
@@ -76,14 +79,14 @@ Ryb::Project.new 'yeti', pretty: 'Yeti' do |proj|
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
   end
 
-  proj.application 'runtime', pretty: 'Runtime' do |app|
-    app.add_includes_paths 'include/', 'runtime/include/'
-    app.add_libraries_paths '$BUILT/lib/', '$BUILT/bin/'
-    app.add_binaries_paths '$BUILT/bin/'
+  proj.application :runtime, pretty: 'Runtime' do |app|
+    app.add_include_paths 'include/', 'runtime/include/'
+    app.add_library_paths '$BUILT/lib/', '$BUILT/bin/'
+    app.add_binary_paths '$BUILT/bin/'
 
     app.add_source_files 'runtime/include/**/*.{h,hpp,inl}'
     app.add_source_files 'runtime/src/**/*.{c,cc,cpp}'
 
-    app.add_dependency 'yeti'
+    app.add_dependency :yeti
   end
 end
