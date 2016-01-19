@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "yeti/foundation/atomics.h"
+
 namespace yeti {
 namespace foundation {
 
@@ -29,9 +31,10 @@ Allocator::~Allocator() {
 void Allocator::allocated(Allocation *allocation) {
 #if (YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG) || \
     (YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT)
-  // TODO(mtwilliams): Make thread-safe.
-  allocation->next = allocations_;
-  allocations_ = allocation;
+  Allocation *head; do {
+    head = (Allocation *)atomic::load((volatile const void **)&allocations_);
+    allocation->next = head;
+  } while(atomic::cmp_and_xchg((volatile void **)&allocations_, (void *)head, (void *)allocation) != (void *)head);
 #else
   YETI_UNUSED(allocation);
 #endif
@@ -42,6 +45,7 @@ void Allocator::reallocated(Allocation *allocation) {
 }
 
 void Allocator::deallocated(Allocation *allocation) {
+  // TODO(mtwilliams): Make this thread-safe.
   Allocation **I = &allocations_;
   while (*I) {
     if (*I == allocation) {
