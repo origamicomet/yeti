@@ -21,7 +21,7 @@
   "                              |_   _| -_|  _| |                               \n" \
   "                                |_| |___|_| |_|                               \n" \
   "                                                                              \n" \
-  "      Copyright 2013-2015 Origami Comet Games, Inc. All rights reserved.      \n" \
+  "      Copyright 2013-2016 Origami Comet Games, Inc. All rights reserved.      \n" \
   "                                                                              \n"
 
 int main(int argc, const char *argv[]) {
