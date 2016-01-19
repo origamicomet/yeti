@@ -66,7 +66,7 @@ void Allocator::set_name(const char *name) {
   yeti_assert_debug(strlen(name) <= 255);
 #if (YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG) || \
     (YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT)
-  const Size name_len = strlen(name);
+  const size_t name_len = strlen(name);
   memcpy(&name_[0], name, name_len + 1);
 #else
   YETI_UNUSED(name);

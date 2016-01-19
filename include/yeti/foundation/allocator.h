@@ -33,13 +33,13 @@ struct Allocation {
   /// ...
   Allocation *next;
   /// ...
-  Pointer start;
+  uintptr_t start;
   /// ...
-  Pointer end;
+  uintptr_t end;
   /// Describes where the allocation was made in the codebase.
   struct {
     const char *file;
-    Size line;
+    size_t line;
   } location;
 };
 
@@ -53,9 +53,9 @@ class Allocator {
 
  public:
   // TODO(mtwilliams): Document this interface.
-  virtual Pointer allocate(Size sz, Size alignment = 16) = 0;
-  virtual Pointer reallocate(Pointer ptr, Size sz, Size alignment = 16) = 0;
-  virtual void deallocate(Pointer ptr) = 0;
+  virtual uintptr_t allocate(size_t sz, size_t alignment = 16) = 0;
+  virtual uintptr_t reallocate(uintptr_t ptr, size_t sz, size_t alignment = 16) = 0;
+  virtual void deallocate(uintptr_t ptr) = 0;
 
  protected:
   // TODO(mtwilliams): Document this interface.

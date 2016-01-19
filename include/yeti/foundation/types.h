@@ -38,9 +38,6 @@ typedef uint64_t yeti_uint64_t;
 typedef float yeti_float32_t;
 typedef double yeti_float64_t;
 
-typedef uintptr_t yeti_ptr_t;
-typedef size_t yeti_size_t;
-
 typedef bool yeti_bool_t;
 
 YETI_END_EXTERN_C // }
@@ -58,9 +55,6 @@ typedef yeti_uint64_t u64;
 
 typedef yeti_float32_t f32;
 typedef yeti_float64_t f64;
-
-typedef yeti_ptr_t Pointer;
-typedef yeti_size_t Size;
 
 YETI_END_NAMESPACE // }
 

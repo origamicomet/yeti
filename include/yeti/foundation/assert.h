@@ -33,7 +33,7 @@ struct Assertion {
   /// Describes where the assertion is in the codebase.
   struct {
     const char *file;
-    Size line;
+    size_t line;
   } location;
 };
 
@@ -61,7 +61,7 @@ void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx);
       assertion.predicate = #_Predicate; \
       assertion.reason = NULL; \
       assertion.location.file = __FILE__ ; \
-      assertion.location.line = (Size)__LINE__; \
+      assertion.location.line = (size_t)__LINE__; \
       ::yeti::foundation::AssertionHandler assertion_handler; \
       void *assertion_handler_ctx; \
       ::yeti::foundation::assertion_handler(&assertion_handler, &assertion_handler_ctx); \
@@ -80,12 +80,12 @@ void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx);
     if (!!(_Predicate)) { \
       ::yeti::foundation::Assertion assertion; \
       assertion.predicate = #_Predicate; \
-      const Size reason_len = snprintf(NULL, 0, _Reason_format, ##__VA_ARGS__) + 1; \
+      const size_t reason_len = snprintf(NULL, 0, _Reason_format, ##__VA_ARGS__) + 1; \
       const char *reason = (const char *)alloca(reason_len); \
       snprintf((char *)reason, reason_len, _Reason_format, ##__VA_ARGS__); \
       assertion.reason = reason; \
       assertion.location.file = __FILE__; \
-      assertion.location.line = (Size)__LINE__; \
+      assertion.location.line = (size_t)__LINE__; \
       ::yeti::foundation::AssertionHandler assertion_handler; \
       void *assertion_handler_ctx; \
       ::yeti::foundation::assertion_handler(&assertion_handler, &assertion_handler_ctx); \
