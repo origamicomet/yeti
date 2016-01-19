@@ -24,7 +24,7 @@
   #define YETI_LIKELY(_Condition) (!!(_Condition))
 #else // !defined(DOXYGEN)
   #if defined(__GNUC__)
-    #define YETI_LIKELY(_Condition) __builtin_expect(!!(_Condition),1)
+    #define YETI_LIKELY(_Condition) __builtin_expect(!!(_Condition), 1)
   #else
     #define YETI_LIKELY(_Condition) (!!(_Condition))
   #endif
@@ -36,7 +36,7 @@
   #define YETI_UNLIKELY(_Condition) (!!(_Condition))
 #else // !defined(DOXYGEN)
   #if defined(__GNUC__)
-    #define YETI_UNLIKELY(_Condition) __builtin_expect(!!(_Condition),0)
+    #define YETI_UNLIKELY(_Condition) __builtin_expect(!!(_Condition), 0)
   #else
     #define YETI_UNLIKELY(_Condition) (!!(_Condition))
   #endif
