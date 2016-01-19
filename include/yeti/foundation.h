@@ -16,7 +16,6 @@
 #ifndef _YETI_FOUNDATION_H_
 #define _YETI_FOUNDATION_H_
 
-#include <errorno.h>
 #include <fenv.h>
 #include <float.h>
 #include <inttypes.h>
