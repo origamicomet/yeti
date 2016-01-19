@@ -24,26 +24,20 @@ PLATFORMS = %i{windows}
 ARCHITECTURES = %i{x86 x86_64}
 
 namespace :yeti do
-  task :amalgamate => ['fs'] do
-    # Merge all our source files into one gigantic one!
-    amalgamation = "_build/_amalgamations/yeti.cc"
-    sources = Dir["src/**/*.cc"].sort
-    FileUtils.rm(amalgamation, force: true)
-    puts "Generating #{amalgamation}..."
-    File.open(amalgamation, "wb") do |amalgamation|
+  task :unity => ['fs'] do
+    unity = "_build/_unities/yeti.cc"
+    sources = Dir["src/**/*.cc"].sort.map{|src| File.realpath(src)}
+    FileUtils.rm(unity, force: true)
+    puts "Generating #{unity}..."
+    File.open(unity, "wb") do |unity|
       sources.each do |source|
         puts "==> #{source}"
-        File.open(source, "rb") do |source|
-          while portion = source.read(4096)
-            amalgamation.write(portion)
-          end
-          amalgamation.write("\n")
-        end
+        unity.write("#include \"#{source}\"\n")
       end
     end
   end
 
-  task :build, [:configuration, :platform, :architecture] => ['yeti:amalgamate', 'fs'] do |_, args|
+  task :build, [:configuration, :platform, :architecture] => ['yeti:unity', 'fs'] do |_, args|
     puts "Building Yeti..."
 
     configuration = args[:configuration].to_sym
@@ -168,7 +162,7 @@ namespace :yeti do
                *compiler_args,
                "/Fd_build/lib/yeti_#{triplet}.pdb",
                "/Fo_build/obj/yeti_#{triplet}.obj",
-               "_build/_amalgamations/yeti.cc")
+               "_build/_unities/yeti.cc")
 
         # Link!
         puts "==> Linking _build/lib/yeti_#{triplet}.lib..."
@@ -185,26 +179,20 @@ namespace :yeti do
 end
 
 namespace :runtime do
-  task :amalgamate => ['fs'] do
-    # Merge all our source files into one gigantic one!
-    amalgamation = "_build/_amalgamations/runtime.cc"
-    sources = Dir["runtime/src/**/*.cc"].sort
-    FileUtils.rm(amalgamation, force: true)
-    puts "Generating #{amalgamation}..."
-    File.open(amalgamation, "wb") do |amalgamation|
+  task :unity => ['fs'] do
+    unity = "_build/_unities/runtime.cc"
+    sources = Dir["runtime/src/**/*.cc"].sort.map{|src| File.realpath(src)}
+    FileUtils.rm(unity, force: true)
+    puts "Generating #{unity}..."
+    File.open(unity, "wb") do |unity|
       sources.each do |source|
         puts "==> #{source}"
-        File.open(source, "rb") do |source|
-          while portion = source.read(4096)
-            amalgamation.write(portion)
-          end
-          amalgamation.write("\n")
-        end
+        unity.write("#include \"#{source}\"\n")
       end
     end
   end
 
-  task :build, [:configuration, :platform, :architecture] => ['runtime:amalgamate', 'fs'] do |_, args|
+  task :build, [:configuration, :platform, :architecture] => ['runtime:unity', 'fs'] do |_, args|
     puts "Building Runtime..."
 
     configuration = args[:configuration].to_sym
@@ -349,7 +337,7 @@ namespace :runtime do
                *compiler_args,
                "/Fd_build/bin/runtime_#{triplet}.pdb",
                "/Fo_build/obj/runtime_#{triplet}.obj",
-               "_build/_amalgamations/runtime.cc")
+               "_build/_unities/runtime.cc")
 
         # Link!
         puts "==> Linking _build/bin/runtime_#{triplet}.exe..."
@@ -367,7 +355,7 @@ namespace :runtime do
 end
 
 task :fs do
-  ['_build/_amalgamations', '_build/obj', '_build/bin', '_build/lib'].each do |path|
+  ['_build/_unities', '_build/obj', '_build/bin', '_build/lib'].each do |path|
     FileUtils.mkdir_p(path)
   end
 end
@@ -380,8 +368,8 @@ task :build, [:configuration] do |_, args|
   architectures = ARCHITECTURES
 
   Rake::Task['fs'].execute
-  Rake::Task['yeti:amalgamate'].execute
-  Rake::Task['runtime:amalgamate'].execute
+  Rake::Task['yeti:unity'].execute
+  Rake::Task['runtime:unity'].execute
 
   architectures.each do |architecture|
     platforms.each do |platform|
