@@ -24,14 +24,14 @@ project :yeti, pretty: 'Yeti' do |proj|
   proj.configuration 'development' do |config| config.suffix = '_development'; end
   proj.configuration 'release' do |config| config.suffix = '_release'; end
 
-  # We target Windows 7 and later.
-  proj.platform :windows do |platform| platform.sdk = '7.1'; end
-  # We target Lion and later.
-  proj.platform :macosx do |platform| platform.version = '10.7'; end
-  # TODO(mtwilliams): Determine the minimum kernel we'll support.
-  proj.platform :linux do |platform| end
+  # # We target Windows 7 and later.
+  # proj.platform :windows do |platform| platform.sdk = '7.1'; end
+  # # We target Lion and later.
+  # proj.platform :macosx do |platform| platform.version = '10.7'; end
+  # # TODO(mtwilliams): Determine the minimum kernel we'll support.
+  # proj.platform :linux do |platform| end
 
-  proj.configuration :debug, pretty: 'Debug' do
+  proj.configuration :debug, pretty: 'Debug' do |config|
     config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
 
     config.define '_DEBUG' => true,
@@ -43,7 +43,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     config.optimize = :nothing
   end
 
-  proj.configuration :development, pretty: 'Development' do
+  proj.configuration :development, pretty: 'Development' do |config|
     config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
 
     config.define 'NDEBUG' => true,
@@ -68,12 +68,17 @@ project :yeti, pretty: 'Yeti' do |proj|
   end
 
   proj.library :yeti, pretty: 'Yeti' do |lib|
+    lib.author = 'Origami Comet Games, Inc.'
+    lib.description = 'A general-purpose, data-driven game engine.'
+    lib.license = 'Attribution based licensing.'
+
     lib.define '__YETI_IS_BEING_COMPILED__' => true
+    lib.define '__YETI_VERSION__' => `git rev-parse HEAD`.rstrip
     lib.linkage = :static
 
-    lib.add_includes_paths 'include/'
-    lib.add_libraries_paths '$BUILT/lib/', '$BUILT/bin/'
-    lib.add_binaries_paths '$BUILT/bin/'
+    lib.add_include_paths 'include/'
+    lib.add_library_paths '$build/lib/', '$build/bin/'
+    lib.add_binary_paths '$build/bin/'
 
     lib.add_source_files 'include/**/*.{h,hpp,inl}'
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
@@ -81,8 +86,8 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.application :runtime, pretty: 'Runtime' do |app|
     app.add_include_paths 'include/', 'runtime/include/'
-    app.add_library_paths '$BUILT/lib/', '$BUILT/bin/'
-    app.add_binary_paths '$BUILT/bin/'
+    app.add_library_paths '$build/lib/', '$build/bin/'
+    app.add_binary_paths '$build/bin/'
 
     app.add_source_files 'runtime/include/**/*.{h,hpp,inl}'
     app.add_source_files 'runtime/src/**/*.{c,cc,cpp}'
