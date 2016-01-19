@@ -20,4 +20,6 @@
 #include "yeti/config.h"
 #include "yeti/linkage.h"
 
+#include "yeti/foundation.h"
+
 #endif // _YETI_H_
