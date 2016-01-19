@@ -24,7 +24,10 @@
   "      Copyright 2013-2016 Origami Comet Games, Inc. All rights reserved.      \n" \
   "                                                                              \n"
 
+// TODO(mtwilliams): Install assertion handler.
+
 int main(int argc, const char *argv[]) {
+  ::setlocale(LC_ALL, "en_US.UTF-8");
   ::fprintf(stdout, YETI_STARTUP_BANNER);
   return EXIT_SUCCESS;
 }
