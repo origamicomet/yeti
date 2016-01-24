@@ -56,7 +56,7 @@ void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx);
 ///
 #define yeti_assert(_Predicate) \
   do { \
-    if (!!(_Predicate)) { \
+    if (!(_Predicate)) { \
       ::yeti::foundation::Assertion assertion; \
       assertion.predicate = #_Predicate; \
       assertion.reason = NULL; \
@@ -77,7 +77,7 @@ void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx);
 ///
 #define yeti_assertf(_Predicate, _Reason_format, ...) \
   do { \
-    if (!!(_Predicate)) { \
+    if (!(_Predicate)) { \
       ::yeti::foundation::Assertion assertion; \
       assertion.predicate = #_Predicate; \
       const size_t reason_len = snprintf(NULL, 0, _Reason_format, ##__VA_ARGS__) + 1; \
