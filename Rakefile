@@ -341,10 +341,15 @@ namespace :runtime do
 
         # Link!
         puts "==> Linking _build/bin/runtime_#{triplet}.exe..."
+
+        dependencies = %w{kernel32.lib user32.lib gdi32.lib}
+        dependencies << "yeti_#{triplet}.lib"
+
         system(env,
                "link.exe",
                *linker_args,
                "/OUT:_build/bin/runtime_#{triplet}.exe",
+               *dependencies,
                "_build/obj/runtime_#{triplet}.obj")
 
         puts "Done!"
