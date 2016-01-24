@@ -274,7 +274,7 @@ namespace :runtime do
         compiler_args << "/Iruntime/include"
 
         # Search our libraries.
-        compiler_args << "/LIBPATH:_build/lib"
+        linker_args << "/LIBPATH:_build/lib"
 
         # Compile for the appropriate architecture.
         case architecture
