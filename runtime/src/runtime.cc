@@ -26,8 +26,27 @@
 
 // TODO(mtwilliams): Install assertion handler.
 
+static void main_window_event_handler(void *ctx) {
+  YETI_UNUSED(ctx);
+}
+
 int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
   ::fprintf(stdout, YETI_STARTUP_BANNER);
+
+  static const yeti::Window::Description main_window_desc = {
+    /* .title = */ "Yeti",
+    /* .dimensions = */ {
+      /* .width = */ 1280,
+      /* .height = */ 720
+    }
+  };
+
+  yeti::Window *main_window = yeti::Window::open({"Yeti", {1280, 720}});
+  main_window->show();
+  while (true) {
+    main_window->update(&main_window_event_handler, NULL);
+  }
+
   return EXIT_SUCCESS;
 }

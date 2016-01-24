@@ -22,4 +22,6 @@
 
 #include "yeti/foundation.h"
 
+#include "yeti/window.h"
+
 #endif // _YETI_H_
