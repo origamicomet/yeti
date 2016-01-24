@@ -86,4 +86,12 @@ class YETI_PUBLIC Allocator {
 } // foundation
 } // yeti
 
+extern YETI_PUBLIC void *operator new(size_t sz, yeti::foundation::Allocator &allocator);
+extern YETI_PUBLIC void *operator new(size_t sz, yeti::foundation::Allocator *allocator);
+extern YETI_PUBLIC void *operator new[](size_t sz, yeti::foundation::Allocator &allocator);
+extern YETI_PUBLIC void *operator new[](size_t sz, yeti::foundation::Allocator *allocator);
+
+extern YETI_PUBLIC void operator delete(void *ptr, yeti::foundation::Allocator &allocator);
+extern YETI_PUBLIC void operator delete(void *ptr, yeti::foundation::Allocator *allocator);
+
 #endif // _YETI_FOUNDATION_ALLOCATOR_H_

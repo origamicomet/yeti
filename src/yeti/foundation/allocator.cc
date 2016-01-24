@@ -117,3 +117,27 @@ void Allocator::for_each_allocation(void (*vistor)(const Allocation *, void *), 
 
 } // foundation
 } // yeti
+
+void *operator new(size_t sz, yeti::foundation::Allocator &allocator) {
+  return (void *)allocator.allocate(sz);
+}
+
+void *operator new(size_t sz, yeti::foundation::Allocator *allocator) {
+  return (void *)allocator->allocate(sz);
+}
+
+void *operator new[](size_t sz, yeti::foundation::Allocator &allocator) {
+  return (void *)allocator.allocate(sz);
+}
+
+void *operator new[](size_t sz, yeti::foundation::Allocator *allocator) {
+  return (void *)allocator->allocate(sz);
+}
+
+void operator delete(void *ptr, yeti::foundation::Allocator &allocator) {
+  allocator.deallocate((uintptr_t)ptr);
+}
+
+void operator delete(void *ptr, yeti::foundation::Allocator *allocator) {
+  allocator->deallocate((uintptr_t)ptr);
+}
