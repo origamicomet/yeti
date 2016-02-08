@@ -274,6 +274,12 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_SHOWWINDOW: {
       // TODO(mtwilliams): Toggle rendering based on this?
     } break;
+    case WM_SYSCOMMAND: {
+      switch (wParam) {
+        case SC_MINIMIZE: break;
+        case SC_MAXIMIZE: break;
+      }
+    } break;
     case WM_ERASEBKGND: {
       // Avoid any potential flickering. Shouldn't be an isssue though.
       // return TRUE;
