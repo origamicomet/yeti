@@ -288,6 +288,9 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       // TODO(mtwilliams): Resize swap-chains based on this? Or should a hook
       // be used that listens for this instead?
     } break;
+    case WM_INPUT_DEVICE_CHANGE: {
+      // TODO(mtwilliams): Handle device connection/disconnections.
+    } break;
     case WM_INPUTLANGCHANGE: {
       // TODO(mtwilliams): Handle different keyboard layouts.
     } break;
