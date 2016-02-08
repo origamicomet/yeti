@@ -11,8 +11,12 @@
 
 #include "yeti/window.h"
 
+#include "yeti/input/keyboard.h"
+// #include "yeti/input/mouse.h"
+
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
+  #undef DELETE
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
@@ -294,9 +298,154 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_INPUTLANGCHANGE: {
       // TODO(mtwilliams): Handle different keyboard layouts.
     } break;
+
     case WM_INPUT: {
-      // TODO(mtwilliams): Handle raw-input.
+      RAWINPUT raw_input;
+      UINT raw_input_sz = sizeof(RAWINPUT);
+      ::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, (LPVOID)&raw_input, &raw_input_sz, sizeof(RAWINPUTHEADER));
+
+      switch (raw_input.header.dwType) {
+        case RIM_TYPEKEYBOARD: {
+          RAWKEYBOARD &kb = raw_input.data.keyboard;
+
+          if (kb.VKey == 0xff)
+            // Part of an escape sequence; ignore.
+            return 0;
+
+          if (kb.VKey == VK_SHIFT) {
+            // Map to left or right variants.
+            kb.VKey = ::MapVirtualKey(kb.MakeCode, MAPVK_VSC_TO_VK_EX);
+          } else if (kb.VKey == VK_NUMLOCK) {
+            // For some reason, the "Numlock" key shares the same scan-code as
+            // the Pause/Break key, so we have to fix it manually.
+            kb.MakeCode = (::MapVirtualKey(kb.VKey, MAPVK_VK_TO_VSC) | 0x100);
+          }
+
+          const bool E0 = !!(kb.Flags & RI_KEY_E0);
+          const bool E1 = !!(kb.Flags & RI_KEY_E1);
+
+          if (E1) {
+            if (kb.VKey == VK_PAUSE)
+              // Mnaually map VK_PAUSE because MapVirtualKey does so incorrectly.
+              kb.MakeCode = 0x45;
+            else
+              kb.MakeCode = ::MapVirtualKey(kb.VKey, MAPVK_VK_TO_VSC);
+          }
+
+          Key key = Keys::UNKNOWN;
+          switch (kb.VKey) {
+            case VK_ESCAPE:
+              key = Keys::ESCAPE;
+              break;
+            case VK_TAB:
+              key = Keys::TAB;
+              break;
+            case VK_SHIFT:
+            case VK_LSHIFT:
+            case VK_RSHIFT:
+              // TODO(mtwilliams): Expose Keys::LEFT_SHIFT and Keys::RIGHT_SHIFT?
+              key = Keys::SHIFT;
+              break;
+            case VK_CAPITAL:
+              key = Keys::CAPSLOCK;
+              break;
+            case VK_RETURN:
+              key = E0 ? Keys::NUMPAD_ENTER : Keys::ENTER;
+              break;
+            case VK_SPACE:
+              key = Keys::SPACE;
+              break;
+            case VK_BACK:
+              key = Keys::BACKSPACE;
+              break;
+            case VK_CONTROL:
+              key = E0 ? Keys::RIGHT_CONTROL : Keys::LEFT_CONTROL;
+              break;
+            case VK_MENU:
+              key = E0 ? Keys::RIGHT_ALT : Keys::LEFT_ALT;
+              break;
+            case VK_LWIN:
+              key = Keys::LEFT_SUPER;
+              break;
+            case VK_RWIN:
+              key = Keys::RIGHT_SUPER;
+              break;
+            case VK_NUMLOCK:
+              key = Keys::NUMLOCK;
+              break;
+            case VK_HOME:
+              key = E0 ? Keys::HOME : Keys::NUMPAD_7;
+              break;
+            case VK_PRIOR:
+              key = E0 ? Keys::PAGE_UP : Keys::NUMPAD_9;
+              break;
+            case VK_NEXT:
+              key = E0 ? Keys::PAGE_DOWN : Keys::NUMPAD_3;
+              break;
+            case VK_END:
+              key = E0 ? Keys::END : Keys::NUMPAD_1;
+              break;
+            case VK_INSERT:
+              key = E0 ? Keys::INSERT : Keys::NUMPAD_0;
+              break;
+            case VK_DELETE:
+              key = E0 ? Keys::DELETE : Keys::NUMPAD_DELETE;
+              break;
+            case VK_UP:
+              key = E0 ? Keys::UP : Keys::NUMPAD_8;
+              break;
+            case VK_DOWN:
+              key = E0 ? Keys::DOWN : Keys::NUMPAD_2;
+              break;
+            case VK_LEFT:
+              key = E0 ? Keys::LEFT : Keys::NUMPAD_4;
+              break;
+            case VK_RIGHT:
+              key = E0 ? Keys::RIGHT : Keys::NUMPAD_6;
+              break;
+            case VK_CLEAR:
+              // TODO(mtwilliams): Expose a NUMPAD_CLEAR?
+              key = E0 ? Keys::UNKNOWN : Keys::NUMPAD_5;
+              break;
+            case VK_ADD:
+              key = Keys::NUMPAD_ADD;
+              break;
+            case VK_SUBTRACT:
+              key = Keys::NUMPAD_SUBTRACT;
+              break;
+            case VK_MULTIPLY:
+              key = Keys::NUMPAD_MULTIPLY;
+              break;
+            case VK_DIVIDE:
+              key = Keys::NUMPAD_DIVIDE;
+              break;
+            default: {
+              if (kb.VKey >= '0' && kb.VKey <= '9')
+                key = (Key)((kb.VKey - '0') + Keys::NUMBER_0);
+              else if (kb.VKey >= 'A' && kb.VKey <= 'Z')
+                key = (Key)((kb.VKey - 'A') + Keys::A);
+              else if (kb.VKey >= VK_F1 && kb.VKey <= VK_F12)
+                key = (Key)((kb.VKey - VK_F1) + Keys::F1);
+              else if (kb.VKey >= VK_NUMPAD0 && kb.VKey <= VK_NUMPAD9)
+                key = (Key)((kb.VKey - VK_NUMPAD0) + Keys::NUMPAD_0);
+            } break;
+          }
+
+          // TODO(mtwilliams): Check focus?
+          // TODO(mtwilliams): Emit events?
+          if (kb.Flags & RI_KEY_BREAK)
+            Keyboard::up(key);
+          else
+            Keyboard::down(key);
+        } return 0;
+
+        case RIM_TYPEMOUSE: {
+          const RAWMOUSE &mouse = raw_input.data.mouse;
+          // TODO(mtwilliams): Handle raw-input from mouse.
+        } break;
+      }
     } break;
+
     case WM_CHAR:
     case WM_DEADCHAR: {
       // TODO(mtwilliams): Special case text input.
