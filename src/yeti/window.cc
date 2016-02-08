@@ -267,6 +267,7 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_GETICON: {
       // TODO(mtwilliams): Return application specific icons.
     } break;
+    case WM_ACTIVATE:
     case WM_ACTIVATEAPP: {
       // TODO(mtwilliams): Toggle rendering based on this?
     } break;
