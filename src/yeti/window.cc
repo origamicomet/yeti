@@ -250,6 +250,10 @@ uintptr_t Window::to_native_hndl() const {
 static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   Window *window = (Window *)::GetPropA(hWnd, "inst");
   switch (uMsg) {
+    case WM_CLOSE: {
+      // Destruction is inevitable!
+      ::DestroyWindow(hWnd);
+    } return TRUE;
     case WM_NCDESTROY: {
       // According to MSDN, all entries in the property list of a window must
       // be removed (via RemoveProp) before it is destroyed. In practice, this
@@ -280,10 +284,6 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_INPUTLANGCHANGE: {
       // TODO(mtwilliams): Handle different keyboard layouts.
     } break;
-    case WM_CLOSE: {
-      // Destruction is inevitable!
-      ::DestroyWindow(hWnd);
-    } return TRUE;
   }
   return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
