@@ -294,6 +294,13 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_INPUTLANGCHANGE: {
       // TODO(mtwilliams): Handle different keyboard layouts.
     } break;
+    case WM_INPUT: {
+      // TODO(mtwilliams): Handle raw-input.
+    } break;
+    case WM_CHAR:
+    case WM_DEADCHAR: {
+      // TODO(mtwilliams): Special case text input.
+    } break;
   }
   return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
