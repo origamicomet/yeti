@@ -44,14 +44,6 @@ Window *Window::open(const Window::Description &desc) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   Window *window = new (foundation::heap()) Window();
 
-  char class_name[37] = "875d3758-bff3-11e5-93a6-4441a4143a20";
-  // TODO(mtwilliams): Generate a unique class name.
-  // foundation::UUID uuid = foundation::UUID::generate();
-  // uuid.to_s(class_name);
-
-  WCHAR class_name_w[37];
-  ::MultiByteToWideChar(CP_UTF8, 0, class_name, -1, class_name_w, 37);
-
   WNDCLASSEXW wcx;
   memset(&wcx, 0, sizeof(wcx));
   wcx.cbSize        = sizeof(WNDCLASSEX);
@@ -63,7 +55,7 @@ Window *Window::open(const Window::Description &desc) {
   // TODO(mtwilliams): Use our own icon, IDI_ENGINE_ICON?
   wcx.hIcon         = ::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.hIconSm       = ::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
-  wcx.lpszClassName = class_name_w;
+  wcx.lpszClassName = L"875d3758-bff3-11e5-93a6-4441a4143a20";
 
   const bool registered_class_succesfully = (::RegisterClassExW(&wcx) != 0);
   yeti_assert(registered_class_succesfully);
@@ -80,7 +72,7 @@ Window *Window::open(const Window::Description &desc) {
   const DWORD adjusted_width = client_area.right - client_area.left;
   const DWORD adjusted_height = client_area.bottom - client_area.top;
 
-  HWND hndl = ::CreateWindowExW(ex_styles, class_name_w, title_w, styles, 0, 0,
+  HWND hndl = ::CreateWindowExW(ex_styles, wcx.lpszClassName, title_w, styles, 0, 0,
                                 adjusted_width, adjusted_height, NULL, NULL,
                                 ::GetModuleHandle(NULL), NULL);
 
