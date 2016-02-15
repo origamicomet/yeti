@@ -1,4 +1,4 @@
-//===-- yeti.h --------------------------------------------*- mode: C++ -*-===//
+//===-- yeti/math.h ---------------------------------------*- mode: C++ -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -10,19 +10,15 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief Your sherpa for the journey to the center of Yeti.
+/// \brief For all of your math and magic needs.
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef _YETI_H_
-#define _YETI_H_
+#ifndef _YETI_MATH_H_
+#define _YETI_MATH_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
+#include "yeti/math/vec2.h"
+#include "yeti/math/vec3.h"
+#include "yeti/math/vec4.h"
 
-#include "yeti/foundation.h"
-
-#include "yeti/math.h"
-#include "yeti/window.h"
-
-#endif // _YETI_H_
+#endif // _YETI_MATH_H_
