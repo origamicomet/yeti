@@ -34,18 +34,25 @@ int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
   ::fprintf(stdout, YETI_STARTUP_BANNER);
 
-  static const yeti::Window::Description main_window_desc = {
-    /* .title = */ "Yeti",
-    /* .dimensions = */ {
-      /* .width = */ 1280,
-      /* .height = */ 720
-    }
-  };
-
   yeti::Window *main_window = yeti::Window::open({"Yeti", {1280, 720}});
+  yeti::input::from(main_window);
   main_window->show();
+
   while (true) {
     main_window->update(&main_window_event_handler, NULL);
+
+  #if 0
+    const yeti::Vec3 mouse_absolute = yeti::Mouse::axis(yeti::MouseAxes::ABSOLUTE);
+    const yeti::Vec3 mouse_relative = yeti::Mouse::axis(yeti::MouseAxes::RELATIVE);
+    const yeti::Vec3 mouse_delta = yeti::Mouse::axis(yeti::MouseAxes::DELTA);
+    fprintf(stdout,
+      "mouse.absolute.x=%.2f, mouse.absolute.y=%.2f, "
+      "mouse.relative.x=%.2f, mouse.relative.y=%.2f, "
+      "mouse.delta.x=%.2f, mouse.delta.y=%.2f\n",
+      mouse_absolute.x, mouse_absolute.y,
+      mouse_relative.x, mouse_relative.y,
+      mouse_delta.x, mouse_delta.y);
+  #endif
   }
 
   return EXIT_SUCCESS;

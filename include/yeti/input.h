@@ -20,4 +20,6 @@
 #include "yeti/input/keyboard.h"
 #include "yeti/input/mouse.h"
 
+#include "yeti/input/feeder.h"
+
 #endif // _YETI_INPUT_H_
