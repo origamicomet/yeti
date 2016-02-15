@@ -13,8 +13,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef _YETI_KEYBOARD_H_
-#define _YETI_KEYBOARD_H_
+#ifndef _YETI_INPUT_KEYBOARD_H_
+#define _YETI_INPUT_KEYBOARD_H_
 
 #include "yeti/config.h"
 #include "yeti/linkage.h"
@@ -60,4 +60,4 @@ extern YETI_LOCAL void update();
 
 } // yeti
 
-#endif // _YETI_KEYBOARD_H_
+#endif // _YETI_INPUT_KEYBOARD_H_
