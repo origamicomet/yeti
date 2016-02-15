@@ -1,4 +1,4 @@
-//===-- yeti.h --------------------------------------------*- mode: C++ -*-===//
+//===-- yeti/input.h --------------------------------------*- mode: C++ -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -10,21 +10,14 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief Your sherpa for the journey to the center of Yeti.
+/// \brief Because you're out of control...
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef _YETI_H_
-#define _YETI_H_
+#ifndef _YETI_INPUT_H_
+#define _YETI_INPUT_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
+#include "yeti/input/keyboard.h"
+#include "yeti/input/mouse.h"
 
-#include "yeti/foundation.h"
-
-#include "yeti/math.h"
-#include "yeti/input.h"
-
-#include "yeti/window.h"
-
-#endif // _YETI_H_
+#endif // _YETI_INPUT_H_
