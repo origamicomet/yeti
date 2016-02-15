@@ -13,11 +13,13 @@
 
 namespace yeti {
 
-namespace {
-  // This is essentially a rolling buffer (of bits) that tracks the state of
-  // each key up to 31 frames ago. This appears needlessly complex, but will
-  // allow us to track keys being pushed and released in a single frame.
-  static u32 _state[Keys::_COUNT] = { 0, };
+namespace Keyboard {
+  namespace {
+    // This is essentially a rolling buffer (of bits) that tracks the state of
+    // each key up to 31 frames ago. This appears needlessly complex, but will
+    // allow us to track keys being pushed and released in a single frame.
+    static u32 _state[Keys::_COUNT] = { 0, };
+  }
 }
 
 bool Keyboard::connected() {
