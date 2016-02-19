@@ -35,7 +35,6 @@
   #endif
 #elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
       (YETI_COMPILER == YETI_COMPILER_CLANG)
-  // TODO(mtwilliams): Implement for GCC/Clang.
 #endif
 
 namespace yeti {
