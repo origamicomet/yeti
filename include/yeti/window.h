@@ -58,6 +58,11 @@ class YETI_PUBLIC Window {
   void maximize();
   void restore();
 
+  // TODO(mtwilliams): Provide a platform agnostic interface for setting the
+  // window's cursor, including the ability to hide the cursor.
+  void cursor();
+  void set_cursor();
+
   // TODO(mtwilliams): Document this interface.
   bool clip();
   bool unclip();
