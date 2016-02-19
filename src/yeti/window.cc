@@ -272,6 +272,31 @@ void Window::resize(u32 new_width, u32 new_height) {
 #endif
 }
 
+bool Window::keyboard_focus() const {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  return (::GetFocus() == (HWND)native_hndl_);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
+}
+
+bool Window::set_keyboard_focus(bool new_keyboard_focus) {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  return (::SetFocus(new_keyboard_focus ? (HWND)native_hndl_ : NULL) != NULL);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+  return false;
+#endif
+}
+
 uintptr_t Window::to_native_hndl() const {
   return this->native_hndl_;
 }

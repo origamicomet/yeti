@@ -68,6 +68,9 @@ class YETI_PUBLIC Window {
   void resize(u32 new_width, u32 new_height);
 
   // TODO(mtwilliams): Document this interface.
+  bool keyboard_focus() const;
+  bool set_keyboard_focus(bool new_keyboard_focus);
+
   uintptr_t to_native_hndl() const;
 
  private:
