@@ -68,6 +68,10 @@ class YETI_PUBLIC Window {
   void resize(u32 new_width, u32 new_height);
 
   // TODO(mtwilliams): Document this interface.
+  bool closable() const;
+  bool set_closable(bool is_closable);
+
+  // TODO(mtwilliams): Document this interface.
   bool keyboard_focus() const;
   bool set_keyboard_focus(bool new_keyboard_focus);
 
@@ -81,6 +85,7 @@ class YETI_PUBLIC Window {
 
  private:
   uintptr_t native_hndl_;
+  bool is_closable_;
 };
 
 } // yeti

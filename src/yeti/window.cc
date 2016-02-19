@@ -30,6 +30,8 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 #endif
 
 Window::Window() {
+  this->native_hndl_ = NULL;
+  this->is_closable_ = true;
 }
 
 Window::~Window() {
@@ -272,6 +274,29 @@ void Window::resize(u32 new_width, u32 new_height) {
 #endif
 }
 
+bool Window::closable() const {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  return is_closable_;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+  return false;
+#endif
+}
+
+bool Window::set_closable(bool new_closable) {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS || \
+    YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X || \
+    YETI_PLATFORM == YETI_PLATFORM_LINUX
+  is_closable_ = new_closable;
+  return true;
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+  return false;
+#endif
+}
+
 bool Window::keyboard_focus() const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return (::GetFocus() == (HWND)native_hndl_);
@@ -338,8 +363,9 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
     } break;
 
     case WM_CLOSE: {
-      // Destruction is inevitable!
-      ::DestroyWindow(hWnd);
+      // Destruction is inevitable! Sometimes?
+      if (window->closable())
+        ::DestroyWindow(hWnd);
     } return TRUE;
 
     case WM_NCDESTROY: {
