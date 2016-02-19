@@ -214,9 +214,20 @@ void Window::restore() {
 bool Window::clip() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   RECT clipping_area = { 0, };
-  ::GetWindowRect((HWND)native_hndl_, &clipping_area);
-  ::ClipCursor(&clipping_area);
-  return true;
+  ::GetClientRect((HWND)native_hndl_, &clipping_area);
+
+  // We want to clip inside the system chrome, which in Microsoft terminology
+  // means the "client area." Of course they fail to provide an API that's the
+  // opposite of AdjustWindowRect(Ex)... so we have to convert our client area
+  // into screen coordinates by manually adjusting GetClientRect's ouput.
+  POINT offset = {0, 0};
+  ::ClientToScreen((HWND)native_hndl_, &offset);
+  clipping_area.left += offset.x;
+  clipping_area.right += offset.x;
+  clipping_area.top += offset.y;
+  clipping_area.bottom += offset.y;
+
+  return (::ClipCursor(&clipping_area) != 0);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   // TODO(mtwilliams): Use XGrabPointer.
