@@ -71,6 +71,12 @@ class YETI_PUBLIC Window {
   bool keyboard_focus() const;
   bool set_keyboard_focus(bool new_keyboard_focus);
 
+  // TODO(mtwilliams): Document this interface.
+  bool mouse_focus() const;
+  bool set_mouse_focus(bool new_mouse_focus);
+
+ public:
+  // TODO(mtwilliams): Document this interface.
   uintptr_t to_native_hndl() const;
 
  private:

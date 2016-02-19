@@ -297,6 +297,33 @@ bool Window::set_keyboard_focus(bool new_keyboard_focus) {
 #endif
 }
 
+bool Window::mouse_focus() const {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  // HACK(mtwilliams): Assume we have mouse focus.
+  return true;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
+}
+
+bool Window::set_mouse_focus(bool new_mouse_focus) {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  // HACK(mtwilliams): Assume we have mouse focus.
+  return true;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+  return false;
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+  return false;
+#endif
+}
+
 uintptr_t Window::to_native_hndl() const {
   return this->native_hndl_;
 }
