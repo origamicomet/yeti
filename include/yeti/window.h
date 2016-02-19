@@ -58,6 +58,10 @@ class YETI_PUBLIC Window {
   void maximize();
   void restore();
 
+  // TODO(mtwilliams): Document this interface.
+  bool clip();
+  bool unclip();
+
  public:
   // TODO(mtwilliams): Document this interface.
   void title(char title[256]) const;

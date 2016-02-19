@@ -211,6 +211,34 @@ void Window::restore() {
 #endif
 }
 
+bool Window::clip() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  RECT clipping_area = { 0, };
+  ::GetWindowRect((HWND)native_hndl_, &clipping_area);
+  ::ClipCursor(&clipping_area);
+  return true;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+  // TODO(mtwilliams): Use XGrabPointer.
+  // Refer to http://stackoverflow.com/questions/4642867.
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+  return false;
+#endif
+}
+
+bool Window::unclip() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::ClipCursor(NULL);
+  return true;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
+      YETI_PLATFORM == YETI_PLATFORM_ANDROID
+  return false;
+#endif
+}
+
 void Window::title(char title[256]) const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   WCHAR title_w[256];
