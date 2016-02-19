@@ -42,6 +42,16 @@ int main(int argc, const char *argv[]) {
     main_window->update(&main_window_event_handler, NULL);
 
   #if 0
+    if (yeti::Mouse::pressed(yeti::MouseButtons::LEFT)) {
+      fprintf(stdout, "mouse.buttons[left] was pressed!\n");
+      main_window->clip();
+    } else if (yeti::Mouse::released(yeti::MouseButtons::LEFT)) {
+      fprintf(stdout, "mouse.buttons[left] was released!\n");
+      main_window->unclip();
+    }
+  #endif
+
+  #if 0
     const yeti::Vec3 mouse_absolute = yeti::Mouse::axis(yeti::MouseAxes::ABSOLUTE);
     const yeti::Vec3 mouse_relative = yeti::Mouse::axis(yeti::MouseAxes::RELATIVE);
     const yeti::Vec3 mouse_delta = yeti::Mouse::axis(yeti::MouseAxes::DELTA);
@@ -53,6 +63,9 @@ int main(int argc, const char *argv[]) {
       mouse_relative.x, mouse_relative.y,
       mouse_delta.x, mouse_delta.y);
   #endif
+
+    yeti::Keyboard::update();
+    yeti::Mouse::update();
   }
 
   return EXIT_SUCCESS;
