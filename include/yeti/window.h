@@ -53,6 +53,11 @@ class YETI_PUBLIC Window {
   void show();
   void hide();
 
+  // TODO(mtwilliams): Document this interface.
+  void minimize();
+  void maximize();
+  void restore();
+
  public:
   // TODO(mtwilliams): Document this interface.
   void title(char title[256]) const;

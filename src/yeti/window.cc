@@ -179,6 +179,36 @@ void Window::hide() {
 #endif
 }
 
+void Window::minimize() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::ShowWindow((HWND)native_hndl_, SW_MINIMIZE);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS
+#elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
+}
+
+void Window::maximize() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::ShowWindow((HWND)native_hndl_, SW_MAXIMIZE);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS
+#elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
+}
+
+void Window::restore() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::ShowWindow((HWND)native_hndl_, SW_RESTORE);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS
+#elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
+}
+
 void Window::title(char title[256]) const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   WCHAR title_w[256];
