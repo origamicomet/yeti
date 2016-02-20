@@ -26,6 +26,9 @@
 #include "yeti/input.h"
 
 #include "yeti/window.h"
+#include "yeti/time_step_policy.h"
+
+#include "yeti/application.h"
 
 YETI_BEGIN_EXTERN_C // {
 
