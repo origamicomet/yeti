@@ -46,6 +46,8 @@ void Allocator::reallocated(Allocation *allocation) {
 }
 
 void Allocator::deallocated(Allocation *allocation) {
+#if (YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG) || \
+    (YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT)
   // TODO(mtwilliams): Make this thread-safe.
   Allocation **I = &allocations_;
   while (*I) {
@@ -55,6 +57,7 @@ void Allocator::deallocated(Allocation *allocation) {
     }
     I = &((*I)->next);
   }
+#endif
 }
 
 const char *Allocator::name() const {
