@@ -27,4 +27,12 @@
 
 #include "yeti/window.h"
 
+YETI_BEGIN_EXTERN_C // {
+
+extern YETI_PUBLIC void __yeti__();
+extern YETI_PUBLIC const char *__yeti_copyright__();
+extern YETI_PUBLIC const char *__yeti_version__();
+
+YETI_END_EXTERN_C // }
+
 #endif // _YETI_H_
