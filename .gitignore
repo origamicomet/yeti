@@ -5,6 +5,7 @@ Makefile
 build.ninja
 .ninja_deps
 .ninja_log
+NOTES
 
 # Sublime Text 2/3
 *.sublime-workspace
