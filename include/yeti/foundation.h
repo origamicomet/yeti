@@ -38,5 +38,6 @@
 #include "yeti/foundation/assert.h"
 #include "yeti/foundation/allocator.h"
 #include "yeti/foundation/global_heap_allocator.h"
+#include "yeti/foundation/array.h"
 
 #endif // _YETI_FOUNDATION_H_
