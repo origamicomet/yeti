@@ -59,23 +59,25 @@ bool StandardApplication::startup() {
   application_if::expose(&this->script_, this);
 
   // TODO(mtwilliams): Load the boot script as specified by |manfiest_|.
-   // this->script_.load(<resource>);
-    // this->script_.load(<bytecode from lua_dump>);
-   // this->script_.call("startup", 0);
+  // this->script_.load(resource ~> bytecode from lua_dump);
+  if (!this->script_.call("startup", 0))
+    return false;
 
   return true;
 }
 
 void StandardApplication::update(const f32 delta_time) {
-  // this->script_.call("update", 1, Script::FLOAT, delta_time);
+  if (!this->script_.call("update", 1, Script::T_FLOAT, delta_time))
+    this->pause();
 }
 
-  // this->script_.call("render", 0);
 void StandardApplication::render() {
+  if (!this->script_.call("render", 0))
+    this->pause();
 }
 
 void StandardApplication::shutdown() {
-  // this->script_.call("shutdown", 0);
+  this->script_.call("shutdown", 0);
 }
 
 void StandardApplication::start_logging_to_stdout_and_stderr() const {
