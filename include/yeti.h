@@ -29,6 +29,8 @@
 #include "yeti/time_step_policy.h"
 
 #include "yeti/script.h"
+#include "yeti/script/application_if.h"
+
 #include "yeti/application.h"
 
 YETI_BEGIN_EXTERN_C // {
