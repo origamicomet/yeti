@@ -71,7 +71,7 @@ void Application::update(const f32 delta_time) {
   yeti_assert_debug(delta_time >= 0.f);
 }
 
-void Application::render() const {
+void Application::render() {
 }
 
 void Application::run() {

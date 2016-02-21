@@ -70,8 +70,8 @@ void StandardApplication::update(const f32 delta_time) {
   // this->script_.call("update", 1, Script::FLOAT, delta_time);
 }
 
-void StandardApplication::render() const {
   // this->script_.call("render", 0);
+void StandardApplication::render() {
 }
 
 void StandardApplication::shutdown() {

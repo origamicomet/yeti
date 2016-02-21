@@ -33,7 +33,7 @@ class StandardApplication : public yeti::Application {
  public:
   bool startup();
   void update(const f32 delta_time);
-  void render() const;
+  void render();
   void shutdown();
 
  private:

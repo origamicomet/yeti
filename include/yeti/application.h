@@ -44,7 +44,7 @@ class YETI_PUBLIC Application {
   virtual bool startup();
   virtual void shutdown();
   virtual void update(const f32 delta_time);
-  virtual void render() const;
+  virtual void render();
 
   void run();
 
