@@ -183,7 +183,9 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
   Vec3 wheel = Vec3::ZERO;
   if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
     wheel.y = -(f32)((short)mouse.usButtonData);
-  if (mouse.usButtonFlags & RI_MOUSE_HWHEEL)
+  // TODO(mtwilliams): Target Windows XP or higher by defining WINVER and _WIN32_WINNT.
+  // Refer to https://msdn.microsoft.com/en-us/library/6sehtctf.aspx for details.
+  if (mouse.usButtonFlags & 0x0800 /* RI_MOUSE_HWHEEL */)
     wheel.x = (f32)((short)mouse.usButtonData);
   wheel = wheel / (f32)WHEEL_DELTA;
 
