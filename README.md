@@ -3,28 +3,28 @@
 </p>
 
 <p align="center">
-  :snowman: A general-purpose, data-driven game engine and tools.
+  :snowman: A general-purpose data-driven game engine with tools.
 </p>
 
-<p align="center">  
+<p align="center">
   <a href="https://ci.appveyor.com/project/origamicomet/yeti/branch/master">
     <img alt="Build Status for Windows" src="https://img.shields.io/appveyor/ci/origamicomet/yeti.svg">
   </a>
-  
+
   <a href="https://travis-ci.org/origamicomet/yeti">
     <img alt="Build Status for Mac & Linux" src="https://img.shields.io/travis/origamicomet/yeti/master.svg?label=build">
   </a>
-  
+
   <a href="https://github.com/origamicomet/yeti/releases">
     <img alt="Downloads" src="https://img.shields.io/github/downloads/origamicomet/yeti/total.svg">
   </a>
-  
+
   <br>
-  
+
   <a href="https://github.com/origamicomet/yeti/releases">
     <img alt="Latest Release" src="https://img.shields.io/github/release/origamicomet/yeti.svg">
   </a>
-  
+
   <a href="https://github.com/origamicomet/yeti/blob/master/LICENSE">
     <img alt="License" src="https://img.shields.io/badge/license-attribution--based-blue.svg">
   </a>
