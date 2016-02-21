@@ -89,6 +89,9 @@ class YETI_PUBLIC TimeStepPolicy {
               const foundation::HighResolutionTimer *wall);
 
  public:
+  const TimeStepPolicy::Description &desc() const;
+
+ public:
   // TODO(mtwilliams): Document this interface.
   u32 steps() const;
   f32 delta_time_per_step() const;
@@ -99,6 +102,10 @@ class YETI_PUBLIC TimeStepPolicy {
   u32 steps_;
   f32 delta_time_per_step_;
 };
+
+YETI_INLINE const TimeStepPolicy::Description &TimeStepPolicy::desc() const {
+  return desc_;
+}
 
 YETI_INLINE u32 TimeStepPolicy::steps() const {
   return steps_;
