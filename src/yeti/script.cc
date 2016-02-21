@@ -50,4 +50,41 @@ void Script::add_module_function(const char *module,
   lua_pop(L, 1);
 }
 
+bool Script::call(const char *fn, u32 n, ...) {
+  lua_pushlightuserdata(L, (void *)this);
+  lua_pushcclosure(L, &Script::__error_handler, 1);
+
+  lua_getglobal(L, fn);
+
+  va_list ap;
+  va_start(ap, n);
+
+  for (u32 arg = 0; arg < n; ++arg) {
+    const Type type = (Type)va_arg(ap, int);
+    switch (type) {
+      case T_NIL:      lua_pushnil(L); break;
+      case T_BOOLEAN:  lua_pushboolean(L, va_arg(ap, int)); break;
+      case T_INTEGER:  lua_pushnumber(L, va_arg(ap, int)); break;
+      case T_FLOAT:    lua_pushnumber(L, va_arg(ap, double)); break;
+      case T_STRING:   lua_pushstring(L, va_arg(ap, const char *)); break;
+      case T_ARRAY:    yeti_assertf(0, "Not implemented yet."); break;
+      case T_MAP:      yeti_assertf(0, "Not implemented yet."); break;
+      case T_POINTER:  lua_pushlightuserdata(L, va_arg(ap, void *)); break;
+      case T_FUNCTION: lua_pushcfunction(L, (lua_CFunction)va_arg(ap, void *)); break;
+      default: {
+        yeti_assertf(0, "Invalid or unknown type.");
+      } break;
+    }
+  }
+
+  va_end(ap);
+
+  if (lua_pcall(L, n, 0, -(int)(n + 2)) != 0) {
+    lua_pop(L, 1);
+    return false;
+  }
+
+  return true;
+}
+
 } // yeti

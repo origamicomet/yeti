@@ -34,6 +34,20 @@ class YETI_PUBLIC Script {
  YETI_DISALLOW_COPYING(Script);
 
  public:
+  enum Type {
+    T_UNKNOWN  = 0,
+    T_NIL      = 1,
+    T_BOOLEAN  = 2,
+    T_INTEGER  = 3,
+    T_FLOAT    = 4,
+    T_STRING   = 5,
+    T_ARRAY    = 6,
+    T_MAP      = 7,
+    T_POINTER  = 8,
+    T_FUNCTION = 9
+  };
+
+ public:
   Script();
   ~Script();
 
@@ -42,13 +56,23 @@ class YETI_PUBLIC Script {
   static int __error_handler(lua_State *L);
 
  public:
-  /// Creates a module called @module.
+  /// \brief Creates a module called @module.
   void add_module(const char *module);
 
-  /// Adds @fn as @name to the @module.
+  /// \brief Adds @fn as @name to the @module.
   void add_module_function(const char *module,
                            const char *name,
                            const lua_CFunction fn);
+
+ public:
+  /// \brief Calls the global function @fn with @n number of arguments.
+  ///
+  /// Each argument is specified by the type preceding the value, except for
+  /// T_NIL. For example:
+  ///
+  ///   call("meaning_of_life", Script::T_INTEGER, 42);
+  ///
+  bool call(const char *fn, u32 n, ...);
 
  public:
   lua_State *state();
