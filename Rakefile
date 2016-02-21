@@ -24,6 +24,75 @@ PLATFORMS = %i{windows}
 ARCHITECTURES = %i{x86 x86_64}
 
 namespace :yeti do
+  task :deps, [:configuration, :platform, :architecture] => ['fs'] do |_, args|
+    puts "Building dependencies..."
+
+    configuration = args[:configuration].to_sym
+    configuration_is_known = CONFIGURATIONS.include?(configuration)
+    raise "Unknown configuration '#{configuration}'!" unless configuration_is_known
+
+    platform = args[:platform].to_sym
+    platform_is_supported = PLATFORMS.include?(platform)
+    raise "Unsupported platform '#{platform}'!" unless platform_is_supported
+
+    architecture = args[:architecture].to_sym
+    architecture_is_supported = ARCHITECTURES.include?(architecture)
+    raise "Unsupported architecture '#{architecture}'!" unless architecture_is_supported
+
+    triplet = [configuration, platform, Hash[ARCHITECTURES.zip(%w{32 64})][architecture]].join('_')
+
+    # TODO(mtwilliams): Refactor this.
+    case platform
+      when :windows
+        raise "You don't have Visual Studio installed!" unless VisualStudio.available?
+
+        # TODO(mtwilliams): Support other toolchains.
+        vs = if ENV['TOOLCHAIN']
+          supported = VisualStudio::NAMES.include?(ENV['TOOLCHAIN'])
+          raise "Unsupported toolchain '#{ENV['TOOLCHAIN']}'!" unless supported
+          vs = VisualStudio.find_by_name(ENV['TOOLCHAIN'])
+          raise "You don't have #{VisualStudio::NAME_TO_PRETTY_NAME[ENV['TOOLCHAIN']]} installed." unless vs
+          vs
+        else
+          vs = VisualStudio.latest
+          puts "==> Using #{vs.name.pretty}."
+          vs
+        end
+
+        vc = vs.products[:c_and_cpp]
+
+        platform_is_supported = vc.supports[:platforms].include?(platform)
+        raise "#{vs.name.pretty} doesn't support '#{platform}'!" unless platform_is_supported
+        sdk = vc.sdks[:windows].first
+        architecture_is_supported = vc.supports[:architectures].include?(architecture)
+        raise "#{vs.name.pretty} doesn't support '#{architecture}'!" unless architecture_is_supported
+
+        env = vc.environment(target: {platform: platform, architecture: architecture})
+
+        # Refer to http://luajit.org/install.html for details.
+        puts "==> Building LuaJIT..."
+
+        luajit_configuration = CONFIGURATIONS.zip(%w{debug release release}).to_h[configuration]
+        luajit_arch = ARCHITECTURES.zip(%w{x86 x64}).to_h[architecture]
+        luajit_triplet = [luajit_configuration, platform, Hash[ARCHITECTURES.zip(%w{32 64})][architecture]].join('_')
+
+        system(env.merge({'LJDLLNAME' => "luajit_#{luajit_triplet}.dll",
+                          'LJLIBNAME' => "luajit_#{luajit_triplet}.lib"}),
+               "cmd.exe",
+               "/c",
+               "cd deps/luajit/src & " +
+               "msvcbuild")
+
+        FileUtils.copy "deps/luajit/src/luajit_#{luajit_triplet}.lib", "_build/lib/luajit_#{triplet}.lib"
+        FileUtils.copy "deps/luajit/src/luajit_#{luajit_triplet}.dll", "_build/bin/luajit_#{triplet}.dll"
+
+        puts "Done!"
+      else
+        raise "Not implemented yet."
+      end
+
+  end
+
   task :unity => ['fs'] do
     unity = "_build/_unities/yeti.cc"
     sources = Dir["src/**/*.cc"].sort.map{|src| File.realpath(src)}
@@ -60,11 +129,11 @@ namespace :yeti do
         raise "You don't have Visual Studio installed!" unless VisualStudio.available?
 
         # TODO(mtwilliams): Support other toolchains.
-        vs = if ENV['toolchain']
-          supported = VisualStudio::NAMES.include?(ENV['toolchain'])
-          raise "Unsupported toolchain '#{ENV['toolchain']}'!" unless supported
-          vs = VisualStudio.find_by_name(ENV['toolchain'])
-          raise "You don't have #{VisualStudio::NAME_TO_PRETTY_NAME[ENV['toolchain']]} installed." unless vs
+        vs = if ENV['TOOLCHAIN']
+          supported = VisualStudio::NAMES.include?(ENV['TOOLCHAIN'])
+          raise "Unsupported toolchain '#{ENV['TOOLCHAIN']}'!" unless supported
+          vs = VisualStudio.find_by_name(ENV['TOOLCHAIN'])
+          raise "You don't have #{VisualStudio::NAME_TO_PRETTY_NAME[ENV['TOOLCHAIN']]} installed." unless vs
           vs
         else
           vs = VisualStudio.latest
@@ -98,6 +167,7 @@ namespace :yeti do
         vc.includes.each{|path| compiler_args << "/I#{path}" }
 
         # Search our includes.
+        compiler_args << "/Ideps/luajit/include"
         compiler_args << "/Iinclude"
 
         # Compile for the appropriate architecture.
@@ -217,11 +287,11 @@ namespace :runtime do
         raise "You don't have Visual Studio installed!" unless VisualStudio.available?
 
         # TODO(mtwilliams): Support other toolchains.
-        vs = if ENV['toolchain']
-          supported = VisualStudio::NAMES.include?(ENV['toolchain'])
-          raise "Unsupported toolchain '#{ENV['toolchain']}'!" unless supported
-          vs = VisualStudio.find_by_name(ENV['toolchain'])
-          raise "You don't have #{VisualStudio::NAME_TO_PRETTY_NAME[ENV['toolchain']]} installed." unless vs
+        vs = if ENV['TOOLCHAIN']
+          supported = VisualStudio::NAMES.include?(ENV['TOOLCHAIN'])
+          raise "Unsupported toolchain '#{ENV['TOOLCHAIN']}'!" unless supported
+          vs = VisualStudio.find_by_name(ENV['TOOLCHAIN'])
+          raise "You don't have #{VisualStudio::NAME_TO_PRETTY_NAME[ENV['TOOLCHAIN']]} installed." unless vs
           vs
         else
           vs = VisualStudio.latest
@@ -272,6 +342,7 @@ namespace :runtime do
         vc.libraries[architecture].each{|path| linker_args << "/LIBPATH:#{path}" }
 
         # Search our includes.
+        compiler_args << "/Ideps/luajit/include"
         compiler_args << "/Iinclude"
         compiler_args << "/Iruntime/include"
 
@@ -346,6 +417,7 @@ namespace :runtime do
 
         dependencies = %w{kernel32.lib user32.lib gdi32.lib}
         dependencies << "yeti_#{triplet}.lib"
+        dependencies << "luajit_#{triplet}.lib"
 
         system(env,
                "link.exe",
@@ -364,6 +436,26 @@ end
 task :fs do
   ['_build/_unities', '_build/obj', '_build/bin', '_build/lib'].each do |path|
     FileUtils.mkdir_p(path)
+  end
+end
+
+task :deps, [:configuration] do |_, args|
+  configurations = [*args[:configuration]]
+  configurations = CONFIGURATIONS if args[:configuration].nil?
+  # TODO(mtwilliams): Detect the current platform.
+  platforms = [:windows]
+  architectures = ARCHITECTURES
+
+  Rake::Task['fs'].execute
+
+  architectures.each do |architecture|
+    platforms.each do |platform|
+      configurations.each do |configuration|
+        Rake::Task['yeti:deps'].execute(:configuration => configuration,
+                                        :platform => platform,
+                                        :architecture => architecture)
+      end
+    end
   end
 end
 
