@@ -12,3 +12,5 @@
 - Optimize allocation tracking via a different strategy. Refer to the EASTL talk that describes the use arenas.
 - Default application icon based on the Yeti logo.
 - Determine the best approach to using a user-provided icon. Check my Github stars for that resource editor/embedding library. Or just load based on a manifest setting?
+- Switch time-step policies by updating |desc_| and |state_| rather than creating a new TimeStepPolicy.
+- Use yeti_assert(!"<message>") instead of yeti_assertf(0, "<message>").
