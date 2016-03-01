@@ -205,6 +205,7 @@ namespace :yeti do
 
         compiler_args << '/D__YETI_IS_BEING_COMPILED__=1'
         compiler_args << "/D__YETI_VERSION__=\"#{`git rev-parse HEAD`.strip}\""
+        compiler_args << "/D__YETI_REVISION__=#{`git rev-list --count HEAD`.strip}"
         compiler_args << "/D__YETI_COPYRIGHT__=\"Copyright 2013-#{Time.new.year} Origami Comet Games, Inc. All rights reserved.\""
         compiler_args << '/DYETI_LINKAGE=YETI_LINKAGE_STATIC'
         compiler_args << "/DYETI_CONFIGURATION=YETI_CONFIGURATION_#{configuration.upcase}"

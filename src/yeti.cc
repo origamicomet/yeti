@@ -34,4 +34,11 @@ const char *__yeti_version__() {
   return __YETI_VERSION__;
 }
 
+YETI_PUBLIC
+yeti_uint32_t __yeti_revision__() {
+  // The number of commits composing the code this was built from: `git rev-list --count HEAD`.
+  // Refer to our Rakefile for details.
+  return __YETI_REVISION__;
+}
+
 YETI_END_EXTERN_C // }

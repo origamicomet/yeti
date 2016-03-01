@@ -38,6 +38,7 @@ YETI_BEGIN_EXTERN_C // {
 extern YETI_PUBLIC void __yeti__();
 extern YETI_PUBLIC const char *__yeti_copyright__();
 extern YETI_PUBLIC const char *__yeti_version__();
+extern YETI_PUBLIC uint32_t __yeti_revision__();
 
 YETI_END_EXTERN_C // }
 
