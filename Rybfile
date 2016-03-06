@@ -69,11 +69,13 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.library :yeti, pretty: 'Yeti' do |lib|
     lib.author = 'Origami Comet Games, Inc.'
-    lib.description = 'A general-purpose, data-driven game engine.'
+    lib.description = 'A general-purpose data-driven game engine.'
     lib.license = 'Attribution based licensing.'
 
     lib.define '__YETI_IS_BEING_COMPILED__' => true
     lib.define '__YETI_VERSION__' => `git rev-parse HEAD`.rstrip
+    lib.define '__YETI_REVISION__' => `git rev-list --count HEAD`.strip
+    lib.define '__YETI_COPYRIGHT__' => "Copyright 2013-#{Time.new.year} Origami Comet Games, Inc. All rights reserved."
     lib.linkage = :static
 
     lib.add_include_paths 'include/'
