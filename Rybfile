@@ -20,9 +20,9 @@ project :yeti, pretty: 'Yeti' do |proj|
   proj.platform :windows do |platform| platform.suffix = '_windows'; end
   proj.platform :macosx do |platform| platform.suffix = '_macosx'; end
   proj.platform :linux do |platform| platform.suffix = '_linux'; end
-  proj.configuration 'debug' do |config| config.suffix = '_debug'; end
-  proj.configuration 'development' do |config| config.suffix = '_development'; end
-  proj.configuration 'release' do |config| config.suffix = '_release'; end
+  proj.configuration :debug do |config| config.suffix = '_debug'; end
+  proj.configuration :development do |config| config.suffix = '_development'; end
+  proj.configuration :release do |config| config.suffix = '_release'; end
 
   # # We target Windows 7 and later.
   # proj.platform :windows do |platform| platform.sdk = '7.1'; end
