@@ -44,7 +44,7 @@ project :yeti, pretty: 'Yeti' do |proj|
   end
 
   proj.configuration :development, pretty: 'Development' do |config|
-    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
+    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEVELOPMENT'
 
     config.define 'NDEBUG' => true,
                   '_HAS_ITERATOR_DEBUGGING' => false,
@@ -56,7 +56,7 @@ project :yeti, pretty: 'Yeti' do |proj|
   end
 
   proj.configuration :release, pretty: 'Release' do |config|
-    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG'
+    config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_RELEASE'
 
     config.define 'NDEBUG' => true,
                   '_HAS_ITERATOR_DEBUGGING' => false,
