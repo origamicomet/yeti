@@ -16,7 +16,10 @@
 #ifndef _YETI_FOUNDATION_TYPES_H_
 #define _YETI_FOUNDATION_TYPES_H_
 
-// TODO(mtwilliams): Don't rely on stdint.h.
+#include "yeti/config.h"
+#include "yeti/linkage.h"
+
+// TODO(mtwilliams): Don't rely on `stdint.h`.
 // TODO(mtwilliams): Provide fallbacks for shitty compilers.
 #include <stddef.h>
 #include <stdint.h>

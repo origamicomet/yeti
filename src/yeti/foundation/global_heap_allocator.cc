@@ -11,6 +11,8 @@
 
 #include "yeti/foundation/global_heap_allocator.h"
 
+#include <stdlib.h>
+
 namespace yeti {
 namespace foundation {
 
@@ -52,10 +54,10 @@ namespace {
   }
 }
 
-static GlobalHeapAllocator _global_heap_allocator;
+static GlobalHeapAllocator global_heap_allocator_;
 
 Allocator &heap() {
-  return _global_heap_allocator;
+  return global_heap_allocator_;
 }
 
 } // foundation

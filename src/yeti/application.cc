@@ -13,6 +13,7 @@
 
 #include "yeti/window.h"
 #include "yeti/time_step_policy.h"
+#include "yeti/input.h"
 
 namespace yeti {
 

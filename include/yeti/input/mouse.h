@@ -20,6 +20,8 @@
 #include "yeti/linkage.h"
 #include "yeti/foundation.h"
 
+#include "yeti/math.h"
+
 namespace yeti {
 
 namespace MouseButtons {

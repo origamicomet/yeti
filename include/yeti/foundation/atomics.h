@@ -20,6 +20,7 @@
 #include "yeti/linkage.h"
 
 #include "yeti/foundation/types.h"
+#include "yeti/foundation/support.h"
 
 #if YETI_COMPILER == YETI_COMPILER_MSVC
   #include <intrin.h>

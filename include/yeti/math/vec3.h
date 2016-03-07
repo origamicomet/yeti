@@ -19,9 +19,7 @@
 
 #include "yeti/config.h"
 #include "yeti/linkage.h"
-
-#include <stdlib.h>
-#include <math.h>
+#include "yeti/foundation.h"
 
 namespace yeti {
 

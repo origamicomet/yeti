@@ -11,6 +11,8 @@
 
 #include "yeti/foundation/high_res_timer.h"
 
+#include "yeti/foundation/global_heap_allocator.h"
+
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
