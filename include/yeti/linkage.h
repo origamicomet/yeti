@@ -42,7 +42,7 @@
 #else // #if !defined(DOXYGEN)
   #if YETI_LINKAGE == YETI_LINKAGE_STATIC
     #define YETI_LOCAL
-  #elif YETI_LINKAGE == YETI_DYNAMIC_LINAKGE
+  #elif YETI_LINKAGE == YETI_LINKAGE_DYNAMIC
     #if defined (__YETI_IS_BEING_COMPILED__)
       #if defined(__GNUC__)
         #if __GNUC__ >= 4
