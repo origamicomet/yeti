@@ -1,6 +1,6 @@
 project :yeti, pretty: 'Yeti' do |proj|
   # Statically link to Yeti for the (small) optimization wins.
-  proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_STATIC'
+  proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_DYNAMIC'
 
   # Supress all of Visual Studio's bullshit.
   # TODO(mtwilliams): Refactor into Ryb.
@@ -68,26 +68,41 @@ project :yeti, pretty: 'Yeti' do |proj|
   end
 
   proj.library :yeti, pretty: 'Yeti' do |lib|
+    lib.linkage = :dynamic
+
     lib.author = 'Origami Comet Games, Inc.'
     lib.description = 'A general-purpose data-driven game engine.'
     lib.license = 'Attribution based licensing.'
 
     lib.define '__YETI_IS_BEING_COMPILED__' => true
-    lib.define '__YETI_VERSION__' => `git rev-parse HEAD`.rstrip
-    lib.define '__YETI_REVISION__' => `git rev-list --count HEAD`.strip
-    lib.define '__YETI_COPYRIGHT__' => "Copyright 2013-#{Time.new.year} Origami Comet Games, Inc. All rights reserved."
-    lib.linkage = :static
+    lib.define '__YETI_VERSION__' => "\"\\\"#{`git rev-parse HEAD`.rstrip}\\\"\""
+    lib.define '__YETI_REVISION__' => `git rev-list --count HEAD`.strip.to_i
+    lib.define '__YETI_COPYRIGHT__' => "\"\\\"Copyright 2013-#{Time.new.year} Origami Comet Games, Inc. All rights reserved.\\\"\""
 
     lib.add_include_paths 'include/'
     lib.add_library_paths '$build/lib/', '$build/bin/'
     lib.add_binary_paths '$build/bin/'
 
+    lib.add_include_paths 'deps/luajit/include/', 'deps/sqlite3/include/'
+    lib.add_library_paths 'deps/luajit/lib/', 'deps/sqlite3/lib/'
+    lib.add_binary_paths 'deps/luajit/bin/', 'deps/sqlite3/bin/'
+
     lib.add_source_files 'include/**/*.{h,hpp,inl}'
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
+
+    lib.platform :windows do |platform|
+      # TODO(mtwilliams): Automatically mangle.
+      platform.add_external_dependency 'kernel32.lib'
+      platform.add_external_dependency 'user32.lib'
+      platform.add_external_dependency 'gdi32.lib'
+      platform.add_external_dependency 'lua51.lib'
+      platform.add_external_dependency 'sqlite3.lib'
+    end
   end
 
   proj.application :runtime, pretty: 'Runtime' do |app|
     app.add_include_paths 'include/', 'runtime/include/'
+    app.add_include_paths 'deps/luajit/include/'
     app.add_library_paths '$build/lib/', '$build/bin/'
     app.add_binary_paths '$build/bin/'
 
@@ -95,5 +110,12 @@ project :yeti, pretty: 'Yeti' do |proj|
     app.add_source_files 'runtime/src/**/*.{c,cc,cpp}'
 
     app.add_dependency :yeti
+
+    app.platform :windows do |platform|
+      # TODO(mtwilliams): Automatically mangle.
+      platform.add_external_dependency 'kernel32.lib'
+      platform.add_external_dependency 'user32.lib'
+      platform.add_external_dependency 'gdi32.lib'
+    end
   end
 end
