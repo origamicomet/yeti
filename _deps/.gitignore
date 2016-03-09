@@ -1,0 +1,4 @@
+# This is where Sherpa tracks and installs all packages into.
+
+*
+!.gitignore
