@@ -1,3 +1,10 @@
+# This seems like a hack. Perhaps we should move everything to a "mangler?"
+mangle = Proc.new do |triplet, dependency|
+  configuration, platform, arch = *triplet
+  suffix = [configuration, platform, {:x86 => '32', :x86_64 => '64'}.fetch(arch, arch.to_s)].join('_')
+  "#{dependency}_#{suffix}"
+end
+
 project :yeti, pretty: 'Yeti' do |proj|
   # Statically link to Yeti for the (small) optimization wins.
   proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_DYNAMIC'
@@ -98,6 +105,9 @@ project :yeti, pretty: 'Yeti' do |proj|
       platform.add_external_dependency 'lua51.lib'
       platform.add_external_dependency 'sqlite3.lib'
     end
+
+    lib.add_external_dependency 'luajit', mangler: mangle
+    lib.add_external_dependency 'sqlite3', mangler: mangle
   end
 
   proj.application :runtime, pretty: 'Runtime' do |app|
