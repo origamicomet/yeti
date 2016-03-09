@@ -27,7 +27,7 @@ class Window;
 namespace input {
 
 /// \internal Watches @window for input and feeds into the pertinent singletons.
-extern YETI_LOCAL void from(const Window *window);
+extern YETI_PUBLIC void from(const Window *window);
 
 } // input
 
