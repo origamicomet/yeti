@@ -90,9 +90,9 @@ project :yeti, pretty: 'Yeti' do |proj|
     lib.add_library_paths '$build/lib/', '$build/bin/'
     lib.add_binary_paths '$build/bin/'
 
-    lib.add_include_paths 'deps/luajit/include/', 'deps/sqlite3/include/'
-    lib.add_library_paths 'deps/luajit/lib/', 'deps/sqlite3/lib/'
-    lib.add_binary_paths 'deps/luajit/bin/', 'deps/sqlite3/bin/'
+    lib.add_include_paths '_deps/luajit/include/', '_deps/sqlite3/include/'
+    lib.add_library_paths '_deps/luajit/_build/lib/', '_deps/sqlite3/_build/lib/'
+    lib.add_binary_paths '_deps/luajit/_build/bin/', '_deps/sqlite3/_build/bin/'
 
     lib.add_source_files 'include/**/*.{h,hpp,inl}'
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
@@ -112,7 +112,7 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.application :runtime, pretty: 'Runtime' do |app|
     app.add_include_paths 'include/', 'runtime/include/'
-    app.add_include_paths 'deps/luajit/include/'
+    app.add_include_paths '_deps/luajit/include/'
     app.add_library_paths '$build/lib/', '$build/bin/'
     app.add_binary_paths '$build/bin/'
 
