@@ -30,7 +30,7 @@ namespace foundation {
 
 /// ...
 template <typename T>
-class YETI_PUBLIC Array {
+class Array {
  public:
   explicit Array(Allocator *allocator, const u32 sz = 0);
   explicit Array(Allocator &allocator, const u32 sz = 0);
