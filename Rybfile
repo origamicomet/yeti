@@ -99,11 +99,7 @@ project :yeti, pretty: 'Yeti' do |proj|
 
     lib.platform :windows do |platform|
       # TODO(mtwilliams): Automatically mangle.
-      platform.add_external_dependency 'kernel32.lib'
-      platform.add_external_dependency 'user32.lib'
-      platform.add_external_dependency 'gdi32.lib'
-      platform.add_external_dependency 'lua51.lib'
-      platform.add_external_dependency 'sqlite3.lib'
+      platform.add_external_dependencies %w(kernel32 user32 gdi32)
     end
 
     lib.add_external_dependency 'luajit', mangler: mangle
@@ -123,9 +119,8 @@ project :yeti, pretty: 'Yeti' do |proj|
 
     app.platform :windows do |platform|
       # TODO(mtwilliams): Automatically mangle.
-      platform.add_external_dependency 'kernel32.lib'
-      platform.add_external_dependency 'user32.lib'
-      platform.add_external_dependency 'gdi32.lib'
+      platform.add_external_dependencies %w(kernel32 user32 gdi32)
     end
+
   end
 end
