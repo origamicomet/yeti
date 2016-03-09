@@ -98,7 +98,6 @@ project :yeti, pretty: 'Yeti' do |proj|
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
 
     lib.platform :windows do |platform|
-      # TODO(mtwilliams): Automatically mangle.
       platform.add_external_dependencies %w(kernel32 user32 gdi32)
     end
 
@@ -118,9 +117,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     app.add_dependency :yeti
 
     app.platform :windows do |platform|
-      # TODO(mtwilliams): Automatically mangle.
       platform.add_external_dependencies %w(kernel32 user32 gdi32)
     end
-
   end
 end
