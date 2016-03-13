@@ -2,8 +2,8 @@
 
 ### Global
 
-- Use yeti_assert(!"<message>") instead of yeti_assertf(0, "<message>").
 - Move to Sherpa for managing dependencies.
+- Use `yeti_assert(!"<message>")` instead of `yeti_assertf(0, "<message>")`.
 
 ### Foundation
 
@@ -13,15 +13,15 @@
 
 - Extract mouse buttons and mouse axes into an include file?
 - Respect keyboard layouts?
-- Use WM_CHAR and friends for textual input.
-- Implement Keyboard::connected() and Mouse::connected().
-- Implement Window::mouse_focus() and Window::set_mouse_focus().
-- Actually generate events in Window::update() for consumption by |event_handler|.
-- Implement standard and custom cursors via Window::cursor() and Window::set_cursor().
-- Update MouseAxes::ABSOLUTE and MouseAxes::RELATIVE upon raw-input? We'll have to manually translate GetCursorPos to a window-relative point.
+- Use `WM_CHAR` and friends for textual input.
+- Implement `Keyboard::connected()` and `Mouse::connected()`.
+- Implement `Window::mouse_focus()` and `Window::set_mouse_focus()`.
+- Actually generate events in `Window::update()` for consumption by `event_handler`.
+- Implement standard and custom cursors via `Window::cursor()` and `Window::set_cursor()`.
+- Update `MouseAxes::ABSOLUTE` and `MouseAxes::RELATIVE` upon raw-input? We'll have to manually translate `GetCursorPos` to a window-relative point.
 - Make allocation tracking thread-safe.
 - Optimize allocation tracking via a different strategy. Refer to the EASTL talk that describes the use arenas.
-- Switch time-step policies by updating |desc_| and |state_| rather than creating a new TimeStepPolicy.
+- Switch time-step policies by updating `TimeStepPolicy::desc_` and `TimeStepPolicy::state_` rather than creating a new `TimeStepPolicy`.
 
 ### Runtime
 
@@ -90,7 +90,7 @@
 
 ### Sound Editor
 
-- Scaffold. Extract into `origamicomet/gorilla`.
+- Scaffold. Extract into `origamicomet/gorilla` and `origamicomet/jungle`.
 
 ### Localization Editor
 
@@ -126,6 +126,7 @@
 # Vanguard
 
 ### Gore Tech
+
 - Scaffold plugin.
 
 ### Destruction Tech
