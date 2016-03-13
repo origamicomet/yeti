@@ -1,0 +1,6 @@
+[submodule "_deps/luajit"]
+	path = _deps/luajit
+	url = git@github.com:origamicomet/luajit.git
+[submodule "_deps/sqlite3"]
+	path = _deps/sqlite3
+	url = git@github.com:origamicomet/sqlite3.git

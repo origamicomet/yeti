@@ -2,3 +2,8 @@
 
 *
 !.gitignore
+
+# HACK(mtwilliams): Use git submodules and manually build until sherpa is ready.
+
+!luajit
+!sqlite3

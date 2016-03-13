@@ -3,6 +3,7 @@
 ### Global
 
 - Use yeti_assert(!"<message>") instead of yeti_assertf(0, "<message>").
+- Move to Sherpa for managing dependencies.
 
 ### Foundation
 
