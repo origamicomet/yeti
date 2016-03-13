@@ -2,19 +2,20 @@
 	"folders":
 	[
 		{
-			"file_exclude_patterns":
-			[
+			"path": ".",
+
+			"follow_symlinks": true,
+
+			"file_exclude_patterns": [
 				"*.sublime-project",
 				"*.ninja*"
 			],
-			"folder_exclude_patterns":
-			[
+
+			"folder_exclude_patterns": [
 				"_build",
-				"deps",
+				"_deps",
 				"docs"
-			],
-			"follow_symlinks": true,
-			"path": "."
+			]
 		}
 	]
 }
