@@ -15,6 +15,9 @@
 
 #include "yeti/foundation/filesystem.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
   #undef ABSOLUTE
@@ -24,6 +27,13 @@
     LARGE_INTEGER unix_time;
     unix_time.QuadPart = (ftime.QuadPart / 10000000LL) - 11644473600LL;
     return unix_time;
+  }
+
+  static LARGE_INTEGER FileTimeToUnixTime(FILETIME ftime) {
+    LARGE_INTEGER ftime_as_li;
+    ftime_as_li.LowPart = ftime.dwLowDateTime;
+    ftime_as_li.HighPart = ftime.dwHighDateTime;
+    return ::FileTimeToUnixTime(ftime_as_li);
   }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
@@ -138,6 +148,57 @@ bool fs::destroy(fs::Type type, const char *path) {
       // TODO(mtwilliams): Should we delete recursively, using SHFileOperation?
       return ::RemoveDirectory(path) != 0;
   }
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
+  yeti_assert_debug(directory != NULL);
+  yeti_assert_debug(walker != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  yeti_assert_debug(strlen(directory) <= 253);
+  char pattern[256];
+  sprintf(&pattern[0], "%s\\*", directory);
+
+  WIN32_FIND_DATA find_data;
+  HANDLE find = ::FindFirstFileA(&pattern[0], &find_data);
+  if (find == INVALID_HANDLE_VALUE)
+    return false;
+
+  do {
+    // Ignore '.' and '..' but not .*
+    if (find_data.cFileName[0] == '.') {
+      if (find_data.cFileName[1] == '\0')
+        continue;
+      if (find_data.cFileName[1] == '.')
+        if (find_data.cFileName[2] == '\0')
+          continue;
+    }
+
+    fs::Info info;
+    info.type = (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? fs::DIRECTORY : fs::FILE;
+    info.read = 1;
+    info.write = !(find_data.dwFileAttributes & FILE_ATTRIBUTE_READONLY);
+    /* info.execute = */ {
+      DWORD binary_type;
+      info.execute = !!::GetBinaryTypeA(&find_data.cFileName[0], &binary_type); }
+    /* info.size = */ {
+      LARGE_INTEGER size;
+      size.LowPart = find_data.nFileSizeLow;
+      size.HighPart = find_data.nFileSizeHigh;
+      info.size = size.QuadPart; }
+    info.created_at = ::FileTimeToUnixTime(find_data.ftCreationTime).QuadPart;
+    info.last_accessed_at = ::FileTimeToUnixTime(find_data.ftLastAccessTime).QuadPart;
+    info.last_modified_at = ::FileTimeToUnixTime(find_data.ftLastWriteTime).QuadPart;
+
+    if (!walker(&find_data.cFileName[0], &info, walker_ctx))
+      break;
+  } while (::FindNextFile(find, &find_data) != 0);
+
+  ::FindClose(find);
+
+  return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif

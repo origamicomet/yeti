@@ -111,6 +111,13 @@ extern YETI_PUBLIC bool destroy(const char *path);
 ///
 extern YETI_PUBLIC bool destroy(fs::Type type, const char *path);
 
+/// User-specified callback for yeti::foundation::fs::walk.
+typedef bool (*Walker)(const char *path, const Info *info, void *ctx);
+
+/// Non-recursively walks @directory with @walker until there are no more
+/// entires or @walker returns |false|.
+extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *walker_ctx = NULL);
+
 /// Opens an existing file @path with @permissions.
 /// \note Fails if there is no file @path.
 ///
