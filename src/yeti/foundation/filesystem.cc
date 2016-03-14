@@ -22,19 +22,6 @@
   #include <windows.h>
   #undef ABSOLUTE
   #undef RELATIVE
-
-  static LARGE_INTEGER FileTimeToUnixTime(LARGE_INTEGER ftime) {
-    LARGE_INTEGER unix_time;
-    unix_time.QuadPart = (ftime.QuadPart / 10000000LL) - 11644473600LL;
-    return unix_time;
-  }
-
-  static LARGE_INTEGER FileTimeToUnixTime(FILETIME ftime) {
-    LARGE_INTEGER ftime_as_li;
-    ftime_as_li.LowPart = ftime.dwLowDateTime;
-    ftime_as_li.HighPart = ftime.dwHighDateTime;
-    return ::FileTimeToUnixTime(ftime_as_li);
-  }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
@@ -46,6 +33,25 @@
 
 namespace yeti {
 namespace foundation {
+
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+namespace {
+  static u64 file_time_to_secs_since_unix_epoch(u64 file_time) {
+    return (file_time / 10000000ull) - 11644473600ull;
+  }
+
+  static u64 file_time_to_secs_since_unix_epoch(LARGE_INTEGER file_time) {
+    return file_time_to_secs_since_unix_epoch(file_time.QuadPart);
+  }
+
+  static u64 file_time_to_secs_since_unix_epoch(FILETIME file_time) {
+    LARGE_INTEGER file_time_as_li;
+    file_time_as_li.LowPart = file_time.dwLowDateTime;
+    file_time_as_li.HighPart = file_time.dwHighDateTime;
+    return file_time_to_secs_since_unix_epoch(file_time_as_li);
+  }
+}
+#endif
 
 bool fs::info(const char *path, fs::Info *info) {
   yeti_assert_debug(path != NULL);
@@ -82,9 +88,9 @@ bool fs::info(uintptr_t hndl, fs::Info *info) {
   // TODO(mtwilliams): Determine if executable without resorting to ::GetBinaryType.
   info->execute = 0;
   info->size = standard_info.EndOfFile.QuadPart;
-  info->created_at = ::FileTimeToUnixTime(basic_info.CreationTime).QuadPart;
-  info->last_accessed_at = ::FileTimeToUnixTime(basic_info.LastAccessTime).QuadPart;
-  info->last_modified_at = ::FileTimeToUnixTime(basic_info.LastWriteTime).QuadPart;
+  info->created_at = file_time_to_secs_since_unix_epoch(basic_info.CreationTime);
+  info->last_accessed_at = file_time_to_secs_since_unix_epoch(basic_info.LastAccessTime);
+  info->last_modified_at = file_time_to_secs_since_unix_epoch(basic_info.LastWriteTime);
 
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
@@ -190,9 +196,9 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
       size.LowPart = find_data.nFileSizeLow;
       size.HighPart = find_data.nFileSizeHigh;
       info.size = size.QuadPart; }
-    info.created_at = ::FileTimeToUnixTime(find_data.ftCreationTime).QuadPart;
-    info.last_accessed_at = ::FileTimeToUnixTime(find_data.ftLastAccessTime).QuadPart;
-    info.last_modified_at = ::FileTimeToUnixTime(find_data.ftLastWriteTime).QuadPart;
+    info.created_at = file_time_to_secs_since_unix_epoch(find_data.ftCreationTime);
+    info.last_accessed_at = file_time_to_secs_since_unix_epoch(find_data.ftLastAccessTime);
+    info.last_modified_at = file_time_to_secs_since_unix_epoch(find_data.ftLastWriteTime);
 
     if (!walker(&find_data.cFileName[0], &info, walker_ctx))
       break;
