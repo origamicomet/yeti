@@ -63,7 +63,7 @@ bool fs::info(const char *path, fs::Info *info) {
   HANDLE hndl = ::CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (hndl == INVALID_HANDLE_VALUE)
     return false;
-  const bool succeeded = fs::info((uintptr_t)hndl, info);
+  const bool succeeded = fs::info((File *)hndl, info);
   ::CloseHandle(hndl);
   return succeeded;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
@@ -71,15 +71,15 @@ bool fs::info(const char *path, fs::Info *info) {
 #endif
 }
 
-bool fs::info(uintptr_t hndl, fs::Info *info) {
-  yeti_assert_debug(hndl != NULL);
+bool fs::info(fs::File *file, fs::Info *info) {
+  yeti_assert_debug(file != NULL);
   yeti_assert_debug(info != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   FILE_BASIC_INFO basic_info;
   FILE_STANDARD_INFO standard_info;
-  if (!::GetFileInformationByHandleEx((HANDLE)hndl, FileBasicInfo, (LPVOID)&basic_info, sizeof(FILE_BASIC_INFO)))
+  if (!::GetFileInformationByHandleEx((HANDLE)file, FileBasicInfo, (LPVOID)&basic_info, sizeof(FILE_BASIC_INFO)))
     return false;
-  if (!::GetFileInformationByHandleEx((HANDLE)hndl, FileStandardInfo, (LPVOID)&standard_info, sizeof(FILE_STANDARD_INFO)))
+  if (!::GetFileInformationByHandleEx((HANDLE)file, FileStandardInfo, (LPVOID)&standard_info, sizeof(FILE_STANDARD_INFO)))
     return false;
 
   info->type = standard_info.Directory ? fs::DIRECTORY : fs::FILE;
@@ -212,7 +212,7 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
 #endif
 }
 
-uintptr_t fs::open(const char *path, const fs::Permissions permissions) {
+fs::File *fs::open(const char *path, const fs::Permissions permissions) {
   yeti_assert_debug(path != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   DWORD desired_access = 0;
@@ -223,45 +223,45 @@ uintptr_t fs::open(const char *path, const fs::Permissions permissions) {
   DWORD share_mode = 0;
   if (!(permissions & fs::EXCLUSIVE))
    share_mode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
-  return (uintptr_t)::CreateFileA(path, desired_access, share_mode, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  return (fs::File *)::CreateFileA(path, desired_access, share_mode, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
 
-void fs::close(uintptr_t hndl) {
-  yeti_assert_debug(hndl != NULL);
+void fs::close(fs::File *file) {
+  yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  ::CloseHandle((HANDLE)hndl);
+  ::CloseHandle((HANDLE)file);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
 
-u64 fs::read(uintptr_t hndl, uintptr_t in, u64 in_len) {
-  yeti_assert_debug(hndl != NULL);
+u64 fs::read(fs::File *file, uintptr_t in, u64 in_len) {
+  yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   DWORD read;
-  ::ReadFile((HANDLE)hndl, (LPVOID)in, in_len, &read, NULL);
+  ::ReadFile((HANDLE)file, (LPVOID)in, in_len, &read, NULL);
   return read;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
 
-u64 fs::write(uintptr_t hndl, const uintptr_t out, u64 out_len) {
-  yeti_assert_debug(hndl != NULL);
+u64 fs::write(fs::File *file, const uintptr_t out, u64 out_len) {
+  yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   DWORD wrote;
-  ::WriteFile((HANDLE)hndl, (LPCVOID)out, out_len, &wrote, NULL);
+  ::WriteFile((HANDLE)file, (LPCVOID)out, out_len, &wrote, NULL);
   return wrote;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
 
-i64 fs::seek(uintptr_t hndl, fs::Position pos, i64 offset) {
-  yeti_assert_debug(hndl != NULL);
+i64 fs::seek(fs::File *file, fs::Position pos, i64 offset) {
+  yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   LARGE_INTEGER move; move.QuadPart = offset;
   LARGE_INTEGER moved = { 0, };
@@ -273,17 +273,17 @@ i64 fs::seek(uintptr_t hndl, fs::Position pos, i64 offset) {
       method = FILE_END;
   else if (pos == fs::RELATIVE)
     method = FILE_CURRENT;
-  ::SetFilePointerEx((HANDLE)hndl, move, &moved, method);
+  ::SetFilePointerEx((HANDLE)file, move, &moved, method);
   return moved.QuadPart;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
 
-void fs::flush(uintptr_t hndl) {
-  yeti_assert_debug(hndl != NULL);
+void fs::flush(fs::File *file) {
+  yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  ::FlushFileBuffers((HANDLE)hndl);
+  ::FlushFileBuffers((HANDLE)file);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif

@@ -90,11 +90,14 @@ enum Position {
   RELATIVE = 2
 };
 
+/// An opaque handle that represents an open file.
+struct File;
+
 /// Fills out @info for the file or directory at @path.
 extern YETI_PUBLIC bool info(const char *path, fs::Info *info);
 
-/// Fills out @info for the file @hndl.
-extern YETI_PUBLIC bool info(uintptr_t hndl, fs::Info *info);
+/// Fills out @info for the @file.
+extern YETI_PUBLIC bool info(fs::File *file, fs::Info *info);
 
 /// Returns true if a file (or directory) exists at @path.
 extern YETI_PUBLIC bool exists(const char *path);
@@ -124,31 +127,31 @@ extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *wal
 /// Opens an existing file @path with @permissions.
 /// \note Fails if there is no file @path.
 ///
-extern YETI_PUBLIC uintptr_t open(const char *path, const fs::Permissions permissions);
+extern YETI_PUBLIC fs::File *open(const char *path, const fs::Permissions permissions);
 
-/// Closes a handle of a file opened by yeti::foundation::fs::open.
-extern YETI_PUBLIC void close(uintptr_t hndl);
+/// Closes a @file opened by yeti::foundation::fs::open.
+extern YETI_PUBLIC void close(fs::File *file);
 
-/// Synchronously reads up to @in_len bytes from the file @hndl into @in.
+/// Synchronously reads up to @in_len bytes from the @file into @in.
 /// \returns The number of bytes actually read. Zero indicates failure.
 ///
-extern YETI_PUBLIC u64 read(uintptr_t hndl, uintptr_t in, u64 in_len);
+extern YETI_PUBLIC u64 read(fs::File *file, uintptr_t in, u64 in_len);
 
-/// Synchronously writes up to @out_len bytes to the file @hndl from @out.
+/// Synchronously writes up to @out_len bytes to the @file from @out.
 /// \returns The number of bytes actually written. Zero indicates failure.
 ///
-extern YETI_PUBLIC u64 write(uintptr_t hndl, const uintptr_t out, u64 out_len);
+extern YETI_PUBLIC u64 write(fs::File *file, const uintptr_t out, u64 out_len);
 
-/// Moves the read/write position inside the file @hndl. If @pos is
-/// fs::ABSOLUTE, then @offset is taken as from the start of the file if
-/// positive, or from the end of the file if negative. If @pos is fs::RELATIVE,
-/// the @offset is taken from the current position in the file.
+/// Moves the read/write position inside the @file. If @pos is fs::ABSOLUTE,
+/// then @offset is taken as from the start of the file if positive, or from
+/// the end of the file if negative. If @pos is fs::RELATIVE, the @offset is
+/// taken from the current position in the file.
 /// \returns The number of bytes seeked.
 ///
-extern YETI_PUBLIC i64 seek(uintptr_t hndl, fs::Position pos, i64 offset);
+extern YETI_PUBLIC i64 seek(fs::File *file, fs::Position pos, i64 offset);
 
 /// Forces all buffered data to be written to the file @hndl.
-extern YETI_PUBLIC void flush(uintptr_t hndl);
+extern YETI_PUBLIC void flush(fs::File *file);
 
 namespace async {
   extern YETI_PUBLIC void read();
