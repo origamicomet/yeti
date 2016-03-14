@@ -51,40 +51,42 @@ bool fs::info(const char *path, fs::Info *info) {
   yeti_assert_debug(path != NULL);
   yeti_assert_debug(info != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  DWORD attributes = ::GetFileAttributesA(path);
-  if (attributes == INVALID_FILE_ATTRIBUTES)
+  if (::GetFileAttributesA(path) == INVALID_FILE_ATTRIBUTES)
+    // Does not exist?
     return false;
-
-  DWORD binary_type;
-  BOOL is_executable = ::GetBinaryTypeA(path, &binary_type);
-
   HANDLE hndl = ::CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (hndl == INVALID_HANDLE_VALUE)
     return false;
+  const bool succeeded = fs::info((uintptr_t)hndl, info);
+  ::CloseHandle(hndl);
+  return succeeded;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
 
+bool fs::info(uintptr_t hndl, fs::Info *info) {
+  yeti_assert_debug(hndl != NULL);
+  yeti_assert_debug(info != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   FILE_BASIC_INFO basic_info;
-  if (!::GetFileInformationByHandleEx(hndl, FileBasicInfo, (LPVOID)&basic_info, sizeof(FILE_BASIC_INFO)))
-    goto failed;
-
   FILE_STANDARD_INFO standard_info;
-  if (!::GetFileInformationByHandleEx(hndl, FileStandardInfo, (LPVOID)&standard_info, sizeof(FILE_STANDARD_INFO)))
-    goto failed;
+  if (!::GetFileInformationByHandleEx((HANDLE)hndl, FileBasicInfo, (LPVOID)&basic_info, sizeof(FILE_BASIC_INFO)))
+    return false;
+  if (!::GetFileInformationByHandleEx((HANDLE)hndl, FileStandardInfo, (LPVOID)&standard_info, sizeof(FILE_STANDARD_INFO)))
+    return false;
 
   info->type = standard_info.Directory ? fs::DIRECTORY : fs::FILE;
   info->read = 1;
-  info->write = !(attributes & FILE_ATTRIBUTE_READONLY);
-  info->execute = is_executable ? 1 : 0;
-  info->size = standard_info.EndOfFile.LowPart;
+  info->write = !(basic_info.FileAttributes & FILE_ATTRIBUTE_READONLY);
+  // TODO(mtwilliams): Determine if executable without resorting to ::GetBinaryType.
+  info->execute = 0;
+  info->size = standard_info.EndOfFile.QuadPart;
   info->created_at = ::FileTimeToUnixTime(basic_info.CreationTime).QuadPart;
   info->last_accessed_at = ::FileTimeToUnixTime(basic_info.LastAccessTime).QuadPart;
   info->last_modified_at = ::FileTimeToUnixTime(basic_info.LastWriteTime).QuadPart;
 
-succeeded:
   return true;
-
-failed:
-  ::CloseHandle(hndl);
-  return false;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif

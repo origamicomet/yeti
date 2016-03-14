@@ -93,6 +93,9 @@ enum Position {
 /// Fills out @info for the file or directory at @path.
 extern YETI_PUBLIC bool info(const char *path, fs::Info *info);
 
+/// Fills out @info for the file @hndl.
+extern YETI_PUBLIC bool info(uintptr_t hndl, fs::Info *info);
+
 /// Returns true if a file (or directory) exists at @path.
 extern YETI_PUBLIC bool exists(const char *path);
 
