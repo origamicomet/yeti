@@ -4,10 +4,14 @@
 
 - Move to Sherpa for managing dependencies.
 - Use `yeti_assert(!"<message>")` instead of `yeti_assertf(0, "<message>")`.
+- Move to C++ style casts?
 
 ### Foundation
 
 - Extract from engine into `origamicomet/ocf`.
+- Refactor `yeti::foundation::fs` into an interface?
+- Asynchronous I/O on files.
+- Memory-mapped I/O on files.
 
 ### Engine
 
