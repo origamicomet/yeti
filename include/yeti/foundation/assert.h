@@ -46,7 +46,7 @@ void assertion_handler(AssertionHandler *assertion_handler, void **ctx);
 
 ///
 extern YETI_PUBLIC
-void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx);
+void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx = NULL);
 
 } // foundation
 } // yeti

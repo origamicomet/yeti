@@ -66,20 +66,20 @@ class Array {
   typedef bool Matcher(const T &, void *);
 
   /// \brief Returns true if @matcher returns true for every element.
-  bool all(Matcher matcher, void *matcher_ctx) const;
+  bool all(Matcher matcher, void *matcher_ctx = NULL) const;
 
   /// \brief Returns true if @matcher returns true for any element.
-  bool any(Matcher matcher, void *matcher_ctx) const;
+  bool any(Matcher matcher, void *matcher_ctx = NULL) const;
 
   /// \brief Returns true if @matcher returns true for only one element.
-  bool one(Matcher matcher, void *matcher_ctx) const;
+  bool one(Matcher matcher, void *matcher_ctx = NULL) const;
 
   /// \brief Returns true if @matcher returns false for every element.
-  bool none(Matcher matcher, void *matcher_ctx) const;
+  bool none(Matcher matcher, void *matcher_ctx = NULL) const;
 
  public:
-  T reduce(void reducer(const T &, T &, void *), const T &initial, void *fn_ctx) const;
-  void apply(void fn(T &, void *), void *fn_ctx);
+  T reduce(void reducer(const T &, T &, void *), const T &initial, void *fn_ctx = NULL) const;
+  void apply(void fn(T &, void *), void *fn_ctx = NULL);
 
  public:
   // TODO(mtwilliams): Implement sorting and searching.
