@@ -120,4 +120,20 @@ project :yeti, pretty: 'Yeti' do |proj|
       platform.add_external_dependencies %w(kernel32 user32 gdi32)
     end
   end
+
+  proj.application :resource_compiler, pretty: 'Resource Compiler' do |app|
+    app.add_include_paths 'include/', 'tools/resource_compiler/include/'
+    app.add_include_paths '_deps/luajit/include/', '_deps/sqlite3/include/'
+    app.add_library_paths '$build/lib/', '$build/bin/'
+    app.add_binary_paths '$build/bin/'
+
+    app.add_source_files 'tools/resource_compiler/include/**/*.{h,hpp,inl}'
+    app.add_source_files 'tools/resource_compiler/src/**/*.{c,cc,cpp}'
+
+    app.add_dependency :yeti
+
+    app.platform :windows do |platform|
+      platform.add_external_dependencies %w(kernel32 user32 gdi32)
+    end
+  end
 end
