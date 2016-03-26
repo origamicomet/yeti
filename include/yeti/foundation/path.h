@@ -34,6 +34,9 @@ extern YETI_PUBLIC char seperator();
 /// Returns the extension of the @path.
 extern YETI_PUBLIC const char *extension(const char *path);
 
+/// Copies the current working directory to @cwd.
+extern YETI_PUBLIC void cwd(char *cwd, size_t cwd_len);
+
 } // fs
 
 } // foundation

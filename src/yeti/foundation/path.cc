@@ -19,6 +19,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  #include <windows.h>
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS
+#elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
+
+// TODO(mtwilliams): Handle UTF-8.
+
 namespace yeti {
 namespace foundation {
 
@@ -46,6 +56,17 @@ const char *path::extension(const char *path) {
   }
 
   return NULL;
+}
+
+void path::cwd(char *cwd, size_t cwd_len) {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  const DWORD wrote = ::GetCurrentDirectoryA((DWORD)cwd_len, (LPTSTR)&cwd[0]);
+  yeti_assert_debug((wrote != 0) && (wrote <= cwd_len - 1));
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS
+#elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
+#endif
 }
 
 } // foundation
