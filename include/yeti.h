@@ -25,6 +25,11 @@
 #include "yeti/math.h"
 #include "yeti/input.h"
 
+#include "yeti/resource.h"
+#include "yeti/resource_database.h"
+#include "yeti/resource_manager.h"
+#include "yeti/resource_compiler.h"
+
 #include "yeti/window.h"
 #include "yeti/time_step_policy.h"
 
