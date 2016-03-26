@@ -39,13 +39,13 @@ class Array {
   ~Array();
 
  public:
-  T *unshift(const T &element);
+  void unshift(const T &element);
   void shift();
-  void shift(T &element);
+  void shift(T *element);
 
-  T *push(const T &element);
+  void push(const T &element);
   void pop();
-  void pop(T &element);
+  void pop(T *element);
 
   void clear();
   void reserve(const u32 additional);
@@ -139,7 +139,7 @@ Array<T>::~Array() {
 // TODO(mtwilliams): Implement shifting and unshifting.
 
 // template <typename T>
-// T *Array<T>::unshift(T &element) {
+// void Array<T>::unshift(T *element) {
 // }
 
 // template <typename T>
@@ -151,11 +151,10 @@ Array<T>::~Array() {
 // }
 
 template <typename T>
-T *Array<T>::push(const T &element) {
+void Array<T>::push(const T &element) {
   // TODO(mtwilliams): Grow logarithmically?
   this->resize(this->size() + 1);
   this->last_[-1] = element;
-  return this->last_;
 }
 
 template <typename T>
@@ -165,9 +164,9 @@ void Array<T>::pop() {
 }
 
 template <typename T>
-void Array<T>::pop(T &element) {
+void Array<T>::pop(T *element) {
   // TODO(mtwilliams): Shrink logarithmically?
-  element = this->last_[-1];
+  *element = this->last_[-1];
   this->resize(this->size() - 1);
 }
 
