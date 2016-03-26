@@ -66,17 +66,17 @@ class Array {
  public:
   typedef bool Matcher(const T &, void *);
 
-  /// \brief Returns true if @matcher returns true for every element.
-  bool all(Matcher matcher, void *matcher_ctx = NULL) const;
-
-  /// \brief Returns true if @matcher returns true for any element.
-  bool any(Matcher matcher, void *matcher_ctx = NULL) const;
-
   /// \brief Returns true if @matcher returns true for only one element.
   bool one(Matcher matcher, void *matcher_ctx = NULL) const;
 
   /// \brief Returns true if @matcher returns false for every element.
   bool none(Matcher matcher, void *matcher_ctx = NULL) const;
+
+  /// \brief Returns true if @matcher returns true for every element.
+  bool all(Matcher matcher, void *matcher_ctx = NULL) const;
+
+  /// \brief Returns true if @matcher returns true for any element.
+  bool any(Matcher matcher, void *matcher_ctx = NULL) const;
 
  public:
   void reduce(void reducer(const T &, T &, void *), const T &initial, void *fn_ctx = NULL) const;
@@ -218,12 +218,14 @@ const T *Array<T>::first() const {
 
 template <typename T>
 T *Array<T>::last() {
-  return last_;
+  // TODO(mtwilliams): Figure out nicer way of doing this.
+  return &last_[-1];
 }
 
 template <typename T>
 const T *Array<T>::last() const {
-  return last_;
+  // TODO(mtwilliams): Figure out nicer way of doing this.
+  return &last_[-1];
 }
 
 template <typename T>
@@ -247,9 +249,27 @@ YETI_INLINE bool Array<T>::empty() const {
 }
 
 template <typename T>
+bool Array<T>::one(Matcher matcher, void *matcher_ctx) const {
+  yeti_assert_debug(matcher != NULL);
+  u32 matches = 0;
+  for (const T *E = this->first(); E <= this->last(); E += sizeof(T))
+    matches += matcher(E, matcher_ctx) ? 1 : 0;
+  return (matches == 1);
+}
+
+template <typename T>
+bool Array<T>::none(Matcher matcher, void *matcher_ctx) const {
+  yeti_assert_debug(matcher != NULL);
+  for (const T *E = this->first(); E <= this->last(); E += sizeof(T))
+    if (matcher(E, matcher_ctx))
+      return false;
+  return true;
+}
+
+template <typename T>
 bool Array<T>::all(Matcher matcher, void *matcher_ctx) const {
   yeti_assert_debug(matcher != NULL);
-  for (const T *E = this->first(); E != this->last(); E += sizeof(T))
+  for (const T *E = this->first(); E <= this->last(); E += sizeof(T))
     if (!matcher(E, matcher_ctx))
       return false;
   return true;
@@ -258,28 +278,10 @@ bool Array<T>::all(Matcher matcher, void *matcher_ctx) const {
 template <typename T>
 bool Array<T>::any(Matcher matcher, void *matcher_ctx) const {
   yeti_assert_debug(matcher != NULL);
-  for (const T *E = this->first(); E != this->last(); E += sizeof(T))
+  for (const T *E = this->first(); E <= this->last(); E += sizeof(T))
     if (matcher(E, matcher_ctx))
       return true;
   return false;
-}
-
-template <typename T>
-bool Array<T>::one(Matcher matcher, void *matcher_ctx) const {
-  yeti_assert_debug(matcher != NULL);
-  u32 matches = 0;
-  for (const T *E = this->first(); E != this->last(); E += sizeof(T))
-    matches += matcher(E, matcher_ctx) ? 1 : 0;
-  return (matches == 1);
-}
-
-template <typename T>
-bool Array<T>::none(Matcher matcher, void *matcher_ctx) const {
-  yeti_assert_debug(matcher != NULL);
-  for (const T *E = this->first(); E != this->last(); E += sizeof(T))
-    if (matcher(E, matcher_ctx))
-      return false;
-  return true;
 }
 
 } // foundation

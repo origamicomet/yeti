@@ -86,7 +86,7 @@ void Application::run() {
     yeti_assert_debug(time_step_policy_ != NULL);
     time_step_policy_->update(frame, wall);
 
-    for (Window **window = windows_.first(); window != windows_.last(); ++window)
+    for (Window **window = windows_.first(); window <= windows_.last(); ++window)
       (*window)->update(&window_event_handler_, (void *)this);
 
     // It's important that these are pulled out prior to updating, just in case
