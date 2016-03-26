@@ -55,7 +55,7 @@ class StandardApplication : public yeti::Application {
   /// \brief Logs software and hardware information.
   void log_pertinent_information_about_system() const;
 
-private:
+ private:
   Manifest *manifest_;
   Script script_;
 };
