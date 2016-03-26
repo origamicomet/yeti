@@ -40,6 +40,9 @@
 
 #include "yeti/foundation/allocator.h"
 #include "yeti/foundation/global_heap_allocator.h"
+
+#include "yeti/foundation/hash.h"
+
 #include "yeti/foundation/array.h"
 
 #include "yeti/foundation/high_res_timer.h"
