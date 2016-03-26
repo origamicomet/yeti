@@ -27,6 +27,7 @@ namespace yeti {
 namespace foundation {
 
 // TODO(mtwilliams): Call destructors for non-POD?
+// TODO(mtwilliams): Specialized implementation for T = T'[N], i.e arrays.
 
 /// ...
 template <typename T>
@@ -78,7 +79,7 @@ class Array {
   bool none(Matcher matcher, void *matcher_ctx = NULL) const;
 
  public:
-  T reduce(void reducer(const T &, T &, void *), const T &initial, void *fn_ctx = NULL) const;
+  void reduce(void reducer(const T &, T &, void *), const T &initial, void *fn_ctx = NULL) const;
   void apply(void fn(T &, void *), void *fn_ctx = NULL);
 
  public:
