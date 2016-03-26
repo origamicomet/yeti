@@ -107,7 +107,7 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.application :runtime, pretty: 'Runtime' do |app|
     app.add_include_paths 'include/', 'runtime/include/'
-    app.add_include_paths '_deps/luajit/include/'
+    app.add_include_paths '_deps/luajit/include/', '_deps/sqlite3/include/'
     app.add_library_paths '$build/lib/', '$build/bin/'
     app.add_binary_paths '$build/bin/'
 
