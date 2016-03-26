@@ -112,7 +112,7 @@ void StandardApplication::log_pertinent_information_about_build() const {
   ::printf("    build=%s\n\n", build());
 
   // TODO(mtwilliams): Determine content version.
-  ::printf("  Runtime\n");
+  ::printf("  Version\n");
   ::printf("    engine=%s\n", __yeti_version__());
   ::printf("    runtime=%s\n", __yeti_version__());
   ::printf("    content=%s\n\n", "unknown");
