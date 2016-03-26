@@ -149,8 +149,8 @@ void Window::update(void (*event_handler)(void *ctx), void *event_handler_ctx) {
 void Window::close() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // We destroy the window in WM_CLOSE (and free it in WM_NCDESTROY) so that we
-  // don't have to handle closing the window programmatically differently. This
-  // creates some complexity, notably with multi-threaded rendering, but
+  // don't have to handle programmatic window closes differently. This
+  // introduces some complexity, notably with multi-threaded rendering, but
   // reduces the complexity of window management for users, specifically
   // when embedding engine windows inside tools.
   ::CloseWindow((HWND)native_hndl_);
