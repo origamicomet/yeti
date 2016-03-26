@@ -127,7 +127,7 @@ extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *wal
 /// Opens an existing file @path with @permissions.
 /// \note Fails if there is no file @path.
 ///
-extern YETI_PUBLIC fs::File *open(const char *path, const fs::Permissions permissions);
+extern YETI_PUBLIC fs::File *open(const char *path, const u32 permissions);
 
 /// Closes a @file opened by yeti::foundation::fs::open.
 extern YETI_PUBLIC void close(fs::File *file);

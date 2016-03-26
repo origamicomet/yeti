@@ -28,6 +28,8 @@
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
 #endif
 
+// TODO(mtwilliams): Make pretty.
+ // https://github.com/origamicomet/yeti/tree/bcb14a305ea603b610a7501707a354fd6ae72c2d
 // TODO(mtwilliams): Support unicode paths.
 // TODO(mtwilliams): Use Shell32 API?
 
@@ -77,8 +79,10 @@ bool fs::info(fs::File *file, fs::Info *info) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   FILE_BASIC_INFO basic_info;
   FILE_STANDARD_INFO standard_info;
+
   if (!::GetFileInformationByHandleEx((HANDLE)file, FileBasicInfo, (LPVOID)&basic_info, sizeof(FILE_BASIC_INFO)))
     return false;
+
   if (!::GetFileInformationByHandleEx((HANDLE)file, FileStandardInfo, (LPVOID)&standard_info, sizeof(FILE_STANDARD_INFO)))
     return false;
 
@@ -212,7 +216,7 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
 #endif
 }
 
-fs::File *fs::open(const char *path, const fs::Permissions permissions) {
+fs::File *fs::open(const char *path, const u32 permissions) {
   yeti_assert_debug(path != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   DWORD desired_access = 0;
