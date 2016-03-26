@@ -14,7 +14,13 @@
 namespace yeti {
 
 Script::Script() {
+#if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
   L = lua_newstate((lua_Alloc)&Script::__alloc, (void *)this);
+#elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+  // TODO(mtwilliams): Use our allocator for Lua.
+  // NOTE(mtwilliams): LuaJIT expects us to allocate within the first 2Gb.
+  L = luaL_newstate();
+#endif
 }
 
 Script::~Script() {
