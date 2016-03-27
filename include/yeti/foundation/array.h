@@ -40,6 +40,10 @@ class Array {
   ~Array();
 
  public:
+  T &operator[](const size_t idx);
+  const T &operator[](const size_t idx) const;
+
+ public:
   void unshift(const T &element);
   void shift();
   void shift(T *element);
@@ -135,6 +139,17 @@ Array<T> &Array<T>::operator=(const Array<T> &ary) {
 template <typename T>
 Array<T>::~Array() {
   allocator_->deallocate((uintptr_t)last_);
+
+template <typename T>
+T &Array<T>::operator[](const size_t idx) {
+  yeti_assert_debug(idx < size());
+  return first_[idx];
+}
+
+template <typename T>
+const T &Array<T>::operator[](const size_t idx) const {
+  yeti_assert_debug(idx < size());
+  return first_[idx];
 }
 
 // TODO(mtwilliams): Implement shifting and unshifting.
