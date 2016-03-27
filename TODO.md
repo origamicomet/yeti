@@ -13,6 +13,7 @@
 - Asynchronous I/O on files.
 - Memory-mapped I/O on files.
 - Expose a platform independent way to watch a directory (and all its children) for modifications.
+- Create a `path::join` function.
 
 ### Engine
 
