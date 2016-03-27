@@ -31,6 +31,10 @@ namespace path {
 /// Preferred path seperator for the current platform.
 extern YETI_PUBLIC char seperator();
 
+/// Modifies @path to use the current platforms preferred seperators, among
+/// other things.
+extern YETI_PUBLIC void canonicalize(char *path);
+
 /// Returns the extension of the @path.
 extern YETI_PUBLIC const char *extension(const char *path);
 

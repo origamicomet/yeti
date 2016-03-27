@@ -43,7 +43,24 @@ char path::seperator() {
 #endif
 }
 
+void path::canonicalize(char *path) {
+  yeti_assert_debug(path != NULL);
+  for (char *ch = path; *ch; ++ch) {
+    switch (*ch) {
+    #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+      case '/': *ch = '\\'; break;
+    #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X \
+          YETI_PLATFORM == YETI_PLATFORM_LINUX \
+          YETI_PLATFORM == YETI_PLATFORM_IOS \
+          YETI_PLATFORM == YETI_PLATFORM_ANDROID
+      case '\\': *ch = '/'; break;
+    #endif
+    }
+  }
+}
+
 const char *path::extension(const char *path) {
+  yeti_assert_debug(path != NULL);
   const char *start = path;
   const char *end = path + strlen(path);
 
@@ -59,6 +76,7 @@ const char *path::extension(const char *path) {
 }
 
 void path::cwd(char *cwd, size_t cwd_len) {
+  // TODO(mtwilliams): Allow users to determine the size of buffer required?
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   const DWORD wrote = ::GetCurrentDirectoryA((DWORD)cwd_len, (LPTSTR)&cwd[0]);
   yeti_assert_debug((wrote != 0) && (wrote <= cwd_len - 1));
