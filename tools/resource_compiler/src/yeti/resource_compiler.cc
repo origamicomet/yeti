@@ -22,7 +22,7 @@ int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
 
   yeti::resource_compiler::Runner resource_compiler_runner;
-  resource_compiler_runner.setup(argv, argc);
+  resource_compiler_runner.setup(&argv[1], argc - 1);
   resource_compiler_runner.run();
 
   return EXIT_FAILURE;
