@@ -54,6 +54,11 @@ bool ResourceCompiler::compilable(const char *path) const {
 bool ResourceCompiler::ignorable(const char *path) const {
   // TODO(mtwilliams): Implement a Git-like ignore dotfile.
   yeti_assert_debug(path != NULL);
+
+  // Ignore any and all dot files.
+  if (path[0] == '.')
+    return true;
+
   return false;
 }
 
