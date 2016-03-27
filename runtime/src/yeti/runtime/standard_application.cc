@@ -78,6 +78,8 @@ void StandardApplication::render() {
 
 void StandardApplication::shutdown() {
   this->script_.call("shutdown", 0);
+
+  yeti::shutdown();
 }
 
 void StandardApplication::start_logging_to_stdout_and_stderr() const {

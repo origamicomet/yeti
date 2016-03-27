@@ -22,6 +22,7 @@ int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
 
   // Let the games begin.
+  yeti::initialize();
   yeti::runtime::StandardApplication app;
   app.run();
 

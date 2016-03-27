@@ -30,6 +30,8 @@
 #include "yeti/resource_manager.h"
 #include "yeti/resource_compiler.h"
 
+#include "yeti/resources/script_resource.h"
+
 #include "yeti/window.h"
 #include "yeti/time_step_policy.h"
 
@@ -46,5 +48,12 @@ extern YETI_PUBLIC const char *__yeti_version__();
 extern YETI_PUBLIC uint32_t __yeti_revision__();
 
 YETI_END_EXTERN_C // }
+
+YETI_BEGIN_NAMESPACE // {
+
+extern YETI_PUBLIC void initialize();
+extern YETI_PUBLIC void shutdown();
+
+YETI_END_NAMESPACE // }
 
 #endif // _YETI_H_

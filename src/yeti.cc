@@ -37,3 +37,12 @@ yeti_uint32_t __yeti_revision__() {
 }
 
 YETI_END_EXTERN_C // }
+
+void yeti::initialize() {
+  resource_manager::initialize();
+  resource_manager::track(script_resource::type());
+}
+
+void yeti::shutdown() {
+  resource_manager::shutdown();
+}

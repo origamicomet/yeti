@@ -42,6 +42,15 @@ extern YETI_PUBLIC const Resource::Type *type_from_path(const char *path);
 /// Refer to yeti::Resource::Type::extensions for more information.
 extern YETI_PUBLIC const Resource::Type *type_from_ext(const char *ext);
 
+///
+extern YETI_PUBLIC void initialize();
+
+///
+extern YETI_PUBLIC void shutdown();
+
+///
+extern YETI_PUBLIC void track(const Resource::Type *type);
+
 // TODO(mtwilliams): Only allow resources to be loaded (outside of the engine)
 // via packages.
 

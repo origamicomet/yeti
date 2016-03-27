@@ -53,6 +53,35 @@ const Resource::Type *resource_manager::type_from_ext(const char *ext) {
   return NULL;
 }
 
+void resource_manager::initialize() {
+}
+
+void resource_manager::shutdown() {
+}
+
+// Of course we can't call this 'register' because that's a reserved keyword in
+// C and C++. Lovely language, right?
+void resource_manager::track(const Resource::Type *type) {
+  yeti_assert_debug(type != NULL);
+
+#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+  // Make sure `type->name` is indeed unique.
+  for (const Resource::Type **I = types_.first(); I <= types_.last(); ++I)
+    if (strcmp((*I)->name, type->name) == 0)
+      yeti_assertf(0, "A resource type with the name '%s' is already registered!", type->name);
+
+  // Make sure `type->extensions` do not overlap.
+  for (const Resource::Type **I = types_.first(); I <= types_.last(); ++I)
+    for (const char **E = &type->extensions[0]; *E; ++E)
+      for (const char **ext = &(*I)->extensions[0]; *ext; ++ext)
+        if (strcmp(*E, *ext) == 0)
+          yeti_assertf(0, "The resource type '%s' already registered the file extension '%s'!", (*I)->name, *E);
+#endif
+
+  types_.push(type);
+}
+
 Resource *resource_manager::load(Resource::Id id) {
   // if (Resource *resource = resources_.find(id)) {
   //   resource->ref();
