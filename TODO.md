@@ -38,7 +38,13 @@
 
 ### Resource Compiler
 
-- Scaffold.
+- Allow more than one source data directory.
+  - Rather than "layering" by building `core` and then building `vanguard`, we should be able to build `core` and `vanguard` together.
+- Interface with `ResourceDatabase`.
+  - We also need to be able to pop out an `OptimizedResourceDatabase`.
+- Daemonizable. Should watch source data directory for changes, debounce for a user configurable amount of time, and then build any new or modified resources.
+- Don't use assertions for error handling.
+- Detailed logging.
 
 ### Resource Package & Bundle Manager
 
