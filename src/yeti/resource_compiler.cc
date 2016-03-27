@@ -96,18 +96,24 @@ void ResourceCompiler::compile(const char *path) {
   ResourceCompiler::Input input;
   input.root = &data_src_[0];
   input.path = path;
-  input.source = foundation::fs::open(path, foundation::fs::READ | foundation::fs::EXCLUSIVE);
+
+  Path input_path;
+  sprintf(&input_path[0], "%s/%s", input.root, path);
+  input.source = foundation::fs::open(&input_path[0], foundation::fs::READ | foundation::fs::EXCLUSIVE);
+  yeti_assert(input.source != NULL);
 
   ResourceCompiler::Output output;
   output.root = &data_[0];
 
   Path memory_resident_data_path = { 0, };
   sprintf(&memory_resident_data_path[0], "%s/%016llx", output.root, id);
-  output.memory_resident_data = foundation::fs::open(&memory_resident_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+  output.memory_resident_data = foundation::fs::create_or_open(&memory_resident_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+  yeti_assert(output.memory_resident_data != NULL);
 
   Path streaming_data_path = { 0, };
   sprintf(&streaming_data_path[0], "%s.streaming", &memory_resident_data_path[0]);
-  output.streaming_data = foundation::fs::open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+  output.streaming_data = foundation::fs::create_or_open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+  yeti_assert(output.streaming_data != NULL);
 
   type->compile(&input, &output);
 
@@ -124,7 +130,7 @@ void ResourceCompiler::canonicalize(char *path) const {
     memmove((void *)&path[0], (const void *)&path[data_src_len_ + 1], strlen(path) - data_src_len_);
 
   // TODO(mtwilliams): Refactor into `foundation::path::unixy`?
-#ifdef YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // Make sure we're using Unix-y path seperators.
   for (char *ch = path; *ch; ++ch)
     *ch = (*ch == '\\') ? '/' : *ch;
