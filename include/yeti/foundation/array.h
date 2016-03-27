@@ -138,7 +138,8 @@ Array<T> &Array<T>::operator=(const Array<T> &ary) {
 
 template <typename T>
 Array<T>::~Array() {
-  allocator_->deallocate((uintptr_t)last_);
+  allocator_->deallocate((uintptr_t)first_);
+}
 
 template <typename T>
 T &Array<T>::operator[](const size_t idx) {
