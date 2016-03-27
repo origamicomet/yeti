@@ -124,6 +124,10 @@ typedef bool (*Walker)(const char *path, const Info *info, void *ctx);
 /// entires or @walker returns |false|.
 extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *walker_ctx = NULL);
 
+/// Creates or opens a file at @path with @permissions.
+///
+extern YETI_PUBLIC fs::File *create_or_open(const char *path, const u32 permissions);
+
 /// Opens an existing file @path with @permissions.
 /// \note Fails if there is no file @path.
 ///

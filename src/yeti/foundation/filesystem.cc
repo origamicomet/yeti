@@ -235,6 +235,20 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
 #endif
 }
 
+fs::File *fs::create_or_open(const char *path, const u32 permissions) {
+  yeti_assert_debug(path != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  const DWORD desired_access = permissions_to_desired_access(permissions);
+  const DWORD share_mode = permissions_to_share_mode(permissions);
+  HANDLE hndl = ::CreateFileA(path, desired_access, share_mode, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hndl == INVALID_HANDLE_VALUE)
+    return NULL;
+  return (fs::File *)hndl;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
 fs::File *fs::open(const char *path, const u32 permissions) {
   yeti_assert_debug(path != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
