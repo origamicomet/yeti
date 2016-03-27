@@ -48,7 +48,7 @@ namespace resource_compiler {
     /// Root directory of source data.
     const char *root;
 
-    /// Path of source data.
+    /// Canonical path of source data.
     const char *path;
 
     /// Handle to read source data.
