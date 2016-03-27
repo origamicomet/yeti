@@ -52,6 +52,22 @@ namespace {
     file_time_as_li.HighPart = file_time.dwHighDateTime;
     return file_time_to_secs_since_unix_epoch(file_time_as_li);
   }
+
+  static DWORD permissions_to_desired_access(u32 permissions) {
+    DWORD desired_access = 0;
+    if (permissions & fs::READ)
+      desired_access |= GENERIC_READ;
+    if (permissions & fs::WRITE)
+      desired_access |= GENERIC_WRITE;
+    return desired_access;
+  }
+
+  static DWORD permissions_to_share_mode(u32 permissions) {
+    if (permissions & fs::EXCLUSIVE)
+      return 0;
+    else
+      return FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+  }
 }
 #endif
 
@@ -222,15 +238,12 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
 fs::File *fs::open(const char *path, const u32 permissions) {
   yeti_assert_debug(path != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  DWORD desired_access = 0;
-  if (permissions & fs::READ)
-    desired_access |= GENERIC_READ;
-  if (permissions & fs::WRITE)
-    desired_access |= GENERIC_WRITE;
-  DWORD share_mode = 0;
-  if (!(permissions & fs::EXCLUSIVE))
-   share_mode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
-  return (fs::File *)::CreateFileA(path, desired_access, share_mode, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  const DWORD desired_access = permissions_to_desired_access(permissions);
+  const DWORD share_mode = permissions_to_share_mode(permissions);
+  HANDLE hndl = ::CreateFileA(path, desired_access, share_mode, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hndl == INVALID_HANDLE_VALUE)
+    return NULL;
+  return (fs::File *)hndl;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
