@@ -204,7 +204,10 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
     info.last_accessed_at = file_time_to_secs_since_unix_epoch(find_data.ftLastAccessTime);
     info.last_modified_at = file_time_to_secs_since_unix_epoch(find_data.ftLastWriteTime);
 
-    if (!walker(&find_data.cFileName[0], &info, walker_ctx))
+    char path[256];
+    sprintf(&path[0], "%s\\%s", directory, &find_data.cFileName[0]);
+
+    if (!walker(&path[0], &info, walker_ctx))
       break;
   } while (::FindNextFile(find, &find_data) != 0);
 
