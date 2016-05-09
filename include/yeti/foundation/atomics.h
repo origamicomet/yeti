@@ -71,6 +71,12 @@ namespace atomic {
   i64 cmp_and_xchg(volatile i64 *v, const i64 expected, const i64 desired);
   u64 cmp_and_xchg(volatile u64 *v, const u64 expected, const u64 desired);
   void *cmp_and_xchg(volatile void **v, const void *expected, const void *desired);
+
+  template <typename T>
+  T min(volatile T *v, const T versus);
+
+  template <typename T>
+  T max(volatile T *v, const T versus);
 }
 
 YETI_INLINE i32 atomic::load(const volatile i32 *v) {
@@ -313,6 +319,26 @@ YETI_INLINE u64 atomic::cmp_and_xchg(volatile u64 *v, const u64 expected, const 
 
 YETI_INLINE void *atomic::cmp_and_xchg(volatile void **v, const void *expected, const void *desired) {
   return (void *)cmp_and_xchg((uintptr_t *)v, (uintptr_t)expected, (uintptr_t)desired);
+}
+
+template <typename T>
+YETI_INLINE T atomic::min(volatile T *v, const T versus) {
+  while (true) {
+    const T expected = atomic::load(v);
+    const T smallest = (expected < versus) ? expected : versus;
+    if (atomic::cmp_and_xchg(v, expected, smallest) == expected)
+      return smallest;
+  }
+}
+
+template <typename T>
+YETI_INLINE T atomic::max(volatile T *v, const T versus) {
+  while (true) {
+    const T expected = atomic::load(v);
+    const T largest = (expected > versus) ? expected : versus;
+    if (atomic::cmp_and_xchg(v, expected, largest) == expected)
+      return largest;
+  }
 }
 
 } // foundation
