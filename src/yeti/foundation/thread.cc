@@ -12,6 +12,7 @@
 #include "yeti/foundation/thread.h"
 
 #include "yeti/foundation/global_heap_allocator.h"
+#include "yeti/foundation/thread_safe/linear_allocator.h"
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
@@ -58,6 +59,15 @@ namespace {
     Thread::EntryPoint entry_point;
     uintptr_t entry_point_arg;
   };
+
+  // NOTE(mtwilliams): Decreasing this significantly can cause a crash if the
+  // number of outstanding threads (i.e. not hit `thread_entry_point` and
+  // deallocated their respective ThreadStartInfo) exceeds the amount of memory
+  // made available. We could make this crashless by using a custom allocator
+  // that knows to `Thread::yield()` if we fail to allocate.
+  static const size_t thread_start_info_mem_sz_ = 12288;
+  static u8 thread_start_info_mem_[thread_start_info_mem_sz_] = { 0, };
+  static thread_safe::LinearAllocator thread_start_info_allocator_((uintptr_t)thread_start_info_mem_, thread_start_info_mem_sz_);
 }
 
 namespace {
@@ -96,7 +106,7 @@ namespace {
     #pragma warning(pop)
   #endif
 
-    heap().deallocate(thread_start_info_ptr);
+    thread_start_info_allocator_.deallocate(thread_start_info_ptr);
 
     entry_point(entry_point_arg);
 
@@ -126,7 +136,7 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   Thread *thread = new (foundation::heap()) Thread();
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  ThreadStartInfo *thread_start_info = new (heap()) ThreadStartInfo;
+  ThreadStartInfo *thread_start_info = new (thread_start_info_allocator_) ThreadStartInfo;
   strncpy((char *)thread_start_info->name, (const char *)options->name, sizeof(Thread::Name));
   thread_start_info->entry_point = entry_point;
   thread_start_info->entry_point_arg = entry_point_arg;
