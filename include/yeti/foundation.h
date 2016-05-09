@@ -40,6 +40,7 @@
 
 #include "yeti/foundation/allocator.h"
 #include "yeti/foundation/global_heap_allocator.h"
+#include "yeti/foundation/thread_safe/linear_allocator.h"
 
 #include "yeti/foundation/hash.h"
 

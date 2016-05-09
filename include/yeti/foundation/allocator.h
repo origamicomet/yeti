@@ -23,6 +23,11 @@
 #include "yeti/foundation/support.h"
 #include "yeti/foundation/assert.h"
 
+#include <stdlib.h>
+#include <string.h>
+
+#include <new>
+
 namespace yeti {
 namespace foundation {
 
