@@ -12,6 +12,7 @@
 #include "yeti/foundation/thread_safe/linear_allocator.h"
 
 #include "yeti/foundation/atomics.h"
+#include "yeti/foundation/memory.h"
 
 namespace yeti {
 namespace foundation {
@@ -38,12 +39,12 @@ uintptr_t LinearAllocator::allocate(size_t sz, size_t alignment) {
     const uintptr_t unallocated = atomic::load(&unallocated_);
 
     const uintptr_t mem_after_header = unallocated + sizeof(Allocation);
-    const size_t padding_after_header = alignment - (mem_after_header % alignment);
+    const size_t padding_after_header = memory::align(mem_after_header, alignment);
 
     const uintptr_t allocation = mem_after_header + padding_after_header;
 
     const uintptr_t mem_after_allocation = allocation + sz;
-    const size_t padding_after_allocation = 4 - (mem_after_allocation % 4);
+    const size_t padding_after_allocation = memory::align(mem_after_allocation, 4);
 
     const uintptr_t mem_after_everything = mem_after_allocation + padding_after_allocation;
     yeti_assert(mem_after_everything <= mem_upper_);
