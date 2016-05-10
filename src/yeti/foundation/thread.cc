@@ -136,7 +136,14 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   Thread *thread = new (foundation::heap()) Thread();
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  ThreadStartInfo *thread_start_info = new (thread_start_info_allocator_) ThreadStartInfo;
+  ThreadStartInfo *thread_start_info = NULL;
+  while (thread_start_info == NULL) {
+    thread_start_info = (ThreadStartInfo *)thread_start_info_allocator_.allocate(sizeof(ThreadStartInfo));
+    if (thread_start_info == NULL)
+      // Heavily contended; back off.
+      Thread::yield();
+  }
+
   strncpy((char *)thread_start_info->name, (const char *)options->name, sizeof(Thread::Name));
   thread_start_info->entry_point = entry_point;
   thread_start_info->entry_point_arg = entry_point_arg;

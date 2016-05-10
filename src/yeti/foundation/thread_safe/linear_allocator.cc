@@ -47,7 +47,13 @@ uintptr_t LinearAllocator::allocate(size_t sz, size_t alignment) {
     const size_t padding_after_allocation = memory::align(mem_after_allocation, 4);
 
     const uintptr_t mem_after_everything = mem_after_allocation + padding_after_allocation;
-    yeti_assert(mem_after_everything <= mem_upper_);
+
+    if (mem_after_everything >= mem_upper_)
+      // We don't have enough memory left to fufill the requested allocation.
+      // In most cases this is non-fatal, at least in our us e cases. Typically
+      // we trade memory for contention when using this allocator. Hence us
+      // returning `NULL` rather than crashing (to let us retry).
+      return NULL;
 
     if (atomic::cmp_and_xchg(&unallocated_, unallocated, mem_after_everything) != unallocated)
       continue;
