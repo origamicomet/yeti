@@ -47,11 +47,11 @@ class YETI_PUBLIC LinearAllocator : public Allocator {
       // We use the least significant bit to indicate deallocation.
       struct {
       #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
-        u32 : 31;
         u32 deallocated : 1;
+        u32 : 31;
       #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
-        u64 : 63;
         u64 deallocated : 1;
+        u64 : 63;
       #endif
       };
     };
@@ -64,8 +64,8 @@ class YETI_PUBLIC LinearAllocator : public Allocator {
     static Allocation *recover(uintptr_t ptr) {
       // Refer to the comments above to understand why this works.
       u8 *end_of_header = (u8 *)ptr;
-      while (*end_of_header-- == Allocation::PAD);
-      return (Allocation *)(end_of_header - sizeof(Allocation::end));
+      while (*--end_of_header == Allocation::PAD);
+      return (Allocation *)(end_of_header - sizeof(Allocation::end) + 1);
     }
   };
 
@@ -74,8 +74,8 @@ class YETI_PUBLIC LinearAllocator : public Allocator {
   ~LinearAllocator();
 
  public:
-  uintptr_t allocate(size_t sz, size_t alignment);
-  uintptr_t reallocate(uintptr_t ptr, size_t sz, size_t alignment);
+  uintptr_t allocate(size_t sz, size_t alignment = 8);
+  uintptr_t reallocate(uintptr_t ptr, size_t sz, size_t alignment = 8);
   void deallocate(uintptr_t ptr);
 
  private:

@@ -56,7 +56,7 @@ uintptr_t LinearAllocator::allocate(size_t sz, size_t alignment) {
     header->end = mem_after_everything;
     memset((void *)&header->padding[0], Allocation::PAD, padding_after_header);
 
-    return mem_after_header;
+    return allocation;
   }
 }
 
@@ -66,6 +66,7 @@ uintptr_t LinearAllocator::reallocate(uintptr_t ptr, size_t sz, size_t alignment
 
   // OPTIMIZATION(mtwilliams): Grow if possible.
   const uintptr_t new_ptr = this->allocate(sz, alignment);
+  yeti_assert_debug(new_ptr != NULL);
   memcpy((void *)new_ptr, (const void *)ptr, header->end - ptr);
   this->deallocate(ptr);
 
@@ -91,35 +92,43 @@ void LinearAllocator::deallocate(uintptr_t ptr) {
 
   // Add to unreclaimed region.
   atomic::min(&unreclaimed_lower_, lower);
-  atomic::min(&unreclaimed_upper_, upper);
+  atomic::max(&unreclaimed_upper_, upper);
 
   // Reclaim as much of the partially unallocated region as possible.
   this->reclaim();
 }
 
 void LinearAllocator::reclaim() {
-  uintptr_t unallocated = atomic::load(&unallocated_);
-
-  uintptr_t unreclaimed_lower = atomic::load(&unreclaimed_lower_);
-  uintptr_t unreclaimed_upper = atomic::load(&unreclaimed_upper_);
-
-  if (unreclaimed_upper != unallocated)
-    // Not a contiguous block, unfortunately.
-    return;
-
   if (atomic::cmp_and_xchg(&reclaiming_, 0, 1) != 0)
     // Another thread is already reclaiming.
     return;
 
-  uintptr_t reclaimable = unreclaimed_lower;
-  for (uintptr_t cursor = unreclaimed_lower; cursor < unreclaimed_upper;) {
-    const Allocation *header = Allocation::recover(reclaimable);
-    cursor = header->end & ~((uintptr_t)1);
-    reclaimable = header->deallocated ? reclaimable : cursor;
-  }
+  while (true) {
+    uintptr_t unallocated = atomic::load(&unallocated_);
 
-  if (atomic::cmp_and_xchg(&unallocated_, unallocated, reclaimable) == unallocated)
-    atomic::store(&unreclaimed_upper_, reclaimable);
+    uintptr_t unreclaimed_lower = atomic::load(&unreclaimed_lower_);
+    uintptr_t unreclaimed_upper = atomic::load(&unreclaimed_upper_);
+
+    if (unreclaimed_upper != unallocated)
+      // Not a contiguous block, unfortunately.
+      break;
+
+    if (unreclaimed_lower == unreclaimed_upper)
+      // Nothing to reclaim.
+      break;
+
+    uintptr_t reclaimable = unreclaimed_lower;
+    for (uintptr_t cursor = unreclaimed_lower; cursor < unreclaimed_upper;) {
+      const Allocation *header = (const Allocation *)cursor;
+      cursor = header->end & ~((uintptr_t)1);
+      reclaimable = header->deallocated ? reclaimable : cursor;
+    }
+
+    if (atomic::cmp_and_xchg(&unallocated_, unallocated, reclaimable) == unallocated) {
+      atomic::store(&unreclaimed_upper_, reclaimable);
+      break;
+    }
+  }
 
   atomic::store(&reclaiming_, 0);
 }
