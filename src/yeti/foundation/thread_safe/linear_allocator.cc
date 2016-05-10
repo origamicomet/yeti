@@ -50,7 +50,7 @@ uintptr_t LinearAllocator::allocate(size_t sz, size_t alignment) {
 
     if (mem_after_everything >= mem_upper_)
       // We don't have enough memory left to fufill the requested allocation.
-      // In most cases this is non-fatal, at least in our us e cases. Typically
+      // In most cases this is non-fatal, at least in our use cases. Typically
       // we trade memory for contention when using this allocator. Hence us
       // returning `NULL` rather than crashing (to let us retry).
       return NULL;
