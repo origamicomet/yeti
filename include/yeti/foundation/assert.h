@@ -72,7 +72,7 @@ void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx = N
   } while (0,0)
 
 /// \def yeti_assertf
-/// \brief Raises a fuss if |_Predicate| doesn't evaluate to true, providing
+/// \brief Raises a fuss if @_Predicate doesn't evaluate to true, providing
 /// user-specified, formatted reasoning.
 ///
 #define yeti_assertf(_Predicate, _Reason_format, ...) \

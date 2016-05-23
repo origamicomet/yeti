@@ -19,7 +19,7 @@
 #define _YETI_FOUNDATION_SUPPORT_LIKELINESS_H_
 
 /// \def YETI_LIKELY
-/// \brief |_Condition| is likely to evaluate to be true.
+/// \brief @_Condition is likely to evaluate to be true.
 #if defined(DOXYGEN)
   #define YETI_LIKELY(_Condition) (!!(_Condition))
 #else // !defined(DOXYGEN)
@@ -31,7 +31,7 @@
 #endif
 
 /// \def YETI_UNLIKELY
-/// \brief |_Condition| is likely to evaluate to be false.
+/// \brief @_Condition is likely to evaluate to be false.
 #if defined(DOXYGEN)
   #define YETI_UNLIKELY(_Condition) (!!(_Condition))
 #else // !defined(DOXYGEN)

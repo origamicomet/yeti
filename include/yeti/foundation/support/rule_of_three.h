@@ -19,14 +19,14 @@
 #define _YETI_FOUNDATION_SUPPORT_RULE_OF_THREE_H_
 
 /// \def YETI_DISALLOW_CONSTRUCTION
-/// \brief Prevent construction of |_Class_name|.
+/// \brief Prevent construction of @_Class_name.
 #define YETI_DISALLOW_CONSTRUCTION(_Class_name) \
  private: \
   _Class_name(); \
   ~_Class_name();
 
 /// \def YETI_DISALLOW_COPYING
-/// \brief Prevent copying of |_Class_name|.
+/// \brief Prevent copying of @_Class_name.
 #define YETI_DISALLOW_COPYING(_Class_name) \
  private: \
   _Class_name (const _Class_name &); \
