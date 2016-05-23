@@ -46,7 +46,7 @@ class YETI_PUBLIC HighResolutionTimer {
   /// \brief Returns the number of seconds elapsed since the last reset.
   u64 secs() const;
 
-  /// \brief Returns the number of miliseconds elapsed since the last reset.
+  /// \brief Returns the number of milliseconds elapsed since the last reset.
   u64 msecs() const;
 
   /// \brief Returns the number of microseconds elapsed since the last reset.
