@@ -51,8 +51,18 @@ void set_assertion_handler(AssertionHandler new_assertion_handler, void *ctx = N
 } // foundation
 } // yeti
 
+#include <stdio.h>
+
+// REFACTOR(mtwilliams): Extract into a common header?
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  #include <malloc.h>
+  #ifndef alloca
+    #define alloca _alloca
+  #endif
+#endif
+
 /// \def yeti_assert
-/// \brief Raises a fuss if |_Predicate| doesn't evaluate to true.
+/// \brief Raises a fuss if @_Predicate doesn't evaluate to true.
 ///
 #define yeti_assert(_Predicate) \
   do { \
