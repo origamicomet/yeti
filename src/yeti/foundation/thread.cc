@@ -60,11 +60,10 @@ namespace {
     uintptr_t entry_point_arg;
   };
 
-  // NOTE(mtwilliams): Decreasing this significantly can cause a crash if the
-  // number of outstanding threads (i.e. not hit `thread_entry_point` and
-  // deallocated their respective ThreadStartInfo) exceeds the amount of memory
-  // made available. We could make this crashless by using a custom allocator
-  // that knows to `Thread::yield()` if we fail to allocate.
+  // NOTE(mtwilliams): Decreasing this can cause significant contention (and
+  // thus performance degredation) if the number of outstanding threads (i.e.
+  // not hit `thread_entry_point` and deallocated their respective
+  // ThreadStartInfo) exceeds the amount of memory made available.
   static const size_t thread_start_info_mem_sz_ = 12288;
   static u8 thread_start_info_mem_[thread_start_info_mem_sz_] = { 0, };
   static thread_safe::LinearAllocator thread_start_info_allocator_((uintptr_t)thread_start_info_mem_, thread_start_info_mem_sz_);
