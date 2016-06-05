@@ -35,6 +35,9 @@ extern YETI_PUBLIC char seperator();
 /// other things.
 extern YETI_PUBLIC void canonicalize(char *path);
 
+/// Returns the file component of the @path.
+extern YETI_PUBLIC const char *file(const char *path);
+
 /// Returns the extension of the @path.
 extern YETI_PUBLIC const char *extension(const char *path);
 

@@ -59,8 +59,25 @@ void path::canonicalize(char *path) {
   }
 }
 
+const char *path::file(const char *path) {
+  yeti_assert_debug(path != NULL);
+
+  const char *start = path;
+  const char *end = path + strlen(path);
+
+  for (const char *ch = end; ch >= start; --ch) {
+    switch (*ch) {
+      case '/':
+      case '\\': return &ch[1];
+    }
+  }
+
+  return path;
+}
+
 const char *path::extension(const char *path) {
   yeti_assert_debug(path != NULL);
+
   const char *start = path;
   const char *end = path + strlen(path);
 
