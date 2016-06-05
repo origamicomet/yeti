@@ -89,9 +89,11 @@ void ResourceCompiler::compile(const char *path) {
 
   // TODO(mtwilliams): Only compile if |last_modified_at| is more recent than
   // than whatever our |db| last saw.
-
   // TODO(mtwilliams): Update our |db| to reflect the compilation of this
   // resource.
+
+  fprintf(stdout, "Compiling '%s'...\n", path);
+  fprintf(stdout, " type=%s\n", type->name);
 
   ResourceCompiler::Input input;
   input.root = &data_src_[0];
