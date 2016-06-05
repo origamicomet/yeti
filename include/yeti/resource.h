@@ -36,6 +36,9 @@ class YETI_PUBLIC Resource {
  YETI_DISALLOW_COPYING(Resource);
 
  public:
+  struct Data;
+
+ public:
   /// An opaque identifier that uniquely identifies a resource.
   typedef u64 Id;
 
@@ -59,14 +62,23 @@ class YETI_PUBLIC Resource {
 
     Resource *(*prepare)(Resource::Id id);
 
-    void (*load)(Resource *resource);
+    void (*load)(Resource *resource, const Resource::Data &data);
     void (*unload)(Resource *resource);
 
     void (*online)(Resource *resource);
     void (*offline)(Resource *resource);
 
-    void (*compile)(const resource_compiler::Input *,
+    void (*compile)(const resource_compiler::Input *input,
                     const resource_compiler::Output *output);
+  };
+
+ public:
+  struct Data {
+    /// Handle to memory-resident data.
+    foundation::fs::File *memory_resident_data;
+
+    /// Handle to read streaming data.
+    foundation::fs::File *streaming_data;
   };
 
  public:
@@ -101,6 +113,14 @@ class YETI_PUBLIC Resource {
     mutable Resource *resource_;
   };
 
+ public:
+  ///
+  enum State {
+    UNLOADED = 0,
+    LOADED   = 1,
+    FAILED   = 2
+  };
+
  protected:
   Resource(Resource::Id id);
   ~Resource();
@@ -120,9 +140,16 @@ class YETI_PUBLIC Resource {
   /// for unloading.
   void deref();
 
+  ///
+  State state() const;
+
+  ///
+  void set_state(State state);
+
  private:
   const Id id_;
   u32 refs_;
+  u32 state_;
 };
 
 } // yeti

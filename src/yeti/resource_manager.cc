@@ -16,12 +16,35 @@
 namespace yeti {
 
 namespace resource_manager {
-  // foundation::Map<Resource::Id, Resource *> resources_(foundation::heap());
-  foundation::Array<const Resource::Type *> types_(foundation::heap());
-  // foundation::Queue<Resource *> to_be_loaded_(foundation::heap());
-  // foundation::Queue<Resource *> to_be_unloaded_(foundation::heap());
-  // foundation::Queue<Resource *> to_be_onlined_(foundation::heap());
-  // foundation::Queue<Resource *> to_be_offlined_(foundation::heap());
+  namespace {
+    static const size_t queue_mem_sz_ = 131072;
+
+    static const size_t load_queue_mem_sz_    = queue_mem_sz_ * 1/3;
+    static const size_t unload_queue_mem_sz_  = queue_mem_sz_ * 1/3;
+    static const size_t online_queue_mem_sz_  = queue_mem_sz_ * 1/6;
+    static const size_t offline_queue_mem_sz_ = queue_mem_sz_ * 1/6;
+
+    static u8 queue_mem_[queue_mem_sz_] = { 0, };
+
+    static u8 *load_queue_mem_ = &queue_mem_[0];
+    static u8 *unload_queue_mem_ = &load_queue_mem_[load_queue_mem_sz_];
+    static u8 *online_queue_mem_ = &unload_queue_mem_[unload_queue_mem_sz_];
+    static u8 *offline_queue_mem_ = &online_queue_mem_[online_queue_mem_sz_];
+
+    foundation::Array<const Resource::Type *> types_(foundation::heap());
+
+    foundation::Mutex *resources_lock_ = foundation::Mutex::create();
+
+    foundation::HashMap<Resource::Id, Resource *> resources_(foundation::heap(), 65535);
+
+    foundation::Queue<Resource *> to_be_loaded_((uintptr_t)load_queue_mem_, load_queue_mem_sz_);
+    foundation::Queue<Resource *> to_be_unloaded_((uintptr_t)unload_queue_mem_, unload_queue_mem_sz_);
+
+    foundation::Queue<Resource *> to_be_brought_online_((uintptr_t)online_queue_mem_, online_queue_mem_sz_);
+    foundation::Queue<Resource *> to_be_put_offline_((uintptr_t)offline_queue_mem_, offline_queue_mem_sz_);
+  }
+
+  static void management_thread(uintptr_t);
 }
 
 Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
@@ -59,13 +82,13 @@ const Resource::Type *resource_manager::type_from_ext(const char *ext) {
 }
 
 void resource_manager::initialize() {
+  foundation::Thread::spawn(&resource_manager::management_thread, 0)->detach();
 }
 
 void resource_manager::shutdown() {
 }
 
-// Of course we can't call this 'register' because that's a reserved keyword in
-// C and C++. Lovely language, right?
+// Of course we can't call this "register" because that's a reserved keyword.
 void resource_manager::track(const Resource::Type *type) {
   yeti_assert_debug(type != NULL);
 
@@ -88,25 +111,67 @@ void resource_manager::track(const Resource::Type *type) {
 }
 
 Resource *resource_manager::load(Resource::Id id) {
-  // if (Resource *resource = resources_.find(id)) {
-  //   resource->ref();
-  //   return resource;
-  // }
+  YETI_SCOPED_LOCK(resources_lock_);
+
+  if (Resource **resource = resources_.find(id)) {
+    (*resource)->ref();
+    return (*resource);
+  }
 
   const Resource::Type *type = type_from_id(Resource::type_from_id(id));
   yeti_assert_development(type != NULL);
 
-  yeti_assert_debug(type->prepare != NULL);
   Resource *resource = type->prepare(id);
-  // resources_.insert(id, resource);
-  // to_be_loaded_.push(resource);
+  yeti_assert_debug(resource != NULL);
+
+  resources_.insert(id, resource);
+  to_be_loaded_.push(resource);
 
   return resource;
 }
 
 void resource_manager::unload(Resource *resource) {
+  YETI_SCOPED_LOCK(resources_lock_);
+
   yeti_assert_debug(resource != NULL);
-  // to_be_unloaded_.push(resource);
+  yeti_assert_development(resource->refs() == 0);
+
+  resources_.remove(resource->id());
+  to_be_unloaded_.push(resource);
+}
+
+void resource_manager::management_thread(uintptr_t) {
+  for (;;) {
+    YETI_SCOPED_LOCK(resources_lock_);
+
+    // OPTIMIZE(mtwilliams): Use condition variables to reduce contention.
+    Resource *resource;
+
+    while (to_be_loaded_.pop(&resource)) {
+      const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
+      yeti_assert_debug(type != NULL);
+
+      Resource::Data data;
+
+      char memory_resident_data_path[256] = { 0, };
+      sprintf(&memory_resident_data_path[0], "data/%016llx", resource->id());
+      data.memory_resident_data = foundation::fs::open(&memory_resident_data_path[0], foundation::fs::READ);
+
+      char streaming_data_path[256] = { 0, };
+      sprintf(&streaming_data_path[0], "data/%016llx.streaming", resource->id());
+      data.streaming_data = foundation::fs::open(&streaming_data_path[0], foundation::fs::READ);
+
+      type->load(resource, data);
+
+      resource->set_state(Resource::LOADED);
+    }
+
+    while (to_be_unloaded_.pop(&resource)) {
+      const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
+      yeti_assert_debug(type != NULL);
+      type->unload(resource);
+    }
+  }
 }
 
 } // yeti
