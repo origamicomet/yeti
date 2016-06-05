@@ -26,15 +26,20 @@ namespace resource_manager {
 
 Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
   yeti_assert_debug(type != NULL);
-  return (Resource::Type::Id)foundation::murmur(type->name, 0);
+  return (Resource::Type::Id)foundation::murmur_hash_32(type->name, 0);
 }
 
 const Resource::Type *resource_manager::type_from_id(Resource::Type::Id id) {
   for (const Resource::Type **type = types_.first(); type <= types_.last(); ++type)
-    if (id == foundation::murmur((*type)->name, 0))
+    if (id == foundation::murmur_hash_32((*type)->name, 0))
       return *type;
 
   return NULL;
+}
+
+const Resource::Type *resource_manager::type_from_name(const char *name) {
+  yeti_assert_debug(name != NULL);
+  return type_from_id(foundation::murmur_hash_32(name, 0));
 }
 
 const Resource::Type *resource_manager::type_from_path(const char *path) {

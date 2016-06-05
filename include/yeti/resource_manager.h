@@ -34,6 +34,9 @@ extern YETI_PUBLIC Resource::Type::Id id_from_type(const Resource::Type *type);
 /// resource type via yeti::resource_manager::type_from_ext.
 extern YETI_PUBLIC const Resource::Type *type_from_id(Resource::Type::Id id);
 
+/// Finds a resource type via its name.
+extern YETI_PUBLIC const Resource::Type *type_from_name(const char *name);
+
 /// Extracts the file extension from @path and uses it to find the associated
 /// resource type via yeti::resource_manager::type_from_ext.
 extern YETI_PUBLIC const Resource::Type *type_from_path(const char *path);
