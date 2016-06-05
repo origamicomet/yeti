@@ -54,6 +54,7 @@
 #include "yeti/foundation/hash.h"
 
 #include "yeti/foundation/array.h"
+#include "yeti/foundation/hash_map.h"
 #include "yeti/foundation/mirrored_ring_buffer.h"
 #include "yeti/foundation/thread_safe/queue.h"
 
