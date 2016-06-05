@@ -19,6 +19,7 @@
 #include "yeti/config.h"
 #include "yeti/linkage.h"
 
+#include "yeti/foundation/support/macro.h"
 #include "yeti/foundation/support/usage.h"
 #include "yeti/foundation/support/inlining.h"
 #include "yeti/foundation/support/likeliness.h"
