@@ -59,7 +59,15 @@ bool StandardApplication::startup() {
   application_if::expose(&this->script_, this);
 
   // TODO(mtwilliams): Load the boot script as specified by |manfiest_|.
-  // this->script_.load(resource ~> bytecode from lua_dump);
+
+  const Resource::Type *script_resource_type = resource_manager::type_from_name("script");
+  const Resource::Type::Id script_resource_type_id = resource_manager::id_from_type(script_resource_type);
+  const Resource::Id script_resource_id = Resource::id_from_type_and_name(script_resource_type_id, "vanguard/boot");
+  ScriptResource *script_resource = (ScriptResource *)resource_manager::load(script_resource_id);
+  while (script_resource->state() != Resource::LOADED);
+
+  this->script_.inject(script_resource);
+
   if (!this->script_.call("startup", 0))
     return false;
 
@@ -78,7 +86,6 @@ void StandardApplication::render() {
 
 void StandardApplication::shutdown() {
   this->script_.call("shutdown", 0);
-
   yeti::shutdown();
 }
 

@@ -11,6 +11,8 @@
 
 #include "yeti/script.h"
 
+#include "yeti/resources/script_resource.h"
+
 namespace yeti {
 
 Script::Script() {
@@ -34,9 +36,11 @@ void *Script::__alloc(Script *script, void *ptr, size_t old_sz, size_t new_sz) {
 
 int Script::__error_handler(lua_State *L) {
   Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
   // TODO(mtwilliams): Forward to a user-defined error handler.
   // TODO(mtwilliams): Use lua_Debug to build a Lua & C/C++ callstack.
-  YETI_TRAP();
+  ::fprintf(stderr, "Lua Error!\n > %s\n\n", lua_tostring(L, -1));
+
   return 0;
 }
 
@@ -86,11 +90,26 @@ bool Script::call(const char *fn, u32 n, ...) {
   va_end(ap);
 
   if (lua_pcall(L, n, 0, -(int)(n + 2)) != 0) {
-    lua_pop(L, 1);
+    lua_pop(L, 1 + 1);
     return false;
+  } else {
+    lua_pop(L, 1);
   }
 
   return true;
+}
+
+void Script::inject(const ScriptResource *script_resource) {
+  yeti_assert_debug(script_resource != NULL);
+
+  lua_pushlightuserdata(L, (void *)this);
+  lua_pushcclosure(L, &Script::__error_handler, 1);
+
+  if (luaL_loadbuffer(L, (const char *)script_resource->bytecode_, script_resource->bytecode_len_, script_resource->path_) != 0)
+    yeti_assertf(0, "Script injection failed!\n > %s", lua_tostring(L, -1));
+
+  if (lua_pcall(L, 0, 0, -2) != 0)
+    yeti_assertf(0, "Script injection failed!\n > %s", lua_tostring(L, -1));
 }
 
 } // yeti

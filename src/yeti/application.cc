@@ -108,7 +108,7 @@ void Application::run() {
     frame->reset();
   }
 
-  YETI_TRAP();
+  YETI_UNREACHABLE();
 }
 
 void Application::pause() {

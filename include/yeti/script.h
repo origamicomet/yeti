@@ -29,6 +29,8 @@ extern "C" {
 
 namespace yeti {
 
+class ScriptResource;
+
 /// ...
 class YETI_PUBLIC Script {
  YETI_DISALLOW_COPYING(Script);
@@ -73,6 +75,10 @@ class YETI_PUBLIC Script {
   ///   call("meaning_of_life", Script::T_INTEGER, 42);
   ///
   bool call(const char *fn, u32 n, ...);
+
+ public:
+  /// \brief Injects @script_resource into the global scope.
+  void inject(const ScriptResource *script_resource);
 
  public:
   lua_State *state();
