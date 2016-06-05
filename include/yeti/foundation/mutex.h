@@ -53,9 +53,9 @@ class YETI_PUBLIC Mutex {
 };
 
 /// \def YETI_SCOPED_LOCK
-/// \brief Acquires a lock for the duration of this scope.
+/// \brief Acquires a lock for the duration of the current scope.
 #define YETI_SCOPED_LOCK(_Mutex) \
-  ScopedLock __lock_##__LINE__##__(_Mutex);
+  const ::yeti::foundation::ScopedLock YETI_PASTE(__scoped_lock__, __LINE__)(_Mutex);
 
 /// Acquires a lock for the duration of its scope.
 class ScopedLock {
