@@ -98,7 +98,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
 
     lib.platform :windows do |platform|
-      platform.add_external_dependencies %w(kernel32 user32 gdi32)
+      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32)
     end
 
     lib.add_external_dependency 'luajit', mangler: mangle
@@ -117,7 +117,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     app.add_dependency :yeti
 
     app.platform :windows do |platform|
-      platform.add_external_dependencies %w(kernel32 user32 gdi32)
+      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32)
     end
   end
 
@@ -133,7 +133,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     app.add_dependency :yeti
 
     app.platform :windows do |platform|
-      platform.add_external_dependencies %w(kernel32 user32 gdi32)
+      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32)
     end
   end
 end
