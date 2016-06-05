@@ -31,6 +31,8 @@
 namespace yeti {
 namespace foundation {
 
+// TODO(mtwilliams): Track if allocations need to be ignored in sumation.
+
 /// ...
 struct Allocation {
   /// ...
@@ -91,6 +93,8 @@ class YETI_PUBLIC Allocator {
 } // foundation
 } // yeti
 
+// BUG(mtwilliams): The pointer variant of this is likely a placement new. A
+// fix is to throw a tag (and provide a default value.)
 extern YETI_PUBLIC void *operator new(size_t sz, yeti::foundation::Allocator &allocator);
 extern YETI_PUBLIC void *operator new(size_t sz, yeti::foundation::Allocator *allocator);
 extern YETI_PUBLIC void *operator new[](size_t sz, yeti::foundation::Allocator &allocator);
@@ -98,5 +102,16 @@ extern YETI_PUBLIC void *operator new[](size_t sz, yeti::foundation::Allocator *
 
 extern YETI_PUBLIC void operator delete(void *ptr, yeti::foundation::Allocator &allocator);
 extern YETI_PUBLIC void operator delete(void *ptr, yeti::foundation::Allocator *allocator);
+
+/// \def YETI_NEW
+/// \brief Allocates memory with @Allocator for the given type @T, then calls
+/// its constructor.
+#define YETI_NEW(T, Allocator) \
+  new ((void *)(Allocator).allocate(sizeof(T), alignof(T))) T
+
+/// \def YETI_DELETE
+/// \brief Destructs @Instance and deallocates memory using @Allocator.
+#define YETI_DELETE(T, Allocator, Instance) \
+  { (Instance)->~T(); (Allocator).deallocate((uintptr_t)Instance); }
 
 #endif // _YETI_FOUNDATION_ALLOCATOR_H_
