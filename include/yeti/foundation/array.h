@@ -28,13 +28,13 @@ namespace foundation {
 
 // TODO(mtwilliams): Call destructors for non-POD?
 // TODO(mtwilliams): Specialized implementation for T = T'[N], i.e arrays.
+// TODO(mtwilliams): Document `Array<T>`.
 
-/// ...
 template <typename T>
 class Array {
  public:
-  explicit Array(Allocator *allocator, const u32 sz = 0);
-  explicit Array(Allocator &allocator, const u32 sz = 0);
+  explicit Array(Allocator *allocator, const size_t sz = 0);
+  explicit Array(Allocator &allocator, const size_t sz = 0);
   Array(const Array<T> &ary);
   Array<T> &operator=(const Array<T> &ary);
   ~Array();
@@ -53,8 +53,8 @@ class Array {
   void pop(T *element);
 
   void clear();
-  void reserve(const u32 additional);
-  void resize(const u32 new_sz);
+  void reserve(const size_t additional);
+  void resize(const size_t new_sz);
 
   T *first();
   const T *first() const;
@@ -62,9 +62,9 @@ class Array {
   T *last();
   const T *last() const;
 
-  u32 reserved() const;
-  u32 size() const;
-  u32 length() const;
+  size_t reserved() const;
+  size_t size() const;
+  size_t length() const;
   bool empty() const;
 
  public:
@@ -97,17 +97,17 @@ class Array {
 };
 
 template <typename T>
-Array<T>::Array(Allocator *allocator, const u32 sz) {
+Array<T>::Array(Allocator *allocator, const size_t sz) {
   yeti_assert_debug(allocator != NULL);
   allocator_ = allocator;
   // TODO(mtwilliams): Respect minimum alignment requirements of |T|.
-  first_ = (T *)allocator.allocate(sz * sizeof(T));
+  first_ = (T *)allocator->allocate(sz * sizeof(T));
   last_ = first_ + sz * sizeof(T);
   reserved_ = last_;
 }
 
 template <typename T>
-Array<T>::Array(Allocator &allocator, const u32 sz) {
+Array<T>::Array(Allocator &allocator, const size_t sz) {
   allocator_ = &allocator;
   // TODO(mtwilliams): Respect minimum alignment requirements of |T|.
   first_ = (T *)allocator.allocate(sz * sizeof(T));
@@ -193,9 +193,9 @@ void Array<T>::clear() {
 }
 
 template <typename T>
-void Array<T>::reserve(const u32 additional) {
-  const u32 size = this->size();
-  const u32 reserved = this->reserved();
+void Array<T>::reserve(const size_t additional) {
+  const size_t size = this->size();
+  const size_t reserved = this->reserved();
 
   // TODO(mtwilliams): Respect minimum alignment requirements of |T|.
   first_ = (T *)allocator_->reallocate((uintptr_t)first_, (reserved + additional) * sizeof(T));
@@ -204,10 +204,10 @@ void Array<T>::reserve(const u32 additional) {
 }
 
 template <typename T>
-void Array<T>::resize(const u32 new_sz) {
-  const u32 size = this->size();
-  const u32 reserved = this->reserved();
-  const u32 remaining = reserved - size;
+void Array<T>::resize(const size_t new_sz) {
+  const size_t size = this->size();
+  const size_t reserved = this->reserved();
+  const size_t remaining = reserved - size;
 
   if (new_sz > size) {
     if ((new_sz - size) <= remaining) {
@@ -245,17 +245,17 @@ const T *Array<T>::last() const {
 }
 
 template <typename T>
-YETI_INLINE u32 Array<T>::reserved() const {
+YETI_INLINE size_t Array<T>::reserved() const {
   return (reserved_ - first_) / sizeof(T);
 }
 
 template <typename T>
-YETI_INLINE u32 Array<T>::size() const {
+YETI_INLINE size_t Array<T>::size() const {
   return (last_ - first_) / sizeof(T);
 }
 
 template <typename T>
-YETI_INLINE u32 Array<T>::length() const {
+YETI_INLINE size_t Array<T>::length() const {
   return this->reserved();
 }
 
@@ -267,7 +267,8 @@ YETI_INLINE bool Array<T>::empty() const {
 template <typename T>
 bool Array<T>::one(Matcher matcher, void *matcher_ctx) const {
   yeti_assert_debug(matcher != NULL);
-  u32 matches = 0;
+  // OPTIMIZE(mtwilliams): Early out on the second match.
+  size_t matches = 0;
   for (const T *E = this->first(); E <= this->last(); E += sizeof(T))
     matches += matcher(E, matcher_ctx) ? 1 : 0;
   return (matches == 1);
