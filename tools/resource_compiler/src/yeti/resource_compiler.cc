@@ -15,9 +15,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// TODO(mtwilliams): Install assertion handler.
-// TODO(mtwilliams): Install error handler.
-
 int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
 
