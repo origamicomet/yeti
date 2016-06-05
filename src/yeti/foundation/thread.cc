@@ -12,7 +12,7 @@
 #include "yeti/foundation/thread.h"
 
 #include "yeti/foundation/global_heap_allocator.h"
-#include "yeti/foundation/thread_safe/linear_allocator.h"
+#include "yeti/foundation/thread_safe/scratch_allocator.h"
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
@@ -66,7 +66,7 @@ namespace {
   // ThreadStartInfo) exceeds the amount of memory made available.
   static const size_t thread_start_info_mem_sz_ = 12288;
   static u8 thread_start_info_mem_[thread_start_info_mem_sz_] = { 0, };
-  static thread_safe::LinearAllocator thread_start_info_allocator_((uintptr_t)thread_start_info_mem_, thread_start_info_mem_sz_);
+  static thread_safe::ScratchAllocator thread_start_info_allocator_((uintptr_t)thread_start_info_mem_, thread_start_info_mem_sz_);
 }
 
 namespace {
@@ -85,7 +85,8 @@ namespace {
   #endif
 
   static DWORD thread_entry_point(uintptr_t thread_start_info_ptr) {
-    const ThreadStartInfo *thread_start_info = (const ThreadStartInfo *)thread_start_info_ptr;
+    const ThreadStartInfo *thread_start_info =
+      (const ThreadStartInfo *)thread_start_info_ptr;
 
     Thread::EntryPoint entry_point = thread_start_info->entry_point;
     uintptr_t entry_point_arg = thread_start_info->entry_point_arg;

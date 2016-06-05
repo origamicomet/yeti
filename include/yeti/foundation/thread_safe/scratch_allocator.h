@@ -1,4 +1,4 @@
-//===-- yeti/foundation/thread_safe/linear_allocator.h ----*- mode: C++ -*-===//
+//===-- yeti/foundation/thread_safe/scratch_allocator.h ---*- mode: C++ -*-===//
 //
 //                 _____               _     _   _
 //                |   __|___ _ _ ___ _| |___| |_|_|___ ___
@@ -13,8 +13,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef _YETI_FOUNDATION_THREAD_SAFE_LINEAR_ALLOCATOR_H_
-#define _YETI_FOUNDATION_THREAD_SAFE_LINEAR_ALLOCATOR_H_
+#ifndef _YETI_FOUNDATION_THREAD_SAFE_SCRATCH_ALLOCATOR_H_
+#define _YETI_FOUNDATION_THREAD_SAFE_SCRATCH_ALLOCATOR_H_
 
 #include "yeti/config.h"
 #include "yeti/linkage.h"
@@ -29,8 +29,10 @@ namespace yeti {
 namespace foundation {
 namespace thread_safe {
 
-class YETI_PUBLIC LinearAllocator : public Allocator {
- YETI_DISALLOW_COPYING(LinearAllocator);
+// https://bitbucket.org/bitsquid/foundation/src/7f896236dbafd2cb842655004b1c7bf6e76dcef9/memory.cpp?fileviewer=file-view-default
+
+class YETI_PUBLIC ScratchAllocator : public Allocator {
+ YETI_DISALLOW_COPYING(ScratchAllocator);
 
  private:
   struct Allocation {
@@ -70,8 +72,8 @@ class YETI_PUBLIC LinearAllocator : public Allocator {
   };
 
  public:
-  LinearAllocator(uintptr_t mem, size_t sz);
-  ~LinearAllocator();
+  ScratchAllocator(uintptr_t mem, size_t sz);
+  ~ScratchAllocator();
 
  public:
   uintptr_t allocate(size_t sz, size_t alignment = 8);
@@ -94,4 +96,4 @@ class YETI_PUBLIC LinearAllocator : public Allocator {
 } // foundation
 } // yeti
 
-#endif // _YETI_FOUNDATION_THREAD_SAFE_LINEAR_ALLOCATOR_H_
+#endif // _YETI_FOUNDATION_THREAD_SAFE_SCRATCH_ALLOCATOR_H_

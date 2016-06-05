@@ -1,4 +1,4 @@
-//===-- yeti/foundation/thread_safe/linear_allocator.cc ---*- mode: C++ -*-===//
+//===-- yeti/foundation/thread_safe/scratch_allocator.cc ---*- mode: C++ -*-===//
 //
 //                 _____               _     _   _
 //                |   __|___ _ _ ___ _| |___| |_|_|___ ___
@@ -9,7 +9,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "yeti/foundation/thread_safe/linear_allocator.h"
+#include "yeti/foundation/thread_safe/scratch_allocator.h"
 
 #include "yeti/foundation/atomics.h"
 #include "yeti/foundation/memory.h"
@@ -18,7 +18,7 @@ namespace yeti {
 namespace foundation {
 namespace thread_safe {
 
-LinearAllocator::LinearAllocator(uintptr_t mem, size_t sz)
+ScratchAllocator::ScratchAllocator(uintptr_t mem, size_t sz)
   : Allocator()
   , mem_lower_(mem)
   , mem_upper_(mem + sz)
@@ -27,14 +27,14 @@ LinearAllocator::LinearAllocator(uintptr_t mem, size_t sz)
   , unreclaimed_upper_(mem)
   , reclaiming_(0)
 {
-  this->set_name("thread_safe_linear_allocator");
+  this->set_name("ts_scratch_allocator");
 }
 
-LinearAllocator::~LinearAllocator() {
+ScratchAllocator::~ScratchAllocator() {
 }
 
-// TODO(mtwilliams): Add barriers.
-uintptr_t LinearAllocator::allocate(size_t sz, size_t alignment) {
+// TODO(mtwilliams): Audit synchronization points.
+uintptr_t ScratchAllocator::allocate(size_t sz, size_t alignment) {
   while (true) {
     const uintptr_t unallocated = atomic::load(&unallocated_);
 
@@ -66,8 +66,8 @@ uintptr_t LinearAllocator::allocate(size_t sz, size_t alignment) {
   }
 }
 
-// TODO(mtwilliams): Add barriers.
-uintptr_t LinearAllocator::reallocate(uintptr_t ptr, size_t sz, size_t alignment) {
+// TODO(mtwilliams): Audit synchronization points.
+uintptr_t ScratchAllocator::reallocate(uintptr_t ptr, size_t sz, size_t alignment) {
   Allocation *header = Allocation::recover(ptr);
 
   // OPTIMIZATION(mtwilliams): Grow if possible.
@@ -79,8 +79,8 @@ uintptr_t LinearAllocator::reallocate(uintptr_t ptr, size_t sz, size_t alignment
   return new_ptr;
 }
 
-// TODO(mtwilliams): Add barriers.
-void LinearAllocator::deallocate(uintptr_t ptr) {
+// TODO(mtwilliams): Audit synchronization points.
+void ScratchAllocator::deallocate(uintptr_t ptr) {
   yeti_assert_debug(ptr > mem_lower_);
   yeti_assert_debug(ptr < mem_upper_);
 
@@ -104,7 +104,8 @@ void LinearAllocator::deallocate(uintptr_t ptr) {
   this->reclaim();
 }
 
-void LinearAllocator::reclaim() {
+// TODO(mtwilliams): Audit synchronization points.
+void ScratchAllocator::reclaim() {
   if (atomic::cmp_and_xchg(&reclaiming_, 0, 1) != 0)
     // Another thread is already reclaiming.
     return;
