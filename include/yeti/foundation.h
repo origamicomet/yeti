@@ -49,14 +49,17 @@
 
 #include "yeti/foundation/allocator.h"
 #include "yeti/foundation/global_heap_allocator.h"
-#include "yeti/foundation/thread_safe/linear_allocator.h"
+#include "yeti/foundation/buddy_allocator.h"
+#include "yeti/foundation/proxy_allocator.h"
+#include "yeti/foundation/thread_safe/scratch_allocator.h"
 
 #include "yeti/foundation/hash.h"
 
 #include "yeti/foundation/array.h"
 #include "yeti/foundation/queue.h"
 #include "yeti/foundation/hash_map.h"
+#include "yeti/foundation/sort_map.h"
+
 #include "yeti/foundation/mirrored_ring_buffer.h"
-#include "yeti/foundation/thread_safe/queue.h"
 
 #endif // _YETI_FOUNDATION_H_
