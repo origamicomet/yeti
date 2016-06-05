@@ -56,7 +56,7 @@ bool ResourceCompiler::ignorable(const char *path) const {
   yeti_assert_debug(path != NULL);
 
   // Ignore any and all dot files.
-  if (path[0] == '.')
+  if (foundation::path::file(path)[0] == '.')
     return true;
 
   return false;
