@@ -20,10 +20,18 @@
 #include "yeti/linkage.h"
 #include "yeti/foundation.h"
 
+#include "yeti/script_if.h"
+
 namespace yeti {
 
-class Script;
 class Application;
+
+namespace script_if {
+
+/// \internal
+extern YETI_LOCAL Application *application(lua_State *L);
+
+}
 
 namespace application_if {
 

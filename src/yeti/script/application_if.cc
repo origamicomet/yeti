@@ -18,18 +18,19 @@
 
 namespace yeti {
 
+Application *script_if::application(lua_State *L) {
+  // TODO(mtwilliams): Refactor singleton management into yeti::Script.
+  lua_getglobal(L, "Application");
+  lua_getfield(L, -1, "__instance__");
+  if (!lua_islightuserdata(L, -1))
+    luaL_error(L, "Expected Application.__instance__ to be a light user-data reference to a yeti::Application.");
+  Application *app = (Application *)lua_touserdata(L, -1);
+  lua_pop(L, 2);
+  return app;
+}
+
 namespace application_if {
   namespace {
-    static Application *instance(lua_State *L) {
-      // TODO(mtwilliams): Refactor singleton management into yeti::Script.
-      lua_getglobal(L, "Application");
-      lua_getfield(L, -1, "__instance__");
-      yeti_assertf_development(lua_islightuserdata(L, -1), "Expected Application.__instance__ to be a light user-data reference to a yeti::Application.");
-      Application *app = (Application *)lua_touserdata(L, -1);
-      lua_pop(L, 2);
-      return app;
-    }
-
     static int platform(lua_State *L) {
       lua_pushstring(L, Application::platform());
       return 1;
@@ -46,37 +47,37 @@ namespace application_if {
     }
 
     static int pause(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
       app->pause();
       return 0;
     }
 
     static int unpause(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
       app->unpause();
       return 0;
     }
 
     static int quit(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
       app->quit();
       return 0;
     }
 
     static int window(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
       lua_pushlightuserdata(L, (void *)app->windows()[0]);
       return 1;
     }
 
     static int windows(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
       yeti_assertf(0, "Not implemented yet.");
       return 0;
     }
 
     static int time_step_policy(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
       const TimeStepPolicy::Description &time_step_policy_desc = app->time_step_policy()->desc();
 
       switch (time_step_policy_desc.type) {
@@ -103,7 +104,7 @@ namespace application_if {
     }
 
     static int set_time_step_policy(lua_State *L) {
-      Application *app = instance(L);
+      Application *app = script_if::application(L);
 
       TimeStepPolicy::Description time_step_policy_desc; {
         const char *policy = luaL_checkstring(L, 1);
@@ -113,9 +114,9 @@ namespace application_if {
           time_step_policy_desc.type = TimeStepPolicy::FIXED;
           time_step_policy_desc.config.fixed.delta_time_per_step = luaL_checknumber(L, 2);
         } else if (strcmp("smoothed", policy) == 0) {
-          yeti_assertf(0, "Not implemented yet.");
+          return luaL_error(L, "Not implemented yet.");
         } else if (strcmp("smoothed_with_debt_payback", policy) == 0) {
-          yeti_assertf(0, "Not implemented yet.");
+          return luaL_error(L, "Not implemented yet.");
         } else {
           luaL_argerror(L, 1, "expected 'variable', 'fixed', 'smoothed', or 'smoothed_with_debt_payback'");
         }
