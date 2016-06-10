@@ -27,6 +27,8 @@ extern "C" {
   #include <luajit.h>
 }
 
+#include "yeti/script_environment.h"
+
 namespace yeti {
 
 class ScriptResource;
@@ -58,6 +60,10 @@ class YETI_PUBLIC Script {
   static int __error_handler(lua_State *L);
 
  public:
+ public:
+  /// \brief Injects @script_resource into the global scope.
+  void inject(const ScriptResource *script_resource);
+
   /// \brief Adds @fn as @name globally.
   void add_function(const char *name,
                     const lua_CFunction fn);
@@ -85,18 +91,20 @@ class YETI_PUBLIC Script {
   bool call(const char *fn, u32 n, ...);
 
  public:
-  /// \brief Injects @script_resource into the global scope.
-  void inject(const ScriptResource *script_resource);
-
- public:
   lua_State *state();
+  ScriptEnvironment *environment();
 
  private:
   lua_State *L;
+  ScriptEnvironment E;
 };
 
 YETI_INLINE lua_State *Script::state() {
   return L;
+}
+
+YETI_INLINE ScriptEnvironment *Script::environment() {
+  return &E;
 }
 
 } // yeti
