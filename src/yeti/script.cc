@@ -57,6 +57,18 @@ void Script::add_module(const char *module) {
   lua_setglobal(L, module);
 }
 
+void Script::add_module_constructor(const char *module,
+                                    const lua_CFunction fn) {
+  // TODO(mtwilliams): Support Lua 5.2 by using LUA_REGISTRYINDEX and LUA_RIDX_GLOBALS.
+  lua_getglobal(L, module);
+
+  lua_createtable(L, 0, 1);
+  lua_pushcfunction(L, fn);
+  lua_setfield(L, -2, "__call");
+
+  lua_setmetatable(L, -2);
+}
+
 void Script::add_module_function(const char *module,
                                  const char *name,
                                  const lua_CFunction fn) {

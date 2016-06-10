@@ -65,6 +65,10 @@ class YETI_PUBLIC Script {
   /// \brief Creates a module called @module.
   void add_module(const char *module);
 
+  /// \brief Adds @fn so that is called whenever @module is called.
+  void add_module_constructor(const char *module,
+                              const lua_CFunction fn);
+
   /// \brief Adds @fn as @name to the @module.
   void add_module_function(const char *module,
                            const char *name,
