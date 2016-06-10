@@ -53,6 +53,8 @@ class YETI_PUBLIC Vec2 {
   ///
   f32 magnitude() const;
 
+ public:
+
   /// \brief Calculates the dot-product between this vector and @v.
   ///
   f32 dot(const Vec2 v) const;
