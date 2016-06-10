@@ -44,6 +44,13 @@ int Script::__error_handler(lua_State *L) {
   return 0;
 }
 
+void Script::add_function(const char *name,
+                          const lua_CFunction fn) {
+  // TODO(mtwilliams): Support Lua 5.2 by using LUA_REGISTRYINDEX and LUA_RIDX_GLOBALS.
+  lua_pushcfunction(L, fn);
+  lua_setglobal(L, name);
+}
+
 void Script::add_module(const char *module) {
   // TODO(mtwilliams): Support Lua 5.2 by using LUA_REGISTRYINDEX and LUA_RIDX_GLOBALS.
   lua_newtable(L);

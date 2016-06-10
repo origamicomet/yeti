@@ -58,6 +58,10 @@ class YETI_PUBLIC Script {
   static int __error_handler(lua_State *L);
 
  public:
+  /// \brief Adds @fn as @name globally.
+  void add_function(const char *name,
+                    const lua_CFunction fn);
+
   /// \brief Creates a module called @module.
   void add_module(const char *module);
 
