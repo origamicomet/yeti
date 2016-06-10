@@ -58,9 +58,8 @@ class YETI_PUBLIC Application {
 
  public:
   // TODO(mtwilliams): Document this interface.
-  Window **windows();
-  const Window **windows() const;
-  u32 num_windows() const;
+  foundation::Array<Window *> &windows();
+  const foundation::Array<Window *> &windows() const;
 
  public:
   // TODO(mtwilliams): Document this interface.

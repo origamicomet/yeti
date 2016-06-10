@@ -130,16 +130,12 @@ void Application::window_event_handler_(void *ctx) {
   YETI_UNUSED(window);
 }
 
-Window **Application::windows() {
-  return (Window **)windows_.first();
+foundation::Array<Window *> &Application::windows() {
+  return windows_;
 }
 
-const Window **Application::windows() const {
-  return (const Window **)windows_.first();
-}
-
-u32 Application::num_windows() const {
-  return windows_.size();
+const foundation::Array<Window *> &Application::windows() const {
+  return windows_;
 }
 
 TimeStepPolicy *Application::time_step_policy() {

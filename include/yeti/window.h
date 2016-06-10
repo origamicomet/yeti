@@ -56,6 +56,7 @@ class YETI_PUBLIC Window {
   // TODO(mtwilliams): Document this interface.
   void minimize();
   void maximize();
+
   void restore();
 
   // TODO(mtwilliams): Provide a platform agnostic interface for setting the
