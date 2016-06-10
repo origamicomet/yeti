@@ -60,10 +60,14 @@ class YETI_PUBLIC Script {
   static int __error_handler(lua_State *L);
 
  public:
+  /// \internal
+  static Script *recover(lua_State *L);
+
  public:
   /// \brief Injects @script_resource into the global scope.
   void inject(const ScriptResource *script_resource);
 
+ public:
   /// \brief Adds @fn as @name globally.
   void add_function(const char *name,
                     const lua_CFunction fn);

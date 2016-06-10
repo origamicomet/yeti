@@ -23,6 +23,14 @@ Script::Script() {
   // NOTE(mtwilliams): LuaJIT expects us to allocate within the first 2Gb.
   L = luaL_newstate();
 #endif
+
+  // INSECURE(mtwilliams): Don't let unsigned code (ab)use the system.
+  luaL_openlibs(L);
+
+  lua_newtable(L, 0, 1);
+  lua_pushlightuserdata(L, (void *)this);
+  lua_setfield(L, -2, "__instance__");
+  lua_setglobal(L, "Script");
 }
 
 Script::~Script() {
@@ -42,6 +50,34 @@ int Script::__error_handler(lua_State *L) {
   ::fprintf(stderr, "Lua Error!\n > %s\n\n", lua_tostring(L, -1));
 
   return 0;
+}
+
+// OPTIMIZE(mtwilliams): Store a pointer to self after `Script::L` and bump `L`
+// to recover `Script` more efficiently?
+Script *Script::recover(lua_State *L) {
+  yeti_assert_debug(L != NULL);
+
+  lua_getglobal(L, "Script");
+  lua_getfield(L, -1, "__instance__");
+  yeti_assert_debug(lua_islightuserdata(L, -1), "Expected Script.__instance__ to be a light user-data reference to a yeti::Script.");
+
+  Script *script = (Script *)lua_touserdata(L, -1);
+  lua_pop(L, 2);
+
+  return script;
+}
+
+void Script::inject(const ScriptResource *script_resource) {
+  yeti_assert_debug(script_resource != NULL);
+
+  lua_pushlightuserdata(L, (void *)this);
+  lua_pushcclosure(L, &Script::__error_handler, 1);
+
+  if (luaL_loadbuffer(L, (const char *)script_resource->bytecode_, script_resource->bytecode_len_, script_resource->path_) != 0)
+    yeti_assertf(0, "Script injection failed!\n > %s", lua_tostring(L, -1));
+
+  if (lua_pcall(L, 0, 0, -2) != 0)
+    yeti_assertf(0, "Script injection failed!\n > %s", lua_tostring(L, -1));
 }
 
 void Script::add_function(const char *name,
@@ -116,19 +152,6 @@ bool Script::call(const char *fn, u32 n, ...) {
   }
 
   return true;
-}
-
-void Script::inject(const ScriptResource *script_resource) {
-  yeti_assert_debug(script_resource != NULL);
-
-  lua_pushlightuserdata(L, (void *)this);
-  lua_pushcclosure(L, &Script::__error_handler, 1);
-
-  if (luaL_loadbuffer(L, (const char *)script_resource->bytecode_, script_resource->bytecode_len_, script_resource->path_) != 0)
-    yeti_assertf(0, "Script injection failed!\n > %s", lua_tostring(L, -1));
-
-  if (lua_pcall(L, 0, 0, -2) != 0)
-    yeti_assertf(0, "Script injection failed!\n > %s", lua_tostring(L, -1));
 }
 
 } // yeti
