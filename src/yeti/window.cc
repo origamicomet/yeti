@@ -59,7 +59,8 @@ Window *Window::open(const Window::Description &desc) {
   wcx.hIconSm       = ::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.lpszClassName = L"875d3758-bff3-11e5-93a6-4441a4143a20";
 
-  const bool registered_class_succesfully = (::RegisterClassExW(&wcx) != 0);
+  // NOTE(mtwilliams): This is not thread-safe. Not that any of this stuff is.
+  static const bool registered_class_succesfully = (::RegisterClassExW(&wcx) != 0);
   yeti_assert(registered_class_succesfully);
 
   const DWORD styles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
