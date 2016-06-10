@@ -58,6 +58,8 @@ bool StandardApplication::startup() {
   // Expose ourself to Lua.
   application_if::expose(&this->script_, this);
   window_if::expose(&this->script_);
+  mouse_if::expose(&this->script_);
+  keyboard_if::expose(&this->script_);
 
   // TODO(mtwilliams): Load the boot script as specified by |manfiest_|.
 

@@ -37,7 +37,10 @@
 
 #include "yeti/script.h"
 #include "yeti/script/application_if.h"
+#include "yeti/script/math_if.h"
 #include "yeti/script/window_if.h"
+#include "yeti/script/mouse_if.h"
+#include "yeti/script/keyboard_if.h"
 
 #include "yeti/application.h"
 
