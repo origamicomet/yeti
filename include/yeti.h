@@ -37,6 +37,7 @@
 
 #include "yeti/script.h"
 #include "yeti/script/application_if.h"
+#include "yeti/script/window_if.h"
 
 #include "yeti/application.h"
 
