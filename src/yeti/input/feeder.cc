@@ -243,7 +243,7 @@ void input::from(const Window *window) {
 
   // TODO(mtwilliams): Determine if Windows caches sub-classes, i.e. does
   // something akin to "find-or-create".
-  LONG_PTR orginal_window_proc = ::SetWindowLongPtr(hndl, GWLP_WNDPROC, (LONG_PTR)&InputWindowProcW);
+  LONG_PTR orginal_window_proc = ::SetWindowLongPtrW(hndl, GWLP_WNDPROC, (LONG_PTR)&InputWindowProcW);
   const bool installed_hook_succesfully = (orginal_window_proc != NULL);
   yeti_assert(installed_hook_succesfully);
 
