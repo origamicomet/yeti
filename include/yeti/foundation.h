@@ -59,6 +59,7 @@
 #include "yeti/foundation/queue.h"
 #include "yeti/foundation/hash_map.h"
 #include "yeti/foundation/sort_map.h"
+#include "yeti/foundation/thread_safe/pool.h"
 
 #include "yeti/foundation/mirrored_ring_buffer.h"
 
