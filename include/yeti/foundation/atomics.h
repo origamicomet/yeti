@@ -38,11 +38,13 @@
       (YETI_COMPILER == YETI_COMPILER_CLANG)
 #endif
 
+// TODO(mtwilliams): Provide templated versions.
+
 namespace yeti {
 namespace foundation {
 
 /// \namespace ::yeti::foundation::atomic
-/// \brief TODO(mtwilliam): Document this.
+/// \brief TODO(mtwilliams): Document this.
 namespace atomic {
   i32 load(const volatile i32 *v);
   u32 load(const volatile u32 *v);
