@@ -136,6 +136,7 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   Thread *thread = new (foundation::heap()) Thread();
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  // TODO(mtwilliams): Move retry logic back into |thread_start_info_allocator_|?
   ThreadStartInfo *thread_start_info = NULL;
   while (thread_start_info == NULL) {
     thread_start_info = (ThreadStartInfo *)thread_start_info_allocator_.allocate(sizeof(ThreadStartInfo));
