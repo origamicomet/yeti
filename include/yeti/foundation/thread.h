@@ -42,7 +42,7 @@ class YETI_PUBLIC Thread {
     Name name;
 
     /// A bitmask of all the cores the new thread can be scheduled on.
-    u32 affinity;
+    u64 affinity;
 
     /// The inital size (in bytes) of the stack to provide the new thread.
     /// \note If zero, a reasonable default is chosen. This is platform dependent.

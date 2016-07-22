@@ -29,7 +29,7 @@ namespace {
     {'\0',},
 
     // By default, threads can be scheduled on any core.
-    0xFFFFFFFFul,
+    0xFFFFFFFFFFFFFFFFull,
 
     // By default, we use 1MiB stacks.
     0x100000ul
@@ -158,15 +158,19 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
 
   yeti_assert((HANDLE)thread->native_hndl_ != INVALID_HANDLE_VALUE);
 
-  if (options->affinity != 0xFFFFFFFFul) {
-    // TODO(mtwilliams): Expose a 64-bit affinity mask?
+  if (options->affinity != ~0ull) {
+    // NOTE(mtwilliams): This will truncate to 32 bits, and therefore 32 cores,
+    // if on 32 bit..
     ::SetThreadAffinityMask((HANDLE)thread->native_hndl_, (DWORD_PTR)options->affinity);
 
     // PROFILE(mtwilliams): Determine if this improves scheduling at all.
     if (options->affinity & (options->affinity - 1)) {
-      DWORD ideal_processor;
-      _BitScanForward(&ideal_processor, (DWORD)options->affinity);
-      ::SetThreadIdealProcessor((HANDLE)thread->native_hndl_, ideal_processor);
+      // BUG(mtwilliams): Only hints for cores `[1, 32]`.
+      if (options->affinity <= 0xFFFFFFFFull) {
+        DWORD ideal_processor;
+        _BitScanForward(&ideal_processor, (DWORD)options->affinity);
+        ::SetThreadIdealProcessor((HANDLE)thread->native_hndl_, ideal_processor);
+      }
     }
   }
 
