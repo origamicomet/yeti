@@ -57,6 +57,7 @@ bool StandardApplication::startup() {
 
   // Expose ourself to Lua.
   application_if::expose(&this->script_, this);
+  math_if::expose(&this->script_);
   window_if::expose(&this->script_);
   mouse_if::expose(&this->script_);
   keyboard_if::expose(&this->script_);
@@ -78,6 +79,9 @@ bool StandardApplication::startup() {
 }
 
 void StandardApplication::update(const f32 delta_time) {
+  // TODO(mtwilliams): Move into `Application`?
+  this->script_.environment()->reset();
+
   if (!this->script_.call("update", 1, Script::T_FLOAT, delta_time))
     this->pause();
 }
