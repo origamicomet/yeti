@@ -16,6 +16,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
+  #include <intrin.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
@@ -91,21 +92,27 @@ namespace {
     Thread::EntryPoint entry_point = thread_start_info->entry_point;
     uintptr_t entry_point_arg = thread_start_info->entry_point_arg;
 
-  #if YETI_COMPILER == YETI_COMPILER_MSVC
-    THREAD_NAME_INFO thread_name_info;
-    thread_name_info.dwType = 0x1000;
-    thread_name_info.szName = &thread_start_info->name[0];
-    thread_name_info.dwThreadID = ::GetCurrentThreadId();
-    thread_name_info.dwFlags = 0;
-    #pragma warning(push)
-    #pragma warning(disable: 6320 6322)
-      __try{
-        ::RaiseException(0x406D1388, 0, sizeof(THREAD_NAME_INFO)/sizeof(ULONG_PTR), (ULONG_PTR *)&thread_name_info);
-      } __except (EXCEPTION_EXECUTE_HANDLER){
-      }
-    #pragma warning(pop)
+  #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+      YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+    // TODO(mtwilliams): Raise exception regardless of compiler?
+    #if YETI_COMPILER == YETI_COMPILER_MSVC
+      THREAD_NAME_INFO thread_name_info;
+      thread_name_info.dwType = 0x1000;
+      thread_name_info.szName = &thread_start_info->name[0];
+      thread_name_info.dwThreadID = ::GetCurrentThreadId();
+      thread_name_info.dwFlags = 0;
+
+      #pragma warning(push)
+      #pragma warning(disable: 6320 6322)
+        __try {
+          ::RaiseException(0x406D1388, 0, sizeof(THREAD_NAME_INFO)/sizeof(ULONG_PTR), (ULONG_PTR *)&thread_name_info);
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
+        }
+      #pragma warning(pop)
+    #endif
   #endif
 
+    // Return memory to |thread_start_info_allocator_| as soon as possible.
     thread_start_info_allocator_.deallocate(thread_start_info_ptr);
 
     entry_point(entry_point_arg);
