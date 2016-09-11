@@ -51,7 +51,7 @@ class YETI_PUBLIC ScriptEnvironment {
   template <typename T>
   T *allocate();
 
-  /// Invalidates all outstanding temporaries.
+  /// Invalidates all temporaries, reclaiming all storage.
   void reset();
 
  private:
