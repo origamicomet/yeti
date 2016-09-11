@@ -29,6 +29,8 @@
 
 YETI_BEGIN_EXTERN_C // {
 
+typedef size_t yeti_size_t;
+
 typedef int8_t yeti_int8_t;
 typedef uint8_t yeti_uint8_t;
 typedef int16_t yeti_int16_t;
