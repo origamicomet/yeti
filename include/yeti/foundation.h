@@ -54,6 +54,7 @@
 #include "yeti/foundation/thread_safe/scratch_allocator.h"
 
 #include "yeti/foundation/hash.h"
+#include "yeti/foundation/prng.h"
 
 #include "yeti/foundation/array.h"
 #include "yeti/foundation/queue.h"
