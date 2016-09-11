@@ -69,6 +69,11 @@ class YETI_PUBLIC Thread {
   /// free'd after it exits.
   void detach();
 
+  /// \brief Non-gracefully terminates this thread.
+  /// \warning This thread may still hold exclusive resources, e.g. locks. This
+  /// can cause a deadlock if not accounted for.
+  void terminate();
+
   /// \brief Switch execution to another thread.
   static void yield();
 

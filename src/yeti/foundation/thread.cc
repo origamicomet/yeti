@@ -211,6 +211,17 @@ void Thread::detach() {
 #endif
 }
 
+void Thread::terminate() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  // I drink your milkshake...
+  ::TerminateThread((HANDLE)native_hndl_, 0x0);
+  // Handle is closed in destructor.
+  delete this;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
 void Thread::yield() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   if (::SwitchToThread() == 0)
