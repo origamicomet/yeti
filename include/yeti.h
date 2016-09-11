@@ -25,6 +25,10 @@
 #include "yeti/math.h"
 #include "yeti/input.h"
 
+#include "yeti/task.h"
+#include "yeti/task_manager.h"
+#include "yeti/task_scheduler.h"
+
 #include "yeti/resource.h"
 #include "yeti/resource_database.h"
 #include "yeti/resource_manager.h"

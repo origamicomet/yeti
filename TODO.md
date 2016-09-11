@@ -85,6 +85,7 @@
 - Optimize `lua_State *` -> `Script *` recovery.
   - Use a bump pointer, i.e. store a pointer to self after `lua_State *`.
 - Gracefully terminate worker threads, to prevent deadlocks.
+- Optimize task permits by storing in blocks of pointers that span an entire cache line, i.e. 16 on 32-bit and 8 on 64-bit.
 
 ### Runtime
 

@@ -22,6 +22,8 @@
 
 namespace yeti {
 
+// TODO(mtwilliams): Pad `Task` to 64 bytes.
+
 /// \brief Describes a schedulable unit of work and its dependencies.
 struct YETI_PUBLIC Task {
   /// \brief Specifies the work to do when a task is scheduled.
@@ -65,7 +67,7 @@ struct YETI_PUBLIC Task {
   ///        2. Never have a worker thread sleep when it can schedule work.
   ///        3. Never wake a worker thread only to yield it immediately.
   ///
-  ///  (4) Reduced memory footprint--forward dependencies requires more memory
+  ///  (4) Reduced memory footprint--forward dependencies require more memory
   ///      due to additional members in task descriptions and the use of empty
   ///      parent tasks to collect dependencies for tasks with more than one
   ///      dependency.

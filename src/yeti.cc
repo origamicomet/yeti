@@ -26,12 +26,16 @@ namespace yeti {
 void yeti::initialize() {
   yeti::foundation::set_assertion_handler(&yeti::default_assertion_handler);
 
+  task_scheduler::initialize();
+
   resource_manager::initialize();
   resource_manager::track(ScriptResource::type());
 }
 
 void yeti::shutdown() {
   resource_manager::shutdown();
+
+  task_scheduler::shutdown();
 }
 
 YETI_BEGIN_EXTERN_C // {
