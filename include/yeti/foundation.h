@@ -48,6 +48,7 @@
 #include "yeti/foundation/filesystem.h"
 
 #include "yeti/foundation/allocator.h"
+
 #include "yeti/foundation/global_heap_allocator.h"
 #include "yeti/foundation/buddy_allocator.h"
 #include "yeti/foundation/proxy_allocator.h"
@@ -60,8 +61,10 @@
 #include "yeti/foundation/queue.h"
 #include "yeti/foundation/hash_map.h"
 #include "yeti/foundation/sort_map.h"
-#include "yeti/foundation/thread_safe/pool.h"
 
 #include "yeti/foundation/mirrored_ring_buffer.h"
+
+#include "yeti/foundation/thread_safe/pool.h"
+#include "yeti/foundation/thread_safe/sp_mc_deque.h"
 
 #endif // _YETI_FOUNDATION_H_
