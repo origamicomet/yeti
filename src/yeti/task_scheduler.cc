@@ -121,15 +121,19 @@ void task_scheduler::initialize() {
       (uintptr_t)&worker_queue_mem_[0],
       mem_per_worker_queue);
 
-  // NOTE(mtwilliams): Assume the main thread called us.
-  Q = work_queues_[0];
-
   for (size_t worker = 0; worker < num_workers_; ++worker) {
     work_queues_[worker + 1] =
       new (foundation::heap()) WorkQueue(
         (uintptr_t)&worker_queue_mem_[(worker + 1) * mem_per_worker_queue],
         mem_per_worker_queue);
+  }
 
+  // NOTE(mtwilliams): Assume the main thread called us.
+  Q = work_queues_[0];
+
+  // Only start workers after all queues are initialized, otherwise a worker
+  // may try to steal from a non-initialized queue and cause an access violation.
+  for (size_t worker = 0; worker < num_workers_; ++worker) {
     foundation::Thread::Options worker_thread_opts;
     sprintf(&worker_thread_opts.name[0], "Worker #%02u", worker + 1);
     worker_thread_opts.affinity = (1ull << worker);
