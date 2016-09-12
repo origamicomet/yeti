@@ -115,8 +115,8 @@ void task_scheduler::initialize() {
     sizeof(worker_queue_mem_) /  (num_workers_ + 1);
 
   // We reserve the first work queue for the main thread, essentially
-  // treating the main thread as a worker.
-  work_queues_[0] =
+  // treating the main thread as a worker. We assume the main thread called us.
+  Q = work_queues_[0] =
     new (foundation::heap()) WorkQueue(
       (uintptr_t)&worker_queue_mem_[0],
       mem_per_worker_queue);
@@ -127,9 +127,6 @@ void task_scheduler::initialize() {
         (uintptr_t)&worker_queue_mem_[(worker + 1) * mem_per_worker_queue],
         mem_per_worker_queue);
   }
-
-  // NOTE(mtwilliams): Assume the main thread called us.
-  Q = work_queues_[0];
 
   // Only start workers after all queues are initialized, otherwise a worker
   // may try to steal from a non-initialized queue and cause an access violation.
