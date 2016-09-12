@@ -19,7 +19,7 @@ namespace yeti {
 
 Application::Application()
   : windows_(foundation::heap())
-  /* , time_step_policy_(NULL) */ {
+  , time_step_policy_(NULL) {
 }
 
 Application::~Application() {
