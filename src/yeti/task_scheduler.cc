@@ -56,9 +56,12 @@ namespace task_scheduler {
       return task;
     } else {
       // This worker's queue is empty. Try to steal some work from another
-      // worker. We may end up trying to steal work from ourself, which
-      // although stupid, doesn't break anything.
+      // worker.
       WorkQueue *const victim = work_queues_[foundation::prng<size_t>() % num_workers_];
+
+      if (victim == Q)
+        // Don't steal from ourself.
+        return NULL;
 
       if (Task *task = victim->steal())
         return task;
