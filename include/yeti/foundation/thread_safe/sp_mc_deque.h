@@ -57,7 +57,7 @@ class SpMcDeque {
 
  public:
   /// \brief Pushes @E to the private end of the queue.
-  void push(const T &E);
+  u64 push(const T &E);
 
   /// \brief Pops an element from the private end of the queue.
   /// \returns An element, or NULL when the queue is empty.
@@ -90,14 +90,17 @@ SpMcDeque<T>::~SpMcDeque() {
 // TODO(mtwilliams): Insert compiler and memory barriers.
 
 template <typename T>
-void SpMcDeque<T>::push(const T& E) {
+u64 SpMcDeque<T>::push(const T& E) {
   const u64 bottom = atomic::load(&bottom_);
+  const u64 top = atomic::load(&top_);
 
   // Make sure we won't overflow the queue.
-  yeti_assert_debug(atomic::load(&top_) - bottom <= N);
+  yeti_assert_debug(top - bottom <= N);
 
   atomic::store((volatile void **)&Q[bottom % N], (const void *)E);
   atomic::store(&bottom_, bottom + 1);
+
+  return (top - bottom - 1);
 }
 
 template <typename T>
