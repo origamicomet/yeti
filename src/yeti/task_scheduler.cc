@@ -25,6 +25,9 @@ namespace task_scheduler {
     typedef foundation::thread_safe::SpMcDeque<Task *> WorkQueue;
     static WorkQueue *work_queues_[64];
 
+    // Signalled when there may be work to steal.
+    static foundation::Event *work_to_be_stolen_ = foundation::Event::create();
+
     // OPTIMIZE(mtwilliams): We dedicate 1MiB to worker queues. This may be
     // excessive. We should determine a reasonable upper limit.
     static u8 worker_queue_mem_[1048576];
@@ -45,9 +48,13 @@ namespace task_scheduler {
   static void worker_thread(const uintptr_t worker) {
     Q = work_queues_[worker + 1];
 
-    while (true)
-      if (Task *task = grab())
+    while (true) {
+      if (Task *task = grab()) {
         schedule(task);
+      } else {
+        work_to_be_stolen_->wait();
+      }
+    }
   }
 
   static Task *grab() {
@@ -55,18 +62,19 @@ namespace task_scheduler {
       // We got some work from our queue.
       return task;
     } else {
-      // This worker's queue is empty. Try to steal some work from another
-      // worker.
-      WorkQueue *const victim = work_queues_[foundation::prng<size_t>() % num_workers_];
+      // Retry try a few times.
+      for (u32 attempts = 0; attempts < 3; ++attempts) {
+        // This worker's queue is empty. Try to steal some work from another
+        // worker.
+        WorkQueue *const victim = work_queues_[foundation::prng<size_t>() % num_workers_];
 
-      if (victim == Q)
-        // Don't steal from ourself.
-        return NULL;
+        if (victim == Q)
+          // Don't steal from ourself.
+          return NULL;
 
-      if (Task *task = victim->steal())
-        return task;
-
-      // TODO(mtwilliams): Retry a few times then sleep?
+        if (Task *task = victim->steal())
+          return task;
+      }
     }
 
     // No work available, or failed to steal some.
@@ -95,9 +103,15 @@ namespace task_scheduler {
     // REFACTOR(mtwilliams): Move into seperate function?
     Task::Permit *permit = local_copy_of_task.permits;
     while (permit) {
-      if (foundation::atomic::sub(&permit->task->permission, 1) == 1)
+      if (foundation::atomic::sub(&permit->task->permission, 1) == 1) {
         // Submit to this worker's queue.
-        Q->push(task);
+        const u64 work = Q->push(task);
+
+        if (work > 1)
+          // We've got more work queued than we are able to schedule. Signal
+          // another worker to steal some.
+          work_to_be_stolen_->signal();
+      }
 
       // SMELL(mtwilliams): Use double indirection.
       Task::Permit *const next = permit->next;
@@ -167,7 +181,12 @@ void task_scheduler::submit(Task *task) {
   // Tasks should never be submitted outside of the main or worker threads.
   yeti_assert_debug(Q != NULL);
 
-  Q->push(task);
+  const u64 work = Q->push(task);
+
+  if (work > 1)
+    // We've got more work queued than we are able to schedule. Signal
+    // another worker to steal some.
+    work_to_be_stolen_->signal();
 }
 
 #if 0
