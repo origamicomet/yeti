@@ -33,7 +33,11 @@ namespace resource_manager {
 
     foundation::Array<const Resource::Type *> types_(foundation::heap());
 
-    foundation::Mutex *resources_lock_ = foundation::Mutex::create();
+    foundation::ReadersWriterLock *resources_lock_ = foundation::ReadersWriterLock::create();
+
+    // TODO(mtwilliams): Replace with condition variable.
+    // Signalled whenever some work was added to one of the four queues.
+    foundation::Event *work_to_be_done_ = foundation::Event::create();
 
     foundation::HashMap<Resource::Id, Resource *> resources_(foundation::heap(), 65535);
 
@@ -44,7 +48,7 @@ namespace resource_manager {
     foundation::Queue<Resource *> to_be_put_offline_((uintptr_t)offline_queue_mem_, offline_queue_mem_sz_);
   }
 
-  static void management_thread(uintptr_t);
+  static void management_thread(uintptr_t /* unused */);
 }
 
 Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
@@ -111,11 +115,13 @@ void resource_manager::track(const Resource::Type *type) {
 }
 
 Resource *resource_manager::load(Resource::Id id) {
-  YETI_SCOPED_LOCK(resources_lock_);
+  {
+    YETI_SCOPED_LOCK_NON_EXCLUSIVE(resources_lock_);
 
-  if (Resource **resource = resources_.find(id)) {
-    (*resource)->ref();
-    return (*resource);
+    if (Resource **resource = resources_.find(id)) {
+      (*resource)->ref();
+      return (*resource);
+    }
   }
 
   const Resource::Type *type = type_from_id(Resource::type_from_id(id));
@@ -124,52 +130,70 @@ Resource *resource_manager::load(Resource::Id id) {
   Resource *resource = type->prepare(id);
   yeti_assert_debug(resource != NULL);
 
-  resources_.insert(id, resource);
-  to_be_loaded_.push(resource);
+  {
+    YETI_SCOPED_LOCK_EXCLUSIVE(resources_lock_);
+
+    resources_.insert(id, resource);
+    to_be_loaded_.push(resource);
+  }
+
+  work_to_be_done_->signal();
 
   return resource;
 }
 
 void resource_manager::unload(Resource *resource) {
-  YETI_SCOPED_LOCK(resources_lock_);
-
   yeti_assert_debug(resource != NULL);
   yeti_assert_development(resource->refs() == 0);
 
-  resources_.remove(resource->id());
-  to_be_unloaded_.push(resource);
+  {
+    YETI_SCOPED_LOCK_EXCLUSIVE(resources_lock_);
+
+    resources_.remove(resource->id());
+    to_be_unloaded_.push(resource);
+  }
+
+  work_to_be_done_->signal();
 }
 
 void resource_manager::management_thread(uintptr_t) {
   for (;;) {
-    YETI_SCOPED_LOCK(resources_lock_);
+    work_to_be_done_->wait();
 
-    // OPTIMIZE(mtwilliams): Use condition variables to reduce contention.
-    Resource *resource;
+    {
+      // TODO(mtwilliams): Collect work to be done to an internal "queue" then
+      // release |resources_lock_| so as not to block other threads when loading,
+      // unloading, onlining, or offlining.
 
-    while (to_be_loaded_.pop(&resource)) {
-      const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
-      yeti_assert_debug(type != NULL);
+      YETI_SCOPED_LOCK_EXCLUSIVE(resources_lock_);
 
-      Resource::Data data;
+      Resource *resource;
 
-      char memory_resident_data_path[256] = { 0, };
-      sprintf(&memory_resident_data_path[0], "data/%016llx", resource->id());
-      data.memory_resident_data = foundation::fs::open(&memory_resident_data_path[0], foundation::fs::READ);
+      while (to_be_loaded_.pop(&resource)) {
+        const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
+        yeti_assert_debug(type != NULL);
 
-      char streaming_data_path[256] = { 0, };
-      sprintf(&streaming_data_path[0], "data/%016llx.streaming", resource->id());
-      data.streaming_data = foundation::fs::open(&streaming_data_path[0], foundation::fs::READ);
+        Resource::Data data;
 
-      type->load(resource, data);
+        char memory_resident_data_path[256] = { 0, };
+        sprintf(&memory_resident_data_path[0], "data/%016llx", resource->id());
+        data.memory_resident_data = foundation::fs::open(&memory_resident_data_path[0], foundation::fs::READ);
 
-      resource->set_state(Resource::LOADED);
-    }
+        char streaming_data_path[256] = { 0, };
+        sprintf(&streaming_data_path[0], "data/%016llx.streaming", resource->id());
+        data.streaming_data = foundation::fs::open(&streaming_data_path[0], foundation::fs::READ);
 
-    while (to_be_unloaded_.pop(&resource)) {
-      const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
-      yeti_assert_debug(type != NULL);
-      type->unload(resource);
+        type->load(resource, data);
+
+        resource->set_state(Resource::LOADED);
+      }
+
+      while (to_be_unloaded_.pop(&resource)) {
+        const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
+        yeti_assert_debug(type != NULL);
+
+        type->unload(resource);
+      }
     }
   }
 }

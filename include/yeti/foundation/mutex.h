@@ -26,6 +26,8 @@
 namespace yeti {
 namespace foundation {
 
+// TODO(mtwilliams): Rename to `yeti::foundation::Lock`?
+
 /// A lightweight user-space mutex.
 class YETI_PUBLIC Mutex {
  YETI_DISALLOW_CONSTRUCTION(Mutex);
