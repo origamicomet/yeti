@@ -42,6 +42,7 @@
 #include "yeti/foundation/high_res_timer.h"
 
 #include "yeti/foundation/mutex.h"
+#include "yeti/foundation/event.h"
 #include "yeti/foundation/thread.h"
 
 #include "yeti/foundation/path.h"
