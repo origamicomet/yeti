@@ -47,16 +47,9 @@ extern YETI_PUBLIC void shutdown();
 ///
 extern YETI_PUBLIC void submit(Task *task);
 
-// TODO(mtwilliams): Provide mechanisim to allow threads to do work while
-// waiting for an event to signal.
-
-#if 0
-
 /// \brief Schedules tasks while waiting for an event to be signaled.
 ///
-extern YETI_PUBLIC void do_work_while_waiting_for(foundation::Event &event);
-
-#endif
+extern YETI_PUBLIC void do_work_while_waiting_for(foundation::Event *event);
 
 } // task_scheduler
 

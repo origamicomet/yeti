@@ -189,14 +189,10 @@ void task_scheduler::submit(Task *task) {
     work_to_be_stolen_->signal();
 }
 
-#if 0
-
-void task_scheduler::do_work_while_waiting_for(foundation::Event &event) {
-  while (!event.signalled())
+void task_scheduler::do_work_while_waiting_for(foundation::Event *event) {
+  while (!event->signalled())
     if (Task *task = grab())
       schedule(task);
 }
-
-#endif
 
 } // yeti
