@@ -43,6 +43,7 @@
 ### Engine
 
 - Extract mouse buttons and mouse axes into an include file.
+- Commute mouse axes to two-dimensional vectors.
 - Respect keyboard layouts.
   - Handle `WM_INPUTLANGCHANGE` messages.
   - Specify keyboard layouts via include file trickery.
@@ -61,7 +62,6 @@
 - On Lua errors, capture Lua and C/C++ callstack (and frames), then forward to a user specifiable error handler.
 - Expose Lua return values to C/C++.
 - Lua 5.2 and 5.3 support.
-- Support up to 63 worker threads.
 - Implement a smoothed time-step policy.
 - Profile round-robin versus random queue assignment for tasks.
 - Investigate performance benefits of intrusive task permits.
