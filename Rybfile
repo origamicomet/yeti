@@ -6,7 +6,7 @@ mangle = Proc.new do |triplet, dependency|
 end
 
 project :yeti, pretty: 'Yeti' do |proj|
-  # Statically link to Yeti for the (small) optimization wins.
+  # Dynamically link to Yeti to reduce unnecessary bloat.
   proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_DYNAMIC'
 
   # Supress all of Visual Studio's bullshit.
