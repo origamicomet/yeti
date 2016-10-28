@@ -50,13 +50,13 @@ namespace atomic {
   u32 load(const volatile u32 *v);
   i64 load(const volatile i64 *v);
   u64 load(const volatile u64 *v);
-  void *load(const volatile void **v);
+  void *load(void ** const volatile v);
 
   void store(volatile i32 *v, const i32 desired);
   void store(volatile u32 *v, const u32 desired);
   void store(volatile i64 *v, const i64 desired);
   void store(volatile u64 *v, const u64 desired);
-  void store(volatile void **v, const void *desired);
+  void store(void ** volatile v, const void *desired);
 
   i32 add(volatile i32 *lhs, const i32 rhs);
   u32 add(volatile u32 *lhs, const u32 rhs);
@@ -72,7 +72,7 @@ namespace atomic {
   u32 cmp_and_xchg(volatile u32 *v, const u32 expected, const u32 desired);
   i64 cmp_and_xchg(volatile i64 *v, const i64 expected, const i64 desired);
   u64 cmp_and_xchg(volatile u64 *v, const u64 expected, const u64 desired);
-  void *cmp_and_xchg(volatile void **v, const void *expected, const void *desired);
+  void *cmp_and_xchg(void ** volatile v, const void *expected, const void *desired);
 
   template <typename T>
   T min(volatile T *v, const T versus);
@@ -151,7 +151,7 @@ YETI_INLINE u64 atomic::load(const volatile u64 *v) {
 #endif
 }
 
-YETI_INLINE void *atomic::load(const volatile void **v) {
+YETI_INLINE void *atomic::load(void ** const volatile v) {
   return (void *)load((uintptr_t *)v);
 }
 
@@ -197,7 +197,7 @@ YETI_INLINE void atomic::store(volatile u64 *v, const u64 desired) {
   store((i64 *)v, (i64)desired);
 }
 
-YETI_INLINE void atomic::store(volatile void **v, const void *desired) {
+YETI_INLINE void atomic::store(void ** volatile v, const void *desired) {
   store((uintptr_t *)v, (uintptr_t)desired);
 }
 
@@ -319,7 +319,7 @@ YETI_INLINE u64 atomic::cmp_and_xchg(volatile u64 *v, const u64 expected, const 
   return (u64)cmp_and_xchg((i64 *)v, (i64)expected, (i64)desired);
 }
 
-YETI_INLINE void *atomic::cmp_and_xchg(volatile void **v, const void *expected, const void *desired) {
+YETI_INLINE void *atomic::cmp_and_xchg(void ** volatile v, const void *expected, const void *desired) {
   return (void *)cmp_and_xchg((uintptr_t *)v, (uintptr_t)expected, (uintptr_t)desired);
 }
 
