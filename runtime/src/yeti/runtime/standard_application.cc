@@ -87,6 +87,9 @@ void StandardApplication::update(const f32 delta_time) {
 }
 
 void StandardApplication::render() {
+  // TODO(mtwilliams): Reset ScriptEnviornment again?
+  // this->script_.environment()->reset();
+
   if (!this->script_.call("render", 0))
     this->pause();
 }
