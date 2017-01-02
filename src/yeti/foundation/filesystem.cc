@@ -275,6 +275,9 @@ void fs::close(fs::File *file) {
 u64 fs::read(fs::File *file, uintptr_t in, u64 in_len) {
   yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  yeti_assert_debug(in_len <= 0xFFFFFFFFull);
+  // Guaranteed to read |in_len| bytes except in certain circumstances that we
+  // won't encounter.
   DWORD read;
   ::ReadFile((HANDLE)file, (LPVOID)in, in_len, &read, NULL);
   return read;
@@ -286,6 +289,9 @@ u64 fs::read(fs::File *file, uintptr_t in, u64 in_len) {
 u64 fs::write(fs::File *file, const uintptr_t out, u64 out_len) {
   yeti_assert_debug(file != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  yeti_assert_debug(out_len <= 0xFFFFFFFFull);
+  // Guaranteed to write |out_len| bytes except in certain circumstances that
+  // we won't encounter.
   DWORD wrote;
   ::WriteFile((HANDLE)file, (LPCVOID)out, out_len, &wrote, NULL);
   return wrote;
