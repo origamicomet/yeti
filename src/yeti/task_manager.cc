@@ -15,9 +15,9 @@ namespace yeti {
 
 namespace task_manager {
   namespace {
-    static u8 task_pool_mem_[256 * sizeof(Task)] = { 0, };
+    static u8 task_pool_mem_[256 * (sizeof(Task) + 8 /* overhead */)] = { 0, };
     static foundation::thread_safe::Pool<Task> task_pool_((uintptr_t)&task_pool_mem_[0], sizeof(task_pool_mem_));
-    static u8 permit_pool_mem_[256 * sizeof(Task)] = { 0, };
+    static u8 permit_pool_mem_[256 * (sizeof(Task) + 8 /* overhead */)] = { 0, };
     static foundation::thread_safe::Pool<Task::Permit> permit_pool_((uintptr_t)&permit_pool_mem_[0], sizeof(permit_pool_mem_));
   }
 }
