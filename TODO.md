@@ -82,12 +82,14 @@
 - Implement a SQLite3-powered `ResourceDatabase`.
 - Use our own allocator for Lua on 64-bit.
   - Provide an allocator that alloctates within the first 2GiB of VM.
+    - Map some amount of memory in the lower parts during startup.
 - Optimize `lua_State *` -> `Script *` recovery.
   - Use a bump pointer, i.e. store a pointer to self after `lua_State *`.
 - Gracefully terminate worker threads, to prevent deadlocks.
 - Optimize task permits by storing in blocks of pointers that span an entire cache line, i.e. 16 on 32-bit and 8 on 64-bit.
 - Use a Condition Variable to signal `resource_manager::management_thread`.
 - Add bulk operation support to `resource_manager`.
+- Map `memory_resident_data` wholesale and provide a `Slice<u8>` instead of file handle.
 
 ### Runtime
 
@@ -103,7 +105,9 @@
   - Rather than "layering" by building `core` and then building `vanguard`, we should be able to build `core` and `vanguard` together.
 - Interface with `ResourceDatabase`.
   - We also need to be able to pop out an `OptimizedResourceDatabase`.
-- Daemonizable. Should watch source data directory for changes, debounce for a user configurable amount of time, and then build any new or modified resources.
+    - Dispatch using a function pointer table that fits into one cache line, and 16-byte aligns each function pointer (to efficiently use RIP relative addressing.)
+      - Dale Weiler had the idea to force the compiler to not inline a function that takes a pointer to this struct and returns it by value thereby forcing the compilter to load the function pointers into registers. At least on the x86-64 ABI.
+- Daemonizable. Should watch source data directory for changes, debounce for a user configurable amount of time (to debounce), and then build any new or modified resources.
 - Don't use assertions for error handling.
 - Detailed logging.
 - Pattern-based ignore rules.

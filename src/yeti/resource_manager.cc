@@ -179,6 +179,9 @@ void resource_manager::management_thread(uintptr_t) {
         sprintf(&memory_resident_data_path[0], "data/%016llx", resource->id());
         data.memory_resident_data = foundation::fs::open(&memory_resident_data_path[0], foundation::fs::READ);
 
+        // HACK(mtwilliams): Assume every resource has memory resident data.
+        yeti_assert_debug(data.memory_resident_data != NULL);
+
         char streaming_data_path[256] = { 0, };
         sprintf(&streaming_data_path[0], "data/%016llx.streaming", resource->id());
         data.streaming_data = foundation::fs::open(&streaming_data_path[0], foundation::fs::READ);
