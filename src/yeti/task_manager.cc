@@ -23,7 +23,9 @@ namespace task_manager {
 }
 
 Task *task_manager::acquire_a_task() {
-  return task_pool_.acquire();
+  Task *task = task_pool_.acquire();
+  yeti_assert_development(task != NULL);
+  return task;
 }
 
 void task_manager::relinquish_a_task(Task *task) {
@@ -31,7 +33,9 @@ void task_manager::relinquish_a_task(Task *task) {
 }
 
 Task::Permit *task_manager::acquire_a_permit() {
-  return permit_pool_.acquire();
+  Task::Permit *permit = permit_pool_.acquire();
+  yeti_assert_development(permit != NULL);
+  return permit;
 }
 
 void task_manager::relinquish_a_permit(Task::Permit *permit) {
