@@ -117,7 +117,10 @@ void ResourceCompiler::compile(const char *path) {
   output.streaming_data = foundation::fs::create_or_open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
   yeti_assert(output.streaming_data != NULL);
 
-  type->compile(&input, &output);
+  const bool success = type->compile(&input, &output);
+
+  // TODO(mtwilliams): Properly track resource compilation.
+  yeti_assert_development(success);
 
   foundation::fs::close(input.source);
   foundation::fs::close(output.memory_resident_data);

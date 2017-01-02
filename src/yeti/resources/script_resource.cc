@@ -84,7 +84,7 @@ namespace {
   }
 }
 
-void ScriptResource::compile(const resource_compiler::Input *input,
+bool ScriptResource::compile(const resource_compiler::Input *input,
                               const resource_compiler::Output *output) {
   foundation::fs::Info src_file_info;
   foundation::fs::info(input->source, &src_file_info);
@@ -106,6 +106,8 @@ void ScriptResource::compile(const resource_compiler::Input *input,
     yeti_assertf_debug(0, "Dumping to file failed!\n");
 
   lua_close(L);
+
+  return true;
 }
 
 } // yeti

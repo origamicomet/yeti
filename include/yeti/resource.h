@@ -27,6 +27,9 @@ namespace resource_compiler {
   struct Output;
 }
 
+// TODO(mtwilliams): Protect internal (to Yeti) interfaces.
+ // Maybe a descendant `MutableResource`?
+
 /// An instance of a resource.
 ///
 /// \note There is only ever one instance of a resource except when being
@@ -68,7 +71,7 @@ class YETI_PUBLIC Resource {
     void (*online)(Resource *resource);
     void (*offline)(Resource *resource);
 
-    void (*compile)(const resource_compiler::Input *input,
+    bool (*compile)(const resource_compiler::Input *input,
                     const resource_compiler::Output *output);
   };
 

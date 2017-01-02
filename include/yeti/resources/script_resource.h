@@ -46,7 +46,7 @@ class YETI_PUBLIC ScriptResource : public Resource {
   static void load(Resource *resource, const Resource::Data &data);
   static void unload(Resource *resource);
 
-  static void compile(const resource_compiler::Input *input,
+  static bool compile(const resource_compiler::Input *input,
                       const resource_compiler::Output *output);
 
  private:
