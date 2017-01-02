@@ -121,7 +121,7 @@ extern YETI_PUBLIC bool destroy(fs::Type type, const char *path);
 typedef bool (*Walker)(const char *path, const Info *info, void *ctx);
 
 /// Non-recursively walks @directory with @walker until there are no more
-/// entires or @walker returns |false|.
+/// entires or @walker returns `false`.
 extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *walker_ctx = NULL);
 
 /// Creates or opens a file at @path with @permissions.
@@ -154,7 +154,7 @@ extern YETI_PUBLIC u64 write(fs::File *file, const uintptr_t out, u64 out_len);
 ///
 extern YETI_PUBLIC i64 seek(fs::File *file, fs::Position pos, i64 offset);
 
-/// Forces all buffered data to be written to the file @hndl.
+/// Forces all buffered data to be written to the @file.
 extern YETI_PUBLIC void flush(fs::File *file);
 
 namespace async {
