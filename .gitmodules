@@ -4,3 +4,6 @@
 [submodule "_deps/sqlite3"]
 	path = _deps/sqlite3
 	url = git@github.com:origamicomet/sqlite3.git
+[submodule "_deps/gala"]
+	path = _deps/gala
+	url = git@github.com:origamicomet/gala.git
