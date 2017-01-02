@@ -16,6 +16,9 @@
 #ifndef _YETI_FOUNDATION_MEMORY_H_
 #define _YETI_FOUNDATION_MEMORY_H_
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "yeti/config.h"
 #include "yeti/linkage.h"
 

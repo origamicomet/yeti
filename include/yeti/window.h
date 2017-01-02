@@ -46,7 +46,10 @@ class YETI_PUBLIC Window {
  public:
   // TODO(mtwilliams): Document this interface.
   static Window *open(const Window::Description &desc);
-  void update(void (*event_handler)(void *ctx), void *event_handler_ctx = NULL);
+
+  void update(void (*event_handler)(void *ctx),
+              void *event_handler_ctx = NULL);
+
   void close();
 
   // TODO(mtwilliams): Document this interface.
