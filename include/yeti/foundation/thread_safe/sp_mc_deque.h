@@ -97,7 +97,7 @@ u64 SpMcDeque<T>::push(const T& E) {
   // Make sure we won't overflow the queue.
   yeti_assert_debug(top - bottom <= N);
 
-  atomic::store((volatile void **)&Q[bottom % N], (const void *)E);
+  atomic::store((void ** volatile)&Q[bottom % N], (const void *)E);
   atomic::store(&bottom_, bottom + 1);
 
   return (top - bottom - 1);
@@ -112,7 +112,7 @@ T SpMcDeque<T>::pop() {
 
   if (top <= bottom) {
     // Non-empty.
-    T element = (T)atomic::load((const volatile void **)&Q[bottom % N]);
+    T element = (T)atomic::load((void ** volatile const)&Q[bottom % N]);
 
     if (top != bottom)
       // Still more than one element left in the queue.
@@ -138,7 +138,7 @@ T SpMcDeque<T>::steal() {
 
   if (top < bottom) {
     // Non-empty.
-    T element = (T)atomic::load((const volatile void **)&Q[top % N]);
+    T element = (T)atomic::load((void ** volatile const)&Q[top % N]);
 
     if (atomic::cmp_and_xchg(&top_, top, top + 1) != top)
       // Lost race against @pop or another @steal.

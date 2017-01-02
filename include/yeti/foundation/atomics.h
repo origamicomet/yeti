@@ -39,6 +39,7 @@
 #endif
 
 // TODO(mtwilliams): Provide templated versions.
+// TODO(mtwilliams): Verify type signatures.
 
 namespace yeti {
 namespace foundation {

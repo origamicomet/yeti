@@ -33,9 +33,9 @@ void Allocator::allocated(Allocation *allocation) {
 #if (YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG) || \
     (YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT)
   Allocation *head; do {
-    head = (Allocation *)atomic::load((volatile const void **)&allocations_);
+    head = (Allocation *)atomic::load((void ** const volatile)&allocations_);
     allocation->next = head;
-  } while(atomic::cmp_and_xchg((volatile void **)&allocations_, (void *)head, (void *)allocation) != (void *)head);
+  } while(atomic::cmp_and_xchg((void ** volatile)&allocations_, (const void *)head, (const void *)allocation) != (void *)head);
 #else
   YETI_UNUSED(allocation);
 #endif

@@ -69,10 +69,15 @@ Pool<T>::~Pool() {
 template <typename T>
 T *Pool<T>::acquire() {
 try_acquire:
-  Element *element = (Element *)atomic::load((const volatile void **)&head_);
-  Element *next = (Element *)atomic::load((const volatile void **)&element->next_available_element);
+  Element *element = (Element *)atomic::load((void **volatile const)&head_);
 
-  if (atomic::cmp_and_xchg((volatile void **)&head_, (void *)element, (void *)next) != (void *)element)
+  if (element == NULL)
+    // No more space.
+    return NULL;
+
+  Element *next = (Element *)atomic::load((void **volatile const)&element->next_available_element);
+
+  if (atomic::cmp_and_xchg((void ** volatile)&head_, (void *)element, (void *)next) != (void *)element)
     goto try_acquire;
 
   return &element->storage;
@@ -83,10 +88,10 @@ void Pool<T>::relinquish(T *borrowed) {
   Element *element = (Element *)borrowed;
 
 try_relinquish:
-  Element *head = (Element *)atomic::load((const volatile void **)&head_);
+  Element *head = (Element *)atomic::load((void **volatile const)&head_);
   element->next_available_element = head;
 
-  if (atomic::cmp_and_xchg((volatile void **)&head_, (void *)head, (void *)element) != (void *)head)
+  if (atomic::cmp_and_xchg((void ** volatile)&head_, (void *)head, (void *)element) != (void *)head)
     goto try_relinquish;
 }
 

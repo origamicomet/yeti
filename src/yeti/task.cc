@@ -44,10 +44,10 @@ void task::permits(Task *task, Task *permittee) {
   foundation::atomic::add(&permittee->permission, 1);
 
   Task::Permit *permit = task_manager::acquire_a_permit();
-  permit->next = (Task::Permit *)foundation::atomic::load((const volatile void **)&task->permits);
+  permit->next = (Task::Permit *)foundation::atomic::load((void **volatile const)&task->permits);
   permit->task = permittee;
 
-  foundation::atomic::store((volatile void **)&task->permits, (void *)permit);
+  foundation::atomic::store((void ** volatile)&task->permits, (void *)permit);
 }
 
 } // yeti
