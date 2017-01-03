@@ -46,6 +46,47 @@ namespace application_if {
       return 1;
     }
 
+    static int log(lua_State *L) {
+      log::Level message_level;
+      const char *message;
+
+      switch (lua_gettop(L)) {
+        default:
+          return luaL_error(L, "Application.log expects either a log level and message or just a message.");
+
+        case 1: {
+          // TODO(mtwilliams): Configurable default?
+          message_level = log::INFO;
+          message = luaL_checkstring(L, 1);
+        } break;
+
+        case 2: {
+          // OPTIMIZATION(mtwilliams): Store values in a `Log` table.
+          const char *level = luaL_checkstring(L, 1);
+
+          if (strcmp("debug", level) == 0) {
+            message_level = log::DEBUG;
+          } else if (strcmp("info", level) == 0) {
+            message_level = log::INFO;
+          } else if (strcmp("warning", level) == 0) {
+            message_level = log::WARNING;
+          } else if (strcmp("error", level) == 0) {
+            message_level = log::ERROR;
+          } else if (strcmp("fatal", level) == 0) {
+            message_level = log::FATAL;
+          } else {
+            luaL_argerror(L, 1, "expected 'debug', 'info', 'warning', 'error', or 'fatal'");
+          }
+
+          message = luaL_checkstring(L, 2);
+        } break;
+      }
+
+      log::print(YETI_LOG_SCRIPT, message_level, message);
+
+      return 0;
+    }
+
     static int pause(lua_State *L) {
       Application *app = script_if::application(L);
       app->pause();
@@ -140,6 +181,8 @@ void application_if::expose(Script *script, Application *app) {
   script->add_module_function("Application", "platform", &platform);
   script->add_module_function("Application", "architecture", &architecture);
   script->add_module_function("Application", "build", &build);
+
+  script->add_module_function("Application", "log", &log);
 
   script->add_module_function("Application", "pause", &pause);
   script->add_module_function("Application", "unpause", &unpause);
