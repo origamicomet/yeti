@@ -35,7 +35,7 @@ namespace resource_compiler {
     /// Root directory of source data.
     Path data_src;
 
-    /// Root directory  of compiled data.
+    /// Root directory of compiled data.
     Path data;
 
     // TODO(mtwilliams): Expose the time between scans?
