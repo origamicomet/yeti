@@ -145,6 +145,34 @@ namespace window_if {
       window->set_title(lua_tostring(L, 2));
       return 0;
     }
+
+    static int has_keyboard_focus(lua_State *L) {
+      Window *window = script_if::to_a<Window>(L, 1);
+      lua_pushboolean(L, window->keyboard_focus());
+      return 1;
+    }
+
+    static int set_keyboard_focus(lua_State *L) {
+      Window *window = script_if::to_a<Window>(L, 1);
+      if (!lua_isboolean(L, 2))
+        return luaL_argerror(L, 2, "Expected `focus` to be a boolean.");
+      window->set_keyboard_focus(lua_toboolean(L, 2));
+      return 0;
+    }
+
+    static int has_mouse_focus(lua_State *L) {
+      Window *window = script_if::to_a<Window>(L, 1);
+      lua_pushboolean(L, window->mouse_focus());
+      return 1;
+    }
+
+    static int set_mouse_focus(lua_State *L) {
+      Window *window = script_if::to_a<Window>(L, 1);
+      if (!lua_isboolean(L, 2))
+        return luaL_argerror(L, 2, "Expected `focus` to be a boolean.");
+      window->set_mouse_focus(lua_toboolean(L, 2));
+      return 0;
+    }
   }
 } // window_if
 
@@ -172,11 +200,11 @@ void window_if::expose(Script *script) {
   script->add_module_function("Window", "title", &title);
   script->add_module_function("Window", "set_title", &set_title);
 
-  // script->add_module_function("Window", "has_keyboard_focus", &has_keyboard_focus);
-  // script->add_module_function("Window", "set_keyboard_focus", &set_keyboard_focus);
+  script->add_module_function("Window", "has_keyboard_focus", &has_keyboard_focus);
+  script->add_module_function("Window", "set_keyboard_focus", &set_keyboard_focus);
 
-  // script->add_module_function("Window", "has_mouse_focus", &has_mouse_focus);
-  // script->add_module_function("Window", "set_mouse_focus", &set_mouse_focus);
+  script->add_module_function("Window", "has_mouse_focus", &has_mouse_focus);
+  script->add_module_function("Window", "set_mouse_focus", &set_mouse_focus);
 }
 
 } // yeti
