@@ -26,5 +26,6 @@
 #include "yeti/foundation/support/reachability.h"
 #include "yeti/foundation/support/rule_of_three.h"
 #include "yeti/foundation/support/thread_local_storage.h"
+#include "yeti/foundation/support/strings.h"
 
 #endif // _YETI_FOUNDATION_SUPPORT_H_
