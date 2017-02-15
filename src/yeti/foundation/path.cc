@@ -59,6 +59,15 @@ void path::canonicalize(char *path) {
   }
 }
 
+void path::unixify(char *path) {
+  yeti_assert_debug(path != NULL);
+  for (char *ch = path; *ch; ++ch) {
+    switch (*ch) {
+      case '\\': *ch = '/'; break;
+    }
+  }
+}
+
 const char *path::file(const char *path) {
   yeti_assert_debug(path != NULL);
 

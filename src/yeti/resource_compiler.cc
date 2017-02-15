@@ -11,6 +11,11 @@
 
 #include "yeti/resource_compiler.h"
 
+// TODO(mtwilliams): Drop dependence on global heap allocator.
+
+#include "yeti/foundation/global_heap_allocator.h"
+#include "yeti/foundation/path.h"
+
 // TODO(mtwilliams): Pattern-based ignores.
 // TODO(mtwilliams): Edit distance for detecting mispellings.
 
@@ -46,11 +51,6 @@ void ResourceCompiler::shutdown() {
   delete this;
 }
 
-bool ResourceCompiler::compilable(const char *path) const {
-  yeti_assert_debug(path != NULL);
-  return !!resource_manager::type_from_path(path);
-}
-
 bool ResourceCompiler::ignorable(const char *path) const {
   // TODO(mtwilliams): Implement a Git-like ignore dotfile.
   yeti_assert_debug(path != NULL);
@@ -62,15 +62,64 @@ bool ResourceCompiler::ignorable(const char *path) const {
   return false;
 }
 
-void ResourceCompiler::compile() {
+// We don't allow paths that contain characters other than the lowercase
+// alphabet, numerics, underscores, dashes, path and file delimiters. This
+// prevents many woes encountered when dealing with file systems across
+// different platforms and tools.
+bool ResourceCompiler::allowable(const char *path) const {
+  yeti_assert_debug(path != NULL);
+
+  while (char ch = *path++) {
+    if ((ch >= 'a') && (ch <= 'z'))
+      continue;
+    if ((ch >= '0') && (ch <= '9'))
+      continue;
+    if (ch == '_' || ch == '_')
+      continue;
+    if (ch == '/' || ch == '\\')
+      continue;
+    if (ch == '.')
+      continue;
+    return false;
+  }
+
+  return true;
+}
+
+bool ResourceCompiler::compilable(const char *path) const {
+  yeti_assert_debug(path != NULL);
+  return !!resource_manager::type_from_path(path);
+}
+
+void ResourceCompiler::compile(bool force) {
   // First, we recursively walk |data_src_| to build a list ("backlog") of
   // files that may need to be compiled.
-  foundation::fs::walk(this->data_src_, (foundation::fs::Walker)&ResourceCompiler::walker, (void *)this);
+  foundation::fs::walk(data_src_, (foundation::fs::Walker)&ResourceCompiler::walker, (void *)this);
 
-  // Then we compile all of 'em if the respective |last_modified_at| is more
-  // recent than whatever our |db| last saw. Refer to ResourceCompiler::compile/1 for details.
-  for (const char **path = this->backlog_.first(); path <= this->backlog_.last(); ++path) {
-    this->compile(*path);
+  // TODO(mtwilliams): Track implicit dependencies like shader includes
+  // so we know to recompile all dependents whenever they're modified. This
+  // means ignoring a file after we determine it's not a hard dependency.
+
+  // Second, we iterate over our "backlog" to identify any unallowed paths or
+  // uncompilable unignored source files. If we find any, we fail.
+  for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
+    if (this->ignorable(*path))
+      break;
+
+    // TODO(mtwilliams): Don't assert if |*path| is not allowed or compilable,
+    // instead, fail the compilation.
+    yeti_assert_development(this->allowable(*path));
+    yeti_assert_development(this->compilable(*path));
+  }
+
+  // Finally, we compile any files in our backlog if they have been modified
+  // since our last compilation or |force| is true. Refer to
+  // ResourceCompiler::compile/2 for details.
+  for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
+    if (this->ignorable(*path))
+      break;
+
+    this->compile(*path, force);
 
     // TODO(mtwilliams): Create and use a foundation::String class.
     // TODO(mtwilliams): Use type-traits to allow non-POD in foundational data
@@ -78,17 +127,19 @@ void ResourceCompiler::compile() {
     foundation::heap().deallocate((uintptr_t)*path);
   }
 
-  this->backlog_.clear();
+  backlog_.clear();
 }
 
-void ResourceCompiler::compile(const char *path) {
+void ResourceCompiler::compile(const char *path, bool force) {
   yeti_assert_debug(path != NULL);
 
   const Resource::Id id = Resource::id_from_path(path);
   const Resource::Type *type = resource_manager::type_from_path(path);
 
   // TODO(mtwilliams): Only compile if |last_modified_at| is more recent than
-  // than whatever our |db| last saw.
+  // than whatever our |db| last saw, or if |hash| is different from whatever
+  // we've seen, and |force| is false.
+
   // TODO(mtwilliams): Update our |db| to reflect the compilation of this
   // resource.
 
@@ -131,14 +182,11 @@ void ResourceCompiler::canonicalize(char *path) const {
   yeti_assert_debug(path != NULL);
 
   // Lop off the root directory.
-  if (strncmp(&this->data_src_[0], path, data_src_len_) == 0)
+  if (strncmp(&data_src_[0], path, data_src_len_) == 0)
     memmove((void *)&path[0], (const void *)&path[data_src_len_ + 1], strlen(path) - data_src_len_);
 
-  // TODO(mtwilliams): Refactor into `foundation::path::unixy`?
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  // Make sure we're using Unix-y path seperators.
-  for (char *ch = path; *ch; ++ch)
-    *ch = (*ch == '\\') ? '/' : *ch;
+  foundation::path::unixify(&path[0]);
 #endif
 }
 
@@ -148,14 +196,6 @@ bool ResourceCompiler::walk(const char *path, const foundation::fs::Info *info) 
 
   switch (info->type) {
     case foundation::fs::FILE: {
-      // TODO(mtwilliams): Track implicit dependencies like shader includes
-      // so we know to recompile all dependents whenever they're modified.
-      if (this->ignorable(path))
-        break;
-
-      // TODO(mtwilliams): Don't assert if a resource is not compilable?
-      yeti_assert_development(this->compilable(path));
-
       // OPTIMIZE(mtwilliams): Use a buddy allocator.
       const size_t path_len = strlen(path);
       char *path_copy = (char *)foundation::heap().allocate(path_len + 1);

@@ -35,6 +35,9 @@ extern YETI_PUBLIC char seperator();
 /// other things.
 extern YETI_PUBLIC void canonicalize(char *path);
 
+/// Modifieds @path to use forward slashes as path seperators.
+extern YETI_PUBLIC void unixify(char *path);
+
 /// Returns the file component of the @path.
 extern YETI_PUBLIC const char *file(const char *path);
 
