@@ -26,6 +26,20 @@
 namespace yeti {
 namespace foundation {
 
+// REFACTOR(mtwilliams): Replace with generic members in `HighResolutionTimer`.
+//
+// template <typename T>
+// struct Rational {
+//   T numerator;
+//   T denominator;
+// };
+//
+// class HighResolutionTimer {
+//  private:
+//   u64 epoch_;
+//   Rational<u64> frequency_;
+// }
+
 struct HighResolutionTimer::Implementation {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   LARGE_INTEGER freq;
