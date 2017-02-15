@@ -26,6 +26,8 @@ extern "C" {
 
 namespace yeti {
 
+// TODO(mtwilliams): Hide internals in a subclass.
+
 /// ...
 class YETI_PUBLIC ResourceDatabase {
  YETI_DISALLOW_COPYING(ResourceDatabase);
@@ -34,16 +36,22 @@ class YETI_PUBLIC ResourceDatabase {
   ResourceDatabase();
   ~ResourceDatabase();
 
+ public:
+  static ResourceDatabase *open_or_create(const char *path);
+  void close();
+
  private:
-  // REFACTOR(mtwilliams): Into static functions with only |db| passed in.
   void prepare_();
-  void prepare_version_();
   void prepare_behaviour_();
+  void prepare_version_();
   void prepare_schema_();
   void prepare_statements_();
 
   void cleanup_();
   void cleanup_statements_();
+
+ private:
+  void exec_(const char *sql);
 
  private:
   sqlite3 *db;
