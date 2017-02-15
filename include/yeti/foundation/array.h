@@ -33,6 +33,7 @@ namespace foundation {
 template <typename T>
 class Array {
  public:
+  Array();
   explicit Array(Allocator *allocator, const size_t sz = 0);
   explicit Array(Allocator &allocator, const size_t sz = 0);
   Array(const Array<T> &ary);
@@ -95,6 +96,12 @@ class Array {
   Allocator *allocator_;
   T *first_, *last_, *reserved_;
 };
+
+template <typename T>
+Array<T>::Array() {
+  allocator_ = NULL;
+  first_ = last_ = reserved_ = NULL;
+}
 
 template <typename T>
 Array<T>::Array(Allocator *allocator, const size_t sz) {
