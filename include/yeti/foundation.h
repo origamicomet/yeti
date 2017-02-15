@@ -39,6 +39,8 @@
 
 #include "yeti/foundation/assert.h"
 
+#include "yeti/foundation/log.h"
+
 #include "yeti/foundation/high_res_timer.h"
 
 #include "yeti/foundation/mutex.h"

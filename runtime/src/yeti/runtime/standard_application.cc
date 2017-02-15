@@ -113,28 +113,26 @@ void StandardApplication::set_appropriate_logging_level() const {
 }
 
 void StandardApplication::log_copyright_notices() const {
-  ::printf(
-    "                                                                              \n"
-    "                               __ __     _   _                                \n"
-    "                              |  |  |___| |_|_|                               \n"
-    "                              |_   _| -_|  _| |                               \n"
-    "                                |_| |___|_| |_|                               \n"
-    "                                                                              \n"
-                       "      %s      \n\n", __yeti_copyright__()
+  log::printf(YETI_LOG_GENERAL, log::INFO,
+    "                          __ __     _   _\n"
+    "                         |  |  |___| |_|_|\n"
+    "                         |_   _| -_|  _| |\n"
+    "                           |_| |___|_| |_|\n\n"
+    "%s\n\n", __yeti_copyright__()
   );
 }
 
 void StandardApplication::log_pertinent_information_about_build() const {
-  ::printf("  Runtime\n");
-  ::printf("    platform=%s\n", platform());
-  ::printf("    architecture=%s\n", architecture());
-  ::printf("    build=%s\n\n", build());
-
   // TODO(mtwilliams): Determine content version.
-  ::printf("  Version\n");
-  ::printf("    engine=%s\n", __yeti_version__());
-  ::printf("    runtime=%s\n", __yeti_version__());
-  ::printf("    content=%s\n\n", "unknown");
+  log::printf(YETI_LOG_GENERAL, log::INFO,
+    "Runtime             Version\n"
+    " platform=%-11s engine=%s\n"
+    " architecture=%-7s runtime=%s\n"
+    " build=%-14s content=%s\n\n",
+    platform(), __yeti_version__(),
+    architecture(), __yeti_version__(),
+    build(), "unknown"
+  );
 }
 
 void StandardApplication::log_pertinent_information_about_system() const {
