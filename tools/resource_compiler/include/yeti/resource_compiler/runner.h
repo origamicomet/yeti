@@ -37,6 +37,9 @@ class Runner {
 
   ResourceCompiler::Options resource_compiler_opts_;
   ResourceCompiler *resource_compiler_;
+
+  bool force_;
+  bool watch_;
 };
 
 } // resource_compiler

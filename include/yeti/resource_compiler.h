@@ -38,10 +38,9 @@ namespace resource_compiler {
     /// Root directory of compiled data.
     Path data;
 
-    // TODO(mtwilliams): Expose the time between scans?
-
-    // For when we switch to `yeti::foundation::fs::watch`.
-    // u32 debounce;
+    /// The amount of time, in milliseconds, to collect changes prior to processing.
+    /// \note Only applies if daemonized.
+    u32 debounce;
   };
 
   struct Input {
@@ -92,11 +91,14 @@ class YETI_PUBLIC ResourceCompiler {
   static ResourceCompiler *start(const ResourceCompiler::Options &opts);
   void shutdown();
 
-  bool compilable(const char *path) const;
   bool ignorable(const char *path) const;
+  bool allowable(const char *path) const;
+  bool compilable(const char *path) const;
 
-  void compile();
-  void compile(const char *path);
+  void compile(bool force = false);
+  void compile(const char *path, bool force = false);
+
+  void daemon();
 
  private:
   void canonicalize(char *path) const;
@@ -109,6 +111,13 @@ class YETI_PUBLIC ResourceCompiler {
                      ResourceCompiler *resource_compiler);
 
  private:
+  void watch(foundation::fs::Event event, const char *path);
+
+  static void watcher(foundation::fs::Event event,
+                      const char *path,
+                      ResourceCompiler *resource_compiler);
+
+ private:
   ResourceDatabase *db_;
 
   Path data_;
@@ -116,6 +125,9 @@ class YETI_PUBLIC ResourceCompiler {
   Path data_src_;
   size_t data_src_len_;
 
+  u32 debounce_;
+
+  // Paths collected by `walker`.
   foundation::Array<const char *> backlog_;
 };
 

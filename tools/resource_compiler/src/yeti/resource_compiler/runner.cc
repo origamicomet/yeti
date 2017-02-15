@@ -20,19 +20,21 @@ namespace resource_compiler {
 
 Runner::Runner()
   : resource_database_(NULL)
-  , resource_compiler_(NULL) {
+  , resource_compiler_(NULL)
+  , force_(false)
+  , watch_(false) {
 }
 
 Runner::~Runner() {
 }
 
 void Runner::setup(const char *args[], const u32 num_args) {
+  ResourceCompiler::Path cwd;
+  foundation::path::cwd(&cwd[0], sizeof(cwd));
+
   ResourceCompiler::Path resource_database_path;
   ResourceCompiler::Path data_path;
   ResourceCompiler::Path source_data_path;
-
-  ResourceCompiler::Path cwd;
-  foundation::path::cwd(&cwd[0], sizeof(cwd));
 
   sprintf(&resource_database_path[0], "%s/resources.db", &cwd[0]);
   sprintf(&data_path[0], "%s/data", &cwd[0]);
@@ -45,25 +47,38 @@ void Runner::setup(const char *args[], const u32 num_args) {
       sprintf(&data_path[0], "%s/%s", cwd, *++arg);
     else if (strcmp(*arg, "--data-src") == 0)
       sprintf(&source_data_path[0], "%s/%s", cwd, *++arg);
+    else if (strcmp(*arg, "--force") == 0)
+      force_ = true;
+    else if (strcmp(*arg, "--watch") == 0)
+      watch_ = true;
     else
       yeti_assertf(0, "Unknown command-line argument '%s'.", *arg);
   }
 
-  foundation::path::canonicalize(&resource_database_path[0]);
-  foundation::path::canonicalize(&data_path[0]);
-  foundation::path::canonicalize(&source_data_path[0]);
+  foundation::path::unixify(&resource_database_path[0]);
+  foundation::path::unixify(&data_path[0]);
+  foundation::path::unixify(&source_data_path[0]);
 
-  // resource_compiler_opts_.db = ResourceDatabase::open(&resource_database_path[0]);
-  resource_compiler_opts_.db = (ResourceDatabase *)~NULL;
+  resource_database_ = ResourceDatabase::open_or_create(&resource_database_path[0]);;
+
+  resource_compiler_opts_.db = resource_database_;
   memcpy((void *)&resource_compiler_opts_.data[0], (const void *)&data_path[0], sizeof(data_path));
   memcpy((void *)&resource_compiler_opts_.data_src[0], (const void *)&source_data_path[0], sizeof(source_data_path));
 }
 
 void Runner::run() {
   resource_compiler_ = ResourceCompiler::start(resource_compiler_opts_);
-  resource_compiler_->compile();
+
+  if (watch_) {
+    // TODO(mtwilliams): Install a signal handler to trap termination requests,
+    // and call `ResourceCompiler::shutdown`.
+    resource_compiler_->daemon();
+  } else {
+    resource_compiler_->compile(force_);
+  }
+
   resource_compiler_->shutdown();
-  // resource_database_->close();
+  resource_database_->close();
 }
 
 } // resource_compiler

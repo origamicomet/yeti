@@ -22,7 +22,11 @@
 namespace yeti {
 
 ResourceCompiler::ResourceCompiler()
-  : backlog_(foundation::heap()) {
+  : db_(NULL)
+  , data_len_(0)
+  , data_src_len_(0)
+  , debounce_(0)
+  , backlog_(foundation::heap()) {
 }
 
 ResourceCompiler::~ResourceCompiler() {
@@ -43,6 +47,8 @@ ResourceCompiler *ResourceCompiler::start(const ResourceCompiler::Options &opts)
 
   resource_compiler->data_len_ = strlen(resource_compiler->data_);
   resource_compiler->data_src_len_ = strlen(resource_compiler->data_src_);
+
+  resource_compiler->debounce_ = opts.debounce;
 
   return resource_compiler;
 }
@@ -178,6 +184,31 @@ void ResourceCompiler::compile(const char *path, bool force) {
   foundation::fs::close(output.streaming_data);
 }
 
+// TODO(mtwilliams): (Reuse) our task scheduler to multithread resource
+// compilation.
+
+void ResourceCompiler::daemon() {
+  // Setup our watcher. It will watch |data_src_| to collect a stream of
+  // creation, modification, and deletion events for files and folders.
+  foundation::fs::Watch *watch =
+    foundation::fs::watch(data_src_, (foundation::fs::Watcher)&ResourceCompiler::watcher, (void *)this);
+
+  // Setup a high-resolution timer so we time ourselves to debounce.
+  foundation::HighResolutionTimer *timer =
+    foundation::HighResolutionTimer::create();
+
+  for (;;) {
+    // Collect creation, modification, and deletion events for a period of time.
+    while (timer->msecs() < debounce_)
+      foundation::fs::poll(watch);
+
+    // TODO(mtwilliams): Coalesce events.
+    // TODO(mtwilliams): Handle events.
+
+    timer->reset();
+  }
+}
+
 void ResourceCompiler::canonicalize(char *path) const {
   yeti_assert_debug(path != NULL);
 
@@ -221,5 +252,26 @@ bool ResourceCompiler::walker(const char *path,
   return resource_compiler->walk(path, info);
 }
 
+void ResourceCompiler::watch(foundation::fs::Event event, const char *path) {
+  yeti_assert_debug(path != NULL);
+
+  switch (event) {
+    case foundation::fs::CREATED:
+      log::printf(YETI_LOG_GENERAL, log::TRACE, "+ %s", path);
+      break;
+    case foundation::fs::MODIFIED:
+      log::printf(YETI_LOG_GENERAL, log::TRACE, "* %s", path);
+      break;
+    case foundation::fs::DESTROYED:
+      log::printf(YETI_LOG_GENERAL, log::TRACE, "- %s", path);
+      break;
+  }
+}
+
+void ResourceCompiler::watcher(foundation::fs::Event event,
+                               const char *path,
+                               ResourceCompiler *resource_compiler) {
+  return resource_compiler->watch(event, path);
+}
 
 } // yeti
