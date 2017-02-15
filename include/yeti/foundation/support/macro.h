@@ -18,6 +18,12 @@
 #ifndef _YETI_FOUNDATION_SUPPORT_MACRO_H_
 #define _YETI_FOUNDATION_SUPPORT_MACRO_H_
 
+/// \def YETI_STRINGIFY
+/// \brief Expands @Value prior to converting to string.
+#define YETI_STRINGIFY(Value) YETI_STRINGIFY__EXPAND(Value)
+#define YETI_STRINGIFY__EXPAND(Value) YETI_STRINGIFY__CONVERT(Value)
+#define YETI_STRINGIFY__CONVERT(Value) #Value
+
 /// \def YETI_PASTE
 /// \brief Expands @Left and @Right prior to concatenation.
 #define YETI_PASTE(Left, Right) YETI_PASTE__EXPAND(Left, Right)
