@@ -5,7 +5,12 @@
 - Move to Sherpa for managing dependencies.
 - Use `yeti_assert(!"<message>")` instead of `yeti_assertf(0, "<message>")`.
 - Move to C++ style casts?
-- Target Windows XP or later by specifying `WINVER`.
+- Target Windows 7 or later by specifying `WINVER`.
+  - Don't want to target Windows XP. May have to for Asia.
+- Support macOS.
+  - Add build support for macOS.
+  - Implement asbtractions for `YETI_PLATFORM_MAC_OS_X`.
+  - Rename internal identifers from "Mac OS X" to "macOS."
 
 ### Foundation
 
@@ -98,6 +103,8 @@
 - Use a Condition Variable to signal `resource_manager::management_thread`.
 - Add bulk operation support to `resource_manager`.
 - Map `memory_resident_data` wholesale and provide a `Slice<u8>` instead of file handle.
+- Genericize math types.
+  - Or should we only support wholesale switching to fixed-point?
 
 ### Runtime
 

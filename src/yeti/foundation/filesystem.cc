@@ -236,6 +236,8 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
 
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  // OPTIMIZE(mtwilliams): Set rapid aging to eliminate writes caused by
+  // unnecessary tracking of access times.
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

@@ -157,6 +157,7 @@ YETI_INLINE Vec2 Vec2::max(const Vec2 v1, const Vec2 v2) {
   );
 }
 
+// TODO(mtwilliams): Determine if this is faster.
 YETI_INLINE Vec2 Vec2::lerp(const Vec2 v1, const Vec2 v2, const f32 t) {
   // Linear interpolation is `v1*(1-t) + v2*t`, which is equivalent to:
   return v1 + (v2 - v1) * t;
