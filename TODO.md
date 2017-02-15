@@ -39,6 +39,14 @@
 - Implement a `BuddyAllocator`.
 - Provide a dynamic string class `String` that uses said buddy allocator.
 - Bump default allocation alignment to 16 bytes across the board.
+- Move log categories under `yeti::log` namespace?
+- Add an `open_or_create` function to our filesytem abstraction layer.
+- Add generic unicode conversion helpers.
+  - Convert between UTF-8 and UTF-16.
+  - Convert between UTF-8 and UTF-32.
+- Add generic unicode normalization helpers.
+  - NFC
+  - NFD
 
 ### Engine
 
