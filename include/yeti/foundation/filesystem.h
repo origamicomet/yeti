@@ -33,7 +33,7 @@ enum Type {
   FILE = 1,
 
   /// A directory.
-  DIRECTORY = 2,
+  DIRECTORY = 2
 };
 
 struct Info {
@@ -79,7 +79,7 @@ enum Permissions {
   WRITE = 0x00000002,
 
   /// Don't allow others to fiddle.
-  EXCLUSIVE = 0x80000000,
+  EXCLUSIVE = 0x80000000
 };
 
 enum Position {
@@ -88,6 +88,17 @@ enum Position {
 
   /// Move from current position in the file.
   RELATIVE = 2
+};
+
+enum Event {
+  /// A file was created.
+  CREATED = 1,
+
+  /// A file was modified.
+  MODIFIED = 2,
+
+  /// A file was destroyed.
+  DESTROYED = 3
 };
 
 /// An opaque handle that represents an open file.
@@ -104,17 +115,14 @@ extern YETI_PUBLIC bool exists(const char *path);
 
 /// Creates a new file or directory at @path.
 /// \note Fails if a file or directory already exists at @path.
-///
 extern YETI_PUBLIC bool create(fs::Type type, const char *path);
 
 /// Destroys a file or directory at @path.
 /// \note Auto-detects the type from @path.
-///
 extern YETI_PUBLIC bool destroy(const char *path);
 
 /// Destroys a file or directory at @path.
 /// \note Fails if @type does not match the entry at @path.
-///
 extern YETI_PUBLIC bool destroy(fs::Type type, const char *path);
 
 /// User-specified callback for yeti::foundation::fs::walk.
@@ -124,13 +132,27 @@ typedef bool (*Walker)(const char *path, const Info *info, void *ctx);
 /// entires or @walker returns `false`.
 extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *walker_ctx = NULL);
 
+/// An opaque handle to a directory being watched.
+typedef struct Watch;
+
+/// User-specified callback for yeti::foundation::fs::watch.
+typedef void (*Watcher)(Event event, const char *path, void *ctx);
+
+/// Watches @directory's tree for changes, indicating to @callback what changes
+/// occur.
+extern YETI_PUBLIC Watch *watch(const char *directory, fs::Watcher callback, void *callback_ctx = NULL);
+
+// TODO(mtwilliams): Document this.
+extern YETI_PUBLIC void poll(Watch *watch);
+
+/// Stops watching a directory.
+extern YETI_PUBLIC void unwatch(Watch *watch);
+
 /// Creates or opens a file at @path with @permissions.
-///
 extern YETI_PUBLIC fs::File *create_or_open(const char *path, const u32 permissions);
 
 /// Opens an existing file @path with @permissions.
 /// \note Fails if there is no file @path.
-///
 extern YETI_PUBLIC fs::File *open(const char *path, const u32 permissions);
 
 /// Closes a @file opened by yeti::foundation::fs::open.
@@ -138,12 +160,10 @@ extern YETI_PUBLIC void close(fs::File *file);
 
 /// Synchronously reads up to @in_len bytes from the @file into @in.
 /// \returns The number of bytes actually read. Zero indicates failure.
-///
 extern YETI_PUBLIC u64 read(fs::File *file, uintptr_t in, u64 in_len);
 
 /// Synchronously writes up to @out_len bytes to the @file from @out.
 /// \returns The number of bytes actually written. Zero indicates failure.
-///
 extern YETI_PUBLIC u64 write(fs::File *file, const uintptr_t out, u64 out_len);
 
 /// Moves the read/write position inside the @file. If @pos is fs::ABSOLUTE,
@@ -151,7 +171,6 @@ extern YETI_PUBLIC u64 write(fs::File *file, const uintptr_t out, u64 out_len);
 /// the end of the file if negative. If @pos is fs::RELATIVE, the @offset is
 /// taken from the current position in the file.
 /// \returns The number of bytes seeked.
-///
 extern YETI_PUBLIC i64 seek(fs::File *file, fs::Position pos, i64 offset);
 
 /// Forces all buffered data to be written to the @file.

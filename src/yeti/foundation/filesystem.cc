@@ -15,6 +15,11 @@
 
 #include "yeti/foundation/filesystem.h"
 
+// TODO(mtwilliams): Drop dependence on global heap allocator.
+
+#include "yeti/foundation/global_heap_allocator.h"
+#include "yeti/foundation/path.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -230,6 +235,200 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
   ::FindClose(find);
 
   return true;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+namespace fs {
+  struct Watch {
+    // TODO(mtwilliams): Determine exactly which filters we need.
+    static const DWORD FILTER = FILE_NOTIFY_CHANGE_CREATION |
+                                FILE_NOTIFY_CHANGE_FILE_NAME |
+                                FILE_NOTIFY_CHANGE_SIZE;
+
+    // Handle to root directory.
+    HANDLE hndl;
+
+    // Notifications are begot by Overlapped I/O. I know...
+    OVERLAPPED io;
+
+    // Since Overlapped I/O is asynchronous, we need a persistent buffer. We
+    // make this buffer large enough to prevent notifications from being
+    // silently dropped.
+    u8 notifications[65535];
+
+    // Path to the root directory. Used to reconstitute paths.
+    char root[256];
+    size_t root_len;
+
+    // User's callback.
+    fs::Watcher callback;
+    void *callback_ctx;
+
+    // Whether or not we should listen for changes to the entire tree.
+    bool recursive;
+
+    // Necessary flag to prevent our callback from queuing another read.
+    bool stop;
+
+    // Recovers our `Watch` from |lpOverlapped|.
+    static Watch *recover(LPOVERLAPPED lpOverlapped) {
+      static const size_t offset = offsetof(Watch, io);
+      return (Watch *)((uintptr_t)lpOverlapped - offset);
+    }
+  };
+
+  // This is foward declared because |on_read_directory_changes| calls it.
+  static bool wait_for_notfications(Watch *watch);
+
+  static void CALLBACK on_read_directory_changes(DWORD dwErrorCode,
+                                                 DWORD dwNumberOfBytesTransfered,
+                                                 LPOVERLAPPED lpOverlapped)
+  {
+    Watch *watch = Watch::recover(lpOverlapped);
+
+    if (dwNumberOfBytesTransfered == 0)
+      // Notficiations were silently dropped?
+      return;
+
+    if (dwErrorCode == ERROR_OPERATION_ABORTED) {
+      // Cancelled; clean up after ourselves.
+
+      ::CloseHandle(watch->io.hEvent);
+      ::CloseHandle(watch->hndl);
+
+      delete watch;
+
+      return;
+    }
+
+    if (dwErrorCode == ERROR_SUCCESS) {
+      FILE_NOTIFY_INFORMATION *notification;
+      DWORD offset = 0;
+
+      char path[255*4+1];
+      memcpy((void *)&path[0], (const void *)&watch->root[0], watch->root_len);
+      path[watch->root_len] = '/';
+
+      do {
+        notification = (FILE_NOTIFY_INFORMATION *)&watch->notifications[offset];
+        offset += notification->NextEntryOffset;
+
+        // Reconstitute path.
+        const int relative_path_len = ::WideCharToMultiByte(CP_UTF8, 0, &notification->FileName[0], notification->FileNameLength, NULL, 0, NULL, NULL);
+        const size_t maximum_relative_path_len = (255*4+1) - (watch->root_len+1);
+        yeti_assert_development(relative_path_len <= maximum_relative_path_len);
+        ::WideCharToMultiByte(
+          CP_UTF8, 0, &notification->FileName[0], notification->FileNameLength,
+          &path[watch->root_len+1], (255*4+1) - (watch->root_len+1), NULL, NULL);
+
+        path::unixify(&path[0]);
+
+        Event event;
+        switch (notification->Action) {
+          case FILE_ACTION_RENAMED_NEW_NAME:
+          case FILE_ACTION_ADDED:
+            event = CREATED;
+          break;
+
+          case FILE_ACTION_RENAMED_OLD_NAME:
+          case FILE_ACTION_REMOVED:
+            event = DESTROYED;
+          break;
+
+          case FILE_ACTION_MODIFIED:
+            event = MODIFIED;
+          break;
+        }
+
+        watch->callback(event, &path[0], watch->callback_ctx);
+      } while (notification->NextEntryOffset != 0);
+    }
+
+    if (!watch->stop)
+      // Get more notifications.
+      wait_for_notfications(watch);
+  }
+
+  // Waits for more notifications.
+  static bool wait_for_notfications(Watch *watch) {
+    yeti_assert_debug(watch != NULL);
+    return !!::ReadDirectoryChangesW(
+      watch->hndl, (void *)&watch->notifications, sizeof(Watch::notifications),
+      watch->recursive, Watch::FILTER,
+      NULL, &watch->io,
+      &on_read_directory_changes
+    );
+  }
+}
+#endif
+
+fs::Watch *fs::watch(const char *directory, fs::Watcher callback, void *callback_ctx) {
+  yeti_assert_debug(directory != NULL);
+  yeti_assert_debug(callback != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  static const DWORD desired_access = FILE_LIST_DIRECTORY;
+  static const DWORD share_mode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+  static const DWORD flags_and_attrbitues = FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED;
+
+  // BUG(mtwilliams): Potentially uninitialized |path_w|.
+  WCHAR path_w[256];
+  ::MultiByteToWideChar(CP_UTF8, 0, directory, -1, &path_w[0], 256);
+
+  HANDLE hndl = ::CreateFileW(path_w, desired_access, share_mode, NULL, OPEN_EXISTING, flags_and_attrbitues, NULL);
+  if (hndl == INVALID_HANDLE_VALUE)
+    return NULL;
+
+  Watch *watch = new (foundation::heap()) Watch();
+
+  watch->hndl = hndl;
+  watch->io.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+  memset((void *)watch->notifications, 0, sizeof(Watch::notifications));
+  strncpy(watch->root, directory, 255);
+  watch->root_len = strlen(directory);
+  yeti_assert_development(watch->root_len <= 255);
+  watch->callback = callback;
+  watch->callback_ctx = callback_ctx;
+  watch->recursive = true;
+  watch->stop = false;
+
+  if (wait_for_notfications(watch))
+    return watch;
+
+  ::CloseHandle(watch->io.hEvent);
+  ::CloseHandle(watch->hndl);
+
+  delete watch;
+
+  return NULL;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+void fs::poll(fs::Watch *watch) {
+  yeti_assert_debug(watch != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::MsgWaitForMultipleObjectsEx(0, NULL, 0, QS_ALLINPUT, MWMO_ALERTABLE);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+void fs::unwatch(fs::Watch *watch) {
+  yeti_assert_debug(watch != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  watch->stop = true;
+
+  // Eventually calls our completion routine one final time with an error code
+  // of `ERROR_OPERATION_ABORTED`. That's when we can safely clean up after
+  // ourselves.
+  ::CancelIo(watch->hndl);
+
+  // Try to force it.
+  ::MsgWaitForMultipleObjectsEx(0, NULL, 0, QS_ALLINPUT, MWMO_ALERTABLE);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
