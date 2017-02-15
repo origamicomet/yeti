@@ -32,7 +32,7 @@ template <typename T>
 class Queue {
  // Copying a queue does not make a lot of sense. If you find yourself needing
  // to copy a queue, you probably don't want a queue.
- YETI_DISALLOW_COPYING(Queue);
+ YETI_DISALLOW_COPYING(Queue)
 
  public:
   explicit Queue(uintptr_t mem, size_t sz);

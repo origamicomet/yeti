@@ -32,7 +32,7 @@ bool Keyboard::connected() {
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_IOS ||
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
   // HACK(mtwilliams): Assume no hardware keyboard is connected.
   return false;

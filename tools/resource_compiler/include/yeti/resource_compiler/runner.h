@@ -22,7 +22,7 @@ namespace yeti {
 namespace resource_compiler {
 
 class Runner {
- YETI_DISALLOW_COPYING(Runner);
+ YETI_DISALLOW_COPYING(Runner)
 
  public:
   Runner();

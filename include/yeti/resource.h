@@ -36,7 +36,7 @@ namespace resource_compiler {
 /// reloaded.
 ///
 class YETI_PUBLIC Resource {
- YETI_DISALLOW_COPYING(Resource);
+ YETI_DISALLOW_COPYING(Resource)
 
  public:
   struct Data;

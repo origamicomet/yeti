@@ -32,7 +32,7 @@ namespace thread_safe {
 // https://bitbucket.org/bitsquid/foundation/src/7f896236dbafd2cb842655004b1c7bf6e76dcef9/memory.cpp?fileviewer=file-view-default
 
 class YETI_PUBLIC ScratchAllocator : public Allocator {
- YETI_DISALLOW_COPYING(ScratchAllocator);
+ YETI_DISALLOW_COPYING(ScratchAllocator)
 
  private:
   struct Allocation {
@@ -67,7 +67,7 @@ class YETI_PUBLIC ScratchAllocator : public Allocator {
       // Refer to the comments above to understand why this works.
       u8 *end_of_header = (u8 *)ptr;
       while (*--end_of_header == Allocation::PAD);
-      return (Allocation *)(end_of_header - sizeof(Allocation::end) + 1);
+      return (Allocation *)(end_of_header - sizeof(uintptr_t /* Allocation::end */) + 1);
     }
   };
 
@@ -86,10 +86,10 @@ class YETI_PUBLIC ScratchAllocator : public Allocator {
  private:
   const uintptr_t mem_lower_;
   const uintptr_t mem_upper_;
-  uintptr_t unallocated_;
-  uintptr_t unreclaimed_lower_;
-  uintptr_t unreclaimed_upper_;
-  u32 reclaiming_;
+  volatile uintptr_t unallocated_;
+  volatile uintptr_t unreclaimed_lower_;
+  volatile uintptr_t unreclaimed_upper_;
+  volatile u32 reclaiming_;
 };
 
 } // thread_safe

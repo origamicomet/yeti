@@ -27,7 +27,7 @@ namespace foundation {
 
 /// A system-level thread.
 class YETI_PUBLIC Thread {
- YETI_DISALLOW_COPYING(Thread);
+ YETI_DISALLOW_COPYING(Thread)
 
  public:
   typedef char Name[256];
@@ -47,7 +47,7 @@ class YETI_PUBLIC Thread {
     /// The inital size (in bytes) of the stack to provide the new thread.
     /// \note If zero, a reasonable default is chosen. This is platform dependent.
     /// \note This may be rounded up, i.e. this is the minimum initial size.
-    u32 stack_size;
+    u64 stack_size;
   };
 
  private:

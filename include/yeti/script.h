@@ -35,7 +35,7 @@ class ScriptResource;
 
 /// ...
 class YETI_PUBLIC Script {
- YETI_DISALLOW_COPYING(Script);
+ YETI_DISALLOW_COPYING(Script)
 
  public:
   enum Type {

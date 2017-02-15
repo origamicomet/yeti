@@ -52,7 +52,7 @@ struct Allocation {
 
 /// ...
 class YETI_PUBLIC Allocator {
- YETI_DISALLOW_COPYING(Allocator);
+ YETI_DISALLOW_COPYING(Allocator)
 
  protected:
   Allocator();

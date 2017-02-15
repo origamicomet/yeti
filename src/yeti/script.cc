@@ -27,7 +27,7 @@ Script::Script() {
   // INSECURE(mtwilliams): Don't let unsigned code (ab)use the system.
   luaL_openlibs(L);
 
-  lua_newtable(L, 0, 1);
+  lua_createtable(L, 0, 1);
   lua_pushlightuserdata(L, (void *)this);
   lua_setfield(L, -2, "__instance__");
   lua_setglobal(L, "Script");

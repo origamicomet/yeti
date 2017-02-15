@@ -29,7 +29,7 @@ namespace yeti {
 namespace foundation {
 
 class YETI_PUBLIC ProxyAllocator : public Allocator {
- YETI_DISALLOW_COPYING(ProxyAllocator);
+ YETI_DISALLOW_COPYING(ProxyAllocator)
 
  public:
   explicit ProxyAllocator(Allocator &allocator, const char *name);

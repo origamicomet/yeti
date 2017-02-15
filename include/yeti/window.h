@@ -24,7 +24,7 @@ namespace yeti {
 
 /// ...
 class YETI_PUBLIC Window {
- YETI_DISALLOW_COPYING(Window);
+ YETI_DISALLOW_COPYING(Window)
 
  private:
   Window();

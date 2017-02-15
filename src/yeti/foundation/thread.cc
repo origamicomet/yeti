@@ -30,10 +30,10 @@ namespace {
     {'\0',},
 
     // By default, threads can be scheduled on any core.
-    0xFFFFFFFFFFFFFFFFull,
+    ~UINT64_C(0),
 
     // By default, we use 1MiB stacks.
-    0x100000ul
+    UINT64_C(0x100000)
   };
 }
 

@@ -27,10 +27,10 @@ namespace yeti {
 class Script;
 
 class YETI_PUBLIC ScriptResource : public Resource {
- YETI_DISALLOW_COPYING(ScriptResource);
+ YETI_DISALLOW_COPYING(ScriptResource)
 
  private:
-  friend Script;
+  friend class Script;
 
  public:
   ScriptResource(Resource::Id id);

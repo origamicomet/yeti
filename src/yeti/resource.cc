@@ -17,11 +17,11 @@
 namespace yeti {
 
 Resource::Type::Id Resource::type_from_id(Resource::Id id) {
-  return (Type::Id)(id >> 32ull);
+  return (Type::Id)(id >> UINT64_C(32));
 }
 
 u32 Resource::hash_from_id(Resource::Id id) {
-  return (u32)(id & 0xFFFFFFFFull);
+  return (u32)(id & UINT64_C(0xFFFFFFFF));
 }
 
 Resource::Id Resource::id_from_path(const char *path) {
@@ -49,7 +49,7 @@ Resource::Id Resource::id_from_type_and_name(Resource::Type::Id type,
 
 Resource::Id Resource::id_from_type_and_hash(Resource::Type::Id type,
                                              u32 hash) {
-  return (Id)(((u64)type << 32ull) | (u64)hash);
+  return (Id)(((u64)type << UINT64_C(32)) | (u64)hash);
 }
 
 Resource::Resource(Resource::Id id)

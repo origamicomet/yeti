@@ -21,7 +21,7 @@ namespace yeti {
 namespace keyboard_if {
   namespace {
     static const struct { const char *name; Key key; } key_mappings[Keys::_COUNT] = {
-      #define _(_, Mnemonic, Name) { Name, Keys::##Mnemonic },
+      #define _(_, Mnemonic, Name) { Name, Keys::Mnemonic },
         #include "yeti/input/keys.inl"
       #undef _
     };

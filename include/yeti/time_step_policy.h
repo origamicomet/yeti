@@ -24,7 +24,7 @@ namespace yeti {
 
 /// ...
 class YETI_PUBLIC TimeStepPolicy {
- YETI_DISALLOW_COPYING(TimeStepPolicy);
+ YETI_DISALLOW_COPYING(TimeStepPolicy)
 
  public:
   enum Type {

@@ -68,7 +68,7 @@ namespace resource_compiler {
 
 /// ...
 class YETI_PUBLIC ResourceCompiler {
- YETI_DISALLOW_COPYING(ResourceCompiler);
+ YETI_DISALLOW_COPYING(ResourceCompiler)
 
  private:
   ResourceCompiler();

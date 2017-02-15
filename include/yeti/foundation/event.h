@@ -28,8 +28,8 @@ namespace foundation {
 
 /// A waitable event.
 class YETI_PUBLIC Event {
- YETI_DISALLOW_CONSTRUCTION(Event);
- YETI_DISALLOW_COPYING(Event);
+ YETI_DISALLOW_CONSTRUCTION(Event)
+ YETI_DISALLOW_COPYING(Event)
 
  public:
   /// \brief Creates an event.

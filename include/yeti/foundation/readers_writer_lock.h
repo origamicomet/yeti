@@ -34,8 +34,8 @@ namespace foundation {
 /// erroneous state until completed, i.e. an atomic write is not applicable.
 ///
 class YETI_PUBLIC ReadersWriterLock {
- YETI_DISALLOW_CONSTRUCTION(ReadersWriterLock);
- YETI_DISALLOW_COPYING(ReadersWriterLock);
+ YETI_DISALLOW_CONSTRUCTION(ReadersWriterLock)
+ YETI_DISALLOW_COPYING(ReadersWriterLock)
 
  public:
   /// \brief Creates a lightweight user-space readers-writer lock.
@@ -69,7 +69,7 @@ class YETI_PUBLIC ReadersWriterLock {
 
 /// Acquires a readers-writer lock for the duration of its scope.
 class ReadersWritersScopedLock {
- YETI_DISALLOW_COPYING(ReadersWritersScopedLock);
+ YETI_DISALLOW_COPYING(ReadersWritersScopedLock)
 
  public:
   ReadersWritersScopedLock(ReadersWriterLock *ReadersWriterLock, bool exclusively)

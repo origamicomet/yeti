@@ -30,8 +30,8 @@ namespace foundation {
 
 /// A lightweight user-space mutex.
 class YETI_PUBLIC Mutex {
- YETI_DISALLOW_CONSTRUCTION(Mutex);
- YETI_DISALLOW_COPYING(Mutex);
+ YETI_DISALLOW_CONSTRUCTION(Mutex)
+ YETI_DISALLOW_COPYING(Mutex)
 
  public:
   /// \brief Creates a lightweight user-space mutex.
@@ -61,7 +61,7 @@ class YETI_PUBLIC Mutex {
 
 /// Acquires a lock for the duration of its scope.
 class ScopedLock {
- YETI_DISALLOW_COPYING(ScopedLock);
+ YETI_DISALLOW_COPYING(ScopedLock)
 
  public:
   ScopedLock(Mutex *mutex) : m(mutex) { m->lock(); }

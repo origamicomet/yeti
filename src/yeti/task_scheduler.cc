@@ -146,7 +146,7 @@ void task_scheduler::initialize() {
   // may try to steal from a non-initialized queue and cause an access violation.
   for (size_t worker = 0; worker < num_workers_; ++worker) {
     foundation::Thread::Options worker_thread_opts;
-    sprintf(&worker_thread_opts.name[0], "Worker #%02u", worker + 1);
+    sprintf(&worker_thread_opts.name[0], "Worker #%02lu", worker + 1);
     worker_thread_opts.affinity = (1ull << worker);
 
     worker_threads_[worker] =

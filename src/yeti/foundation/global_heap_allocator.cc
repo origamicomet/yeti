@@ -18,7 +18,7 @@ namespace foundation {
 
 namespace {
   class GlobalHeapAllocator : public Allocator {
-   YETI_DISALLOW_COPYING(GlobalHeapAllocator);
+   YETI_DISALLOW_COPYING(GlobalHeapAllocator)
 
    public:
     GlobalHeapAllocator();

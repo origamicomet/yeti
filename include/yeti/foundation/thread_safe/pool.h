@@ -31,7 +31,7 @@ namespace thread_safe {
 
 template <typename T>
 class Pool {
- YETI_DISALLOW_COPYING(Pool);
+ YETI_DISALLOW_COPYING(Pool)
 
  private:
   struct Element {

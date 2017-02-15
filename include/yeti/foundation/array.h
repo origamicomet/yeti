@@ -122,7 +122,7 @@ Array<T>::Array(const Array<T> &ary) {
   first_ = (T *)ary.allocator_->allocate(ary.reserved() * sizeof(T));
   memcpy((void *)first_, (const void *)ary.first(), ary.size() * sizeof(T));
   last_ = first_ + ary.size() * sizeof(T);
-  reserved_ first + ary.reserved() * sizeof(T);
+  reserved_ = first_ + ary.reserved() * sizeof(T);
 }
 
 template <typename T>
@@ -132,13 +132,14 @@ Array<T> &Array<T>::operator=(const Array<T> &ary) {
   first_ = (T *)ary.allocator_->allocate(ary.reserved() * sizeof(T));
   memcpy((void *)first_, (const void *)ary.first(), ary.size() * sizeof(T));
   last_ = first_ + ary.size() * sizeof(T);
-  reserved_ first + ary.reserved() * sizeof(T);
+  reserved_ = first_ + ary.reserved() * sizeof(T);
   return *this;
 }
 
 template <typename T>
 Array<T>::~Array() {
-  allocator_->deallocate((uintptr_t)first_);
+  if (allocator_)
+    allocator_->deallocate((uintptr_t)first_);
 }
 
 template <typename T>

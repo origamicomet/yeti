@@ -38,7 +38,7 @@ namespace {
       // TODO(mtwilliams): Seed from a better source.
       ::srand(::time(NULL));
       for (u32 s = 0; s <= 16; ++s)
-        state_[s] = ((u64)::rand() << 32ull) | (u64)::rand();
+        state_[s] = ((u64)::rand() << UINT64_C(32)) | (u64)::rand();
     }
   } seeder_;
 }
@@ -51,7 +51,7 @@ template <> u64 prng() {
   s1 ^= s1 << 31;
   const u64 s = s1 ^ s0 ^ (s1 >> 11) ^ (s0 >> 30);
   atomic::store(&state_[p1], s);
-  return s * 1181783497276652981ull;
+  return s * UINT64_C(1181783497276652981);
 }
 
 template <> u64 prng(const u64 min, const u64 max) {
@@ -71,8 +71,8 @@ template <> u64 prng(const u64 min, const u64 max) {
 template <> u32 prng() {
   // HACK(mtwilliams): Probably shouldn't mix down like this.
   const u64 full_width_random_number = prng<u64>();
-  return (full_width_random_number >> 32ull) ^
-         (full_width_random_number & 0xFFFFFFFFull);
+  return (full_width_random_number >> UINT64_C(32)) ^
+         (full_width_random_number & UINT64_C(0xFFFFFFFF));
 }
 
 template <> u32 prng(const u32 min, const u32 max) {
@@ -80,19 +80,19 @@ template <> u32 prng(const u32 min, const u32 max) {
 }
 
 template <> f32 prng() {
-  return (prng<u32>() / (f32)~0ul);
+  return (prng<u32>() / (f32)~UINT32_C(0));
 }
 
 template <> f32 prng(const f32 min, const f32 max) {
-  return (prng<u32>() / (f32)(~0ul / (max - min))) + min;
+  return (prng<u32>() / (f32)(~UINT32_C(0) / (max - min))) + min;
 }
 
 template <> f64 prng() {
-  return (prng<u64>() / (f64)~0ull);
+  return (prng<u64>() / (f64)~UINT64_C(0));
 }
 
 template <> f64 prng(const f64 min, const f64 max) {
-  return (prng<u64>() / (f64)(~0ull / (max - min))) + min;
+  return (prng<u64>() / (f64)(~UINT64_C(0) / (max - min))) + min;
 }
 
 } // foundation

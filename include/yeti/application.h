@@ -27,7 +27,7 @@ class TimeStepPolicy;
 
 /// ...
 class YETI_PUBLIC Application {
- YETI_DISALLOW_COPYING(Application);
+ YETI_DISALLOW_COPYING(Application)
 
  protected:
   Application();

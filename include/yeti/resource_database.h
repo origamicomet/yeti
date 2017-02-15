@@ -30,7 +30,7 @@ namespace yeti {
 
 /// ...
 class YETI_PUBLIC ResourceDatabase {
- YETI_DISALLOW_COPYING(ResourceDatabase);
+ YETI_DISALLOW_COPYING(ResourceDatabase)
 
  private:
   ResourceDatabase();

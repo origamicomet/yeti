@@ -34,7 +34,7 @@ class Script;
 
 /// ...
 class YETI_PUBLIC ScriptEnvironment {
- YETI_DISALLOW_COPYING(ScriptEnvironment);
+ YETI_DISALLOW_COPYING(ScriptEnvironment)
 
  private:
   friend Script;
@@ -67,6 +67,21 @@ class YETI_PUBLIC ScriptEnvironment {
     Vec4 vec4[NUM_OF_TEMPORARIES];
   } storage;
 };
+
+template <> YETI_INLINE Vec2 *ScriptEnvironment::allocate() {
+  yeti_assert_development(this->counts.vec2 < NUM_OF_TEMPORARIES);
+  return &this->storage.vec2[this->counts.vec2++];
+}
+
+template <> YETI_INLINE Vec3 *ScriptEnvironment::allocate() {
+  yeti_assert_development(this->counts.vec3 < NUM_OF_TEMPORARIES);
+  return &this->storage.vec3[this->counts.vec3++];
+}
+
+template <> YETI_INLINE Vec4 *ScriptEnvironment::allocate() {
+  yeti_assert_development(this->counts.vec4 < NUM_OF_TEMPORARIES);
+  return &this->storage.vec4[this->counts.vec4++];
+}
 
 } // yeti
 

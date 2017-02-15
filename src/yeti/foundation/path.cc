@@ -35,9 +35,9 @@ namespace foundation {
 char path::seperator() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return '\\';
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X \
-      YETI_PLATFORM == YETI_PLATFORM_LINUX \
-      YETI_PLATFORM == YETI_PLATFORM_IOS \
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X || \
+      YETI_PLATFORM == YETI_PLATFORM_LINUX || \
+      YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
   return '/';
 #endif
@@ -49,9 +49,9 @@ void path::canonicalize(char *path) {
     switch (*ch) {
     #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
       case '/': *ch = '\\'; break;
-    #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X \
-          YETI_PLATFORM == YETI_PLATFORM_LINUX \
-          YETI_PLATFORM == YETI_PLATFORM_IOS \
+    #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X || \
+          YETI_PLATFORM == YETI_PLATFORM_LINUX || \
+          YETI_PLATFORM == YETI_PLATFORM_IOS || \
           YETI_PLATFORM == YETI_PLATFORM_ANDROID
       case '\\': *ch = '/'; break;
     #endif

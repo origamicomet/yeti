@@ -36,7 +36,7 @@ namespace hash_map {
   namespace Types {
     typedef uintptr_t Hash;
     enum {Bits = sizeof(uintptr_t) * 8};
-  };
+  }
 
   template <typename K, size_t Bits>
   struct Hasher {};
@@ -74,7 +74,7 @@ class HashMap {
  // Copying a hash-map does not make a lot of sense. If you find yourself
  // needing to copy a hash-map, you probably want to dynamically resize it. If
  // that's the case, see the comment in `HashMap<K,V>::insert(...)`.
- YETI_DISALLOW_COPYING(HashMap);
+ YETI_DISALLOW_COPYING(HashMap)
 
  private:
   typedef hash_map::Types::Hash Hash;

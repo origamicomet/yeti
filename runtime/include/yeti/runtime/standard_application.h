@@ -24,7 +24,7 @@ namespace runtime {
 class Manifest;
 
 class StandardApplication : public yeti::Application {
- YETI_DISALLOW_COPYING(StandardApplication);
+ YETI_DISALLOW_COPYING(StandardApplication)
 
  public:
   StandardApplication();

@@ -28,8 +28,8 @@ namespace foundation {
 
 /// A high-resolution monotonic timer.
 class YETI_PUBLIC HighResolutionTimer {
- YETI_DISALLOW_CONSTRUCTION(HighResolutionTimer);
- YETI_DISALLOW_COPYING(HighResolutionTimer);
+ YETI_DISALLOW_CONSTRUCTION(HighResolutionTimer)
+ YETI_DISALLOW_COPYING(HighResolutionTimer)
 
  public:
   /// \brief Creates a high-resolution monotonic timer.

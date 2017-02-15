@@ -29,8 +29,8 @@ namespace foundation {
 /// A mirrored ring buffer!
 ///
 class MirroredRingBuffer {
- YETI_DISALLOW_CONSTRUCTION(MirroredRingBuffer);
- YETI_DISALLOW_COPYING(MirroredRingBuffer);
+ YETI_DISALLOW_CONSTRUCTION(MirroredRingBuffer)
+ YETI_DISALLOW_COPYING(MirroredRingBuffer)
 
  public:
   /// \brief Creates a mirrored ring-buffer of |sz| bytes.

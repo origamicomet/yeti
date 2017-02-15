@@ -49,7 +49,7 @@ namespace thread_safe {
 template <typename T>
 class SpMcDeque {
  // Copying a SpMcDequeue does not make any sense, whatsoever.
- YETI_DISALLOW_COPYING(SpMcDeque);
+ YETI_DISALLOW_COPYING(SpMcDeque)
 
  public:
   SpMcDeque(uintptr_t mem, size_t sz);
@@ -64,7 +64,7 @@ class SpMcDeque {
   T pop();
 
   /// \briefs Steals an element from the public end of the queue.
-  /// \returns
+  /// \returns An element, or NULL when the queue is empty.
   T steal();
 
  private:

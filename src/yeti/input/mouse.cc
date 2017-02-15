@@ -29,7 +29,7 @@ bool Mouse::connected() {
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_IOS ||
+#elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
   // HACK(mtwilliams): Assume no mouse is connected.
   return false;
