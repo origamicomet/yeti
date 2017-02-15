@@ -91,6 +91,7 @@ class HashMap {
  public:
   V *find(const K &key);
   void insert(const K &key, const V &value);
+  V *reserve(const K &key);
   void remove(const K &key);
 
  private:
@@ -145,6 +146,11 @@ V *HashMap<K,V>::find(const K &key) {
 
 template <typename K, typename V>
 void HashMap<K,V>::insert(const K &key, const V &value) {
+  *this->reserve(key) = value;
+}
+
+template <typename K, typename V>
+V *HashMap<K,V>::reserve(const K &key) {
   // We don't support dynamically resizing hash-maps, yet. Generally, a
   // decent load-factor is ~75%, so if we cross that threshold we should
   // manually bump up the size of the hash-map.
@@ -158,9 +164,11 @@ void HashMap<K,V>::insert(const K &key, const V &value) {
 
   Entry *entry = &slots_[slot];
   entry->hash_of_key = hash_of_key;
-  entry->value = value;
+  memset((void *)&entry->value, 0, sizeof(V));
 
   occupants_ += 1;
+
+  return &entry->value;
 }
 
 template <typename K, typename V>
