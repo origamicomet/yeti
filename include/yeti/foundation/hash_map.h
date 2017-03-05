@@ -64,9 +64,6 @@ namespace hash_map {
   template <typename K>
   static Types::Hash hash(const K &key) {
     return Hasher<K, Types::Bits>::hash(key); }
-
-  static Types::Hash hash(const char *key) {
-    return Hasher<const char *, Types::Bits>::hash(key); }
 }
 
 template <typename K, typename V>

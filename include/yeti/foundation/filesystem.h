@@ -133,7 +133,7 @@ typedef bool (*Walker)(const char *path, const Info *info, void *ctx);
 extern YETI_PUBLIC bool walk(const char *directory, fs::Walker walker, void *walker_ctx = NULL);
 
 /// An opaque handle to a directory being watched.
-typedef struct Watch;
+struct Watch;
 
 /// User-specified callback for yeti::foundation::fs::watch.
 typedef void (*Watcher)(Event event, const char *path, void *ctx);

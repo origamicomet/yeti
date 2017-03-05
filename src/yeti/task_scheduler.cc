@@ -66,7 +66,7 @@ namespace task_scheduler {
       for (u32 attempts = 0; attempts < 3; ++attempts) {
         // This worker's queue is empty. Try to steal some work from another
         // worker.
-        WorkQueue *const victim = work_queues_[foundation::prng<size_t>() % num_workers_];
+        WorkQueue *const victim = work_queues_[foundation::prng<u32>(0, num_workers_)];
 
         if (victim == Q)
           // Don't steal from ourself.

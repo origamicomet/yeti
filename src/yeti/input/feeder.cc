@@ -239,6 +239,8 @@ static LRESULT WINAPI InputWindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 }
 
 void input::from(const Window *window) {
+  yeti_assert_debug(window != NULL);
+
   HWND hndl = (HWND)window->to_native_hndl();
 
   // TODO(mtwilliams): Determine if Windows caches sub-classes, i.e. does
