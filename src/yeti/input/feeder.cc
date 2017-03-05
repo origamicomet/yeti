@@ -253,6 +253,9 @@ void input::from(const Window *window) {
   ::SetPropA(hndl, "hooks[input].orginal_window_proc", (HANDLE)orginal_window_proc);
 }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+void input::from(const Window *window) {
+  yeti_assert_debug(window != NULL);
+}
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID

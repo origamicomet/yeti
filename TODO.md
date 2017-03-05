@@ -8,7 +8,6 @@
 - Target Windows 7 or later by specifying `WINVER`.
   - Don't want to target Windows XP. May have to for Asia.
 - Support macOS.
-  - Add build support for macOS.
   - Implement asbtractions for `YETI_PLATFORM_MAC_OS_X`.
   - Rename internal identifers from "Mac OS X" to "macOS."
 

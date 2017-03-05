@@ -1,6 +1,7 @@
 !.gitignore
 
 # Ryb
+_proj/
 _build/
 Makefile
 build.ninja
@@ -9,14 +10,3 @@ build.ninja
 
 # Sublime Text 2/3
 *.sublime-workspace
-
-# Windows
-Thumbs.db
-Desktop.ini
-
-# Mac OS X
-.DS_Store
-
-# Linux
-*~
-.directory
