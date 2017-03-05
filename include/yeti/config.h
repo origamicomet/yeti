@@ -75,7 +75,8 @@
     #define YETI_PLATFORM YETI_PLATFORM_WINDOWS
   #elif defined(__APPLE__)
     #include <TargetConditionals.h>
-    #if defined(TARGET_OS_IPHONE)
+    #if TARGET_OS_IPHONE
+      // NOTE(mtwilliams): This includes tvOS. http://www.openradar.me/22639221
       #define YETI_PLATFORM YETI_PLATFORM_IOS
     #else
       #define YETI_PLATFORM YETI_PLATFORM_MAC_OS_X
