@@ -22,12 +22,18 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
   #undef ABSOLUTE
   #undef RELATIVE
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  #include <unistd.h>
+  #include <fcntl.h>
+  #include <dirent.h>
+  #include <sys/types.h>
+  #include <sys/stat.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -74,6 +80,101 @@ namespace {
       return FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
   }
 }
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+namespace {
+  static int fd_from_handle(fs::File *file) {
+    yeti_assert_debug(file != NULL);
+    return reinterpret_cast<i64>(file);
+  }
+
+  static int permissions_to_flags(u32 permissions) {
+    const u32 masked = permissions & (fs::READ | fs::WRITE);
+    switch (masked) {
+      case (fs::READ | fs::WRITE):
+        return O_WRONLY;
+      case fs::READ:
+        return O_RDONLY;
+      case fs::WRITE:
+        return O_WRONLY;
+      default:
+        YETI_UNREACHABLE();
+    }
+  }
+
+  static mode_t permissions_to_mode(u32 permissions) {
+    mode_t mode = 0;
+    if (permissions & fs::READ)
+      mode |= (S_IRUSR | S_IRGRP | S_IROTH);
+    if (permissions & fs::WRITE)
+      mode |= S_IWUSR;
+    return mode;
+  }
+
+  static bool info_from_stat(const struct stat *stat, fs::Info *info) {
+    const bool is_directory = !!S_ISDIR(stat->st_mode);
+    const bool is_file = !!S_ISREG(stat->st_mode);
+
+    if (!is_directory && !is_file)
+      return false;
+
+    info->type = is_directory ? fs::DIRECTORY : fs::FILE;
+
+    const uid_t euid = geteuid();
+    const uid_t egid = getegid();
+
+    info->read = false; {
+      if (stat->st_mode & S_IROTH) {
+        info->read = true;
+      } else if (stat->st_mode & S_IRGRP) {
+        if (egid == stat->st_gid)
+          info->read = true;
+      } else if (stat->st_mode & S_IRUSR) {
+        if (euid == stat->st_uid)
+          info->read = true;
+      }
+    }
+
+    info->write = false; {
+      if (stat->st_mode & S_IWOTH) {
+        info->write = true;
+      } else if (stat->st_mode & S_IWGRP) {
+        if (egid == stat->st_gid)
+          info->write = true;
+      } else if (stat->st_mode & S_IWUSR) {
+        if (euid == stat->st_uid)
+          info->write = true;
+      }
+    }
+
+    info->execute = false; {
+      if (stat->st_mode & S_IXOTH) {
+        info->execute = true;
+      } else if (stat->st_mode & S_IXGRP) {
+        if (egid == stat->st_gid)
+          info->execute = true;
+      } else if (stat->st_mode & S_IXUSR) {
+        if (euid == stat->st_uid)
+          info->execute = true;
+      }
+    }
+
+    info->size = stat->st_size;
+
+  #if defined(_DARWIN_FEATURE_64_BIT_INODE)
+    info->created_at = (u64)stat->st_birthtimespec.tv_sec +
+                       (u64)(stat->st_birthtimespec.tv_nsec / 1000000000);
+  #else
+    info->created_at = 0;
+  #endif
+
+    info->last_accessed_at = (u64)stat->st_atimespec.tv_sec +
+                             (u64)(stat->st_atimespec.tv_nsec / 1000000000);
+    info->last_modified_at = (u64)stat->st_mtimespec.tv_sec +
+                             (u64)(stat->st_mtimespec.tv_nsec / 1000000000);
+
+    return true;
+  }
+}
 #endif
 
 bool fs::info(const char *path, fs::Info *info) {
@@ -90,6 +191,10 @@ bool fs::info(const char *path, fs::Info *info) {
   ::CloseHandle(hndl);
   return succeeded;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  struct stat stat;
+  if (::stat(path, &stat) != 0)
+    return false;
+  return info_from_stat(&stat, info);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -119,6 +224,10 @@ bool fs::info(fs::File *file, fs::Info *info) {
 
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  struct stat stat;
+  if (::fstat(fd_from_handle(file), &stat) != 0)
+    return false;
+  return info_from_stat(&stat, info);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -131,6 +240,7 @@ bool fs::exists(const char *path) {
    // http://mfctips.com/2012/03/26/best-way-to-check-if-file-or-directory-exists/
   return ::GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  return (::access(path, F_OK) == 0);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -154,6 +264,20 @@ bool fs::create(fs::Type type, const char *path) {
     }
   }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  switch (type) {
+    case fs::FILE: {
+      const mode_t mode = (S_IRUSR | S_IWUSR) | (S_IRGRP) | (S_IROTH);
+      const int fd = ::open(path, O_CREAT | O_EXCL | O_TRUNC | O_WRONLY, mode);
+      const bool created = (fd >= 0);
+      if (created)
+        ::close(fd);
+      return created;
+    }
+    case fs::DIRECTORY: {
+      const mode_t mode = (S_IRWXU) | (S_IRGRP | S_IXGRP) | (S_IROTH | S_IXOTH);
+      return (::mkdir(path, mode) == 0);
+    }
+  }
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
   return false;
@@ -182,6 +306,13 @@ bool fs::destroy(fs::Type type, const char *path) {
       return ::RemoveDirectory(path) != 0;
   }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  switch (type) {
+    case fs::FILE:
+      return (::unlink(path) == 0);
+    case fs::DIRECTORY:
+      // TODO(mtwilliams): Should we delete recursively?
+      return (::rmdir(path) == 0);
+  }
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -236,8 +367,42 @@ bool fs::walk(const char *directory, fs::Walker walker, void *walker_ctx) {
 
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  // OPTIMIZE(mtwilliams): Use ftw(3) instead?
   // OPTIMIZE(mtwilliams): Set rapid aging to eliminate writes caused by
   // unnecessary tracking of access times.
+
+  DIR *stream = ::opendir(directory);
+  if (stream == NULL)
+    return false;
+
+  while (dirent *entry = ::readdir(stream)) {
+    // Ignore '.' and '..' but not .*
+    if (entry->d_name[0] == '.') {
+      if (entry->d_name[1] == '\0')
+        continue;
+      if (entry->d_name[1] == '.')
+        if (entry->d_name[2] == '\0')
+          continue;
+    }
+
+    // TODO(mtwilliams): Handle symbolic links?
+    if ((entry->d_type != DT_DIR) && (entry->d_type != DT_REG))
+      // Not a directory or file; skip.
+      continue;
+
+    char path[256];
+    sprintf(&path[0], "%s/%s", directory, &entry->d_name[0]);
+
+    fs::Info info;
+    yeti_assert(fs::info(&path[0], &info) != false);
+
+    if (!walker(&path[0], &info, walker_ctx))
+      break;
+  }
+
+  ::closedir(stream);
+
+  return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -406,6 +571,8 @@ fs::Watch *fs::watch(const char *directory, fs::Watcher callback, void *callback
 
   return NULL;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  // TODO(mtwilliams): Implement using FSEvents.
+  return NULL;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -415,6 +582,7 @@ void fs::poll(fs::Watch *watch) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::MsgWaitForMultipleObjectsEx(0, NULL, 0, QS_ALLINPUT, MWMO_ALERTABLE);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  YETI_TRAP();
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -432,6 +600,7 @@ void fs::unwatch(fs::Watch *watch) {
   // Try to force it.
   ::MsgWaitForMultipleObjectsEx(0, NULL, 0, QS_ALLINPUT, MWMO_ALERTABLE);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  YETI_TRAP();
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -446,6 +615,13 @@ fs::File *fs::create_or_open(const char *path, const u32 permissions) {
     return NULL;
   return (fs::File *)hndl;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  const mode_t mode = permissions_to_mode(permissions) | (S_IRUSR | S_IRGRP | S_IROTH);
+  const int flags = permissions_to_flags(permissions);
+  const int exclusivity = (permissions & fs::EXCLUSIVE) ? O_EXLOCK : 0;
+  const int fd = ::open(path, O_CREAT | O_TRUNC | flags | exclusivity, mode);
+  if (fd < 0)
+    return NULL;
+  return (fs::File *)fd;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -460,6 +636,12 @@ fs::File *fs::open(const char *path, const u32 permissions) {
     return NULL;
   return (fs::File *)hndl;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  const int flags = permissions_to_flags(permissions);
+  const int exclusivity = (permissions & fs::EXCLUSIVE) ? O_EXLOCK : 0;
+  const int fd = ::open(path, flags | exclusivity);
+  if (fd < 0)
+    return NULL;
+  return (fs::File *)fd;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -469,6 +651,7 @@ void fs::close(fs::File *file) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::CloseHandle((HANDLE)file);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  ::close(fd_from_handle(file));
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -483,6 +666,9 @@ u64 fs::read(fs::File *file, uintptr_t in, u64 in_len) {
   ::ReadFile((HANDLE)file, (LPVOID)in, in_len, &read, NULL);
   return read;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  const ssize_t read = ::read(fd_from_handle(file), (void *)in, in_len);
+  yeti_assert(read >= 0);
+  return read;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -497,6 +683,14 @@ u64 fs::write(fs::File *file, const uintptr_t out, u64 out_len) {
   ::WriteFile((HANDLE)file, (LPCVOID)out, out_len, &wrote, NULL);
   return wrote;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  const int fd = fd_from_handle(file);
+  u64 remaining = out_len;
+  do {
+    const ssize_t wrote = ::write(fd, (const void *)out, out_len);
+    yeti_assert(wrote >= 0);
+    remaining -= wrote;
+  } while (remaining > 0);
+  return out_len;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -517,6 +711,19 @@ i64 fs::seek(fs::File *file, fs::Position pos, i64 offset) {
   ::SetFilePointerEx((HANDLE)file, move, &moved, method);
   return moved.QuadPart;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  // TODO(mtwilliams): We need to force allocation using `F_PREALLOCATE`.
+  int fd = fd_from_handle(file);
+  int whence;
+  if (pos == fs::ABSOLUTE)
+    if (offset >= 0)
+      whence = SEEK_SET;
+    else
+      whence = SEEK_END;
+  else if (pos == fs::RELATIVE)
+    whence = SEEK_CUR;
+  const off_t moved = ::lseek(fd, offset, whence);
+  yeti_assert(moved >= 0);
+  return moved;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -526,6 +733,8 @@ void fs::flush(fs::File *file) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::FlushFileBuffers((HANDLE)file);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  // TODO(mtwilliams): Set `F_FULLFSYNC`?
+  ::fsync(fd_from_handle(file));
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

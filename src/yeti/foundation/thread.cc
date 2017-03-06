@@ -18,6 +18,10 @@
   #include <windows.h>
   #include <intrin.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  #include <unistd.h>
+  #include <pthread.h>
+  #include <limits.h>
+  #include <sched.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 
@@ -121,6 +125,25 @@ namespace {
   }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
   // http://stackoverflow.com/questions/2057960/how-to-set-a-threadname-in-macosx?lq=1
+
+  static void *thread_entry_point(void *thread_start_info_ptr) {
+    const ThreadStartInfo *thread_start_info =
+      (const ThreadStartInfo *)thread_start_info_ptr;
+
+    Thread::EntryPoint entry_point = thread_start_info->entry_point;
+    uintptr_t entry_point_arg = thread_start_info->entry_point_arg;
+
+    // QUESTION(mtwilliams): Should we only name threads in debug and
+    // development builds?
+    ::pthread_setname_np(&thread_start_info->name[0]);
+
+    // Return memory to |thread_start_info_allocator_| as soon as possible.
+    thread_start_info_allocator_.deallocate((uintptr_t)thread_start_info_ptr);
+
+    entry_point(entry_point_arg);
+
+    return NULL;
+  }
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   // http://stackoverflow.com/questions/2369738/can-i-set-the-name-of-a-thread-in-pthreads-linux
   // http://stackoverflow.com/questions/778085/how-to-name-a-thread-in-linux?lq=1
@@ -140,9 +163,6 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   yeti_assert_debug(options->affinity != 0);
   yeti_assert_debug(options->stack_size != 0);
 
-  Thread *thread = new (foundation::heap()) Thread();
-
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // TODO(mtwilliams): Move retry logic back into |thread_start_info_allocator_|?
   ThreadStartInfo *thread_start_info = NULL;
   while (thread_start_info == NULL) {
@@ -156,6 +176,9 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   thread_start_info->entry_point = entry_point;
   thread_start_info->entry_point_arg = entry_point_arg;
 
+  Thread *thread = new (foundation::heap()) Thread();
+
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   thread->native_hndl_ =
     (uintptr_t)::CreateThread(NULL,
                               options->stack_size,
@@ -185,6 +208,40 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   // Be free!
   ::ResumeThread((HANDLE)thread->native_hndl_);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  yeti_assert_debug(options->stack_size >= PTHREAD_STACK_MIN);
+  yeti_assert_debug((options->stack_size % getpagesize()) == 0);
+
+  // NOTE(mtwilliams): POSIX allows implementations to define `pthread_t` as
+  // a structure. Fortunately for us, Apple has defined it as a pointer to an
+  // opaque structure.
+
+  pthread_attr_t attributes;
+
+  yeti_assert(pthread_attr_init(&attributes) == 0);
+  yeti_assert(pthread_attr_setstacksize(&attributes, options->stack_size) == 0);
+
+  const int result =
+    ::pthread_create(
+      (pthread_t *)&thread->native_hndl_,
+      &attributes,
+      &thread_entry_point,
+      (void *)thread_start_info);
+
+  yeti_assert(result == 0);
+
+  pthread_attr_destroy(&attributes);
+
+  if (options->affinity != ~0ull) {
+    // NOTE(mtwilliams): Mach doesn't allow explicit thread placement, so we
+    // have to ignore affinity. However, we can use "affinity sets" (as of
+    // Mac OS X 10.5) as a hint to Mach to schedule a thread on a particular
+    // "processor."
+
+    if (options->affinity & (options->affinity - 1)) {
+      // TODO(mtwilliams): Hint for a specific processor.
+       // Refer to http://superuser.com/questions/149312.
+    }
+  }
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 
@@ -193,11 +250,13 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
 
 void Thread::join() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  // Should we check that this returns `WAIT_OBJECT_0`?
+  // QUESTION(mtwilliams): Should we check that this returns `WAIT_OBJECT_0`?
   ::WaitForSingleObject((HANDLE)native_hndl_, INFINITE);
   // Handle is closed in destructor.
   delete this;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  ::pthread_join((pthread_t)native_hndl_, NULL);
+  delete this;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -207,6 +266,8 @@ void Thread::detach() {
   // Handle is closed in destructor.
   delete this;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  ::pthread_detach((pthread_t)native_hndl_);
+  delete this;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -218,6 +279,8 @@ void Thread::terminate() {
   // Handle is closed in destructor.
   delete this;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  ::pthread_cancel((pthread_t)native_hndl_);
+  delete this;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -228,6 +291,7 @@ void Thread::yield() {
     // Windows didn't schedule another thread, so try to force it.
     ::Sleep(0);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  sched_yield();
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

@@ -51,6 +51,8 @@
 - Add generic unicode normalization helpers.
   - NFC
   - NFD
+- Handle large files in 32 bit builds.
+  - Specify `_FILE_OFFSET_BITS=64` on POSIX targets.
 
 ### Engine
 

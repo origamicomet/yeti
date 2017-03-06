@@ -22,6 +22,7 @@
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  #include <unistd.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -107,6 +108,8 @@ void path::cwd(char *cwd, size_t cwd_len) {
   const DWORD wrote = ::GetCurrentDirectoryA((DWORD)cwd_len, (LPTSTR)&cwd[0]);
   yeti_assert_debug((wrote != 0) && (wrote <= cwd_len - 1));
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+  const char *path = ::getcwd(cwd, cwd_len);
+  yeti_assert_debug(path != NULL);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
