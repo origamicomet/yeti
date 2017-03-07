@@ -67,6 +67,9 @@ void Runner::setup(const char *args[], const u32 num_args) {
 }
 
 void Runner::run() {
+  // Make sure the data directory exists or resource compilation will fail.
+  foundation::fs::create(foundation::fs::DIRECTORY, &resource_compiler_opts_.data[0]);
+
   resource_compiler_ = ResourceCompiler::start(resource_compiler_opts_);
 
   if (watch_) {

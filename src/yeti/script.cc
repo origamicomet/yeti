@@ -59,7 +59,7 @@ Script *Script::recover(lua_State *L) {
 
   lua_getglobal(L, "Script");
   lua_getfield(L, -1, "__instance__");
-  yeti_assert_debug(lua_islightuserdata(L, -1), "Expected Script.__instance__ to be a light user-data reference to a yeti::Script.");
+  yeti_assertf_debug(lua_islightuserdata(L, -1), "Expected Script.__instance__ to be a light user-data reference to a yeti::Script.");
 
   Script *script = (Script *)lua_touserdata(L, -1);
   lua_pop(L, 2);

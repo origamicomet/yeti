@@ -86,7 +86,12 @@ const Resource::Type *resource_manager::type_from_ext(const char *ext) {
 }
 
 void resource_manager::initialize() {
-  foundation::Thread::spawn(&resource_manager::management_thread, 0)->detach();
+  foundation::Thread::Options management_thread_opts;
+  sprintf(&management_thread_opts.name[0], "Resource Management");
+  management_thread_opts.affinity = ~0ull;
+  management_thread_opts.stack_size = 0x100000 /* 1MiB */;
+
+  foundation::Thread::spawn(&resource_manager::management_thread, 0, &management_thread_opts)->detach();
 }
 
 void resource_manager::shutdown() {

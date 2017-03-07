@@ -47,7 +47,7 @@ namespace application_if {
     }
 
     static int log(lua_State *L) {
-      log::Level message_level;
+      log::Level message_level = log::OFF;
       const char *message;
 
       switch (lua_gettop(L)) {

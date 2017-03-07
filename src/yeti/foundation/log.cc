@@ -98,6 +98,10 @@ void log::printf(log::Category::Id category,
   va_start(ap, format);
 
   const int buf_sz = vsnprintf(NULL, 0, format, ap) + 1;
+
+  va_end(ap);
+  va_start(ap, format);
+
   char *buf = (char *)alloca(buf_sz);
   vsnprintf(buf, buf_sz, format, ap);
 

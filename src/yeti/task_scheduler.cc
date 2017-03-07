@@ -148,6 +148,7 @@ void task_scheduler::initialize() {
     foundation::Thread::Options worker_thread_opts;
     sprintf(&worker_thread_opts.name[0], "Worker #%02lu", worker + 1);
     worker_thread_opts.affinity = (1ull << worker);
+    worker_thread_opts.stack_size = 0x100000 /* 1MiB */;
 
     worker_threads_[worker] =
       foundation::Thread::spawn(&worker_thread, (uintptr_t)worker, &worker_thread_opts);
