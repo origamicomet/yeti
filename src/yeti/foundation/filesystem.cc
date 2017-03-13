@@ -709,6 +709,7 @@ i64 fs::seek(fs::File *file, fs::Position pos, i64 offset) {
   else if (pos == fs::RELATIVE)
     method = FILE_CURRENT;
   ::SetFilePointerEx((HANDLE)file, move, &moved, method);
+  ::SetEndOfFile((HANDLE)file);
   return moved.QuadPart;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
   // TODO(mtwilliams): We need to force allocation using `F_PREALLOCATE`.
