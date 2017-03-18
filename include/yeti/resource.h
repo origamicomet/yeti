@@ -22,6 +22,81 @@
 
 namespace yeti {
 
+namespace resource {
+  /// An opaque identifier that uniquely identifies a resource.
+  typedef u64 Id;
+
+  namespace lifecycle {
+    /// Preference for how lifecycle callbacks should be called relative to
+    /// other resources of the same type.
+    ///
+    /// \warning This is a preference, not a guarantee. While care is taken to
+    /// adhere to your preference it will be ignored if doing so is too costly.
+    ///
+    enum Preference {
+      /// Don't care how resources are brought online.
+      INDIFFERENT = 0,
+
+      /// Prefer that resources are immediately brought online after loading.
+      IMMEDIATE = 1,
+
+      /// Prefer that resources of the same type are all loaded first, prior to
+      /// being brought online.
+      BATCH = 2,
+
+      /// Prefer that resources are brought online just prior to first use.
+      ///
+      /// Use this if bringing a resource online after loading it causes stalls
+      /// unless sufficient time has passed. This is seldom the case and should
+      /// be used sparingly.
+      JUST_IN_TIME = 3
+    };
+  }
+
+  /// Describes a type of resource.
+  struct Type {
+    /// An opaque identifier assigned to a type of resource based on its name.
+    typedef u32 Id;
+
+    /// Name of the resource type. Used as a unique identifier.
+    ///
+    /// \note Convention is to use a sigular noun or nouns in `snake_case`. For
+    /// example, `vertex_shader` fits convention and is easily understood while
+    /// `environments (sound)` does not and is extremely confusing in the
+    /// context(s) it is used.
+    const char *name;
+
+    /// Source file extension(s) associated with the resource type.
+    ///
+    /// \note The end of array is marked with a sentinel value, `NULL`. For
+    /// example, `{"vs", "vertex_shader", NULL}`.
+    const char **extensions;
+
+    Resource *(*prepare)(Resource::Id id);
+
+    void (*load)(Resource *resource, const Resource::Data &data);
+    void (*unload)(Resource *resource);
+
+    void (*online)(Resource *resource);
+    void (*offline)(Resource *resource);
+
+    bool (*compile)(const resource_compiler::Input *input,
+                    const resource_compiler::Output *output);
+
+    /// \copydoc lifecycle::Preference
+    lifecycle::Preference lifecycle_preference;
+  };
+
+  /// Data available at runtime.
+  struct Data {
+    /// Handle to memory-resident data.
+    foundation::fs::File *memory_resident_data;
+
+    /// Handle to read streaming data.
+    foundation::fs::File *streaming_data;
+  };
+}
+
 namespace resource_compiler {
   struct Input;
   struct Output;
@@ -39,50 +114,14 @@ class YETI_PUBLIC Resource {
  YETI_DISALLOW_COPYING(Resource)
 
  public:
-  struct Data;
+  /// \copydoc yeti::resource::Id
+  typedef resource::Id Id;
 
- public:
-  /// An opaque identifier that uniquely identifies a resource.
-  typedef u64 Id;
+  /// \copydoc yeti::resource::Type
+  typedef resource::Type Type;
 
- public:
-  /// Describes a type of resource.
-  struct Type {
-    /// An opaque identifier assigned to a type of resource based on its name.
-    typedef u32 Id;
-
-    /// Name of the resource type. Used as a unique identifier.
-    /// \note Convention is to use a sigular noun or nouns in `snake_case`. For
-    /// example, `vertex_shader` fits convention and is easily understood while
-    /// `environments (sound)` does not and is extremely confusing in the
-    /// context(s) it is used.
-    const char *name;
-
-    /// Source file extension(s) associated with the resource type.
-    /// \note The end of array is marked with a sentinel value, `NULL`. For
-    /// example, `{"vs", "vertex_shader", NULL}`.
-    const char **extensions;
-
-    Resource *(*prepare)(Resource::Id id);
-
-    void (*load)(Resource *resource, const Resource::Data &data);
-    void (*unload)(Resource *resource);
-
-    void (*online)(Resource *resource);
-    void (*offline)(Resource *resource);
-
-    bool (*compile)(const resource_compiler::Input *input,
-                    const resource_compiler::Output *output);
-  };
-
- public:
-  struct Data {
-    /// Handle to memory-resident data.
-    foundation::fs::File *memory_resident_data;
-
-    /// Handle to read streaming data.
-    foundation::fs::File *streaming_data;
-  };
+  /// \copydoc yeti::resource::Data
+  typedef resource::Data Data;
 
  public:
   /// \internal

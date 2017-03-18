@@ -40,7 +40,8 @@ const Resource::Type *ScriptResource::type() {
     /* .unload = */ &ScriptResource::unload,
     /* .online = */ NULL,
     /* .offline = */ NULL,
-    /* .compile = */ &ScriptResource::compile
+    /* .compile = */ &ScriptResource::compile,
+    /* .lifecycle_preference = */ resource::lifecycle::INDIFFERENT
   };
 
   return &type;
