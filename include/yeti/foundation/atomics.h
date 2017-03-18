@@ -51,14 +51,12 @@ namespace atomic {
   u32 load(const volatile u32 *v);
   i64 load(const volatile i64 *v);
   u64 load(const volatile u64 *v);
-  uintptr_t load(const volatile uintptr_t *v);
   void *load(void ** const volatile v);
 
   void store(volatile i32 *v, const i32 desired);
   void store(volatile u32 *v, const u32 desired);
   void store(volatile i64 *v, const i64 desired);
   void store(volatile u64 *v, const u64 desired);
-  void store(volatile uintptr_t *v, const uintptr_t desired);
   void store(void ** volatile v, const void *desired);
 
   i32 add(volatile i32 *lhs, const i32 rhs);
@@ -75,8 +73,14 @@ namespace atomic {
   u32 cmp_and_xchg(volatile u32 *v, const u32 expected, const u32 desired);
   i64 cmp_and_xchg(volatile i64 *v, const i64 expected, const i64 desired);
   u64 cmp_and_xchg(volatile u64 *v, const u64 expected, const u64 desired);
-  uintptr_t cmp_and_xchg(volatile uintptr_t *v, const uintptr_t expected, const uintptr_t desired);
   void *cmp_and_xchg(void ** volatile v, const void *expected, const void *desired);
+
+#if YETI_COMPILER != YETI_COMPILER_MSVC
+  // Conflicts with `u32` or `u64` in MSVC.
+  uintptr_t load(const volatile uintptr_t *v);
+  void store(volatile uintptr_t *v, const uintptr_t desired);
+  uintptr_t cmp_and_xchg(volatile uintptr_t *v, const uintptr_t expected, const uintptr_t desired);
+#endif
 
   template <typename T>
   T min(volatile T *v, const T versus);
@@ -155,14 +159,6 @@ YETI_INLINE u64 atomic::load(const volatile u64 *v) {
 #endif
 }
 
-YETI_INLINE uintptr_t atomic::load(const volatile uintptr_t *v) {
-#if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
-  return (uintptr_t)load((const volatile u32 *)v);
-#elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
-  return (uintptr_t)load((const volatile u64 *)v);
-#endif
-}
-
 YETI_INLINE void *atomic::load(void ** const volatile v) {
   return (void *)load((const volatile uintptr_t *)v);
 }
@@ -207,14 +203,6 @@ YETI_INLINE void atomic::store(volatile i64 *v, const i64 desired) {
 
 YETI_INLINE void atomic::store(volatile u64 *v, const u64 desired) {
   store((i64 *)v, (i64)desired);
-}
-
-YETI_INLINE void atomic::store(volatile uintptr_t *v, const uintptr_t desired) {
-#if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
-  store((volatile u32 *)v, (u32)desired);
-#elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
-  store((volatile u64 *)v, (u64)desired);
-#endif
 }
 
 YETI_INLINE void atomic::store(void ** volatile v, const void *desired) {
@@ -339,17 +327,35 @@ YETI_INLINE u64 atomic::cmp_and_xchg(volatile u64 *v, const u64 expected, const 
   return (u64)cmp_and_xchg((i64 *)v, (i64)expected, (i64)desired);
 }
 
-YETI_INLINE uintptr_t atomic::cmp_and_xchg(volatile uintptr_t *v, const uintptr_t expected, const uintptr_t desired) {
-#if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
-  return (uintptr_t)cmp_and_xchg((volatile u32 *)v, (u32)expected, (u32)desired);
-#elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
-  return (uintptr_t)cmp_and_xchg((volatile u64 *)v, (u64)expected, (u64)desired);
-#endif
-}
-
 YETI_INLINE void *atomic::cmp_and_xchg(void ** volatile v, const void *expected, const void *desired) {
   return (void *)cmp_and_xchg((volatile uintptr_t *)v, (uintptr_t)expected, (uintptr_t)desired);
 }
+
+#if YETI_COMPILER != YETI_COMPILER_MSVC
+  YETI_INLINE uintptr_t atomic::load(const volatile uintptr_t *v) {
+  #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
+    return (uintptr_t)load((const volatile u32 *)v);
+  #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+    return (uintptr_t)load((const volatile u64 *)v);
+  #endif
+  }
+
+  YETI_INLINE void atomic::store(volatile uintptr_t *v, const uintptr_t desired) {
+  #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
+    store((volatile u32 *)v, (u32)desired);
+  #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+    store((volatile u64 *)v, (u64)desired);
+  #endif
+  }
+
+  YETI_INLINE uintptr_t atomic::cmp_and_xchg(volatile uintptr_t *v, const uintptr_t expected, const uintptr_t desired) {
+  #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
+    return (uintptr_t)cmp_and_xchg((volatile u32 *)v, (u32)expected, (u32)desired);
+  #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+    return (uintptr_t)cmp_and_xchg((volatile u64 *)v, (u64)expected, (u64)desired);
+  #endif
+  }
+#endif
 
 template <typename T>
 YETI_INLINE T atomic::min(volatile T *v, const T versus) {
