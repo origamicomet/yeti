@@ -22,18 +22,30 @@
 
 namespace yeti {
 
+class Resource;
+
+namespace resource {
+  struct Type;
+  struct Data;
+}
+
+namespace resource_compiler {
+  struct Input;
+  struct Output;
+}
+
 namespace resource {
   /// An opaque identifier that uniquely identifies a resource.
   typedef u64 Id;
 
-  namespace lifecycle {
+  namespace LifecyclePreferences {
     /// Preference for how lifecycle callbacks should be called relative to
     /// other resources of the same type.
     ///
     /// \warning This is a preference, not a guarantee. While care is taken to
     /// adhere to your preference it will be ignored if doing so is too costly.
     ///
-    enum Preference {
+    enum _ {
       /// Don't care how resources are brought online.
       INDIFFERENT = 0,
 
@@ -52,6 +64,9 @@ namespace resource {
       JUST_IN_TIME = 3
     };
   }
+
+  /// \copydoc yeti::resource::LifecyclePreferences::_
+  typedef LifecyclePreferences::_ LifecyclePreference;
 
   /// Describes a type of resource.
   struct Type {
@@ -72,9 +87,9 @@ namespace resource {
     /// example, `{"vs", "vertex_shader", NULL}`.
     const char **extensions;
 
-    Resource *(*prepare)(Resource::Id id);
+    Resource *(*prepare)(resource::Id id);
 
-    void (*load)(Resource *resource, const Resource::Data &data);
+    void (*load)(Resource *resource, const resource::Data &data);
     void (*unload)(Resource *resource);
 
     void (*online)(Resource *resource);
@@ -83,8 +98,8 @@ namespace resource {
     bool (*compile)(const resource_compiler::Input *input,
                     const resource_compiler::Output *output);
 
-    /// \copydoc lifecycle::Preference
-    lifecycle::Preference lifecycle_preference;
+    /// \copydoc LifecyclePreference
+    resource::LifecyclePreference lifecycle_preference;
   };
 
   /// Data available at runtime.
@@ -95,11 +110,6 @@ namespace resource {
     /// Handle to read streaming data.
     foundation::fs::File *streaming_data;
   };
-}
-
-namespace resource_compiler {
-  struct Input;
-  struct Output;
 }
 
 // TODO(mtwilliams): Protect internal (to Yeti) interfaces.
