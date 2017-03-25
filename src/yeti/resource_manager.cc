@@ -36,7 +36,7 @@ namespace resource_manager {
     foundation::ReadersWriterLock *resources_lock_ = foundation::ReadersWriterLock::create();
 
     // TODO(mtwilliams): Replace with condition variable.
-    // Signalled whenever some work was added to one of the four queues.
+    // Signaled whenever some work is added to one of the four queues.
     foundation::Event *work_to_be_done_ = foundation::Event::create();
 
     foundation::HashMap<Resource::Id, Resource *> resources_(foundation::heap(), 65535);

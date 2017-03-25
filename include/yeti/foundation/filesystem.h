@@ -61,7 +61,7 @@ struct Info {
   u64 size;
 
   /// Created at, in seconds from Unix epoch.
-  /// \warning Is not available on some platforms, namely Linux and OS X!
+  /// \warning Is not available on some platforms, namely macOS and Linux!
   u64 created_at;
 
   /// Most recently accessed at, in seconds from Unix epoch.

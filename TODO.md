@@ -82,8 +82,6 @@
 - Audit and eliminate (or minimize) false sharing.
   - In task scheduler.
   - In logging.
-- Implement work stealing.
-- Implement `task_scheduler::do_work_while_waiting_for`.
 - Move to 100% task-based multithreading, i.e. no longer maintain a main thread.
 - Implement and test mouse and keyboard focus tracking.
   - Expose to Lua.
