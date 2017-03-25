@@ -17,6 +17,9 @@ namespace yeti {
 
 namespace resource_manager {
   namespace {
+    // Indicates if loading and unloading is available.
+    static bool enabled_ = false;
+
     static const size_t queue_mem_sz_ = 131072;
 
     static const size_t load_queue_mem_sz_    = queue_mem_sz_ * 1/3;
@@ -85,13 +88,17 @@ const Resource::Type *resource_manager::type_from_ext(const char *ext) {
   return NULL;
 }
 
-void resource_manager::initialize() {
+void resource_manager::initialize(const Config &config) {
+  yeti_assert_debug(!enabled_);
+
   foundation::Thread::Options management_thread_opts;
   sprintf(&management_thread_opts.name[0], "Resource Management");
   management_thread_opts.affinity = ~0ull;
   management_thread_opts.stack_size = 0x100000 /* 1MiB */;
 
   foundation::Thread::spawn(&resource_manager::management_thread, 0, &management_thread_opts)->detach();
+
+  enabled_ = true;
 }
 
 void resource_manager::shutdown() {
@@ -120,6 +127,8 @@ void resource_manager::track(const Resource::Type *type) {
 }
 
 Resource *resource_manager::load(Resource::Id id) {
+  yeti_assert_debug(enabled_);
+
   {
     YETI_SCOPED_LOCK_NON_EXCLUSIVE(resources_lock_);
 
@@ -148,6 +157,7 @@ Resource *resource_manager::load(Resource::Id id) {
 }
 
 void resource_manager::unload(Resource *resource) {
+  yeti_assert_debug(enabled_);
   yeti_assert_debug(resource != NULL);
   yeti_assert_development(resource->refs() == 0);
 

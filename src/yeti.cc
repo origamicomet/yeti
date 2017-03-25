@@ -23,19 +23,23 @@ namespace yeti {
   }
 }
 
-void yeti::initialize() {
+void yeti::initialize(const Config &config) {
   yeti::foundation::set_assertion_handler(&yeti::default_assertion_handler);
 
-  task_scheduler::initialize();
+  if (config.resources.database) {
+    resource_manager::Config resource_manager_config;
+    resource_manager_config.database = config.resources.database;
+    resource_manager::initialize(resource_manager_config);
+  }
 
-  resource_manager::initialize();
   resource_manager::track(ScriptResource::type());
+
+  task_scheduler::Config task_scheduler_config;
+  task_scheduler_config.workers = config.threading.workers;
+  task_scheduler::initialize(task_scheduler_config);
 }
 
 void yeti::shutdown() {
-  resource_manager::shutdown();
-
-  task_scheduler::shutdown();
 }
 
 YETI_BEGIN_EXTERN_C // {

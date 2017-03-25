@@ -121,9 +121,10 @@ namespace task_scheduler {
   }
 }
 
-void task_scheduler::initialize() {
-  // TODO(mtwilliams): Yank via `cpuid`.
-  num_workers_ = 8 - 1;
+void task_scheduler::initialize(const Config &config) {
+  yeti_assert_development(config.workers > 0);
+
+  num_workers_ = config.workers;
 
   const size_t mem_per_worker_queue =
     sizeof(worker_queue_mem_) /  (num_workers_ + 1);

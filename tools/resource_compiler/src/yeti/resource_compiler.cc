@@ -18,7 +18,11 @@
 int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
 
-  yeti::initialize();
+  yeti::Config config;
+  config.resources.database = NULL;
+  config.threading.workers = 8 - 1;
+
+  yeti::initialize(config);
 
   yeti::resource_compiler::Runner resource_compiler_runner;
   resource_compiler_runner.setup(&argv[1], argc - 1);

@@ -27,6 +27,11 @@ namespace yeti {
 
 namespace resource_manager {
 
+///
+struct Config {
+  const char *database;
+};
+
 /// Derives the resource type id from @type.
 extern YETI_PUBLIC Resource::Type::Id id_from_type(const Resource::Type *type);
 
@@ -46,7 +51,7 @@ extern YETI_PUBLIC const Resource::Type *type_from_path(const char *path);
 extern YETI_PUBLIC const Resource::Type *type_from_ext(const char *ext);
 
 ///
-extern YETI_PUBLIC void initialize();
+extern YETI_PUBLIC void initialize(const Config &config);
 
 ///
 extern YETI_PUBLIC void shutdown();

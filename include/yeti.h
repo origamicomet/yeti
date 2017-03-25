@@ -59,7 +59,18 @@ YETI_END_EXTERN_C // }
 
 YETI_BEGIN_NAMESPACE // {
 
-extern YETI_PUBLIC void initialize();
+///
+struct Config {
+  struct {
+    const char *database;
+  } resources;
+
+  struct {
+    size_t workers;
+  } threading;
+};
+
+extern YETI_PUBLIC void initialize(const Config &config);
 extern YETI_PUBLIC void shutdown();
 
 YETI_END_NAMESPACE // }

@@ -20,10 +20,10 @@
 #include "yeti/linkage.h"
 #include "yeti/foundation.h"
 
-namespace yeti {
+#include "yeti/time_step_policy.h"
+#include "yeti/window.h"
 
-class Window;
-class TimeStepPolicy;
+namespace yeti {
 
 /// ...
 class YETI_PUBLIC Application {

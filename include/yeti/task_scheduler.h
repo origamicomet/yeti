@@ -27,11 +27,17 @@ struct Task;
 
 namespace task_scheduler {
 
+///
+struct Config {
+  ///
+  size_t workers;
+};
+
 /// \brief Initializes the task-scheduler.
 ///
 /// \note Assumes execution on main thread.
 ///
-extern YETI_PUBLIC void initialize();
+extern YETI_PUBLIC void initialize(const Config &config);
 
 /// \brief Shuts down the task-scheduler.
 ///

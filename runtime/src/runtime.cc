@@ -15,12 +15,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
 
+  // TODO(mtwilliams): Gather most configuration from `config.ini`.
+  yeti::Config config;
+  config.resources.database = "resources.db";
+  // TODO(mtwilliams): Determine number of cores.
+  config.threading.workers = 8 - 1;
+
   // Let the games begin.
-  yeti::initialize();
+  yeti::initialize(config);
   yeti::runtime::StandardApplication app;
   app.run();
 
