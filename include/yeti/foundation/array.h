@@ -254,17 +254,17 @@ const T *Array<T>::last() const {
 
 template <typename T>
 YETI_INLINE size_t Array<T>::reserved() const {
-  return (reserved_ - first_) / sizeof(T);
+  return (reserved_ - first_);
 }
 
 template <typename T>
 YETI_INLINE size_t Array<T>::size() const {
-  return (last_ - first_) / sizeof(T);
+  return (last_ - first_);
 }
 
 template <typename T>
 YETI_INLINE size_t Array<T>::length() const {
-  return this->reserved();
+  return this->size();
 }
 
 template <typename T>
