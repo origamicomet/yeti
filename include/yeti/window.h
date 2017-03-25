@@ -44,10 +44,21 @@ class YETI_PUBLIC Window {
   };
 
  public:
+  struct Event {
+    enum Type {
+      CLOSED = 1,
+    };
+
+    Type type;
+  };
+
+  typedef void (*EventHandler)(Window *window, const Event &event, void *ctx);
+
+ public:
   // TODO(mtwilliams): Document this interface.
   static Window *open(const Window::Description &desc);
 
-  void update(void (*event_handler)(void *ctx),
+  void update(EventHandler event_handler,
               void *event_handler_ctx = NULL);
 
   void close();

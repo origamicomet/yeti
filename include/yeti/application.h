@@ -54,7 +54,9 @@ class YETI_PUBLIC Application {
   void quit();
 
  private:
-  static void window_event_handler_(void *);
+  static void window_event_handler_(Window *window,
+                                    const Window::Event &event,
+                                    void *self);
 
  public:
   // TODO(mtwilliams): Document this interface.

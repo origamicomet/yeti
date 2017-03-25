@@ -131,9 +131,13 @@ Window *Window::open(const Window::Description &desc) {
 #endif
 }
 
-void Window::update(void (*event_handler)(void *ctx), void *event_handler_ctx) {
+void Window::update(EventHandler event_handler,
+                    void *event_handler_ctx) {
   yeti_assert_debug(event_handler != NULL);
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::SetPropA((HWND)native_hndl_, "event_handler", (HANDLE)event_handler);
+  ::SetPropA((HWND)native_hndl_, "event_handler_ctx", (HANDLE)event_handler_ctx);
+
   MSG msg;
   while (::PeekMessage(&msg, (HWND)native_hndl_, 0, 0, PM_REMOVE)) {
     // TODO(mtwilliams): Translate and pass messages to |event_handler|.
@@ -397,6 +401,9 @@ uintptr_t Window::to_native_hndl() const {
 static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   Window *window = (Window *)::GetPropA(hWnd, "inst");
 
+  Window::EventHandler event_handler = (Window::EventHandler)::GetPropA(hWnd, "event_handler");
+  void *event_handler_ctx = (void *)::GetPropA(hWnd, "event_handler_ctx");
+
   switch (uMsg) {
     case WM_GETICON: {
       // TODO(mtwilliams): Return application specific icons.
@@ -404,8 +411,13 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
     case WM_CLOSE: {
       // Destruction is inevitable! Sometimes?
-      if (window->closable())
+      if (window->closable()) {
+        Window::Event event;
+        event.type = Window::Event::CLOSED;
+        event_handler(window, event, event_handler_ctx);
+
         ::DestroyWindow(hWnd);
+      }
     } return TRUE;
 
     case WM_NCDESTROY: {
@@ -413,6 +425,8 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       // be removed (via RemoveProp) before it is destroyed. In practice, this
       // doesn't make any material difference--perhaps a (small) memory leak?
       ::RemovePropA(hWnd, "inst");
+      ::RemovePropA(hWnd, "event_handler");
+      ::RemovePropA(hWnd, "event_handler_ctx");
 
       // And of course, we free any memory we've associated with |hWnd|.
       foundation::heap().deallocate((uintptr_t)window);

@@ -11,8 +11,6 @@
 
 #include "yeti/application.h"
 
-#include "yeti/window.h"
-#include "yeti/time_step_policy.h"
 #include "yeti/input.h"
 
 namespace yeti {
@@ -125,9 +123,22 @@ void Application::quit() {
   YETI_UNREACHABLE();
 }
 
-void Application::window_event_handler_(void *ctx) {
-  Window *window = (Window *)ctx;
-  YETI_UNUSED(window);
+void Application::window_event_handler_(Window *window,
+                                        const Window::Event &event,
+                                        void *self) {
+  Application *app = (Application *)self;
+
+  u32 index;
+  for (index = 0; index < app->windows_.size(); ++index)
+    if (app->windows_[index] == window)
+      break;
+
+  switch (event.type) {
+    case Window::Event::CLOSED: {
+      app->windows_[index] = app->windows_[app->windows_.size() - 1];
+      app->windows_.resize(app->windows_.size() - 1);
+    } break;
+  }
 }
 
 foundation::Array<Window *> &Application::windows() {
