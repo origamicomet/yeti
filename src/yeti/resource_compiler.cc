@@ -110,7 +110,7 @@ void ResourceCompiler::compile(bool force) {
   // uncompilable unignored source files. If we find any, we fail.
   for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
     if (this->ignorable(*path))
-      break;
+      continue;
 
     // TODO(mtwilliams): Don't assert if |*path| is not allowed or compilable,
     // instead, fail the compilation.
@@ -123,7 +123,7 @@ void ResourceCompiler::compile(bool force) {
   // ResourceCompiler::compile/2 for details.
   for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
     if (this->ignorable(*path))
-      break;
+      continue;
 
     this->compile(*path, force);
 
