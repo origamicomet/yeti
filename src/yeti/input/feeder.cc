@@ -201,12 +201,12 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
   Mouse::update(MouseAxes::WHEEL, wheel);
 }
 
-static LRESULT WINAPI InputWindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-  const WNDPROC original_window_proc = (WNDPROC)::GetPropA(hWnd, "hooks[input].orginal_window_proc");
+static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  const WNDPROC original_window_proc = (WNDPROC)::GetPropA(hWnd, "orginal_window_proc");
 
   switch (uMsg) {
     case WM_INPUT_DEVICE_CHANGE: {
-      // TODO(mtwilliams): Handle device connection/disconnections.
+      // TODO(mtwilliams): Handle device connections and disconnections.
     } break;
 
     case WM_INPUTLANGCHANGE: {
@@ -216,30 +216,36 @@ static LRESULT WINAPI InputWindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
     case WM_INPUT: {
       RAWINPUT raw_input;
       UINT raw_input_sz = sizeof(RAWINPUT);
-      ::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, (LPVOID)&raw_input, &raw_input_sz, sizeof(RAWINPUTHEADER));
-      switch (raw_input.header.dwType) {
-        case RIM_TYPEKEYBOARD: {
-          on_raw_keyboard_input(raw_input.data.keyboard);
-        } break;
-        case RIM_TYPEMOUSE: {
-          on_raw_mouse_input(raw_input.data.mouse);
-        } break;
-      }
+
+      ::GetRawInputData((HRAWINPUT)lParam,
+                        RID_INPUT,
+                        (LPVOID)&raw_input,
+                        &raw_input_sz,
+                        sizeof(RAWINPUTHEADER));
+
+      if (raw_input.header.dwType == RIM_TYPEKEYBOARD)
+        on_raw_keyboard_input(raw_input.data.keyboard);
+      else if (raw_input.header.dwType == RIM_TYPEMOUSE)
+        on_raw_mouse_input(raw_input.data.mouse);
     } break;
 
     case WM_MOUSEMOVE: {
       POINT absolute;
       ::GetCursorPos(&absolute);
-      const Vec3 relative = Vec3((f32)GET_X_LPARAM(lParam), (f32)GET_Y_LPARAM(lParam), 0.f);
+
+      POINT relative;
+      relative.x = GET_X_LPARAM(lParam);
+      relative.y = GET_Y_LPARAM(lParam);
+
       Mouse::update(MouseAxes::ABSOLUTE, Vec3((f32)absolute.x, (f32)absolute.y, 0.f));
-      Mouse::update(MouseAxes::RELATIVE, relative);
+      Mouse::update(MouseAxes::RELATIVE, Vec3((f32)relative.x, (f32)relative.y, 0.f));
     } break;
 
     case WM_NCDESTROY: {
       // According to MSDN, all entries in the property list of a window must
       // be removed (via RemoveProp) before it is destroyed. In practice, this
-      // doesn't make any material difference--perhaps a (small) memory leak?
-      ::RemovePropA(hWnd, "hooks[input].orginal_window_proc");
+      // doesn't make any material difference. Perhaps a (small) memory leak?
+      ::RemovePropA(hWnd, "orginal_window_proc");
     } break;
   }
 
@@ -249,16 +255,36 @@ static LRESULT WINAPI InputWindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 void input::from(const Window *window) {
   yeti_assert_debug(window != NULL);
 
-  HWND hndl = (HWND)window->to_native_hndl();
+  const HWND hndl = (HWND)window->to_native_hndl();
+
+  // Register for raw-input events from keyboards and mice. Also register for
+  // device connection and disconnection events.
+  //
+  // See http://www.usb.org/developers/devclass_docs/Hut1_11.pdf for an
+  // explanation of the magic values.
+  //
+  RAWINPUTDEVICE raw_input_devices[2];
+
+  // Keyboard:
+  raw_input_devices[0].usUsagePage = 0x01;
+  raw_input_devices[0].usUsage     = 0x06;
+  raw_input_devices[0].hwndTarget  = hndl;
+  raw_input_devices[0].dwFlags     = RIDEV_DEVNOTIFY;
+
+  // Mouse:
+  raw_input_devices[1].usUsagePage = 0x01;
+  raw_input_devices[1].usUsage     = 0x02;
+  raw_input_devices[1].hwndTarget  = hndl;
+  raw_input_devices[1].dwFlags     = RIDEV_DEVNOTIFY;
+
+  ::RegisterRawInputDevices(raw_input_devices, 2, sizeof(RAWINPUTDEVICE));
 
   // TODO(mtwilliams): Determine if Windows caches sub-classes, i.e. does
-  // something akin to "find-or-create".
-  LONG_PTR orginal_window_proc = ::SetWindowLongPtrW(hndl, GWLP_WNDPROC, (LONG_PTR)&InputWindowProcW);
-  const bool installed_hook_succesfully = (orginal_window_proc != NULL);
-  yeti_assert(installed_hook_succesfully);
+  // something akin to find-or-create.
+  LONG_PTR orginal_window_proc =
+    ::SetWindowLongPtrW(hndl, GWLP_WNDPROC, (LONG_PTR)&_WindowProcW);
 
-  // TODO(mtwilliams): Use the (global) atom table?
-  ::SetPropA(hndl, "hooks[input].orginal_window_proc", (HANDLE)orginal_window_proc);
+  ::SetPropA(hndl, "orginal_window_proc", (HANDLE)orginal_window_proc);
 }
 
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC

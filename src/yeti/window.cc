@@ -32,79 +32,90 @@ namespace yeti {
 Window::Window() {
   this->native_hndl_ = NULL;
   this->is_closable_ = true;
+  this->is_resizeable_ = true;
 }
 
 Window::~Window() {
 }
 
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  static void compensate_for_chrome(const DWORD styles,
+                                    const DWORD ex_styles,
+                                    u32 *width,
+                                    u32 *height)
+  {
+    RECT area = { 0, 0, *width, *height };
+
+    ::AdjustWindowRectEx(&area, styles, FALSE, ex_styles);
+
+    *width  = area.right - area.left;
+    *height = area.bottom - area.top;
+  }
+#endif
+
 Window *Window::open(const Window::Description &desc) {
   yeti_assert_development(desc.title != NULL);
+
   yeti_assert_development(desc.dimensions.width > 0);
   yeti_assert_development(desc.dimensions.width <= 65535);
+
   yeti_assert_development(desc.dimensions.height > 0);
   yeti_assert_development(desc.dimensions.height <= 65535);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+
   Window *window = new (foundation::heap()) Window();
 
+  window->is_resizeable_ = desc.resizeable;
+  window->is_closable_ = desc.closable;
+
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  // TODO(mtwilliams): Use our own icon, IDI_ENGINE_ICON?
   WNDCLASSEXW wcx;
   memset(&wcx, 0, sizeof(wcx));
   wcx.cbSize        = sizeof(WNDCLASSEX);
-  // TODO(mtwilliams): Investigate if CS_OWNDC needs to be specified.
   wcx.style         = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
   wcx.lpfnWndProc   = &_WindowProcW;
   wcx.hInstance     = ::GetModuleHandle(NULL);
   wcx.hCursor       = ::LoadCursor(NULL, IDC_ARROW);
-  // TODO(mtwilliams): Use our own icon, IDI_ENGINE_ICON?
-  wcx.hIcon         = ::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
-  wcx.hIconSm       = ::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
+  wcx.hIcon         = (HICON)::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
+  wcx.hIconSm       = (HICON)::LoadIconW(wcx.hInstance, MAKEINTRESOURCEW(IDI_APPLICATION));
   wcx.lpszClassName = L"875d3758-bff3-11e5-93a6-4441a4143a20";
 
   // NOTE(mtwilliams): This is not thread-safe. Not that any of this stuff is.
   static const bool registered_class_succesfully = (::RegisterClassExW(&wcx) != 0);
   yeti_assert(registered_class_succesfully);
 
-  const DWORD styles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-  const DWORD ex_styles = WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW;
+  DWORD styles = WS_CAPTION
+               | WS_BORDER
+               | WS_CLIPCHILDREN
+               | WS_CLIPSIBLINGS;
+
+  if (desc.resizeable)
+    styles |= (WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SIZEBOX);
+  else
+    styles |= (WS_SYSMENU);
+
+  DWORD ex_styles = WS_EX_APPWINDOW;
 
   WCHAR title_w[256];
   ::MultiByteToWideChar(CP_UTF8, 0, desc.title, -1, title_w, 256);
 
-  // TODO(mtwilliams): Refactor?
-  RECT client_area = { 0, 0, desc.dimensions.width, desc.dimensions.height };
-  ::AdjustWindowRectEx(&client_area, styles, FALSE, ex_styles);
-  const DWORD adjusted_width = client_area.right - client_area.left;
-  const DWORD adjusted_height = client_area.bottom - client_area.top;
+  u32 width = desc.dimensions.width;
+  u32 height = desc.dimensions.height;
 
-  HWND hndl = ::CreateWindowExW(ex_styles, wcx.lpszClassName, title_w, styles, 0, 0,
-                                adjusted_width, adjusted_height, NULL, NULL,
-                                ::GetModuleHandle(NULL), NULL);
+  compensate_for_chrome(styles, ex_styles, &width, &height);
+
+  HWND hndl = ::CreateWindowExW(ex_styles,
+                                wcx.lpszClassName,
+                                &title_w[0],
+                                styles,
+                                0, 0, width, height,
+                                NULL,
+                                NULL,
+                                ::GetModuleHandle(NULL),
+                                (LPVOID)window);
 
   const bool created_windowed_succesfully = (hndl != NULL);
   yeti_assert(created_windowed_succesfully);
-
-  // TODO(mtwilliams): Use the (global) atom table?
-  const bool inserted_ref_to_inst_successfully = !!(::SetPropA(hndl, "inst", (HANDLE)window));
-  yeti_assert(inserted_ref_to_inst_successfully);
-
-  // Register for keyboard and mouse raw-input events:
-  // See http://www.usb.org/developers/devclass_docs/Hut1_11.pdf for an
-  // explanation of the magic values.
-  RAWINPUTDEVICE raw_input_devices[2];
-
-  // Keyboard:
-  raw_input_devices[0].usUsagePage = 0x01;
-  raw_input_devices[0].usUsage = 0x06;
-  raw_input_devices[0].hwndTarget = hndl;
-  raw_input_devices[0].dwFlags = 0;
-
-  // Mouse:
-  raw_input_devices[1].usUsagePage = 0x01;
-  raw_input_devices[1].usUsage = 0x02;
-  raw_input_devices[1].hwndTarget = hndl;
-  raw_input_devices[1].dwFlags = 0;
-
-  const bool registered_for_raw_input_successfully = !!(::RegisterRawInputDevices(raw_input_devices, 2, sizeof(RAWINPUTDEVICE)));
-  yeti_assert(registered_for_raw_input_successfully);
 
   // HACK(mtwilliams): Center the window on the encompassing monitor.
   HMONITOR encompassing_monitor = ::MonitorFromWindow(hndl, MONITOR_DEFAULTTONULL);
@@ -298,18 +309,22 @@ void Window::dimensions(u32 *width, u32 *height) const {
 void Window::resize(u32 new_width, u32 new_height) {
   yeti_assert_development(new_width > 0);
   yeti_assert_development(new_width <= 65535);
+
   yeti_assert_development(new_height > 0);
   yeti_assert_development(new_height <= 65535);
+
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  const DWORD styles = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-  const DWORD ex_styles = WS_EX_APPWINDOW | WS_EX_OVERLAPPEDWINDOW;
+  const DWORD styles = ::GetWindowLong((HWND)native_hndl_, GWL_STYLE);
+  const DWORD ex_styles = ::GetWindowLong((HWND)native_hndl_, GWL_EXSTYLE);
 
-  RECT new_client_area = { 0, 0, new_width, new_height };
-  ::AdjustWindowRectEx(&new_client_area, styles, FALSE, ex_styles);
-  const DWORD adjusted_width = new_client_area.right - new_client_area.left;
-  const DWORD adjusted_height = new_client_area.bottom - new_client_area.top;
+  u32 width = new_width;
+  u32 height = new_height;
 
-  ::SetWindowPos((HWND)native_hndl_, NULL, 0, 0, adjusted_width, adjusted_height,
+  compensate_for_chrome(styles, ex_styles, &width, &height);
+
+  ::SetWindowPos((HWND)native_hndl_,
+                 NULL,
+                 0, 0, width, height,
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
@@ -329,12 +344,17 @@ bool Window::closable() const {
 #endif
 }
 
-bool Window::set_closable(bool new_closable) {
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS || \
-    YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X || \
-    YETI_PLATFORM == YETI_PLATFORM_LINUX
-  is_closable_ = new_closable;
-  return true;
+void Window::set_closable(bool closable) {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  const HMENU menu = ::GetSystemMenu((HWND)native_hndl_, FALSE);
+
+  if (is_closable_ = closable) {
+    ::EnableMenuItem(menu, SC_CLOSE, MF_BYCOMMAND);
+  } else {
+    ::EnableMenuItem(menu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+  }
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
 #endif
@@ -408,28 +428,49 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       // TODO(mtwilliams): Return application specific icons.
     } break;
 
-    case WM_CLOSE: {
-      // Destruction is inevitable! Sometimes?
-      if (window->closable()) {
-        Window::Event event;
-        event.type = Window::Event::CLOSED;
-        event_handler(window, event, event_handler_ctx);
+    case WM_CREATE: {
+      const CREATESTRUCT *cs = (CREATESTRUCT *)lParam;
 
-        ::DestroyWindow(hWnd);
+      window = (Window *)cs->lpCreateParams;
+
+      // Store property so we can recover `Window *` from handle.
+      ::SetPropA(hWnd, "inst", (HANDLE)window);
+
+      if (!window->closable()) {
+        ::EnableMenuItem(::GetSystemMenu(hWnd, FALSE),
+                         SC_CLOSE,
+                         MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
       }
-    } return TRUE;
+    } return 0;
+
+    case WM_CLOSE: {
+      Window::Event event;
+      event.type = Window::Event::CLOSED;
+      event_handler(window, event, event_handler_ctx);
+
+      // Destruction is inevitable!
+      ::DestroyWindow(hWnd);
+    } return 0;
 
     case WM_NCDESTROY: {
       // According to MSDN, all entries in the property list of a window must
       // be removed (via RemoveProp) before it is destroyed. In practice, this
-      // doesn't make any material difference--perhaps a (small) memory leak?
+      // doesn't make any material difference. Perhaps a (small) memory leak?
       ::RemovePropA(hWnd, "inst");
       ::RemovePropA(hWnd, "event_handler");
       ::RemovePropA(hWnd, "event_handler_ctx");
 
       // And of course, we free any memory we've associated with |hWnd|.
       foundation::heap().deallocate((uintptr_t)window);
-    } return TRUE;
+    } return 0;
+
+    case WM_ERASEBKGND: {
+      // Prevent flickering.
+    } return 1;
+
+    case WM_PAINT: {
+      ::ValidateRect(hWnd, NULL);
+    } return 0;
   }
 
   return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);

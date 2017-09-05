@@ -34,6 +34,7 @@ class YETI_PUBLIC Window {
   struct Description {
     /// ...
     const char *title;
+
     /// ...
     struct {
       /// ...
@@ -41,6 +42,12 @@ class YETI_PUBLIC Window {
       /// ...
       u32 height;
     } dimensions;
+
+    /// ...
+    bool resizeable;
+
+    /// ...
+    bool closable;
   };
 
  public:
@@ -93,7 +100,7 @@ class YETI_PUBLIC Window {
 
   // TODO(mtwilliams): Document this interface.
   bool closable() const;
-  bool set_closable(bool is_closable);
+  void set_closable(bool closable);
 
   // TODO(mtwilliams): Document this interface.
   bool keyboard_focus() const;
@@ -109,6 +116,7 @@ class YETI_PUBLIC Window {
 
  private:
   uintptr_t native_hndl_;
+  bool is_resizeable_;
   bool is_closable_;
 };
 
