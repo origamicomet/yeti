@@ -1,239 +1,408 @@
 # Yeti
 
-### Global
+## Engine
 
-- Move to Sherpa for managing dependencies.
-- Use `yeti_assert(!"<message>")` instead of `yeti_assertf(0, "<message>")`.
-- Move to C++ style casts?
-- Target Windows 7 or later by specifying `WINVER`.
-  - Don't want to target Windows XP. May have to for Asia.
-- Support macOS.
-  - Implement asbtractions for `YETI_PLATFORM_MAC_OS_X`.
-  - Rename internal identifers from "Mac OS X" to "macOS."
+Includes runtime.
 
-### Foundation
+### `TODO`
 
-- Extract from engine into `origamicomet/ocf`.
-- Refactor `yeti::foundation::fs` into an interface?
-- Handle multiple read/write calls internally.
-- Asynchronous I/O on files.
-- Memory-mapped I/O on files.
-- Expose a platform independent way to watch a directory (and all its children) for modifications.
-- Create a `path::join` function.
-- Rename `thread_safe::ScratchAllocator` to `thread_safe::BlockAllocator`.
-- Support up to 64 processors.
-- A thorough `cpuid` implementation.
-  - Build our own database of processors (and errata)?
-- Implement `Array<T>` sort and search.
-- Move to type-safe `Buffer<T>` and `Slice<T`>.
-- Polyfill type-traits.
-- Call destructors for non-POD types for collections.
-- Special case array types passed to collections.
-- Implement a lock-free multi-producer, single consumer queue, `thread_safe::MpMcQueue<T>`.
-- Implement a random number generator.
-- Implement a lock-free random number generator.
-- Make sure distribution of constrained random numbers is even.
-- Expose platform independent signalling events.
-- Expose platform independent condition variables.
-- Allow allocations to be tagged as "ignore" or "proxied."
-- Respect alignment in all allocators.
-- Improve `Array<T>` growth and shrink profile.
-- Identify storage connect/disconnects.
-- Tag custom new/delete so compiler doesn't placement new?
-- Implement a `BuddyAllocator`.
-- Provide a dynamic string class `String` that uses said buddy allocator.
-- Bump default allocation alignment to 16 bytes across the board.
-- Move log categories under `yeti::log` namespace?
-- Add an `open_or_create` function to our filesytem abstraction layer.
-- Add generic unicode conversion helpers.
-  - Convert between UTF-8 and UTF-16.
-  - Convert between UTF-8 and UTF-32.
-- Add generic unicode normalization helpers.
-  - NFC
-  - NFD
-- Handle large files in 32 bit builds.
-  - Specify `_FILE_OFFSET_BITS=64` on POSIX targets.
+* Inspect system to determine CPU, GPU, and RAM.
+  * Provide a thorough `cpuid` implementation.
+    * Build our own database of processors (and errata)?
+* Add an `open_or_create` function to our fileystem abstraction layer.
+  * Should open an existing file and append.
+* Expose asynchronous I/O on files.
+  * Tie into task scheduler, to allow offloading.
+* Expose memory-mapped I/O on files.
+  * Fallback for consoles?
+* Provide platform independent Unicode conversion helpers.
+  * Convert between UTF-8 and UTF-16.
+  * Convert between UTF-8 and UTF-32.
+* Provide platform independent Unicode normalization helpers.
+  * NFC and NFD
+* Provide a buddy allocator.
+* Provide a dynamic string class `String` that a global buddy allocator.
+* Handle large files in 32-bit builds.
+  * Specify `_FILE_OFFSET_BITS=64` on POSIX targets.
+* Improve random number generation.
+  * Thread-localize random number generation.
+  * Provide multiple strategies.
+  * Provide multiple distributions.
+* Expand cryptographic primitives.
+  * Provide SHA-1 and SHA-256.
+* Provide CRC32.
+* Track storage device connects and disconnects.
+* Track keyboard and mouse connects and disconnects.
+  * Enumerate connected devices through `GetRawInputDeviceList` whenever a `WM_INPUT_DEVICE_CHANGE` arrives.
+* Respect keyboard layout.
+  * Handle different keyboard layouts through include file trickery?
+  * Handle `WM_INPUTLANGCHANGE`.
+  * Use `WM_CHAR` and friends for textual input.
+* Extract mouse buttons and axes into an include file.
+* Expose mouse grabbing.
+* Expose setting of system cursor, either to standard or custom cursors.
+* On Lua errors, capture Lua and C/C++ callstack (and frames), then forward to a user specified error handler.
+* Expose Lua return values to C/C++.
+* Support Lua 5.2 and 5.3.
+  * Support registry with macro.
+* Implement smoothed time-step-policy.
+  * Also support debt payback using `wall`.
+* Finish logging infrastructure.
+  * Logging to console.
+    * Colors!
+  * Logging to network.
+  * Logging to file.
+* Finish `ResourceDatabase`.
+* Use our own allocator for Lua in 64-bit builds.
+  * Allocator needs to allocate within the first 2GiB of VM.
+    * Map some amount of memory in lower parts during startup.
+* Target Windows 7 and later.
+  * Don't want to target Windows XP, but may have to for Asia.
+  * Specify in manfiest.
+    * Add a manifest (and use it!)
+  * Define `WINVER` and `_WIN32_WINNT`.
+    * Refer to https://msdn.microsoft.com/en-us/library/6sehtctf.aspx for details.
+* Expand path manipulation utilities.
+  * Provide a path joining function.
+* Implement `Array<T>` sort and search.
+* Support up to 32 processor on 32-bit, and 64 on 64-bit.
+* Polyfill type traits.
+* Provide platform independent condition variables.
+* Allow allocations to be tagged as "ignore" or "proxied."
+* Actually load application manifest.
+* Provide a default application icon.
+  * Base off of Yeti logo.
+* Allow user to provide a custom icon.
+* Install a sophisticated assertion and error handler.
+* Interface resource compiler with database.
+* Make allocation tracking thread-safe.
+* Provide 32 bytes of data storage per task.
 
-### Engine
+### `BUGS`
 
-- Extract mouse buttons and mouse axes into an include file.
-- Commute mouse axes to two-dimensional vectors.
-- Respect keyboard layouts.
-  - Handle `WM_INPUTLANGCHANGE` messages.
-  - Specify keyboard layouts via include file trickery.
-- Use `WM_CHAR` and friends for textual input.
-- Implement `Keyboard::connected()` and `Mouse::connected()`.
-  - Handle `WM_INPUT_DEVICE_CHANGE` messages.
-- Implement `Window::mouse_focus()` and `Window::set_mouse_focus()`.
-- Actually generate events in `Window::update()` for consumption by `event_handler`.
-  - Remove window from `yeti::Application` when closed.
-  - Quit if the main window is closed.
-- Implement standard and custom cursors via `Window::cursor()` and `Window::set_cursor()`.
-- Update `MouseAxes::ABSOLUTE` and `MouseAxes::RELATIVE` upon raw-input? We'll have to manually translate `GetCursorPos` to a window-relative point.
-- Make allocation tracking thread-safe.
-- Optimize allocation tracking via a different strategy. Refer to the EASTL talk that describes the use arenas.
-- Switch time-step policies by updating `TimeStepPolicy::desc_` and `TimeStepPolicy::state_` rather than creating a new `TimeStepPolicy`.
-- On Lua errors, capture Lua and C/C++ callstack (and frames), then forward to a user specifiable error handler.
-- Expose Lua return values to C/C++.
-- Lua 5.2 and 5.3 support.
-- Implement a smoothed time-step policy.
-- Profile round-robin versus random queue assignment for tasks.
-- Investigate performance benefits of intrusive task permits.
-- Audit and eliminate (or minimize) false sharing.
-  - In task scheduler.
-  - In logging.
-- Move to 100% task-based multithreading, i.e. no longer maintain a main thread.
-- Implement and test mouse and keyboard focus tracking.
-  - Expose to Lua.
-- Implement focus grabbing.
-  - Expose to Lua.
-- Finish logging infrastructure.
-  - Log to console.
-  - Log to file.
-  - Log to network.
-- Implement a SQLite3-powered `ResourceDatabase`.
-- Use our own allocator for Lua on 64-bit.
-  - Provide an allocator that alloctates within the first 2GiB of VM.
-    - Map some amount of memory in the lower parts during startup.
-- Optimize `lua_State *` -> `Script *` recovery.
-  - Use a bump pointer, i.e. store a pointer to self after `lua_State *`.
-- Gracefully terminate worker threads, to prevent deadlocks.
-- Optimize task permits by storing in blocks of pointers that span an entire cache line, i.e. 16 on 32-bit and 8 on 64-bit.
-- Use a Condition Variable to signal `resource_manager::management_thread`.
-- Add bulk operation support to `resource_manager`.
-- Map `memory_resident_data` wholesale and provide a `Slice<u8>` instead of file handle.
-- Genericize math types.
-  - Or should we only support wholesale switching to fixed-point?
+* Global heap allocator doesn't respect alignment.
+* Custom `new` and `delete` operators may not be working as expected.
+  * Tag types with `YETI_ALLOCATOR_AWARE`?
 
-### Runtime
+### `PERF`
 
-- Load application manifest.
-- Default application icon based on the Yeti logo.
-- Determine the best approach to using a user-provided icon. Check my Github stars for that resource editor/embedding library. Or just load based on a manifest setting?
-- Install a sophisticated assertion handler.
-- Install a sophisticated error handler for exceptions, signals, and such.
+* Try to minimize impact on 32-bit builds.
+  * Prefer (distinct) 32-bit implementations whever possible.
+    * Random number generation.
+    * Threads.
+  * Audit fixed type usage.
+    * Prefer `unsigned` and `size_t` where possible.
+      * Especially loops.
+* Use intrusive task permits.
+  * Investigate performance.
+* Audit and eliminate (or minimize) false sharing.
+  * Especially in logging and profiling.
+* Optimize `Script *` recovery from `lua_State *`.
+* Support bulk operations on resources.
+* Bundle resources then map `memory_resident_data` wholesale, providing slices instead of direct handles.
+* Improve `Array<T>` memory profile during growth and shrinking.
+* Provide an optimized resource database.
+  * Qualities
+    * Read-only
+    * Fast to query
+    * Perfect hashing in place of lookups for `path -> id`
+  * Dispatch using a function pointer table that fits into one cache line, and 16-byte aligns each pointer (to efficiently use RIP relative addressing).
+    * Dale Weiler had the neat idea of using a function that takes a pointer to this struct and returns it by value thereby forcing the compiler to load the function pointers into registers, at least on the x86_64 ABI. Care must be taken to prevent the compiler from inlining the function.
 
-### Resource Compiler
+### `REFACTOR`
 
-- Allow more than one source data directory.
-  - Rather than "layering" by building `core` and then building `vanguard`, we should be able to build `core` and `vanguard` together.
-- Interface with `ResourceDatabase`.
-  - We also need to be able to pop out an `OptimizedResourceDatabase`.
-    - Dispatch using a function pointer table that fits into one cache line, and 16-byte aligns each function pointer (to efficiently use RIP relative addressing.)
-      - Dale Weiler had the idea to force the compiler to not inline a function that takes a pointer to this struct and returns it by value thereby forcing the compilter to load the function pointers into registers. At least on the x86-64 ABI.
-- Daemonizable. Should watch source data directory for changes, debounce for a user configurable amount of time (to debounce), and then build any new or modified resources.
-- Don't use assertions for error handling.
-- Detailed logging.
-- Pattern-based ignore rules.
-- Use edit-distance to detect misspellings.
-- Properly track compilation success or failure.
-- Use buddy-allocator backed strings for paths.
+* Extract foundation into a library.
+  * Move source tree to `origamicomet/ocf`.
+* Convert `yeti::foundation::fs` to an interface?
+  * Transparent virtual file-systems.
+* Move to type-safe `Slice<T>`.
+* Prefer `void *` over `uintptr_t`.
+* Switch time-step policies by updating `desc_` and `state_` rather than creating a new `TimeStepPolicy`?
+* Abstract `Resoruce::Data` I/O.
+  * Future proofing for resource bundles.
+* Allow hash used for hash tables to be overriden.
+* Update `absolute` and `relative` mouse axes upon raw-input?
+  * Manually translate `GetCursorPos` to a window-relative point?
+* Pass `Task *` to kernel and let kernel pull parameters.
 
-### Resource Package & Bundle Manager
+### `SMELL`
 
-- Scaffold.
+* Containers do not call destructors for non-POD types.
+* Log categories aren't under the `yeti` namespace.
+* Worker threads aren't gracefully terminated.
+  * Deadlocks a-hoy!
+* Returning pointers from `foundation::HashMap<K,V>`.
 
-# Milestones
+### `CRAZY`
 
-## 0.3
+* Move to 100% task-based multi-threading, i.e. only have worker threads.
+  * Introduce a separate multi-producer, single-consumer queue for thread specific work, like message pump.
+* Move to fibers a la Naughty Dog?
+  * Overkill, probably. Mykola has been stupid enough to try, and he keeps having issues.
+* Allow wholesale switch over to fixed-point math.
+  * Might be necessary for determinism.
+* Move to C++ style casts?
 
-### Console
+## Sherpa
 
-- Scaffold.
+* Move to Sherpa for managing dependencies.
 
-### Profiler
+## Console
 
-- Scaffold.
+### `TODO`
 
-### Launcher
+### `BUGS`
 
-- Scaffold.
+### `PERF`
 
-### Crash Reporter
+### `REFACTOR`
 
-- Scaffold.
+### `SMELL`
 
-## 0.6
+## Resource Compiler
 
-### Script Editor & Debugger
+### `TODO`
 
-- Scaffold.
+* Allow more than one source data directory.
+  * Rather than "layering" by building `core` and then building `vanguard`, we should build all directories together.
+* Daemonization.
+  * Watch source data directories for changes, debounce for a user configurable amount of time, and then build any new or modified resources.
+* Detailed logging.
+* Support pattern-based ignore rules.
+* Use edit-distance to detect misspellings.
 
-### Dia Editor
+### `BUGS`
 
-- Scaffold.
+### `PERF`
 
-### Level Editor
+### `REFACTOR`
 
-- Scaffold.
+* Properly track compilation success or failure.
+  * Replace assertions with proper error handling.
+* Use `String` instead of munging ourselves.
 
-### Material Editor
+### `SMELL`
 
-- Scaffold.
+## Resource Package & Bundle Manager
 
-### Unit/Entity Editor
+### `TODO`
 
-- Scaffold.
+### `BUGS`
 
-### Particle Editor
+### `PERF`
 
-- Scaffold.
+### `REFACTOR`
 
-### UI Editor
+### `SMELL`
 
-- Scaffold.
+## Level Editor
 
-### Sound Editor
+### `TODO`
 
-- Scaffold. Extract into `origamicomet/gorilla` and `origamicomet/jungle`.
+### `BUGS`
 
-### Localization Editor
+### `PERF`
 
-- Scaffold.
+### `REFACTOR`
 
-### Cinematic Editor
+### `SMELL`
 
-- Scaffold.
+## Entity & Prefab Editor
 
-## 1.0
+### `TODO`
 
-### Neighborhood
+### `BUGS`
 
-- Scaffold.
+### `PERF`
 
-### Steam Plugin
+### `REFACTOR`
 
-- Scaffold plugin.
+### `SMELL`
 
-### PlayStation Network Plugin
+## Material Editor
 
-- Scaffold plugin.
+### `TODO`
 
-### Xbox Live Plugin
+### `BUGS`
 
-- Scaffold plugin.
+### `PERF`
 
-### Analytics Plugin
+### `REFACTOR`
 
-- Scaffold plugin.
-- Hook up to Eventlytics.
+### `SMELL`
+
+## Particle Editor
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Script Editor & Debugger
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Profiler
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Audio Editor
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Cinematic Editor
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Localization Editor
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Neighborhood
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Launcher
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Crash Reporter
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+## Steam
+
+### `TODO`
+
+### `BUGS`
+
+### `PERF`
+
+### `REFACTOR`
+
+### `SMELL`
+
+---
 
 # Vanguard
 
-### Coat of Arms
+## Fighting Tech
 
-- Render vector graphic to texture atlas(es)?
+* Determine if floating-point physics is deterministic enough.
+* Damage modeling.
 
-### Gore Tech
+## Coat of Arms Tech
 
-- Scaffold plugin.
+* Simple triangulator to render vector art.
+* Cache to textures.
 
-### Destruction Tech
+## Gore Tech
 
-- Scaffold plugin.
+* Wounds
+* Blood
+* Gibs
 
-### Quartermaster
+## Destruction Tech
 
-- Scaffold plugin.
-- Build launcher that handles to a URI scheme.
-  - Looks up randomly generated token passed via URI scheme?
+* Heightmap modification?
+* Frostbite technique for buildings?
+* How to simulate collapse?
+
+## Quartermaster
+
+* Build launcher that handles a URI.
+  * Looks up randomly generated token passed via URI?
+* Matchmaking.
+* History.
+* API
+
+---
+
+- Levels
+  - Edit and play.
+    - Compile a temporary level and package that includes unsaved changes.
+    - Indicate, by setting an environment variable, that the application is running in the level editor.
+    - Finally, forward the level editor's camera's position.
+
+- Entities
+  - Can inherit from other entities.
+    - Mixes in all other components.
+  - Can have (infinitely) nested children.
+    - Levels are entities.
+    - Prefabs are entities.
+  - Compilation...
+    - Merge changes at "source" level.
+      - Lots of reads.
+      - Every instantiation is unique. Means bloat.
+        - Compiling a level is too slow for iteration.
+          - Identify modified entities, map to existing instantiations, then update any inherited values.
+        - Loading a level should be really quick though.
