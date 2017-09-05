@@ -1,4 +1,4 @@
-//===-- yeti/task_scheduler.cc ----------------------------*- mode: C++ -*-===//
+//===-- yeti/task_scheduler.cc --------------------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -11,190 +11,85 @@
 
 #include "yeti/task_scheduler.h"
 
-#include "yeti/task.h"
-#include "yeti/task_manager.h"
-
 namespace yeti {
 
 namespace task_scheduler {
   namespace {
-    // NOTE(mtwilliams): We support up to 63 worker threads.
-    static size_t num_workers_ = 0;
-    static foundation::Thread *worker_threads_[63];
-
-    typedef foundation::thread_safe::SpMcDeque<Task *> WorkQueue;
-    static WorkQueue *work_queues_[64];
-
-    // Signalled when there may be work to steal.
-    static foundation::Event *work_to_be_stolen_ = foundation::Event::create();
-
-    // OPTIMIZE(mtwilliams): We dedicate 1MiB to worker queues. This may be
-    // excessive. We should determine a reasonable upper limit.
-    static u8 worker_queue_mem_[1048576];
+    // TODO(mtwilliams): Statistics.
+    static void prologue(Task *task, void *) {}
+    static void epilogue(Task *task, void *) {}
   }
 }
 
-namespace task_scheduler {
-  namespace {
-    // We use a thread-local pointer to track the appropriate work queue. This
-    // makes handling submissions much, much easier.
-    static YETI_THREAD_LOCAL WorkQueue *Q = NULL;
-  }
+void task_scheduler::initialize(const task_scheduler::Config &config) {
+  ::loom_options_t options;
 
-  // Seperate functions for resue by |do_work_while_waiting_for|.
-  static Task *grab();
-  static void schedule(Task * task);
+  options.workers = config.workers;
 
-  static void worker_thread(const uintptr_t worker) {
-    Q = work_queues_[worker + 1];
+  // Only true of our runtime.
+  options.main_thread_does_work = false;
 
-    while (true) {
-      if (Task *task = grab()) {
-        schedule(task);
-      } else {
-        work_to_be_stolen_->wait();
-      }
-    }
-  }
+  options.prologue.fn = (::loom_prologue_fn)&prologue;
+  options.prologue.context = NULL;
 
-  static Task *grab() {
-    if (Task *task = Q->pop()) {
-      // We got some work from our queue.
-      return task;
-    } else {
-      // Retry try a few times.
-      for (u32 attempts = 0; attempts < 3; ++attempts) {
-        // This worker's queue is empty. Try to steal some work from another
-        // worker.
-        WorkQueue *const victim = work_queues_[foundation::prng<u32>(0, num_workers_)];
+  options.epilogue.fn = (::loom_epilogue_fn)&epilogue;
+  options.epilogue.context = NULL;
 
-        if (victim == Q)
-          // Don't steal from ourself.
-          return NULL;
+  // TODO(mtwilliams): Determine reasonable defaults.
+  options.tasks   = 4096;
+  options.permits = 4096;
+  options.queue   = 4096;
 
-        if (Task *task = victim->steal())
-          return task;
-      }
-    }
-
-    // No work available, or failed to steal some.
-    return NULL;
-  }
-
-  static void schedule(Task *task) {
-    // Relinquish soon as possible. Definitely helps when |task| queues another
-    // task, or our task queue is nearly exhausted. Theoretically reduces the
-    // possibility of false-sharing.
-    Task local_copy_of_task;
-    memcpy((void *)&local_copy_of_task, (const void *)task, sizeof(Task));
-    task_manager::relinquish_a_task(task);
-
-    switch (local_copy_of_task.work.kind) {
-      case Task::Work::NONE:
-        // Do absolutely nothing.
-        break;
-
-      case Task::Work::CPU:
-        yeti_assert_debug(local_copy_of_task.work.cpu.kernel != NULL);
-        local_copy_of_task.work.cpu.kernel(local_copy_of_task.work.cpu.ctx);
-        break;
-    }
-
-    // REFACTOR(mtwilliams): Move into seperate function?
-    Task::Permit *permit = local_copy_of_task.permits;
-    while (permit) {
-      if (foundation::atomic::sub(&permit->task->permission, 1) == 1) {
-        // Submit to this worker's queue.
-        const u64 work = Q->push(task);
-
-        if (work > 1)
-          // We've got more work queued than we are able to schedule. Signal
-          // another worker to steal some.
-          work_to_be_stolen_->signal();
-      }
-
-      // SMELL(mtwilliams): Use double indirection.
-      Task::Permit *const next = permit->next;
-      task_manager::relinquish_a_permit(permit);
-      permit = next;
-    }
-  }
-}
-
-void task_scheduler::initialize(const Config &config) {
-  yeti_assert_development(config.workers > 0);
-
-  num_workers_ = config.workers;
-
-  const size_t mem_per_worker_queue =
-    sizeof(worker_queue_mem_) /  (num_workers_ + 1);
-
-  // We reserve the first work queue for the main thread, essentially
-  // treating the main thread as a worker. We assume the main thread called us.
-  Q = work_queues_[0] =
-    new (foundation::heap()) WorkQueue(
-      (uintptr_t)&worker_queue_mem_[0],
-      mem_per_worker_queue);
-
-  for (size_t worker = 0; worker < num_workers_; ++worker) {
-    work_queues_[worker + 1] =
-      new (foundation::heap()) WorkQueue(
-        (uintptr_t)&worker_queue_mem_[(worker + 1) * mem_per_worker_queue],
-        mem_per_worker_queue);
-  }
-
-  // Only start workers after all queues are initialized, otherwise a worker
-  // may try to steal from a non-initialized queue and cause an access violation.
-  for (size_t worker = 0; worker < num_workers_; ++worker) {
-    foundation::Thread::Options worker_thread_opts;
-    sprintf(&worker_thread_opts.name[0], "Worker #%02lu", worker + 1);
-    worker_thread_opts.affinity = (1ull << worker);
-    worker_thread_opts.stack_size = 0x100000 /* 1MiB */;
-
-    worker_threads_[worker] =
-      foundation::Thread::spawn(&worker_thread, (uintptr_t)worker, &worker_thread_opts);
-  }
+  ::loom_initialize(&options);
 }
 
 void task_scheduler::shutdown() {
-  // NOTE(mtwilliams): Since we terminate the worker threads non-gracefully,
-  // they may still hold exclusive resources, e.g. locks. This can cause a
-  // deadlock if not accounted for.
-
-  // TODO(mtwilliams): Gracefully terminate to prevent the aforementioned?
-  for (size_t worker = 0; worker < num_workers_; ++worker)
-    worker_threads_[worker]->terminate();
-
-  // NOTE(mtwilliams): We don't really care about the minor memory-leak this
-  // causes because the task scheduler is only shutdown prior to exit.
-
-  // for (size_t worker = 0; worker < num_workers_; ++worker)
-  //   delete work_queues_[worker + 1];
-  // delete work_queues_[0];
+  ::loom_shutdown();
 }
 
-void task_scheduler::submit(Task *task) {
-  yeti_assert_debug(task != NULL);
-
-  if (foundation::atomic::load(&task->permission) != 0)
-    // Can't schedule. Should be picked up later.
-    return;
-
-  // Tasks should never be submitted outside of the main or worker threads.
-  yeti_assert_debug(Q != NULL);
-
-  const u64 work = Q->push(task);
-
-  if (work > 1)
-    // We've got more work queued than we are able to schedule. Signal
-    // another worker to steal some.
-    work_to_be_stolen_->signal();
+void task_scheduler::kick(Task::Handle task) {
+  ::loom_kick(task);
 }
 
-void task_scheduler::do_work_while_waiting_for(foundation::Event *event) {
-  while (!event->signalled())
-    if (Task *task = grab())
-      schedule(task);
+void task_scheduler::kick_n(unsigned n, const Task::Handle *tasks) {
+  ::loom_kick_n(n, tasks);
+}
+
+void task_scheduler::kick_and_wait(Task::Handle task) {
+  ::loom_kick_and_wait(task);
+}
+
+void task_scheduler::kick_and_wait_n(unsigned n, const Task::Handle *tasks) {
+  ::loom_kick_and_wait_n(n, tasks);
+}
+
+void task_scheduler::kick_and_do_work_while_waiting(Task::Handle task) {
+  ::loom_kick_and_do_work_while_waiting(task);
+}
+
+void task_scheduler::kick_and_do_work_while_waiting_n(unsigned n, const Task::Handle *tasks) {
+  ::loom_kick_and_do_work_while_waiting_n(n, tasks);
+}
+
+static bool is_desired_yet(volatile u32 *v, const u32 desired) {
+  return (foundation::atomic::load(v) == desired)
+      && (foundation::atomic::cmp_and_xchg(v, desired, desired) == desired);
+}
+
+bool task_scheduler::do_some_work() {
+  return ::loom_do_some_work();
+}
+
+void task_scheduler::do_some_work_until_zero(volatile u32 *v) {
+  while (!is_desired_yet(v, 0))
+    if (!do_some_work())
+      foundation::Thread::yield();
+}
+
+void task_scheduler::do_some_work_until_match(volatile u32 *v, u32 desired) {
+  while (!is_desired_yet(v, desired))
+    if (!do_some_work())
+      foundation::Thread::yield();
 }
 
 } // yeti

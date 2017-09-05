@@ -1,4 +1,4 @@
-//===-- yeti.h --------------------------------------------*- mode: C++ -*-===//
+//===-- yeti.h ------------------------------------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -26,7 +26,6 @@
 #include "yeti/input.h"
 
 #include "yeti/task.h"
-#include "yeti/task_manager.h"
 #include "yeti/task_scheduler.h"
 
 #include "yeti/resource.h"
@@ -66,7 +65,7 @@ struct Config {
   } resources;
 
   struct {
-    size_t workers;
+    i32 workers;
   } threading;
 };
 

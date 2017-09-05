@@ -1,4 +1,4 @@
-//===-- yeti/task.h ---------------------------------------*- mode: C++ -*-===//
+//===-- yeti/task.h -------------------------------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -20,80 +20,29 @@
 #include "yeti/linkage.h"
 #include "yeti/foundation.h"
 
+#include "loom.h"
+
 namespace yeti {
 
-// TODO(mtwilliams): Pad `Task` to 64 bytes.
-
 /// \brief Describes a schedulable unit of work and its dependencies.
-struct YETI_PUBLIC Task {
-  /// \brief Specifies the work to do when a task is scheduled.
-  struct Work {
-    enum Kind {
-      NONE = 0,
-      CPU  = 1
-    };
+struct Task : public ::loom_task_t {
+  /// \brief Code comprising a task.
+  typedef ::loom_kernel_fn Kernel;
 
-    Kind kind;
-
-    union {
-      struct {
-        void (*kernel)(uintptr_t ctx);
-        uintptr_t ctx;
-      } cpu;
-    };
-  };
-
-  /// \brief Specifies a task that is permitted to run by another task.
-  ///
-  /// \details Permits are a simplified implementation of reverse dependencies,
-  /// as described by Charles Bloom in his blog posts.
-  ///
-  /// By using permits the following is achieved:
-  ///
-  ///  (1) Simpler code--scheduling and permitting code is substantially
-  ///      smaller and simpler than forward dependencies.
-  ///
-  ///  (2) Guaranteed scheduling without overhead--by maintaining references to
-  ///      any non-queued tasks in a "permit" any submitted tasks are
-  ///      guaranteed to be scheduled without an additional lock-free
-  ///      data-structure; either by being inserted into a woker's queue
-  ///      immediately, or by being inserted later upon the completion of the
-  ///      final permitting task.
-  ///
-  ///  (3) Improved scheduling characteristics--reverse dependencies allow
-  ///      simple adherence to Charles Bloom's guiding principles:
-  ///
-  ///        1. Always yield worker threads when they cannot schedule work.
-  ///        2. Never have a worker thread sleep when it can schedule work.
-  ///        3. Never wake a worker thread only to yield it immediately.
-  ///
-  ///  (4) Reduced memory footprint--forward dependencies require more memory
-  ///      due to additional members in task descriptions and the use of empty
-  ///      parent tasks to collect dependencies for tasks with more than one
-  ///      dependency.
-  ///
-  struct Permit {
-    Permit *next;
-    Task *task;
-  };
-
-  /// \brief Number of outstanding permits.
-  typedef u32 Permission;
-
-  Task::Work work;
-  Task::Permit *permits;
-  Task::Permission permission;
+  /// \brief Opaque reference to a task.
+  typedef ::loom_handle_t Handle;
 };
 
 namespace task {
-  /// \brief Creates a task with no work and no outstanding permissions.
-  extern YETI_PUBLIC Task *describe();
 
-  /// \brief Creates a task with work but no outstanding permissions.
-  extern YETI_PUBLIC Task *describe(void (*kernel)(uintptr_t), uintptr_t ctx = NULL);
+/// \brief Creates a task with given work.
+extern YETI_PUBLIC Task::Handle describe(Task::Kernel kernel,
+                                         void *data = NULL);
 
-  /// \briefs Prevents @permittee from being scheduled until @task has completed.
-  extern YETI_PUBLIC void permits(Task *task, Task *permittee);
+/// \brief Prevents @permittee from being scheduled until @task has completed.
+extern YETI_PUBLIC void permits(Task::Handle task,
+                                Task::Handle permittee);
+
 } // task
 
 } // yeti
