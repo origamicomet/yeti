@@ -33,8 +33,8 @@ class YETI_PUBLIC Event {
 
  public:
   /// \brief Creates an event.
-  /// \param @all Wake all waiting threads when signalled.
-  static Event *create(bool all = false);
+  /// \param @manual Require manual reset after being signalled.
+  static Event *create(bool manual = false);
 
   /// \brief Destroys this event.
   void destroy();
@@ -47,7 +47,7 @@ class YETI_PUBLIC Event {
   void unsignal();
 
   /// \brief Determines if this event was signalled.
-  /// \warning Will unsignal this event if *not* created with |all|.
+  /// \warning Will unsignal this event if *not* created with `manual`.
   bool signalled();
 
   /// \brief Waits on this event.

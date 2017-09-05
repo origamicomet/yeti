@@ -22,9 +22,9 @@
 namespace yeti {
 namespace foundation {
 
-Event *Event::create(bool all) {
+Event *Event::create(bool manual) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  return (Event *)::CreateEvent(NULL, !all, FALSE, NULL);
+  return (Event *)::CreateEvent(NULL, manual, FALSE, NULL);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
