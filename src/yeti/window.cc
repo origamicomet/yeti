@@ -223,8 +223,8 @@ bool Window::clip() {
 
   // We want to clip inside the system chrome, which in Microsoft terminology
   // means the "client area." Of course they fail to provide an API that's the
-  // opposite of AdjustWindowRect(Ex)... so we have to convert our client area
-  // into screen coordinates by manually adjusting GetClientRect's ouput.
+  // opposite of AdjustWindowRect(Ex). So we have to convert our client area
+  // into screen coordinates by manually adjusting GetClientRect output.
   POINT offset = {0, 0};
   ::ClientToScreen((HWND)native_hndl_, &offset);
   clipping_area.left += offset.x;

@@ -63,13 +63,12 @@ Resource::~Resource() {
 }
 
 void Resource::ref() {
-  foundation::atomic::add(&refs_, 1);
+  foundation::atomic::increment(&refs_);
 }
 
 void Resource::deref() {
-  const u32 refs = foundation::atomic::sub(&refs_, 1) - 1;
+  const u32 refs = foundation::atomic::decrement(&refs_);
 
-  // TODO(mtwilliams): Measure if |refs > 0| is most likely.
   if (YETI_LIKELY(refs > 0))
     // Still in use somewhere.
     return;

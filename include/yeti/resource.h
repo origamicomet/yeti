@@ -78,7 +78,7 @@ namespace resource {
     /// \note Convention is to use a sigular noun or nouns in `snake_case`. For
     /// example, `vertex_shader` fits convention and is easily understood while
     /// `environments (sound)` does not and is extremely confusing in the
-    /// context(s) it is used.
+    /// contexts it is used.
     const char *name;
 
     /// Source file extension(s) associated with the resource type.

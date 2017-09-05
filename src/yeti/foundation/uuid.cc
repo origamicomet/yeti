@@ -40,8 +40,7 @@ UUID &UUID::operator=(const UUID &uuid) {
 void UUID::generate(UUID *uuid) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // TODO(mtwilliams): Verify byte order.
-  GUID guid;
-  ::CoCreateGuid((GUID *)&guid);
+  ::CoCreateGuid((GUID *)&uuid->raw[0]);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif

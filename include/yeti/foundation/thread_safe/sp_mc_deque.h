@@ -31,18 +31,15 @@ namespace thread_safe {
 // TODO(mtwilliams): Use type-traits to only allow pointers, or specialize in
 // the case of integers, i.e. indexes.
 
-// OPTIMIZE(mtwilliams): Force queue size to a multiple of two, thus allowing
-// us to use a simple bitwise AND to dereference an index.
-
 /// \brief A lock-free, single-producer, multiple-consumer, doubly-ended queue.
 ///
-/// \details Provides a private interface to @push and @pop elements in LIFO
-/// order for the single producer and consumer thread. Also provides a public
-/// interface to let other consumer threads @steal elements in FIFO order.
+/// \details The producer can @push and @pop elements in last-in first-out
+/// order, while any number of consumers can @steal elements in first-in
+/// first-out order.
 ///
-/// This is based on the work of D. Chase and Y. Lev as per their paper
-/// "Dynamic Circular Work-Stealing Deque." A more approachable description is
-/// provided by S. Reinalter on his blog.
+/// This is an implementation of the data structure described by Chase and Lev
+/// in their paper "Dynamic Circular Work-Stealing Deque." A more approachable
+/// description is available on Stefan Reinalter's blog.
 ///
 /// \warning Do not use @pop in any thread other than the producer thread.
 ///

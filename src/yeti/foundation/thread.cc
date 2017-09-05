@@ -188,16 +188,25 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   yeti_assert((HANDLE)thread->native_hndl_ != INVALID_HANDLE_VALUE);
 
   if (options->affinity != ~0ull) {
-    // NOTE(mtwilliams): This will truncate to 32 bits, and therefore 32 cores,
-    // if on 32 bit..
+    // NOTE(mtwilliams): This will truncate to 32 bits, and therefor 32 cores,
+    // if on 32 bit. There's not much we can do.
     ::SetThreadAffinityMask((HANDLE)thread->native_hndl_, (DWORD_PTR)options->affinity);
 
     // PROFILE(mtwilliams): Determine if this improves scheduling at all.
-    if (options->affinity & (options->affinity - 1)) {
-      // BUG(mtwilliams): Only hints for cores `[1, 32]`.
-      if (options->affinity <= 0xFFFFFFFFull) {
+    if (options->affinity) {
+      if (options->affinity & (options->affinity - 1)) {
         DWORD ideal_processor;
-        _BitScanForward(&ideal_processor, (DWORD)options->affinity);
+
+        // TODO(mtwilliams): Replace intrinsics with common utility functions.
+      #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
+        if (!_BitScanForward(&ideal_processor, (DWORD)options->affinity)) {
+          _BitScanForward(&ideal_processor, (DWORD)(options->affinity >> 32));
+          ideal_processor += 32;
+        }
+      #else YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+        _BitScanForward64(&ideal_processor, options->affinity);
+      #endif
+
         ::SetThreadIdealProcessor((HANDLE)thread->native_hndl_, ideal_processor);
       }
     }

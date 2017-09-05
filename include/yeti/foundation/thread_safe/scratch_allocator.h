@@ -50,10 +50,10 @@ class YETI_PUBLIC ScratchAllocator : public Allocator {
       struct {
       #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
         u32 deallocated : 1;
-        u32 : 31;
+        u32             : 31;
       #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
         u64 deallocated : 1;
-        u64 : 63;
+        u64             : 63;
       #endif
       };
     };

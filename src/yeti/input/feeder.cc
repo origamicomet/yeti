@@ -18,9 +18,14 @@
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
   #include <windowsx.h>
+
   #undef ABSOLUTE
   #undef RELATIVE
   #undef DELETE
+
+  // HACK(mtwilliams): Define `RI_MOUSE_HWHEEL` until we specify build target
+  // correctly.
+  #define RI_MOUSE_HWHEEL 0x0800
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
@@ -30,6 +35,7 @@
 namespace yeti {
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+
 static void on_raw_keyboard_input(RAWKEYBOARD kb) {
   if (kb.VKey == 0xff)
     // Part of an escape sequence; ignore.
@@ -55,7 +61,6 @@ static void on_raw_keyboard_input(RAWKEYBOARD kb) {
       kb.MakeCode = ::MapVirtualKey(kb.VKey, MAPVK_VK_TO_VSC);
   }
 
-  // REFACTOR(mtwilliams): Mapping out to a seperate function.
   Key key = Keys::UNKNOWN;
   switch (kb.VKey) {
     case VK_ESCAPE:
@@ -153,6 +158,9 @@ static void on_raw_keyboard_input(RAWKEYBOARD kb) {
       else if (kb.VKey >= VK_NUMPAD0 && kb.VKey <= VK_NUMPAD9)
         // TODO(mtwilliams): Determine if this is redundant.
         key = (Key)((kb.VKey - VK_NUMPAD0) + Keys::NUMPAD_0);
+      else
+        // Some other (rare) key. Ignore.
+        return;
     } break;
   }
 
@@ -178,14 +186,14 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
       Mouse::down(button_mappings[btn].btn);
   }
 
-  const Vec3 delta = Vec3((f32)mouse.lLastX, (f32)mouse.lLastY, 0.f);
+  Vec3 delta = Vec3::ZERO;
+  delta.x = (f32)mouse.lLastX;
+  delta.y = (f32)mouse.lLastY;
 
   Vec3 wheel = Vec3::ZERO;
   if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
     wheel.y = -(f32)((short)mouse.usButtonData);
-  // TODO(mtwilliams): Target Windows XP or higher by defining WINVER and _WIN32_WINNT.
-  // Refer to https://msdn.microsoft.com/en-us/library/6sehtctf.aspx for details.
-  if (mouse.usButtonFlags & 0x0800 /* RI_MOUSE_HWHEEL */)
+  if (mouse.usButtonFlags & RI_MOUSE_HWHEEL)
     wheel.x = (f32)((short)mouse.usButtonData);
   wheel = wheel / (f32)WHEEL_DELTA;
 
@@ -258,6 +266,7 @@ void input::from(const Window *window) {
 void input::from(const Window *window) {
   yeti_assert_debug(window != NULL);
 }
+
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID

@@ -69,9 +69,9 @@ bool ResourceCompiler::ignorable(const char *path) const {
 }
 
 // We don't allow paths that contain characters other than the lowercase
-// alphabet, numerics, underscores, dashes, path and file delimiters. This
-// prevents many woes encountered when dealing with file systems across
-// different platforms and tools.
+// alphabet, numerics, underscores, and path and file delimiters. This prevents
+// many woes encountered when dealing with file systems across different
+// platforms and tools.
 bool ResourceCompiler::allowable(const char *path) const {
   yeti_assert_debug(path != NULL);
 

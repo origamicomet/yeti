@@ -40,12 +40,12 @@ namespace {
   }
 
   uintptr_t GlobalHeapAllocator::allocate(size_t sz, size_t alignment) {
-    // FIXME(mtwilliams): Respond to |alignment|.
+    // FIXME(mtwilliams): Respect |alignment|.
     return (uintptr_t)::malloc(sz);
   }
 
   uintptr_t GlobalHeapAllocator::reallocate(uintptr_t ptr, size_t sz, size_t alignment) {
-    // FIXME(mtwilliams): Respond to |alignment|.
+    // FIXME(mtwilliams): Respect |alignment|.
     return (uintptr_t)::realloc((void *)ptr, sz);
   }
 
