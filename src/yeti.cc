@@ -53,7 +53,7 @@ void __yeti__(void) {
 }
 
 const char *__yeti_copyright__() {
-  // Copyright 2013-20xx Origami Comet Games, Inc. All rights reserved.
+  // Copyright 2013-20xx Origami Comet Games, Inc.
   // Refer to our Rybfile for details.
   return __YETI_COPYRIGHT__;
 }
