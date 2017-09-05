@@ -11,12 +11,12 @@
 
 #include "yeti/foundation/log.h"
 
-#include "yeti/foundation/atomics.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+
+#include "yeti/foundation/atomics.h"
 
 #include "yeti/foundation/log/console.h"
 
@@ -28,14 +28,14 @@ namespace log {
     static u32 num_categories_ = 10;
     static Category categories_[categories_sz_] = {
       {"yeti", Category::NONE},
-      {"sys", 0},
       {"core", 0},
-      {"mem", 0},
-      {"prof", 0},
-      {"gfx", 0},
-      {"sound", 0},
+      {"memory", 0},
+      {"system", 0},
+      {"graphics", 0},
+      {"audio", 0},
       {"input", 0},
       {"script", 0},
+      {"profiler", 0},
       {"app", 0}
     };
   }
@@ -47,7 +47,7 @@ log::Category::Id log::Category::add(const char *name,
   yeti_assert_debug(name != NULL);
   yeti_assert_debug(strlen(name) <= sizeof(Category::name) - 1);
 
-  const log::Category::Id id = foundation::atomic::add(&num_categories_, 1);
+  const log::Category::Id id = foundation::atomic::increment(&num_categories_) - 1;
   yeti_assert_debug(id < categories_sz_);
 
   strncpy(&categories_[id].name[0], name, sizeof(Category::name));
@@ -120,7 +120,7 @@ const yeti::log::Category::Id YETI_LOG_CORE = 2;
 const yeti::log::Category::Id YETI_LOG_MEMORY = 3;
 const yeti::log::Category::Id YETI_LOG_PROFILER = 4;
 const yeti::log::Category::Id YETI_LOG_GRAPHICS = 5;
-const yeti::log::Category::Id YETI_LOG_SOUND = 6;
+const yeti::log::Category::Id YETI_LOG_AUDIO = 6;
 const yeti::log::Category::Id YETI_LOG_INPUT = 7;
 const yeti::log::Category::Id YETI_LOG_SCRIPT = 8;
 const yeti::log::Category::Id YETI_LOG_APP = 9;

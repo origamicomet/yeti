@@ -49,7 +49,7 @@ struct Category {
   /// example, `resource_compiler` fits convention and is easily understood
   /// while `worlds (render)` does not and is extremely confusing in the
   /// context(s) it is used.
-  char name[17];
+  char name[33];
 
   /// Parent category.
   ///
@@ -70,10 +70,13 @@ struct Message {
 
     /// The user-specified "category" of message.
     /// Refer to yeti::foundation::log::Category.
-    unsigned category : 27;
+    unsigned category : 8;
 
     /// Denotes weather `content` is structured or unstructured (plaintext).
     unsigned structured : 1;
+
+    /// \internal Saved for later use.
+    unsigned reserved : 19;
 
     /// System identifier for the thread this message originated from.
     u64 origin;
@@ -109,7 +112,7 @@ extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_CORE;
 extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_MEMORY;
 extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_SYSTEM;
 extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_GRAPHICS;
-extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_SOUND;
+extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_AUDIO;
 extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_INPUT;
 extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_SCRIPT;
 extern YETI_PUBLIC const yeti::log::Category::Id YETI_LOG_PROFILER;
