@@ -25,7 +25,7 @@ namespace yeti {
 namespace log {
 
 namespace console {
-  extern YETI_LOCAL void log(const Message *msg);
+  extern YETI_PRIVATE void log(const Message *msg);
 }
 
 } // log

@@ -48,13 +48,13 @@ extern YETI_PUBLIC bool held(const Key key);
 extern YETI_PUBLIC bool released(const Key key);
 
 /// \internal Marks the @key as released for this frame.
-extern YETI_LOCAL void up(const Key key);
+extern YETI_PRIVATE void up(const Key key);
 
 /// \internal Marks the @key as pressed for this frame.
-extern YETI_LOCAL void down(const Key key);
+extern YETI_PRIVATE void down(const Key key);
 
 /// \internal
-extern YETI_LOCAL void update();
+extern YETI_PRIVATE void update();
 
 } // Keyboard
 

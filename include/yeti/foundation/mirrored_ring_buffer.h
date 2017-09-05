@@ -28,7 +28,7 @@ namespace foundation {
 
 /// A mirrored ring buffer!
 ///
-class MirroredRingBuffer {
+class YETI_PUBLIC MirroredRingBuffer {
  YETI_DISALLOW_CONSTRUCTION(MirroredRingBuffer)
  YETI_DISALLOW_COPYING(MirroredRingBuffer)
 

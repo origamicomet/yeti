@@ -71,16 +71,16 @@ extern YETI_PUBLIC bool held(const MouseButton btn);
 extern YETI_PUBLIC bool released(const MouseButton btn);
 
 /// \internal Updates the @axis for this frame.
-extern YETI_LOCAL void update(const MouseAxis axis, const Vec3 &new_value);
+extern YETI_PRIVATE void update(const MouseAxis axis, const Vec3 &new_value);
 
 /// \internal Marks the @btn as released for this frame.
-extern YETI_LOCAL void up(const MouseButton btn);
+extern YETI_PRIVATE void up(const MouseButton btn);
 
 /// \internal Marks the @btn as pressed for this frame.
-extern YETI_LOCAL void down(const MouseButton btn);
+extern YETI_PRIVATE void down(const MouseButton btn);
 
 /// \internal
-extern YETI_LOCAL void update();
+extern YETI_PRIVATE void update();
 
 } // Keyboard
 

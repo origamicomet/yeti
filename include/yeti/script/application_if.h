@@ -24,12 +24,13 @@
 
 namespace yeti {
 
+// See `yeti/application.h`.
 class Application;
 
 namespace script_if {
 
 /// \internal
-extern YETI_LOCAL Application *application(lua_State *L);
+extern YETI_PRIVATE Application *application(lua_State *L);
 
 }
 

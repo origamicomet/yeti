@@ -32,7 +32,7 @@ namespace {
   static u64 p_;
 
   // We seed via a static constructor. Don't rely on this in other static constructors.
-  static const class YETI_LOCAL Seeder {
+  static const class YETI_PRIVATE Seeder {
    public:
     Seeder() {
       // TODO(mtwilliams): Seed from a better source.
