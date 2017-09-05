@@ -26,6 +26,12 @@
 namespace yeti {
 namespace foundation {
 
+/// Calculates the 8-bit pearson hash of @buf with the @seed.
+extern YETI_PUBLIC u8 pearson_hash_8(const char *buf, u8 seed = 0);
+
+/// Calculates the 8-bit pearson hash of @buf with the @seed.
+extern YETI_PUBLIC u8 pearson_hash_8(const void *buf, u8 buf_len, u8 seed = 0);
+
 /// Calculates the 32-bit FNV1A hash of @buf.
 extern YETI_PUBLIC u32 fnv1a_hash_32(const char *buf);
 
