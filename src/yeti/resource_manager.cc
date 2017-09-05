@@ -126,6 +126,21 @@ void resource_manager::track(const Resource::Type *type) {
   types_.push(type);
 }
 
+Resource *resource_manager::find(Resource::Id id) {
+  yeti_assert_debug(enabled_);
+
+  {
+    YETI_SCOPED_LOCK_NON_EXCLUSIVE(resources_lock_);
+
+    if (Resource **resource = resources_.find(id)) {
+      (*resource)->ref();
+      return (*resource);
+    }
+  }
+
+  return NULL;
+}
+
 Resource *resource_manager::load(Resource::Id id) {
   yeti_assert_debug(enabled_);
 

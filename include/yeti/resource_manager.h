@@ -59,6 +59,9 @@ extern YETI_PUBLIC void shutdown();
 ///
 extern YETI_PUBLIC void track(const Resource::Type *type);
 
+///
+extern YETI_PUBLIC Resource *find(Resource::Id id);
+
 // TODO(mtwilliams): Only allow resources to be loaded (outside of the engine)
 // via packages.
 
