@@ -30,6 +30,7 @@ namespace resource {
 }
 
 namespace resource_compiler {
+  struct Environment;
   struct Input;
   struct Output;
 }
@@ -95,7 +96,8 @@ namespace resource {
     void (*online)(Resource *resource);
     void (*offline)(Resource *resource);
 
-    bool (*compile)(const resource_compiler::Input *input,
+    bool (*compile)(const resource_compiler::Environment *env,
+                    const resource_compiler::Input *input,
                     const resource_compiler::Output *output);
 
     /// \copydoc LifecyclePreference

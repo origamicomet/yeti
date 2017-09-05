@@ -16,6 +16,14 @@
 #include "yeti/foundation/global_heap_allocator.h"
 #include "yeti/foundation/path.h"
 
+// NOTE(mtwilliams): Used for log forwarding.
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+
+static const yeti::log::Category::Id YETI_LOG_RESOURCE_COMPILER =
+  ::yeti::log::Category::add("resource_compiler", YETI_LOG_GENERAL);
+
 // TODO(mtwilliams): Pattern-based ignores.
 // TODO(mtwilliams): Edit distance for detecting mispellings.
 
@@ -152,6 +160,12 @@ void ResourceCompiler::compile(const char *path, bool force) {
   fprintf(stdout, "Compiling '%s'...\n", path);
   fprintf(stdout, " type=%s\n", type->name);
 
+  // TODO(mtwilliams): Setup resource compilation environment.
+  ResourceCompiler::Environment env;
+  env.info = &ResourceCompiler::info;
+  env.warning = &ResourceCompiler::warning;
+  env.error = &ResourceCompiler::error;
+
   ResourceCompiler::Input input;
   input.root = &data_src_[0];
   input.path = path;
@@ -174,7 +188,7 @@ void ResourceCompiler::compile(const char *path, bool force) {
   output.streaming_data = foundation::fs::create_or_open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
   yeti_assert(output.streaming_data != NULL);
 
-  const bool success = type->compile(&input, &output);
+  const bool success = type->compile(&env, &input, &output);
 
   // TODO(mtwilliams): Properly track resource compilation.
   yeti_assert_development(success);
@@ -257,13 +271,13 @@ void ResourceCompiler::watch(foundation::fs::Event event, const char *path) {
 
   switch (event) {
     case foundation::fs::CREATED:
-      log::printf(YETI_LOG_GENERAL, log::TRACE, "+ %s", path);
+      log::printf(YETI_LOG_RESOURCE_COMPILER, log::TRACE, "+ %s", path);
       break;
     case foundation::fs::MODIFIED:
-      log::printf(YETI_LOG_GENERAL, log::TRACE, "* %s", path);
+      log::printf(YETI_LOG_RESOURCE_COMPILER, log::TRACE, "* %s", path);
       break;
     case foundation::fs::DESTROYED:
-      log::printf(YETI_LOG_GENERAL, log::TRACE, "- %s", path);
+      log::printf(YETI_LOG_RESOURCE_COMPILER, log::TRACE, "- %s", path);
       break;
   }
 }
@@ -272,6 +286,39 @@ void ResourceCompiler::watcher(foundation::fs::Event event,
                                const char *path,
                                ResourceCompiler *resource_compiler) {
   return resource_compiler->watch(event, path);
+}
+
+// TODO(mtwilliams): Proper logging infrastructure.
+
+namespace {
+  // HACK(mtwilliams): (Broken) forwarding trickery.
+  static void forward_to_log_(log::Level level, const char *format, va_list va) {
+    const int size = vsnprintf(NULL, 0, format, va) + 1;
+    char *message = (char *)alloca(size);
+    vsnprintf(message, size, format, va);
+    log::print(YETI_LOG_RESOURCE_COMPILER, level, message);
+  }
+}
+
+void ResourceCompiler::info(const Environment *env, const char *format, ...) {
+  va_list va;
+  va_start(va, format);
+  forward_to_log_(log::INFO, format, va);
+  va_end(va);
+}
+
+void ResourceCompiler::warning(const Environment *env, const char *format, ...) {
+  va_list va;
+  va_start(va, format);
+  forward_to_log_(log::WARNING, format, va);
+  va_end(va);
+}
+
+void ResourceCompiler::error(const Environment *env, const char *format, ...) {
+  va_list va;
+  va_start(va, format);
+  forward_to_log_(log::ERROR, format, va);
+  va_end(va);
 }
 
 } // yeti

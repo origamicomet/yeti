@@ -43,6 +43,12 @@ namespace resource_compiler {
     u32 debounce;
   };
 
+  struct Environment {
+    void (*info)(const Environment *env, const char *format, ...);
+    void (*warning)(const Environment *env, const char *format, ...);
+    void (*error)(const Environment *env, const char *format, ...);
+  };
+
   struct Input {
     /// Root directory of source data.
     const char *root;
@@ -81,6 +87,9 @@ class YETI_PUBLIC ResourceCompiler {
   /// \copydoc resource_compiler::Options
   typedef resource_compiler::Options Options;
 
+  /// \copydoc resource_compiler::Environment
+  typedef resource_compiler::Environment Environment;
+
   /// \copydoc resource_compiler::Input
   typedef resource_compiler::Input Input;
 
@@ -116,6 +125,11 @@ class YETI_PUBLIC ResourceCompiler {
   static void watcher(foundation::fs::Event event,
                       const char *path,
                       ResourceCompiler *resource_compiler);
+
+ private:
+  static void info(const Environment *env, const char *format, ...);
+  static void warning(const Environment *env, const char *format, ...);
+  static void error(const Environment *env, const char *format, ...);
 
  private:
   ResourceDatabase *db_;
