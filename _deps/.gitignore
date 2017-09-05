@@ -3,8 +3,9 @@
 *
 !.gitignore
 
-# HACK(mtwilliams): Use git submodules and manually build until sherpa is ready.
+# HACK(mtwilliams): Use submodules and manually build until Sherpa is ready.
 
+!loom
 !gala
 !luajit
 !sqlite3

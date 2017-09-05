@@ -7,3 +7,6 @@
 [submodule "_deps/gala"]
 	path = _deps/gala
 	url = git@github.com:origamicomet/gala.git
+[submodule "_deps/loom"]
+	path = _deps/loom
+	url = git@github.com:origamicomet/loom.git

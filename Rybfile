@@ -1,11 +1,10 @@
-
 # TODO(mtwilliams): Provide a mangler class that defines `#call`.
 # This seems like a hack. Perhaps we should move everything to a "mangler?"
 mangle = Proc.new do |triplet, dependency|
   configuration, platform, arch = *triplet
 
   # HACK(mtwilliams): Link to `release` builds of Gala in `development`.
-  if dependency == "gala"
+  if %w{loom gala}.include? dependency
     if configuration == :development
       configuration = :release
     end
@@ -19,6 +18,9 @@ end
 project :yeti, pretty: 'Yeti' do |proj|
   # Dynamically link to Yeti to reduce unnecessary bloat.
   proj.define 'YETI_LINKAGE' => 'YETI_LINKAGE_DYNAMIC'
+
+  # Dynamically linking to Loom doesn't make much sense.
+  proj.define 'LOOM_LINKAGE' => 'LOOM_LINKAGE_STATIC'
 
   # Statically link to Gala for the (small) optimization wins.
   proj.define 'GALA_LINKAGE' => 'GALA_LINKAGE_STATIC'
@@ -54,6 +56,7 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.configuration :debug, pretty: 'Debug' do |config|
     config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEBUG',
+                  'LOOM_CONFIGURATION' => 'LOOM_CONFIGURATION_DEBUG',
                   'GALA_CONFIGURATION' => 'GALA_CONFIGURATION_DEBUG'
 
     config.define '_DEBUG' => true,
@@ -67,7 +70,8 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.configuration :development, pretty: 'Development' do |config|
     config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_DEVELOPMENT',
-                  'GALA_CONFIGURATION' => 'GALA_CONFIGURATION_DEVELOPMENT'
+                  'LOOM_CONFIGURATION' => 'LOOM_CONFIGURATION_RELEASE',
+                  'GALA_CONFIGURATION' => 'GALA_CONFIGURATION_RELEASE'
 
     config.define 'NDEBUG' => true,
                   '_HAS_ITERATOR_DEBUGGING' => false,
@@ -80,6 +84,7 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.configuration :release, pretty: 'Release' do |config|
     config.define 'YETI_CONFIGURATION' => 'YETI_CONFIGURATION_RELEASE',
+                  'LOOM_CONFIGURATION' => 'LOOM_CONFIGURATION_RELEASE',
                   'GALA_CONFIGURATION' => 'GALA_CONFIGURATION_RELEASE'
 
     config.define 'NDEBUG' => true,
@@ -107,17 +112,29 @@ project :yeti, pretty: 'Yeti' do |proj|
     lib.add_library_paths '$build/lib/', '$build/bin/'
     lib.add_binary_paths '$build/bin/'
 
-    lib.add_include_paths '_deps/gala/include/', '_deps/luajit/include/', '_deps/sqlite3/include/'
-    lib.add_library_paths '_deps/gala/_build/lib/', '_deps/luajit/_build/lib/', '_deps/sqlite3/_build/lib/'
-    lib.add_binary_paths '_deps/gala/_build/bin/', '_deps/luajit/_build/bin/', '_deps/sqlite3/_build/bin/'
+    lib.add_include_paths '_deps/loom/include/',
+                          '_deps/gala/include/',
+                          '_deps/luajit/include/',
+                          '_deps/sqlite3/include/'
+
+    lib.add_library_paths '_deps/loom/_build/lib/',
+                          '_deps/gala/_build/lib/',
+                          '_deps/luajit/_build/lib/',
+                          '_deps/sqlite3/_build/lib/'
+
+    lib.add_binary_paths '_deps/loom/_build/bin/',
+                         '_deps/gala/_build/bin/',
+                         '_deps/luajit/_build/bin/',
+                         '_deps/sqlite3/_build/bin/'
 
     lib.add_source_files 'include/**/*.{h,hpp,inl}'
     lib.add_source_files 'src/**/*.{c,cc,cpp}'
 
     lib.platform :windows do |platform|
-      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32)
+      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32 advapi32)
     end
 
+    lib.add_external_dependency 'loom', mangler: mangle
     lib.add_external_dependency 'gala', mangler: mangle
     lib.add_external_dependency 'luajit', mangler: mangle
     lib.add_external_dependency 'sqlite3', mangler: mangle
@@ -125,7 +142,12 @@ project :yeti, pretty: 'Yeti' do |proj|
 
   proj.application :runtime, pretty: 'Runtime' do |app|
     app.add_include_paths 'include/', 'runtime/include/'
-    app.add_include_paths '_deps/gala/include/', '_deps/luajit/include/', '_deps/sqlite3/include/'
+
+    app.add_include_paths '_deps/loom/include/',
+                          '_deps/gala/include/',
+                          '_deps/luajit/include/',
+                          '_deps/sqlite3/include/'
+
     app.add_library_paths '$build/lib/', '$build/bin/'
     app.add_binary_paths '$build/bin/'
 
@@ -135,13 +157,18 @@ project :yeti, pretty: 'Yeti' do |proj|
     app.add_dependency :yeti
 
     app.platform :windows do |platform|
-      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32)
+      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32 advapi32)
     end
   end
 
   proj.application :resource_compiler, pretty: 'Resource Compiler' do |app|
     app.add_include_paths 'include/', 'tools/resource_compiler/include/'
-    app.add_include_paths '_deps/gala/include/', '_deps/luajit/include/', '_deps/sqlite3/include/'
+
+    app.add_include_paths '_deps/loom/include/',
+                          '_deps/gala/include/',
+                          '_deps/luajit/include/',
+                          '_deps/sqlite3/include/'
+
     app.add_library_paths '$build/lib/', '$build/bin/'
     app.add_binary_paths '$build/bin/'
 
@@ -151,7 +178,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     app.add_dependency :yeti
 
     app.platform :windows do |platform|
-      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32)
+      platform.add_external_dependencies %w(kernel32 user32 gdi32 ole32 advapi32)
     end
   end
 end
