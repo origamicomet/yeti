@@ -115,7 +115,7 @@ u64 HighResolutionTimer::msecs() const {
   return ((elapsed.QuadPart * 1000ull) / impl->freq.QuadPart);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   const u64 elapsed = ::mach_absolute_time() - impl->epoch;
-  return ((elapsed * impl->tbi.numer * 1000000ull) / impl->tbi.denom);
+  return ((elapsed * impl->tbi.numer * 1000ull) / impl->tbi.denom);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   struct timespec ts;
   ::clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -134,7 +134,7 @@ u64 HighResolutionTimer::usecs() const {
   return ((elapsed.QuadPart * 1000000ull) / impl->freq.QuadPart);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   const u64 elapsed = ::mach_absolute_time() - impl->epoch;
-  return ((elapsed * impl->tbi.numer * 1000ull) / impl->tbi.denom);
+  return ((elapsed * impl->tbi.numer * 1000000ull) / impl->tbi.denom);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   struct timespec ts;
   ::clock_gettime(CLOCK_MONOTONIC, &ts);
