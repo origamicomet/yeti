@@ -1,4 +1,4 @@
-//===-- yeti/runtime/standard_application.h ---------------*- mode: C++ -*-===//
+//===-- yeti/runtime/standard_application.h -------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|

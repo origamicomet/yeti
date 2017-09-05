@@ -1,4 +1,4 @@
-//===-- yeti/foundation/thread_safe/sp_mc_deque.h ---------*- mode: C++ -*-===//
+//===-- yeti/foundation/thread_safe/sp_mc_deque.h -------*- mode: C++11 -*-===//
 //
 //                 _____               _     _   _
 //                |   __|___ _ _ ___ _| |___| |_|_|___ ___

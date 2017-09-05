@@ -1,4 +1,4 @@
-//===-- yeti/foundation/readers_writer_lock.h --------------*- mode: C++ -*-===//
+//===-- yeti/foundation/readers_writer_lock.h ------------*- mode: C++11 -*-===//
 //
 //                 _____               _     _   _
 //                |   __|___ _ _ ___ _| |___| |_|_|___ ___

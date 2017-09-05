@@ -1,4 +1,4 @@
-//===-- yeti/resources/script_resource.h ------------------*- mode: C++ -*-===//
+//===-- yeti/resources/script_resource.h ----------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|

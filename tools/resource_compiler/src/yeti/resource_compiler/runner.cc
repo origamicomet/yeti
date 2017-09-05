@@ -1,4 +1,4 @@
-//===-- yeti/resource_compiler/runner.cc ------------------*- mode: C++ -*-===//
+//===-- yeti/resource_compiler/runner.cc ----------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|

@@ -1,4 +1,4 @@
-//===-- yeti/foundation/support/strings.h -----------------*- mode: C++ -*-===//
+//===-- yeti/foundation/support/strings.h ---------------*- mode: C++11 -*-===//
 //
 //                 _____               _     _   _
 //                |   __|___ _ _ ___ _| |___| |_|_|___ ___

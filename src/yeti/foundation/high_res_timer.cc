@@ -1,4 +1,4 @@
-//===-- yeti/foundation/high_res_timer.cc -----------------*- mode: C++ -*-===//
+//===-- yeti/foundation/high_res_timer.cc ---------------*- mode: C++11 -*-===//
 //
 //                 _____               _     _   _
 //                |   __|___ _ _ ___ _| |___| |_|_|___ ___

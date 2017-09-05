@@ -1,4 +1,4 @@
-//===-- yeti/foundation/allocator.cc ----------------------*- mode: C++ -*-===//
+//===-- yeti/foundation/allocator.cc --------------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|

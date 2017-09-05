@@ -1,4 +1,4 @@
-//===-- yeti/script/application_if.h ----------------------*- mode: C++ -*-===//
+//===-- yeti/script/application_if.h --------------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
