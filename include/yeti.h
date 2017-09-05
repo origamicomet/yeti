@@ -56,7 +56,7 @@ extern YETI_PUBLIC uint32_t __yeti_revision__();
 
 YETI_END_EXTERN_C // }
 
-YETI_BEGIN_NAMESPACE // {
+namespace yeti {
 
 ///
 struct Config {
@@ -72,6 +72,6 @@ struct Config {
 extern YETI_PUBLIC void initialize(const Config &config);
 extern YETI_PUBLIC void shutdown();
 
-YETI_END_NAMESPACE // }
+}
 
 #endif // _YETI_H_
