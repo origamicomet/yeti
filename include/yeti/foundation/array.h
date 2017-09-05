@@ -49,7 +49,10 @@ class Array {
   void shift();
   void shift(T *element);
 
+  T &emplace();
+
   void push(const T &element);
+
   void pop();
   void pop(T *element);
 
@@ -176,10 +179,15 @@ const T &Array<T>::operator[](const size_t idx) const {
 // }
 
 template <typename T>
-void Array<T>::push(const T &element) {
+T &Array<T>::emplace() {
   // TODO(mtwilliams): Grow logarithmically?
   this->resize(this->size() + 1);
-  this->last_[-1] = element;
+  return this->last_[-1];
+}
+
+template <typename T>
+void Array<T>::push(const T &element) {
+  this->emplace() = element;
 }
 
 template <typename T>
