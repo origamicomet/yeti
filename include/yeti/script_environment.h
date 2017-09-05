@@ -32,15 +32,25 @@ namespace yeti {
 
 class Script;
 
+// TODO(mtwilliams): Global handle system for Lua?
+ // On x86 and x86_64, use light user data to store:
+  // Tag        =  1 ; Always set, to aid differentiation between handles and pointers.
+  // Type       =  8 ; 256 types
+  // Generation =  3 ; Tracks bad references.
+  // Index      = 20 ; 1 million handles
+
 /// ...
 class YETI_PUBLIC ScriptEnvironment {
  YETI_DISALLOW_COPYING(ScriptEnvironment)
+ 
+ public:
+  typedef u32 Type;
 
  private:
   friend Script;
 
  private:
-  static const u32 NUM_OF_TEMPORARIES = 4096ul;
+  static const u32 NUM_OF_TEMPORARIES = 8192;
 
  private:
   ScriptEnvironment();

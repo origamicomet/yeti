@@ -33,22 +33,24 @@ namespace yeti {
 
 class ScriptResource;
 
-/// ...
+// ...
 class YETI_PUBLIC Script {
  YETI_DISALLOW_COPYING(Script)
 
  public:
   enum Type {
-    T_UNKNOWN  = 0,
-    T_NIL      = 1,
-    T_BOOLEAN  = 2,
-    T_INTEGER  = 3,
-    T_FLOAT    = 4,
-    T_STRING   = 5,
-    T_ARRAY    = 6,
-    T_MAP      = 7,
-    T_POINTER  = 8,
-    T_FUNCTION = 9
+    T_UNKNOWN   = 0,
+    T_NIL       = 1,
+    T_BOOLEAN   = 2,
+    T_INTEGER   = 3,
+    T_FLOAT     = 4,
+    T_STRING    = 5,
+    T_ARRAY     = 6,
+    T_MAP       = 7,
+    T_POINTER   = 8,
+    T_FUNCTION  = 9,
+    T_TEMPORARY = 10,
+    T_REF       = 11
   };
 
  public:

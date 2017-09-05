@@ -32,11 +32,11 @@ namespace script_if {
 
 /// \internal
 template <typename T>
-static bool is_a(lua_State *L, int idx);
+extern bool is_a(lua_State *L, int idx);
 
 /// \internal
 template <typename T>
-static T *to_a(lua_State *L, int idx);
+extern T *to_a(lua_State *L, int idx);
 
 } // script_if
 
