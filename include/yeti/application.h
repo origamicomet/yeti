@@ -39,7 +39,7 @@ class YETI_PUBLIC Application {
   static const char *architecture();
   static const char *build();
 
- public:
+ protected:
   // TODO(mtwilliams): Document this interface.
   virtual bool startup();
   virtual void shutdown();

@@ -21,42 +21,53 @@
 namespace yeti {
 namespace runtime {
 
-class Manifest;
+// See `yeti/runtime/manifest.h`.
+struct Manifest;
 
 class StandardApplication : public yeti::Application {
  YETI_DISALLOW_COPYING(StandardApplication)
 
  public:
-  StandardApplication();
+  StandardApplication(const Manifest *manifest);
   ~StandardApplication();
 
- public:
+ protected:
   bool startup();
   void update(const f32 delta_time);
   void render();
   void shutdown();
 
  private:
-  /// \brief Starts logging to stdout/stderr.
-  void start_logging_to_stdout_and_stderr() const;
+  // Starts logging to console.
+  void start_logging_to_console() const;
 
-  /// \brief Starts logging to a file.
+  // Starts logging to a file.
   void start_logging_to_file() const;
 
-  /// \brief Sets the accepted logging levels based on build configuration.
+  // Sets the accepted logging levels based on build configuration.
   void set_appropriate_logging_level() const;
 
-  /// \brief Logs game and engine copyright information.
+  // Logs game and engine copyright information.
   void log_copyright_notices() const;
 
-  /// \brief Logs engine, game, and content revisions.
+  // Logs engine, game, and content revisions.
   void log_pertinent_information_about_build() const;
 
-  /// \brief Logs software and hardware information.
+  // Logs software and hardware information.
   void log_pertinent_information_about_system() const;
 
  private:
-  Manifest *manifest_;
+  // Creates main window and default viewport.
+  void create_main_window_and_default_viewport();
+
+  // Exposes interfaces to Lua.
+  void expose_to_lua();
+
+  // Loads boot package and script.
+  void load_boot_package_and_script();
+
+ private:
+  const Manifest *manifest_;
   Script script_;
 };
 

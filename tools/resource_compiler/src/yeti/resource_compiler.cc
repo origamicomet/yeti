@@ -20,7 +20,8 @@ int main(int argc, const char *argv[]) {
 
   yeti::Config config;
   config.resources.database = NULL;
-  config.threading.workers = 8 - 1;
+  config.threading.workers = -1;
+  config.graphics.enabled = false;
 
   yeti::initialize(config);
 

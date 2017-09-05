@@ -37,6 +37,9 @@ void yeti::initialize(const Config &config) {
   task_scheduler::Config task_scheduler_config;
   task_scheduler_config.workers = config.threading.workers;
   task_scheduler::initialize(task_scheduler_config);
+
+  if (config.graphics.enabled)
+    graphics::engine::initialize(config.graphics.settings);
 }
 
 void yeti::shutdown() {

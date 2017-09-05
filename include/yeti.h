@@ -67,6 +67,11 @@ struct Config {
   struct {
     i32 workers;
   } threading;
+
+  struct {
+    bool enabled;
+    graphics::engine::Settings settings;
+  } graphics;
 };
 
 extern YETI_PUBLIC void initialize(const Config &config);
