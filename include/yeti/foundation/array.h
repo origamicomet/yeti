@@ -23,6 +23,8 @@
 #include "yeti/foundation/support.h"
 #include "yeti/foundation/assert.h"
 
+#include "yeti/foundation/allocator.h"
+
 namespace yeti {
 namespace foundation {
 
