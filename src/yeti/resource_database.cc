@@ -143,20 +143,14 @@ void ResourceDatabase::prepare_schema_() {
       "FOREIGN KEY(version_id) REFERENCES versions(id)\n"
     ");\n"
 
-    "CREATE TABLE IF NOT EXISTS soft_dependencies (\n"
+    // Online and offline dependencies.
+    "CREATE TABLE IF NOT EXISTS dependencies (\n"
       "id INTEGER PRIMARY KEY NOT NULL,\n"
+      "type INTEGER NOT NULL,"
       "build_id INTEGER NOT NULL,\n"
       "dependency_id INTEGER NOT NULL,\n"
       "FOREIGN KEY(build_id) REFERENCES builds(id)\n"
       "FOREIGN KEY(dependency_id) REFERENCES resources(id)\n"
-    ");\n"
-
-    "CREATE TABLE IF NOT EXISTS hard_dependencies (\n"
-      "id INTEGER PRIMARY KEY NOT NULL,\n"
-      "build_id INTEGER NOT NULL,\n"
-      "dependency_id INTEGER NOT NULL,\n"
-      "FOREIGN KEY(build_id) REFERENCES builds(id)\n"
-      "FOREIGN KEY(dependency_id) REFERENCES files(id)\n"
     ");\n"
 
     "CREATE TABLE IF NOT EXISTS logs (\n"
