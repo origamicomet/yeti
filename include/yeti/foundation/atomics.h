@@ -26,13 +26,23 @@
   #include <intrin.h>
   #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
     #pragma intrinsic(_InterlockedExchangeAdd)
+    #pragma intrinsic(_InterlockedIncrement)
+    #pragma intrinsic(_InterlockedDecrement)
     #pragma intrinsic(_InterlockedCompareExchange)
     #pragma intrinsic(_InterlockedCompareExchange64)
+    #pragma intrinsic(_interlockedbittestandset)
+    #pragma intrinsic(_interlockedbittestandreset)
   #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
     #pragma intrinsic(_InterlockedExchangeAdd)
     #pragma intrinsic(_InterlockedExchangeAdd64)
+    #pragma intrinsic(_InterlockedIncrement)
+    #pragma intrinsic(_InterlockedDecrement)
     #pragma intrinsic(_InterlockedCompareExchange)
     #pragma intrinsic(_InterlockedCompareExchange64)
+    #pragma intrinsic(_interlockedbittestandset)
+    #pragma intrinsic(_interlockedbittestandset64)
+    #pragma intrinsic(_interlockedbittestandreset)
+    #pragma intrinsic(_interlockedbittestandreset64)
   #endif
 #elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
       (YETI_COMPILER == YETI_COMPILER_CLANG)
@@ -45,7 +55,6 @@ namespace yeti {
 namespace foundation {
 
 /// \namespace ::yeti::foundation::atomic
-/// \brief TODO(mtwilliams): Document this.
 namespace atomic {
   i32 load(const volatile i32 *v);
   u32 load(const volatile u32 *v);
@@ -58,6 +67,12 @@ namespace atomic {
   void store(volatile i64 *v, const i64 desired);
   void store(volatile u64 *v, const u64 desired);
   void store(void ** volatile v, const void *desired);
+
+  i32 increment(volatile i32 *v);
+  u32 increment(volatile u32 *v);
+
+  i32 decrement(volatile i32 *v);
+  u32 decrement(volatile u32 *v);
 
   i32 add(volatile i32 *lhs, const i32 rhs);
   u32 add(volatile u32 *lhs, const u32 rhs);
@@ -81,6 +96,12 @@ namespace atomic {
   void store(volatile uintptr_t *v, const uintptr_t desired);
   uintptr_t cmp_and_xchg(volatile uintptr_t *v, const uintptr_t expected, const uintptr_t desired);
 #endif
+
+  bool set(volatile u32 *v, const u32 bit);
+  bool set(volatile u64 *v, const u64 bit);
+
+  bool unset(volatile u32 *v, const u32 bit);
+  bool unset(volatile u64 *v, const u64 bit);
 
   template <typename T>
   T min(volatile T *v, const T versus);
@@ -207,6 +228,38 @@ YETI_INLINE void atomic::store(volatile u64 *v, const u64 desired) {
 
 YETI_INLINE void atomic::store(void ** volatile v, const void *desired) {
   store((volatile uintptr_t *)v, (uintptr_t)desired);
+}
+
+YETI_INLINE i32 atomic::increment(volatile i32 *v) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  return (i32)_InterlockedIncrement((volatile long *)v);
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
+
+YETI_INLINE u32 atomic::increment(volatile u32 *v) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  return (u32)_InterlockedIncrement((volatile long *)v);
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
+
+YETI_INLINE i32 atomic::decrement(volatile i32 *v) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  return (i32)_InterlockedDecrement((volatile long *)v);
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
+
+YETI_INLINE u32 atomic::decrement(volatile u32 *v) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  return (u32)_InterlockedDecrement((volatile long *)v);
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
 }
 
 YETI_INLINE i32 atomic::add(volatile i32 *lhs, const i32 rhs) {
@@ -356,6 +409,48 @@ YETI_INLINE void *atomic::cmp_and_xchg(void ** volatile v, const void *expected,
   #endif
   }
 #endif
+
+YETI_INLINE bool atomic::set(volatile u32 *v, const u32 bit) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  return !!_interlockedbittestandset((volatile long *)v, bit);
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
+
+YETI_INLINE bool atomic::set(volatile u64 *v, const u64 bit) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
+    YETI_TRAP();
+    return false;
+  #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+    return !!_interlockedbittestandset64((volatile __int64 *)v, bit);
+  #endif
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
+
+YETI_INLINE bool atomic::unset(volatile u32 *v, const u32 bit) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  return !!_interlockedbittestandreset((volatile long *)v, bit);
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
+
+YETI_INLINE bool atomic::unset(volatile u64 *v, const u64 bit) {
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  #if YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86
+    YETI_TRAP();
+    return false;
+  #elif YETI_ARCHITECTURE == YETI_ARCHITECTURE_X86_64
+    return !!_interlockedbittestandreset64((volatile __int64 *)v, bit);
+  #endif
+#elif (YETI_COMPILER == YETI_COMPILER_GCC) || \
+      (YETI_COMPILER == YETI_COMPILER_CLANG)
+#endif
+}
 
 template <typename T>
 YETI_INLINE T atomic::min(volatile T *v, const T versus) {
