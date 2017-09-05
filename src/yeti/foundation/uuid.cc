@@ -17,7 +17,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 
@@ -42,7 +42,7 @@ void UUID::generate(UUID *uuid) {
   // TODO(mtwilliams): Verify byte order.
   GUID guid;
   ::CoCreateGuid((GUID *)&guid);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

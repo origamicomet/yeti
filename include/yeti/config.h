@@ -50,9 +50,9 @@
 /// \brief Microsoft Windows.
 #define YETI_PLATFORM_WINDOWS 1
 
-/// \macro YETI_PLATFORM_MAC_OS_X
+/// \macro YETI_PLATFORM_MAC
 /// \brief Apple's Mac OS X.
-#define YETI_PLATFORM_MAC_OS_X 2
+#define YETI_PLATFORM_MAC 2
 
 /// \macro YETI_PLATFORM_LINUX
 /// \brief GNU/Linux.
@@ -79,7 +79,7 @@
       // NOTE(mtwilliams): This includes tvOS. http://www.openradar.me/22639221
       #define YETI_PLATFORM YETI_PLATFORM_IOS
     #else
-      #define YETI_PLATFORM YETI_PLATFORM_MAC_OS_X
+      #define YETI_PLATFORM YETI_PLATFORM_MAC
     #endif
   #elif defined(__linux__)
     #if defined(ANDROID)

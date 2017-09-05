@@ -30,8 +30,8 @@ Application::~Application() {
 const char *Application::platform() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return "windows";
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
-  return "macosx";
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  return "mac";
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return "linux";
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS

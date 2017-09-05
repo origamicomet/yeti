@@ -25,7 +25,7 @@ bool Mouse::connected() {
   // TODO(mtwilliams): Check if a mouse is connected.
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return true;

@@ -21,7 +21,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   #include <unistd.h>
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
@@ -36,7 +36,7 @@ namespace foundation {
 char path::seperator() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return '\\';
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X || \
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
       YETI_PLATFORM == YETI_PLATFORM_LINUX || \
       YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -50,7 +50,7 @@ void path::canonicalize(char *path) {
     switch (*ch) {
     #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
       case '/': *ch = '\\'; break;
-    #elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X || \
+    #elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
           YETI_PLATFORM == YETI_PLATFORM_LINUX || \
           YETI_PLATFORM == YETI_PLATFORM_IOS || \
           YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -107,7 +107,7 @@ void path::cwd(char *cwd, size_t cwd_len) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   const DWORD wrote = ::GetCurrentDirectoryA((DWORD)cwd_len, (LPTSTR)&cwd[0]);
   yeti_assert_debug((wrote != 0) && (wrote <= cwd_len - 1));
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   const char *path = ::getcwd(cwd, cwd_len);
   yeti_assert_debug(path != NULL);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX

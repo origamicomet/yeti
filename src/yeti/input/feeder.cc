@@ -21,7 +21,7 @@
   #undef ABSOLUTE
   #undef RELATIVE
   #undef DELETE
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -252,7 +252,9 @@ void input::from(const Window *window) {
   // TODO(mtwilliams): Use the (global) atom table?
   ::SetPropA(hndl, "hooks[input].orginal_window_proc", (HANDLE)orginal_window_proc);
 }
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+
 void input::from(const Window *window) {
   yeti_assert_debug(window != NULL);
 }

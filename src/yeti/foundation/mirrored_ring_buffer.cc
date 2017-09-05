@@ -15,7 +15,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 
@@ -29,7 +29,7 @@ struct MirroredRingBuffer::Implementation {
     uintptr_t lower_half;
     uintptr_t upper_half;
   } vm;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 };
@@ -76,7 +76,7 @@ MirroredRingBuffer *MirroredRingBuffer::create(u32 sz) {
   }
 
   yeti_assertf(0, "Unable to obtain a contiguous virtual memory map!");
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -90,7 +90,7 @@ void MirroredRingBuffer::destroy() {
   ::CloseHandle(impl->vm.mapping);
 
   delete impl;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

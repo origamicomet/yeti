@@ -15,7 +15,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 
@@ -25,7 +25,7 @@ namespace foundation {
 Event *Event::create(bool all) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return (Event *)::CreateEvent(NULL, !all, FALSE, NULL);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -33,7 +33,7 @@ Event *Event::create(bool all) {
 void Event::destroy() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::CloseHandle((HANDLE)this);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -41,7 +41,7 @@ void Event::destroy() {
 void Event::signal() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::SetEvent((HANDLE)this);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -49,7 +49,7 @@ void Event::signal() {
 void Event::unsignal() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ResetEvent((HANDLE)this);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -57,7 +57,7 @@ void Event::unsignal() {
 bool Event::signalled() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return (::WaitForSingleObject((HANDLE)this, 0) == WAIT_OBJECT_0);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -65,7 +65,7 @@ bool Event::signalled() {
 void Event::wait() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::WaitForSingleObject((HANDLE)this, INFINITE);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

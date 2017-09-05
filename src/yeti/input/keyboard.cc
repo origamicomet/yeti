@@ -28,7 +28,7 @@ bool Keyboard::connected() {
   // Refer to http://stackoverflow.com/questions/9930958.
   // As well as http://stackoverflow.com/questions/6881114.
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return true;

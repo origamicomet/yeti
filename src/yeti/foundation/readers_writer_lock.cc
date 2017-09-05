@@ -15,7 +15,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 
@@ -25,7 +25,7 @@ namespace foundation {
 struct ReadersWriterLock::Implementation {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   SRWLOCK srwl;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 };
@@ -34,7 +34,7 @@ ReadersWriterLock *ReadersWriterLock::create() {
   Implementation *impl = new (foundation::heap()) Implementation();
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::InitializeSRWLock(&impl->srwl);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
   return (ReadersWriterLock *)impl;
@@ -43,7 +43,7 @@ ReadersWriterLock *ReadersWriterLock::create() {
 void ReadersWriterLock::destroy() {
   Implementation *impl = (Implementation *)this;
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
   delete impl;
@@ -59,7 +59,7 @@ void ReadersWriterLock::lock(bool exclusive) {
     ::AcquireSRWLockShared(&impl->srwl);
   else
     ::AcquireSRWLockExclusive(&impl->srwl);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -71,7 +71,7 @@ void ReadersWriterLock::unlock(bool exclusive) {
     ::ReleaseSRWLockShared(&impl->srwl);
   else
     ::ReleaseSRWLockExclusive(&impl->srwl);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

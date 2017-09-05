@@ -13,7 +13,7 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -23,7 +23,7 @@ namespace yeti {
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -123,12 +123,12 @@ Window *Window::open(const Window::Description &desc) {
   ::SetWindowPos(hndl, HWND_TOP, centered_pos_x, centered_pos_y, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE);
 
   window->native_hndl_ = (uintptr_t)hndl;
-  return window;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
 #endif
+  return window;
 }
 
 void Window::update(EventHandler event_handler,
@@ -144,7 +144,7 @@ void Window::update(EventHandler event_handler,
     ::TranslateMessage(&msg);
     ::DispatchMessage(&msg);
   }
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -159,7 +159,7 @@ void Window::close() {
   // reduces the complexity of window management for users, specifically
   // when embedding engine windows inside tools.
   ::CloseWindow((HWND)native_hndl_);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -169,7 +169,7 @@ void Window::close() {
 void Window::show() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ShowWindow((HWND)native_hndl_, SW_SHOW);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -179,7 +179,7 @@ void Window::show() {
 void Window::hide() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ShowWindow((HWND)native_hndl_, SW_HIDE);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -189,7 +189,7 @@ void Window::hide() {
 void Window::minimize() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ShowWindow((HWND)native_hndl_, SW_MINIMIZE);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -199,7 +199,7 @@ void Window::minimize() {
 void Window::maximize() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ShowWindow((HWND)native_hndl_, SW_MAXIMIZE);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -209,7 +209,7 @@ void Window::maximize() {
 void Window::restore() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ShowWindow((HWND)native_hndl_, SW_RESTORE);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -233,7 +233,7 @@ bool Window::clip() {
   clipping_area.bottom += offset.y;
 
   return (::ClipCursor(&clipping_area) != 0);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   // TODO(mtwilliams): Use XGrabPointer.
   // Refer to http://stackoverflow.com/questions/4642867.
@@ -247,7 +247,7 @@ bool Window::unclip() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::ClipCursor(NULL);
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -260,7 +260,7 @@ void Window::title(char title[256]) const {
   WCHAR title_w[256];
   ::GetWindowTextW((HWND)native_hndl_, (LPWSTR)title_w, 256);
   ::WideCharToMultiByte(CP_UTF8, 0, title_w, -1, (LPSTR)title, 256, NULL, NULL);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -273,7 +273,7 @@ void Window::set_title(const char *new_title) {
   WCHAR new_title_w[256];
   ::MultiByteToWideChar(CP_UTF8, 0, new_title, -1, new_title_w, 256);
   ::SetWindowTextW((HWND)native_hndl_, new_title_w);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -288,7 +288,7 @@ void Window::dimensions(u32 *width, u32 *height) const {
   ::GetClientRect((HWND)native_hndl_, &client_area);
   *width = client_area.right - client_area.left;
   *height = client_area.bottom - client_area.top;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -311,7 +311,7 @@ void Window::resize(u32 new_width, u32 new_height) {
 
   ::SetWindowPos((HWND)native_hndl_, NULL, 0, 0, adjusted_width, adjusted_height,
                  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
 #elif YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -321,7 +321,7 @@ void Window::resize(u32 new_width, u32 new_height) {
 bool Window::closable() const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return is_closable_;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
@@ -337,14 +337,13 @@ bool Window::set_closable(bool new_closable) {
   return true;
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS || \
       YETI_PLATFORM == YETI_PLATFORM_ANDROID
-  return false;
 #endif
 }
 
 bool Window::keyboard_focus() const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return (::GetFocus() == (HWND)native_hndl_);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return false;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return false;
@@ -356,7 +355,7 @@ bool Window::keyboard_focus() const {
 bool Window::set_keyboard_focus(bool new_keyboard_focus) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   return (::SetFocus(new_keyboard_focus ? (HWND)native_hndl_ : NULL) != NULL);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return false;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return false;
@@ -370,7 +369,7 @@ bool Window::mouse_focus() const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // HACK(mtwilliams): Assume we have mouse focus.
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return false;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return false;
@@ -383,7 +382,7 @@ bool Window::set_mouse_focus(bool new_mouse_focus) {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // HACK(mtwilliams): Assume we have mouse focus.
   return true;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC_OS_X
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return false;
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
   return false;
