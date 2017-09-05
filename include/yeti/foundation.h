@@ -34,6 +34,7 @@
 
 #include "yeti/foundation/types.h"
 #include "yeti/foundation/support.h"
+#include "yeti/foundation/bits.h"
 #include "yeti/foundation/atomics.h"
 #include "yeti/foundation/memory.h"
 
