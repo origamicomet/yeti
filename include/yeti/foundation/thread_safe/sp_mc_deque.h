@@ -49,7 +49,7 @@ class SpMcDeque {
  YETI_DISALLOW_COPYING(SpMcDeque)
 
  public:
-  SpMcDeque(uintptr_t mem, size_t sz);
+  SpMcDeque(uintptr_t memory, size_t sz);
   ~SpMcDeque();
 
  public:
@@ -73,10 +73,11 @@ class SpMcDeque {
 
 
 template <typename T>
-SpMcDeque<T>::SpMcDeque(uintptr_t mem, size_t sz)
-  : Q((T *)mem)
+SpMcDeque<T>::SpMcDeque(uintptr_t memory, size_t sz)
+  : Q((T *)memory)
   , N(sz / sizeof(T))
-  , top_(0), bottom_(0)
+  , top_(0)
+  , bottom_(0)
 {
 }
 
@@ -92,12 +93,12 @@ u64 SpMcDeque<T>::push(const T& E) {
   const u64 top = atomic::load(&top_);
 
   // Make sure we won't overflow the queue.
-  yeti_assert_debug(top - bottom <= N);
+  yeti_assert_debug((bottom - top) <= N);
 
   atomic::store((void ** volatile)&Q[bottom % N], (const void *)E);
   atomic::store(&bottom_, bottom + 1);
 
-  return (top - bottom - 1);
+  return (bottom - top + 1);
 }
 
 template <typename T>
