@@ -66,6 +66,8 @@ namespace hash_map {
     return Hasher<K, Types::Bits>::hash(key); }
 }
 
+// TODO(mtwilliams): Overloadable hash.
+
 template <typename K, typename V>
 class HashMap {
  // Copying a hash-map does not make a lot of sense. If you find yourself
@@ -90,6 +92,9 @@ class HashMap {
   void insert(const K &key, const V &value);
   V *reserve(const K &key);
   void remove(const K &key);
+
+ public:
+  void reset();
 
  private:
   static Hash hash(const K &key);
@@ -180,6 +185,12 @@ void HashMap<K,V>::remove(const K &key) {
       break;
     }
   }
+}
+
+template <typename K, typename V>
+void HashMap<K,V>::reset() {
+  memset((void *)slots_, 0, num_slots_ * sizeof(Entry));
+  occupants_ = 0;
 }
 
 template <typename K, typename V>
