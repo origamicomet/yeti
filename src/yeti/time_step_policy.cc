@@ -48,11 +48,11 @@ void TimeStepPolicy::update(const foundation::HighResolutionTimer *frame,
   switch (desc_.type) {
     case TimeStepPolicy::VARIABLE: {
       steps_ = 1;
-      delta_time_per_step_ = (f32)frame->msecs() / 1000000.f;
+      delta_time_per_step_ = (f32)frame->usecs() / 1000000.f;
     } break;
 
     case TimeStepPolicy::FIXED: {
-      state_.fixed.accumulated += (f32)frame->msecs() / 1000000.f;
+      state_.fixed.accumulated += (f32)frame->usecs() / 1000000.f;
       steps_ = state_.fixed.accumulated / desc_.config.fixed.delta_time_per_step;
       state_.fixed.accumulated -= steps_ * desc_.config.fixed.delta_time_per_step;
       delta_time_per_step_ = desc_.config.fixed.delta_time_per_step;
