@@ -12,27 +12,32 @@
 #include "yeti/script/window_if.h"
 
 #include "yeti/script.h"
+
+// To recover `Application *` from `Script *`.
 #include "yeti/application.h"
 #include "yeti/script/application_if.h"
+
 #include "yeti/window.h"
-#include "yeti/input.h"
 
 namespace yeti {
 
 template <>
 bool script_if::is_a<Window>(lua_State *L, int idx) {
   Window *window = (Window *)lua_touserdata(L, idx);
+
   if (window == NULL)
     // If it's not a pointer, then there's no way it's a `Window *`.
     return false;
 
 #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
     YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-  // Since all our windows are stored in |app|, it's easy enough to check if
-  // the given pointer is indeed to a `yeti::Window`.
   Application *app = application(L);
-  for (Window **I = app->windows().first(); I <= app->windows().last(); ++I)
+
+  // Since all our windows are referenced by our application, it's easy enough
+  // to check if the given pointer is indeed to a `yeti::Window`.
+  for (Window *const *I = app->windows().first(); I <= app->windows().last(); ++I)
     if (window == *I)
+      // Bingo!
       return true;
 
   return false;
@@ -45,7 +50,7 @@ bool script_if::is_a<Window>(lua_State *L, int idx) {
 template <>
 Window *script_if::to_a<Window>(lua_State *L, int idx) {
   if (!is_a<Window>(L, idx))
-    luaL_argerror(L, idx, "Expected a light user-data reference to a yeti::Window.");
+    luaL_argerror(L, idx, "Expected a light user-data reference to a `Window`.");
   return (Window *)lua_touserdata(L, idx);
 }
 
@@ -75,10 +80,13 @@ namespace window_if {
         return luaL_argerror(L, 1, "Expected `height` to be a positive integer.");
       const u32 height = lua_tonumber(L, -1);
 
-      Window *window = Window::open({title, {width, height}});
-      yeti::input::from(window);
-      app->windows().push(window);
+    #if 0
+      Window *window = ...;
       lua_pushlightuserdata(L, (void *)window);
+    #else
+      luaL_error(L, "Not implemented yet.");
+    #endif
+
       return 1;
     }
 
@@ -156,7 +164,7 @@ namespace window_if {
       Window *window = script_if::to_a<Window>(L, 1);
       if (!lua_isboolean(L, 2))
         return luaL_argerror(L, 2, "Expected `focus` to be a boolean.");
-      window->set_keyboard_focus(lua_toboolean(L, 2));
+      window->set_keyboard_focus(!!lua_toboolean(L, 2));
       return 0;
     }
 
@@ -170,7 +178,7 @@ namespace window_if {
       Window *window = script_if::to_a<Window>(L, 1);
       if (!lua_isboolean(L, 2))
         return luaL_argerror(L, 2, "Expected `focus` to be a boolean.");
-      window->set_mouse_focus(lua_toboolean(L, 2));
+      window->set_mouse_focus(!!lua_toboolean(L, 2));
       return 0;
     }
   }
@@ -196,6 +204,10 @@ void window_if::expose(Script *script) {
 
   script->add_module_function("Window", "clip", &clip);
   script->add_module_function("Window", "unclip", &unclip);
+
+  // TODO(mtwilliams): Custom icons.
+  // script->add_module_function("Window", "icon", &icon);
+  // script->add_module_function("Window", "set_icon", &set_icon);
 
   script->add_module_function("Window", "title", &title);
   script->add_module_function("Window", "set_title", &set_title);

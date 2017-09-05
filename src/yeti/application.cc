@@ -13,11 +13,19 @@
 
 #include "yeti/input.h"
 
+// To do some work while waiting for hazards or rendering.
+#include "yeti/task.h"
+#include "yeti/task_scheduler.h"
+
 namespace yeti {
 
 Application::Application()
-  : windows_(foundation::heap())
-  , time_step_policy_(NULL) {
+  : time_step_policy_(NULL)
+  , windows_(foundation::heap(), 0)
+  , worlds_(foundation::heap(), 0)
+  , logical_frame_count_(0)
+  , visual_frame_count_(0)
+  , hazards_(0) {
 }
 
 Application::~Application() {
@@ -73,16 +81,36 @@ void Application::update(const f32 delta_time) {
 void Application::render() {
 }
 
+World *Application::create_a_world() {
+  return NULL;
+}
+
+void Application::update_a_world(World *world,
+                                 const f32 delta_time) {
+  world->update(delta_time);
+}
+
+void Application::render_a_world(const World *world,
+                                 Camera::Handle camera,
+                                 Renderer::Viewport *viewport) {
+}
+
+void Application::destroy_a_world(World *world) {
+}
+
 void Application::run() {
   // TODO(mtwilliams): Move this into a task?
-  foundation::HighResolutionTimer *frame = foundation::HighResolutionTimer::create();
-  foundation::HighResolutionTimer *wall = foundation::HighResolutionTimer::create();
+  foundation::HighResolutionTimer *frame_timer = foundation::HighResolutionTimer::create();
+  foundation::HighResolutionTimer *wall_timer = foundation::HighResolutionTimer::create();
 
   this->startup();
 
   for (;;) {
+    // Don't mutate state until fully reflected.
+    task_scheduler::do_some_work_until_zero(&hazards_);
+
     yeti_assert_debug(time_step_policy_ != NULL);
-    time_step_policy_->update(frame, wall);
+    time_step_policy_->update(frame_timer, wall_timer);
 
     for (Window **window = windows_.first(); window <= windows_.last(); ++window)
       (*window)->update(&window_event_handler_, (void *)this);
@@ -92,10 +120,17 @@ void Application::run() {
     const u32 steps = time_step_policy_->steps();
     const f32 delta_time_per_step = time_step_policy_->delta_time_per_step();
 
+    yeti_assert_debug(steps >= 1);
+
     for (u32 step = 0; step < steps; ++step)
       this->update(delta_time_per_step);
 
+    logical_frame_count_ += 1;
+
+    // TODO(mtwilliams): Limit latency.
     this->render();
+
+    visual_frame_count_ += 1;
 
     yeti::Keyboard::update();
     yeti::Mouse::update();
@@ -103,7 +138,7 @@ void Application::run() {
     // BUG(mtwilliams): Due to inadequate timing resolution, this may result in
     // all frames taking `zero' microseconds unless enough work is performed
     // every frame.
-    frame->reset();
+    frame_timer->reset();
   }
 
   YETI_UNREACHABLE();
@@ -119,34 +154,10 @@ void Application::unpause() {
 
 void Application::quit() {
   this->shutdown();
+
   ::exit(EXIT_SUCCESS);
+
   YETI_UNREACHABLE();
-}
-
-void Application::window_event_handler_(Window *window,
-                                        const Window::Event &event,
-                                        void *self) {
-  Application *app = (Application *)self;
-
-  u32 index;
-  for (index = 0; index < app->windows_.size(); ++index)
-    if (app->windows_[index] == window)
-      break;
-
-  switch (event.type) {
-    case Window::Event::CLOSED: {
-      app->windows_[index] = app->windows_[app->windows_.size() - 1];
-      app->windows_.resize(app->windows_.size() - 1);
-    } break;
-  }
-}
-
-foundation::Array<Window *> &Application::windows() {
-  return windows_;
-}
-
-const foundation::Array<Window *> &Application::windows() const {
-  return windows_;
 }
 
 TimeStepPolicy *Application::time_step_policy() {
@@ -161,6 +172,20 @@ void Application::set_time_step_policy(TimeStepPolicy *new_time_step_policy) {
   if (time_step_policy_)
     time_step_policy_->destroy();
   time_step_policy_ = new_time_step_policy;
+}
+
+const foundation::Array<Window *> &Application::windows() const {
+  return windows_;
+}
+
+const foundation::Array<World *> &Application::worlds() const {
+  return worlds_;
+}
+
+void Application::window_event_handler_(Window *window,
+                                        const Window::Event &event,
+                                        void *self) {
+  Application *app = (Application *)self;
 }
 
 } // yeti

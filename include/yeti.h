@@ -33,17 +33,30 @@
 #include "yeti/resource_manager.h"
 #include "yeti/resource_compiler.h"
 
+#include "yeti/resources/render_config_resource.h"
 #include "yeti/resources/script_resource.h"
 
-#include "yeti/window.h"
-#include "yeti/time_step_policy.h"
+#include "yeti/ecs.h"
 
 #include "yeti/script.h"
+#include "yeti/script_if.h"
 #include "yeti/script/application_if.h"
 #include "yeti/script/math_if.h"
 #include "yeti/script/window_if.h"
-#include "yeti/script/mouse_if.h"
+#include "yeti/script/viewport_if.h"
 #include "yeti/script/keyboard_if.h"
+#include "yeti/script/mouse_if.h"
+#include "yeti/script/world_if.h"
+#include "yeti/script/transform_if.h"
+#include "yeti/script/camera_if.h"
+#include "yeti/script/light_if.h"
+
+#include "yeti/window.h"
+
+#include "yeti/graphics.h"
+#include "yeti/renderer.h"
+
+#include "yeti/time_step_policy.h"
 
 #include "yeti/application.h"
 

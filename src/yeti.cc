@@ -32,6 +32,7 @@ void yeti::initialize(const Config &config) {
     resource_manager::initialize(resource_manager_config);
   }
 
+  resource_manager::track(RenderConfigResource::type());
   resource_manager::track(ScriptResource::type());
 
   task_scheduler::Config task_scheduler_config;

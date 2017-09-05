@@ -188,6 +188,7 @@ void StandardApplication::expose_to_lua() {
   world_if::expose(&this->script_);
   transform_if::expose(&this->script_);
   camera_if::expose(&this->script_);
+  light_if::expose(&this->script_);
 }
 
 void StandardApplication::load_boot_package_and_script() {

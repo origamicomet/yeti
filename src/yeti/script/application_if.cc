@@ -12,18 +12,17 @@
 #include "yeti/script/application_if.h"
 
 #include "yeti/script.h"
+
 #include "yeti/application.h"
-#include "yeti/window.h"
-#include "yeti/time_step_policy.h"
 
 namespace yeti {
 
 Application *script_if::application(lua_State *L) {
-  // TODO(mtwilliams): Refactor singleton management into yeti::Script.
+  // TODO(mtwilliams): Refactor singleton management into `yeti::Script`.
   lua_getglobal(L, "Application");
   lua_getfield(L, -1, "__instance__");
   if (!lua_islightuserdata(L, -1))
-    luaL_error(L, "Expected Application.__instance__ to be a light user-data reference to a yeti::Application.");
+    luaL_error(L, "Expected Application.__instance__ to be a light user-data reference to an `Application`.");
   Application *app = (Application *)lua_touserdata(L, -1);
   lua_pop(L, 2);
   return app;
@@ -48,7 +47,7 @@ namespace application_if {
 
     static int log(lua_State *L) {
       log::Level message_level = log::OFF;
-      const char *message;
+      const char *message = NULL;
 
       switch (lua_gettop(L)) {
         default:
@@ -61,7 +60,7 @@ namespace application_if {
         } break;
 
         case 2: {
-          // OPTIMIZATION(mtwilliams): Store values in a `Log` table.
+          // OPTIMIZATION(mtwilliams): Store values in a Lua table?
           const char *level = luaL_checkstring(L, 1);
 
           if (strcmp("debug", level) == 0) {
@@ -102,18 +101,6 @@ namespace application_if {
     static int quit(lua_State *L) {
       Application *app = script_if::application(L);
       app->quit();
-      return 0;
-    }
-
-    static int window(lua_State *L) {
-      Application *app = script_if::application(L);
-      lua_pushlightuserdata(L, (void *)app->windows()[0]);
-      return 1;
-    }
-
-    static int windows(lua_State *L) {
-      Application *app = script_if::application(L);
-      yeti_assertf(0, "Not implemented yet.");
       return 0;
     }
 
@@ -167,6 +154,42 @@ namespace application_if {
 
       return 0;
     }
+
+    static int window(lua_State *L) {
+      Application *app = script_if::application(L);
+      lua_pushlightuserdata(L, (void *)app->windows()[0]);
+      return 1;
+    }
+
+    static int windows(lua_State *L) {
+      Application *app = script_if::application(L);
+      yeti_assertf(0, "Not implemented yet.");
+      return 0;
+    }
+
+    static int viewport(lua_State *L) {
+      Application *app = script_if::application(L);
+      yeti_assertf(0, "Not implemented yet.");
+      return 0;
+    }
+
+    static int viewports(lua_State *L) {
+      Application *app = script_if::application(L);
+      yeti_assertf(0, "Not implemented yet.");
+      return 0;
+    }
+
+    static int world(lua_State *L) {
+      Application *app = script_if::application(L);
+      yeti_assertf(0, "Not implemented yet.");
+      return 0;
+    }
+
+    static int worlds(lua_State *L) {
+      Application *app = script_if::application(L);
+      yeti_assertf(0, "Not implemented yet.");
+      return 0;
+    }
   }
 } // application_if
 
@@ -183,17 +206,23 @@ void application_if::expose(Script *script, Application *app) {
   script->add_module_function("Application", "build", &build);
 
   script->add_module_function("Application", "log", &log);
-
   script->add_module_function("Application", "pause", &pause);
   script->add_module_function("Application", "unpause", &unpause);
 
   script->add_module_function("Application", "quit", &quit);
 
+  script->add_module_function("Application", "time_step_policy", &time_step_policy);
+  script->add_module_function("Application", "set_time_step_policy", &set_time_step_policy);
+
   script->add_module_function("Application", "window", &window);
   script->add_module_function("Application", "windows", &windows);
 
-  script->add_module_function("Application", "time_step_policy", &time_step_policy);
-  script->add_module_function("Application", "set_time_step_policy", &set_time_step_policy);
+  script->add_module_function("Application", "viewport", &viewport);
+  script->add_module_function("Application", "viewports", &viewports);
+
+  script->add_module_function("Application", "world", &world);
+  script->add_module_function("Application", "worlds", &worlds);
+
 }
 
 } // yeti

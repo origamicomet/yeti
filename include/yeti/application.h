@@ -21,7 +21,13 @@
 #include "yeti/foundation.h"
 
 #include "yeti/time_step_policy.h"
+
 #include "yeti/window.h"
+
+// REFACTOR(mtwilliams): Decouple renderer by turning into singleton?
+#include "yeti/renderer.h"
+
+#include "yeti/world.h"
 
 namespace yeti {
 
@@ -46,6 +52,19 @@ class YETI_PUBLIC Application {
   virtual void update(const f32 delta_time);
   virtual void render();
 
+ public:
+  World *create_a_world();
+
+  void update_a_world(World *world,
+                      const f32 delta_time);
+
+  void render_a_world(const World *world,
+                      Camera::Handle camera,
+                      Renderer::Viewport *viewport);
+
+  void destroy_a_world(World *world);
+
+ public:
   void run();
 
   void pause();
@@ -53,25 +72,34 @@ class YETI_PUBLIC Application {
 
   void quit();
 
- private:
-  static void window_event_handler_(Window *window,
-                                    const Window::Event &event,
-                                    void *self);
-
- public:
-  // TODO(mtwilliams): Document this interface.
-  foundation::Array<Window *> &windows();
-  const foundation::Array<Window *> &windows() const;
-
  public:
   // TODO(mtwilliams): Document this interface.
   TimeStepPolicy *time_step_policy();
   const TimeStepPolicy *time_step_policy() const;
   void set_time_step_policy(TimeStepPolicy *new_time_step_policy);
 
+ public:
+  // TODO(mtwilliams): Document these interfaces.
+  const foundation::Array<Window *> &windows() const;
+  const foundation::Array<World *> &worlds() const;
+
+ private:
+  static void window_event_handler_(Window *window,
+                                    const Window::Event &event,
+                                    void *self);
+
  protected:
-  foundation::Array<Window *> windows_;
   TimeStepPolicy *time_step_policy_;
+
+  foundation::Array<Window *> windows_;
+
+  foundation::Array<World *> worlds_;
+
+  u32 logical_frame_count_;
+  u32 visual_frame_count_;
+
+  // Number of outstanding frames yet to finish reflection.
+  u32 hazards_;
 };
 
 } // yeti
