@@ -76,8 +76,8 @@ class YETI_PUBLIC ScratchAllocator : public Allocator {
   ~ScratchAllocator();
 
  public:
-  uintptr_t allocate(size_t sz, size_t alignment = 8);
-  uintptr_t reallocate(uintptr_t ptr, size_t sz, size_t alignment = 8);
+  uintptr_t allocate(size_t sz, size_t alignment = 16);
+  uintptr_t reallocate(uintptr_t ptr, size_t sz, size_t alignment = 16);
   void deallocate(uintptr_t ptr);
 
  private:
