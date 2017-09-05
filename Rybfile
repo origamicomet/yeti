@@ -106,7 +106,7 @@ project :yeti, pretty: 'Yeti' do |proj|
     lib.define '__YETI_IS_BEING_COMPILED__' => true
     lib.define '__YETI_VERSION__' => "\"\\\"#{`git rev-parse HEAD`.rstrip}\\\"\""
     lib.define '__YETI_REVISION__' => `git rev-list --count HEAD`.strip.to_i
-    lib.define '__YETI_COPYRIGHT__' => "\"\\\"Copyright 2013-#{Time.new.year} Origami Comet Games, Inc. All rights reserved.\\\"\""
+    lib.define '__YETI_COPYRIGHT__' => "\"\\\"Copyright 2012-#{Time.new.year} Origami Comet Games, Inc.\\\"\""
 
     lib.add_include_paths 'include/'
     lib.add_library_paths '$build/lib/', '$build/bin/'
