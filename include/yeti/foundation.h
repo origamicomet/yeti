@@ -55,8 +55,11 @@
 #include "yeti/foundation/allocator.h"
 
 #include "yeti/foundation/global_heap_allocator.h"
+
 #include "yeti/foundation/buddy_allocator.h"
 #include "yeti/foundation/proxy_allocator.h"
+
+#include "yeti/foundation/thread_safe/bump_allocator.h"
 #include "yeti/foundation/thread_safe/scratch_allocator.h"
 
 #include "yeti/foundation/hash.h"
