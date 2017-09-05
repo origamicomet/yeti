@@ -28,14 +28,33 @@
 namespace yeti {
 namespace foundation {
 
+// TODO(mtwilliam): Document `memory` utilities.
+// TODO(mtwilliams): Restrict `memory::copy` buffers.
+// TODO(mtwilliams): Assert `memory::copy` buffers don't overlap.
+
 /// \namespace ::yeti::foundation::memory
-/// \brief TODO(mtwilliam): Document this.
+/// \brief
 namespace memory {
+  /// Forward aligns @base to the closest @alignment byte boundry.
   uintptr_t align(uintptr_t base, size_t alignment);
+
+  /// Zeros @count bytes starting from @ptr.
+  void zero(uintptr_t ptr, size_t count);
+
+  /// Copies @count bytes from @src to @dst.
+  void copy(uintptr_t src, uintptr_t dst, size_t count);
 }
 
 YETI_INLINE uintptr_t memory::align(uintptr_t base, size_t alignment) {
   return (alignment - (base % alignment)) % alignment;
+}
+
+YETI_INLINE void memory::zero(uintptr_t ptr, size_t count) {
+  ::memset((void *)ptr, 0, count);
+}
+
+YETI_INLINE void memory::copy(uintptr_t src, uintptr_t dst, size_t count) {
+  ::memcpy((void *)dst, (const void *)src, count);
 }
 
 } // foundation
