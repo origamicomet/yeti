@@ -51,7 +51,7 @@ class Pool {
 
  public:
   T *acquire();
-  void relinquish(T *borrowed);
+  void release(T *borrowed);
 
  private:
   Allocator *allocator_;
@@ -115,18 +115,18 @@ try_acquire:
 }
 
 template <typename T>
-void Pool<T>::relinquish(T *borrowed) {
+void Pool<T>::release(T *borrowed) {
   yeti_assert_debug((uintptr_t)borrowed >= lower_);
   yeti_assert_debug((uintptr_t)borrowed < upper_);
 
   Element *element = (Element *)borrowed;
 
-try_relinquish:
+try_release:
   Element *head = (Element *)atomic::load((void **volatile const)&free_);
   element->next_available_element = head;
 
   if (atomic::cmp_and_xchg((void ** volatile)&free_, (void *)head, (void *)element) != (void *)head)
-    goto try_relinquish;
+    goto try_release;
 }
 
 } // thread_safe
