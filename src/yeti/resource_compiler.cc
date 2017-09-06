@@ -16,10 +16,10 @@
 #include "yeti/foundation/global_heap_allocator.h"
 #include "yeti/foundation/path.h"
 
-// NOTE(mtwilliams): Used for log forwarding.
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 
 static const yeti::log::Category::Id YETI_LOG_RESOURCE_COMPILER =
   ::yeti::log::Category::add("resource_compiler", YETI_LOG_GENERAL);
@@ -33,6 +33,7 @@ ResourceCompiler::ResourceCompiler()
   : db_(NULL)
   , data_len_(0)
   , data_src_len_(0)
+  , ignore_(foundation::heap())
   , debounce_(0)
   , backlog_(foundation::heap()) {
 }
@@ -56,6 +57,9 @@ ResourceCompiler *ResourceCompiler::start(const ResourceCompiler::Options &opts)
   resource_compiler->data_len_ = strlen(resource_compiler->data_);
   resource_compiler->data_src_len_ = strlen(resource_compiler->data_src_);
 
+  // Load ignore patterns from file, if it exists.
+  resource_compiler->add_ignore_patterns(opts.ignore);
+
   resource_compiler->debounce_ = opts.debounce;
 
   return resource_compiler;
@@ -65,44 +69,11 @@ void ResourceCompiler::shutdown() {
   delete this;
 }
 
-bool ResourceCompiler::ignorable(const char *path) const {
-  // TODO(mtwilliams): Implement a Git-like ignore dotfile.
-  yeti_assert_debug(path != NULL);
-
-  // Ignore any and all dot files.
-  if (foundation::path::file(path)[0] == '.')
-    return true;
-
-  return false;
-}
-
-// We don't allow paths that contain characters other than the lowercase
-// alphabet, numerics, underscores, and path and file delimiters. This prevents
-// many woes encountered when dealing with file systems across different
-// platforms and tools.
-bool ResourceCompiler::allowable(const char *path) const {
-  yeti_assert_debug(path != NULL);
-
-  while (char ch = *path++) {
-    if ((ch >= 'a') && (ch <= 'z'))
-      continue;
-    if ((ch >= '0') && (ch <= '9'))
-      continue;
-    if (ch == '_' || ch == '_')
-      continue;
-    if (ch == '/' || ch == '\\')
-      continue;
-    if (ch == '.')
-      continue;
-    return false;
+void ResourceCompiler::add_ignore_patterns(const char *path) {
+  if (foundation::fs::File *file = foundation::fs::open(path, foundation::fs::READ)) {
+    foundation::PatternFileParser(file).parse(ignore_);
+    foundation::fs::close(file);
   }
-
-  return true;
-}
-
-bool ResourceCompiler::compilable(const char *path) const {
-  yeti_assert_debug(path != NULL);
-  return !!resource_manager::type_from_path(path);
 }
 
 void ResourceCompiler::compile(bool force) {
@@ -144,21 +115,22 @@ void ResourceCompiler::compile(bool force) {
   backlog_.clear();
 }
 
-void ResourceCompiler::compile(const char *path, bool force) {
+bool ResourceCompiler::compile(const char *path, bool force) {
   yeti_assert_debug(path != NULL);
 
   const Resource::Id id = Resource::id_from_path(path);
   const Resource::Type *type = resource_manager::type_from_path(path);
 
-  // TODO(mtwilliams): Only compile if |last_modified_at| is more recent than
-  // than whatever our |db| last saw, or if |hash| is different from whatever
-  // we've seen, and |force| is false.
+  // TODO(mtwilliams): Only compile if |source_file_info.last_modified_at| is
+  // more recent than than whatever our |db| last saw, or if |hash| is
+  // different from whatever we've seen, and |force| is false.
+  foundation::fs::Info source_file_info;
+  foundation::fs::info(path, &source_file_info);
 
   // TODO(mtwilliams): Update our |db| to reflect the compilation of this
   // resource.
 
-  fprintf(stdout, "Compiling '%s'...\n", path);
-  fprintf(stdout, " type=%s\n", type->name);
+  fprintf(stdout, "Compiling '%s' to `%016llx`...\n", path, id);
 
   // TODO(mtwilliams): Setup resource compilation environment.
   ResourceCompiler::Environment env;
@@ -196,14 +168,17 @@ void ResourceCompiler::compile(const char *path, bool force) {
   foundation::fs::close(input.source);
   foundation::fs::close(output.memory_resident_data);
   foundation::fs::close(output.streaming_data);
+
+  return success;
 }
 
 // TODO(mtwilliams): (Reuse) our task scheduler to multithread resource
 // compilation.
 
 void ResourceCompiler::daemon() {
-  // Setup our watcher. It will watch |data_src_| to collect a stream of
-  // creation, modification, and deletion events for files and folders.
+  // Setup our watcher. It will watch the source data directory to collect a
+  // stream of creation, modification, and deletion events for files and
+  // folders.
   foundation::fs::Watch *watch =
     foundation::fs::watch(data_src_, (foundation::fs::Watcher)&ResourceCompiler::watcher, (void *)this);
 
@@ -233,6 +208,50 @@ void ResourceCompiler::canonicalize(char *path) const {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   foundation::path::unixify(&path[0]);
 #endif
+}
+
+bool ResourceCompiler::ignorable(const char *path) const {
+  yeti_assert_debug(path != NULL);
+
+  // Ignore any and all dot files.
+  if (foundation::path::file(path)[0] == '.')
+    return true;
+
+  // Ignore any files matching patterns specified in `.dataignore`.
+  for (const char *const *pattern = ignore_.first(); pattern <= ignore_.last(); ++pattern)
+    if (foundation::path::match(*pattern, path))
+      return true;
+
+  return false;
+}
+
+// We don't allow paths that contain characters other than the lowercase
+// alphabetics, numerics, underscores, and path and extension delimiters. This
+// prevents many woes encountered when dealing with filesystems across
+// different platforms and tools.
+bool ResourceCompiler::allowable(const char *path) const {
+  yeti_assert_debug(path != NULL);
+
+  while (char ch = *path++) {
+    if ((ch >= 'a') && (ch <= 'z'))
+      continue;
+    if ((ch >= '0') && (ch <= '9'))
+      continue;
+    if (ch == '_' || ch == '_')
+      continue;
+    if (ch == '/' || ch == '\\')
+      continue;
+    if (ch == '.')
+      continue;
+    return false;
+  }
+
+  return true;
+}
+
+bool ResourceCompiler::compilable(const char *path) const {
+  yeti_assert_debug(path != NULL);
+  return !!resource_manager::type_from_path(path);
 }
 
 bool ResourceCompiler::walk(const char *path, const foundation::fs::Info *info) {

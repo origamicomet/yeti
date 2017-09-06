@@ -38,6 +38,9 @@ namespace resource_compiler {
     /// Root directory of compiled data.
     Path data;
 
+    /// Path to file of ignore patterns.
+    Path ignore;
+
     /// The amount of time, in milliseconds, to collect changes prior to processing.
     /// \note Only applies if daemonized.
     u32 debounce;
@@ -100,17 +103,22 @@ class YETI_PUBLIC ResourceCompiler {
   static ResourceCompiler *start(const ResourceCompiler::Options &opts);
   void shutdown();
 
-  bool ignorable(const char *path) const;
-  bool allowable(const char *path) const;
-  bool compilable(const char *path) const;
+ private:
+  void add_ignore_patterns(const char *path);
 
+ public:
   void compile(bool force = false);
-  void compile(const char *path, bool force = false);
+  bool compile(const char *path, bool force = false);
 
   void daemon();
 
  private:
   void canonicalize(char *path) const;
+
+ private:
+  bool ignorable(const char *path) const;
+  bool allowable(const char *path) const;
+  bool compilable(const char *path) const;
 
  private:
   bool walk(const char *path, const foundation::fs::Info *info);
@@ -136,9 +144,14 @@ class YETI_PUBLIC ResourceCompiler {
 
   Path data_;
   size_t data_len_;
+
   Path data_src_;
   size_t data_src_len_;
 
+  // Patterns of source filenames to ignore.
+  foundation::Array<const char *> ignore_;
+
+  // Milliseconds to collect changes prior to processing.
   u32 debounce_;
 
   // Paths collected by `walker`.

@@ -75,4 +75,6 @@
 #include "yeti/foundation/thread_safe/pool.h"
 #include "yeti/foundation/thread_safe/sp_mc_deque.h"
 
+#include "yeti/foundation/pattern_file_parser.h"
+
 #endif // _YETI_FOUNDATION_H_
