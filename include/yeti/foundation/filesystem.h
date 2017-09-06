@@ -23,6 +23,8 @@
 #include "yeti/foundation/support.h"
 #include "yeti/foundation/assert.h"
 
+#include "yeti/foundation/array.h"
+
 namespace yeti {
 namespace foundation {
 
@@ -119,6 +121,18 @@ extern YETI_PUBLIC bool exists(const char *path);
 ///
 extern YETI_PUBLIC bool create(fs::Type type, const char *path);
 
+/// Creates or opens a file at @path with @permissions.
+extern YETI_PUBLIC fs::File *create_or_open(const char *path, const u32 permissions);
+
+/// Opens an existing file @path with @permissions.
+///
+/// \note Fails if there is no file @path.
+///
+extern YETI_PUBLIC fs::File *open(const char *path, const u32 permissions);
+
+/// Closes a @file opened by yeti::foundation::fs::open.
+extern YETI_PUBLIC void close(fs::File *file);
+
 /// Destroys a file or directory at @path.
 ///
 /// \note Auto-detects the type from @path.
@@ -130,6 +144,37 @@ extern YETI_PUBLIC bool destroy(const char *path);
 /// \note Fails if @type does not match the entry at @path.
 ///
 extern YETI_PUBLIC bool destroy(fs::Type type, const char *path);
+
+/// Synchronously reads up to @in_len bytes from the @file into @in.
+///
+/// \returns The number of bytes actually read. Zero indicates failure.
+///
+extern YETI_PUBLIC u64 read(fs::File *file, uintptr_t in, u64 in_len);
+
+/// Synchronously reads @file into @buffer.
+///
+/// \returns The number of bytes read. Zero indicates failure.
+///
+extern YETI_PUBLIC u64 read_into_buffer(fs::File *file,
+                                        foundation::Array<u8> &buffer);
+
+/// Synchronously writes up to @out_len bytes to the @file from @out.
+///
+/// \returns The number of bytes actually written. Zero indicates failure.
+///
+extern YETI_PUBLIC u64 write(fs::File *file, const uintptr_t out, u64 out_len);
+
+/// Moves the read/write position inside the @file. If @pos is `fs::ABSOLUTE`,
+/// then @offset is taken as from the start of the file if positive, or from
+/// the end of the file if negative. If @pos is `fs::RELATIVE`, the @offset is
+/// taken from the current position in the file.
+///
+/// \returns The number of bytes seeked.
+///
+extern YETI_PUBLIC i64 seek(fs::File *file, fs::Position pos, i64 offset);
+
+/// Forces all buffered data to be written to the @file.
+extern YETI_PUBLIC void flush(fs::File *file);
 
 /// User-specified callback for yeti::foundation::fs::walk.
 typedef bool (*Walker)(const char *path, const Info *info, void *ctx);
@@ -157,42 +202,6 @@ extern YETI_PUBLIC void poll(Watch *watch);
 
 /// Stops watching a directory.
 extern YETI_PUBLIC void unwatch(Watch *watch);
-
-/// Creates or opens a file at @path with @permissions.
-extern YETI_PUBLIC fs::File *create_or_open(const char *path, const u32 permissions);
-
-/// Opens an existing file @path with @permissions.
-///
-/// \note Fails if there is no file @path.
-///
-extern YETI_PUBLIC fs::File *open(const char *path, const u32 permissions);
-
-/// Closes a @file opened by yeti::foundation::fs::open.
-extern YETI_PUBLIC void close(fs::File *file);
-
-/// Synchronously reads up to @in_len bytes from the @file into @in.
-///
-/// \returns The number of bytes actually read. Zero indicates failure.
-///
-extern YETI_PUBLIC u64 read(fs::File *file, uintptr_t in, u64 in_len);
-
-/// Synchronously writes up to @out_len bytes to the @file from @out.
-///
-/// \returns The number of bytes actually written. Zero indicates failure.
-///
-extern YETI_PUBLIC u64 write(fs::File *file, const uintptr_t out, u64 out_len);
-
-/// Moves the read/write position inside the @file. If @pos is `fs::ABSOLUTE`,
-/// then @offset is taken as from the start of the file if positive, or from
-/// the end of the file if negative. If @pos is `fs::RELATIVE`, the @offset is
-/// taken from the current position in the file.
-///
-/// \returns The number of bytes seeked.
-///
-extern YETI_PUBLIC i64 seek(fs::File *file, fs::Position pos, i64 offset);
-
-/// Forces all buffered data to be written to the @file.
-extern YETI_PUBLIC void flush(fs::File *file);
 
 namespace async {
   extern YETI_PUBLIC void read();

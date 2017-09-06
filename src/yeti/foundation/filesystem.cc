@@ -79,6 +79,12 @@ namespace {
     else
       return FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
   }
+
+  static u64 size_of_file(fs::File *file) {
+    u64 size;
+    yeti_assert(::GetFileSizeEx((HANDLE)file, (LARGE_INTEGER *)&size) != 0);
+    return size;
+  }
 }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 namespace {
@@ -173,6 +179,12 @@ namespace {
                              (u64)(stat->st_mtimespec.tv_nsec / 1000000000);
 
     return true;
+  }
+
+  static u64 size_of_file(fs::File *file) {
+    struct stat stat;
+    yeti_assert(::fstat(fd_from_handle(file), &stat) == 0);
+    return stat->st_size;
   }
 }
 #endif
@@ -283,6 +295,57 @@ bool fs::create(fs::Type type, const char *path) {
   return false;
 }
 
+fs::File *fs::create_or_open(const char *path, const u32 permissions) {
+  yeti_assert_debug(path != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  const DWORD desired_access = permissions_to_desired_access(permissions);
+  const DWORD share_mode = permissions_to_share_mode(permissions);
+  HANDLE hndl = ::CreateFileA(path, desired_access, share_mode, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hndl == INVALID_HANDLE_VALUE)
+    return NULL;
+  return (fs::File *)hndl;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  const mode_t mode = permissions_to_mode(permissions) | (S_IRUSR | S_IRGRP | S_IROTH);
+  const int flags = permissions_to_flags(permissions);
+  const int exclusivity = (permissions & fs::EXCLUSIVE) ? O_EXLOCK : 0;
+  const int fd = ::open(path, O_CREAT | O_TRUNC | flags | exclusivity, mode);
+  if (fd < 0)
+    return NULL;
+  return (fs::File *)fd;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+fs::File *fs::open(const char *path, const u32 permissions) {
+  yeti_assert_debug(path != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  const DWORD desired_access = permissions_to_desired_access(permissions);
+  const DWORD share_mode = permissions_to_share_mode(permissions);
+  HANDLE hndl = ::CreateFileA(path, desired_access, share_mode, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hndl == INVALID_HANDLE_VALUE)
+    return NULL;
+  return (fs::File *)hndl;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  const int flags = permissions_to_flags(permissions);
+  const int exclusivity = (permissions & fs::EXCLUSIVE) ? O_EXLOCK : 0;
+  const int fd = ::open(path, flags | exclusivity);
+  if (fd < 0)
+    return NULL;
+  return (fs::File *)fd;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+void fs::close(fs::File *file) {
+  yeti_assert_debug(file != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::CloseHandle((HANDLE)file);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  ::close(fd_from_handle(file));
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
 bool fs::destroy(const char *path) {
   yeti_assert_debug(path != NULL);
 
@@ -313,6 +376,96 @@ bool fs::destroy(fs::Type type, const char *path) {
       // TODO(mtwilliams): Should we delete recursively?
       return (::rmdir(path) == 0);
   }
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+u64 fs::read(fs::File *file, uintptr_t in, u64 in_len) {
+  yeti_assert_debug(file != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  yeti_assert_debug(in_len <= 0xFFFFFFFFull);
+  // Guaranteed to read |in_len| bytes except in certain circumstances that we
+  // won't encounter.
+  DWORD read;
+  ::ReadFile((HANDLE)file, (LPVOID)in, in_len, &read, NULL);
+  return read;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  const ssize_t read = ::read(fd_from_handle(file), (void *)in, in_len);
+  yeti_assert(read >= 0);
+  return read;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+u64 fs::read_into_buffer(fs::File *file, foundation::Array<u8> &buffer) {
+  yeti_assert_debug(file != NULL);
+  buffer.resize(size_of_file(file));
+  return fs::read(file, (uintptr_t)&buffer[0], buffer.size());
+}
+
+u64 fs::write(fs::File *file, const uintptr_t out, u64 out_len) {
+  yeti_assert_debug(file != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  yeti_assert_debug(out_len <= 0xFFFFFFFFull);
+  // Guaranteed to write |out_len| bytes except in certain circumstances that
+  // we won't encounter.
+  DWORD wrote;
+  ::WriteFile((HANDLE)file, (LPCVOID)out, out_len, &wrote, NULL);
+  return wrote;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  const int fd = fd_from_handle(file);
+  u64 remaining = out_len;
+  do {
+    const ssize_t wrote = ::write(fd, (const void *)out, out_len);
+    yeti_assert(wrote >= 0);
+    remaining -= wrote;
+  } while (remaining > 0);
+  return out_len;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+i64 fs::seek(fs::File *file, fs::Position pos, i64 offset) {
+  yeti_assert_debug(file != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  LARGE_INTEGER move; move.QuadPart = offset;
+  LARGE_INTEGER moved = { 0, };
+  DWORD method;
+  if (pos == fs::ABSOLUTE)
+    if (offset >= 0)
+      method = FILE_BEGIN;
+    else
+      method = FILE_END;
+  else if (pos == fs::RELATIVE)
+    method = FILE_CURRENT;
+  ::SetFilePointerEx((HANDLE)file, move, &moved, method);
+  ::SetEndOfFile((HANDLE)file);
+  return moved.QuadPart;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  // TODO(mtwilliams): We need to force allocation using `F_PREALLOCATE`.
+  int fd = fd_from_handle(file);
+  int whence;
+  if (pos == fs::ABSOLUTE)
+    if (offset >= 0)
+      whence = SEEK_SET;
+    else
+      whence = SEEK_END;
+  else if (pos == fs::RELATIVE)
+    whence = SEEK_CUR;
+  const off_t moved = ::lseek(fd, offset, whence);
+  yeti_assert(moved >= 0);
+  return moved;
+#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+void fs::flush(fs::File *file) {
+  yeti_assert_debug(file != NULL);
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  ::FlushFileBuffers((HANDLE)file);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC
+  // TODO(mtwilliams): Set `F_FULLFSYNC`?
+  ::fsync(fd_from_handle(file));
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -601,141 +754,6 @@ void fs::unwatch(fs::Watch *watch) {
   ::MsgWaitForMultipleObjectsEx(0, NULL, 0, QS_ALLINPUT, MWMO_ALERTABLE);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   YETI_TRAP();
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-fs::File *fs::create_or_open(const char *path, const u32 permissions) {
-  yeti_assert_debug(path != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  const DWORD desired_access = permissions_to_desired_access(permissions);
-  const DWORD share_mode = permissions_to_share_mode(permissions);
-  HANDLE hndl = ::CreateFileA(path, desired_access, share_mode, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hndl == INVALID_HANDLE_VALUE)
-    return NULL;
-  return (fs::File *)hndl;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  const mode_t mode = permissions_to_mode(permissions) | (S_IRUSR | S_IRGRP | S_IROTH);
-  const int flags = permissions_to_flags(permissions);
-  const int exclusivity = (permissions & fs::EXCLUSIVE) ? O_EXLOCK : 0;
-  const int fd = ::open(path, O_CREAT | O_TRUNC | flags | exclusivity, mode);
-  if (fd < 0)
-    return NULL;
-  return (fs::File *)fd;
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-fs::File *fs::open(const char *path, const u32 permissions) {
-  yeti_assert_debug(path != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  const DWORD desired_access = permissions_to_desired_access(permissions);
-  const DWORD share_mode = permissions_to_share_mode(permissions);
-  HANDLE hndl = ::CreateFileA(path, desired_access, share_mode, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hndl == INVALID_HANDLE_VALUE)
-    return NULL;
-  return (fs::File *)hndl;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  const int flags = permissions_to_flags(permissions);
-  const int exclusivity = (permissions & fs::EXCLUSIVE) ? O_EXLOCK : 0;
-  const int fd = ::open(path, flags | exclusivity);
-  if (fd < 0)
-    return NULL;
-  return (fs::File *)fd;
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-void fs::close(fs::File *file) {
-  yeti_assert_debug(file != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  ::CloseHandle((HANDLE)file);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  ::close(fd_from_handle(file));
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-u64 fs::read(fs::File *file, uintptr_t in, u64 in_len) {
-  yeti_assert_debug(file != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  yeti_assert_debug(in_len <= 0xFFFFFFFFull);
-  // Guaranteed to read |in_len| bytes except in certain circumstances that we
-  // won't encounter.
-  DWORD read;
-  ::ReadFile((HANDLE)file, (LPVOID)in, in_len, &read, NULL);
-  return read;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  const ssize_t read = ::read(fd_from_handle(file), (void *)in, in_len);
-  yeti_assert(read >= 0);
-  return read;
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-u64 fs::write(fs::File *file, const uintptr_t out, u64 out_len) {
-  yeti_assert_debug(file != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  yeti_assert_debug(out_len <= 0xFFFFFFFFull);
-  // Guaranteed to write |out_len| bytes except in certain circumstances that
-  // we won't encounter.
-  DWORD wrote;
-  ::WriteFile((HANDLE)file, (LPCVOID)out, out_len, &wrote, NULL);
-  return wrote;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  const int fd = fd_from_handle(file);
-  u64 remaining = out_len;
-  do {
-    const ssize_t wrote = ::write(fd, (const void *)out, out_len);
-    yeti_assert(wrote >= 0);
-    remaining -= wrote;
-  } while (remaining > 0);
-  return out_len;
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-i64 fs::seek(fs::File *file, fs::Position pos, i64 offset) {
-  yeti_assert_debug(file != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  LARGE_INTEGER move; move.QuadPart = offset;
-  LARGE_INTEGER moved = { 0, };
-  DWORD method;
-  if (pos == fs::ABSOLUTE)
-    if (offset >= 0)
-      method = FILE_BEGIN;
-    else
-      method = FILE_END;
-  else if (pos == fs::RELATIVE)
-    method = FILE_CURRENT;
-  ::SetFilePointerEx((HANDLE)file, move, &moved, method);
-  ::SetEndOfFile((HANDLE)file);
-  return moved.QuadPart;
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  // TODO(mtwilliams): We need to force allocation using `F_PREALLOCATE`.
-  int fd = fd_from_handle(file);
-  int whence;
-  if (pos == fs::ABSOLUTE)
-    if (offset >= 0)
-      whence = SEEK_SET;
-    else
-      whence = SEEK_END;
-  else if (pos == fs::RELATIVE)
-    whence = SEEK_CUR;
-  const off_t moved = ::lseek(fd, offset, whence);
-  yeti_assert(moved >= 0);
-  return moved;
-#elif YETI_PLATFORM == YETI_PLATFORM_LINUX
-#endif
-}
-
-void fs::flush(fs::File *file) {
-  yeti_assert_debug(file != NULL);
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  ::FlushFileBuffers((HANDLE)file);
-#elif YETI_PLATFORM == YETI_PLATFORM_MAC
-  // TODO(mtwilliams): Set `F_FULLFSYNC`?
-  ::fsync(fd_from_handle(file));
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
