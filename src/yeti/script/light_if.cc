@@ -17,6 +17,7 @@ namespace yeti {
 
 namespace light_if {
   namespace {
+  }
 } // light_if
 
 void light_if::expose(Script *script) {

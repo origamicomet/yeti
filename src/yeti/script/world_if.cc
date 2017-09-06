@@ -97,7 +97,7 @@ namespace world_if {
 
     static int render(lua_State *L) {
       Application *app = script_if::application(L);
-      lual_error(L, "Not implemented yet.");
+      luaL_error(L, "Not implemented yet.");
       return 0;
     }
   }
