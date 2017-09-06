@@ -47,6 +47,12 @@ extern YETI_PUBLIC const char *extension(const char *path);
 /// Copies the current working directory to @cwd.
 extern YETI_PUBLIC void cwd(char *cwd, size_t cwd_len);
 
+/// Performs a wildcard match of @path against @pattern.
+extern YETI_PUBLIC bool match(const char *pattern, const char *path);
+
+/// \copydoc yeti::foundation::fs::match
+extern YETI_PUBLIC bool glob(const char *pattern, const char *path);
+
 } // fs
 
 } // foundation

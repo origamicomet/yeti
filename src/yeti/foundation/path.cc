@@ -116,5 +116,61 @@ void path::cwd(char *cwd, size_t cwd_len) {
 #endif
 }
 
+// TODO(mtwilliams): Implement pattern matching.
+bool path::match(const char *pattern, const char *path) {
+  while (*path) {
+    if (*pattern == '*') {
+      // Coalesce wildcards.
+      while (*pattern++ == '*');
+
+      // Match any until we match next class in pattern.
+      while (*path) {
+        if (*pattern == '?')
+          goto matched;
+        else if ((*pattern == '/'))
+          if (pattern[1] == '\0')
+            // Trailing path separators are ignored.
+            return true;
+          else if (*path == '/' || *path == '\\')
+            // Matches Windows and Unix style path separators.
+            goto matched;
+          else
+            return false;
+        else if (*path == *pattern)
+          goto matched;
+
+        path++;
+      }
+
+      return (*pattern == '\0');
+    } else if (*pattern == '?') {
+      // Matches any.
+      goto matched;
+    } else if ((*pattern == '/')) {
+      if (pattern[1] == '\0')
+        // Trailing path separators are ignored.
+        return true;
+      else if (*path == '/' || *path == '\\')
+        // Matches Windows and Unix style path separators.
+        goto matched;
+      else
+        return false;
+    }
+
+    if (*path != *pattern)
+      return false;
+
+  matched:
+    path++;
+    pattern++;
+  }
+
+  return (*pattern == '\0');
+}
+
+bool path::glob(const char *pattern, const char *path) {
+  return match(pattern, path);
+}
+
 } // foundation
 } // yeti
