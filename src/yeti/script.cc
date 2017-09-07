@@ -47,7 +47,8 @@ int Script::__error_handler(lua_State *L) {
 
   // TODO(mtwilliams): Forward to a user-defined error handler.
   // TODO(mtwilliams): Use lua_Debug to build a Lua & C/C++ callstack.
-  ::fprintf(stderr, "Lua Error!\n > %s\n\n", lua_tostring(L, -1));
+
+  log::print(YETI_LOG_SCRIPT, log::ERROR, lua_tostring(L, -1));
 
   return 0;
 }
