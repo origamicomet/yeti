@@ -55,7 +55,7 @@ void Runner::setup(const char *args[], const u32 num_args) {
     else if (strcmp(*arg, "--watch") == 0)
       watch_ = true;
     else
-      yeti_assertf(0, "Unknown command-line argument '%s'.", *arg);
+      fprintf(stderr, "Unknown command-line argument '%s'.", *arg);
   }
 
   foundation::path::unixify(&resource_database_path[0]);
