@@ -40,17 +40,17 @@ namespace console {
       case FATAL:   level = "FATAL"; break;
     }
 
-    sprintf(&buf[23], " [%-5s]  ", level);
+    sprintf(&buf[23], " [%-5s] ", level);
 
-    char *copy = &buf[33];
+    char *copy = &buf[32];
     const char *text = (const char *)&msg->content[0];
     while (char ch = *text++) {
       switch (ch) {
         case '\n': {
           if (*text) {
             *copy++ = '\n';
-            memcpy((void *)copy, (const void *)&buf[0], 33);
-            copy += 33;
+            memcpy((void *)copy, (const void *)&buf[0], 32);
+            copy += 32;
           }
         } break;
         default: {
