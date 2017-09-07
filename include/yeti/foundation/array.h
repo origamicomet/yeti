@@ -93,6 +93,10 @@ class Array {
   void apply(void fn(T &, void *), void *fn_ctx = NULL);
 
  public:
+  T *find(const T &value);
+  const T *find(const T &value) const;
+
+ public:
   // TODO(mtwilliams): Implement sorting and searching.
   // void sort(...);
   // T search(...);
@@ -317,6 +321,24 @@ bool Array<T>::any(Matcher matcher, void *matcher_ctx) const {
     if (matcher(E, matcher_ctx))
       return true;
   return false;
+}
+
+template <typename T>
+T *Array<T>::find(const T &value) {
+  for (T *I = this->first(); I <= this->last(); ++I)
+    if (*I == value)
+      return I;
+
+  return NULL;
+}
+
+template <typename T>
+const T *Array<T>::find(const T &value) const {
+  for (const T *I = this->first(); I <= this->last(); ++I)
+    if (*I == value)
+      return I;
+
+  return NULL;
 }
 
 } // foundation
