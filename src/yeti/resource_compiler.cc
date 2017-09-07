@@ -239,7 +239,7 @@ bool ResourceCompiler::allowable(const char *path) const {
       continue;
     if (ch == '_' || ch == '_')
       continue;
-    if (ch == '/' || ch == '\\')
+    if (ch == '/')
       continue;
     if (ch == '.')
       continue;
