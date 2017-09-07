@@ -13,7 +13,7 @@
 
 #include "yeti/script.h"
 
-// To recover `Application *` from `Script *`.
+// To recover `Application *` from `lua_State *`.
 #include "yeti/application.h"
 #include "yeti/script/application_if.h"
 

@@ -169,13 +169,7 @@ void StandardApplication::create_main_window_and_default_viewport() {
   // Quits application. See `Application::window_event_handler_`.
   wd.closable = true;
 
-  Window *window = Window::open(wd);
-
-  // TODO(mtwilliams): Open windows through `Application::open_a_window`, and
-  // let it hook up input.
-  yeti::input::from(window);
-
-  this->windows_.push(window);
+  this->open_a_window(wd);
 }
 
 void StandardApplication::expose_to_lua() {

@@ -81,6 +81,50 @@ void Application::update(const f32 delta_time) {
 void Application::render() {
 }
 
+Window *Application::open_a_window(const Window::Description &desc) {
+  Window *window = Window::open(desc);
+
+  // Hook up input to `Keyboard` and `Mouse`.
+  yeti::input::from(window);
+
+  // Store a reference.
+  windows_.push(window);
+
+  return window;
+}
+
+void Application::close_a_window(Window *window) {
+  // Swap and pop.
+  Window **ref = windows_.find(window);
+  yeti_assert_debug(ref != NULL);
+  *ref = *windows_.last();
+  windows_.pop();
+
+  // Close.
+  window->close();
+}
+
+void Application::window_event_handler_(Window *window,
+                                        const Window::Event &event,
+                                        void *self) {
+  Application *app = (Application *)self;
+
+  switch (event.type) {
+    case Window::Event::CLOSED: {
+      const bool main = (window == *app->windows().first());
+
+      if (main)
+        // Main window closed. Quit.
+        app->quit();
+
+      // Swap and pop.
+      Window **ref = app->windows_.find(window);
+      *ref = *app->windows_.last();
+      app->windows_.pop();
+    } break;
+  }
+}
+
 World *Application::create_a_world() {
   return NULL;
 }
@@ -180,12 +224,6 @@ const foundation::Array<Window *> &Application::windows() const {
 
 const foundation::Array<World *> &Application::worlds() const {
   return worlds_;
-}
-
-void Application::window_event_handler_(Window *window,
-                                        const Window::Event &event,
-                                        void *self) {
-  Application *app = (Application *)self;
 }
 
 } // yeti

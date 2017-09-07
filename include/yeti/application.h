@@ -53,6 +53,16 @@ class YETI_PUBLIC Application {
   virtual void render();
 
  public:
+  Window *open_a_window(const Window::Description &desc);
+
+  void close_a_window(Window *window);
+
+ private:
+  static void window_event_handler_(Window *window,
+                                    const Window::Event &event,
+                                    void *self);
+
+ public:
   World *create_a_world();
 
   void update_a_world(World *world,
@@ -82,11 +92,6 @@ class YETI_PUBLIC Application {
   // TODO(mtwilliams): Document these interfaces.
   const foundation::Array<Window *> &windows() const;
   const foundation::Array<World *> &worlds() const;
-
- private:
-  static void window_event_handler_(Window *window,
-                                    const Window::Event &event,
-                                    void *self);
 
  protected:
   TimeStepPolicy *time_step_policy_;

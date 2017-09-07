@@ -13,7 +13,7 @@
 
 #include "yeti/script.h"
 
-// To recover `Application *` from `Script *`.
+// To recover `Application *` from `lua_State *`.
 #include "yeti/application.h"
 #include "yeti/script/application_if.h"
 
@@ -26,7 +26,7 @@ bool script_if::is_a<Window>(lua_State *L, int idx) {
   Window *window = (Window *)lua_touserdata(L, idx);
 
   if (window == NULL)
-    // If it's not a pointer, then there's no way it's a `Window *`.
+    // If it's not a pointer, then there's no way it's a pointer to a `Window`.
     return false;
 
 #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
@@ -34,11 +34,10 @@ bool script_if::is_a<Window>(lua_State *L, int idx) {
   Application *app = application(L);
 
   // Since all our windows are referenced by our application, it's easy enough
-  // to check if the given pointer is indeed to a `yeti::Window`.
-  for (Window *const *I = app->windows().first(); I <= app->windows().last(); ++I)
-    if (window == *I)
-      // Bingo!
-      return true;
+  // to check if the given pointer is indeed to a `Window`.
+  if (app->windows().find(window))
+    // Bingo!
+    return true;
 
   return false;
 #else
@@ -58,34 +57,67 @@ namespace window_if {
   namespace {
     static int open(lua_State *L) {
       Application *app = script_if::application(L);
-      if (!lua_istable(L, 1))
-        luaL_argerror(L, 1, "Expected a table with `title`, `width`, and `height`.");
 
-      lua_getfield(L, 1, "title");
-      if (!lua_isstring(L, -1))
-        return luaL_argerror(L, 1, "Expected `title` to be a string.");
-      const char *title = lua_tostring(L, -1);
+      Window::Description wd; {
+        if (!lua_istable(L, 1))
+          luaL_argerror(L, 1, "Expected a table with `title`, `width`, and `height`.");
 
-      lua_getfield(L, 1, "width");
-      if (!lua_isnumber(L, -1))
-        return luaL_argerror(L, 1, "Expected `width` to be a number.");
-      if (lua_tonumber(L, -1) <= (lua_Number)0)
-        return luaL_argerror(L, 1, "Expected `width` to be a positive integer.");
-      const u32 width = lua_tonumber(L, -1);
+        lua_getfield(L, 1, "title");
+        if (!lua_isstring(L, -1))
+          return luaL_argerror(L, 1, "Expected `title` to be a string.");
+        wd.title = lua_tostring(L, -1);
 
-      lua_getfield(L, 1, "height");
-      if (!lua_isnumber(L, -1))
-        return luaL_argerror(L, 1, "Expected `height` to be a number.");
-      if (lua_tonumber(L, -1) <= (lua_Number)0)
-        return luaL_argerror(L, 1, "Expected `height` to be a positive integer.");
-      const u32 height = lua_tonumber(L, -1);
+        lua_getfield(L, 1, "width");
+        if (!lua_isnumber(L, -1))
+          return luaL_argerror(L, 1, "Expected `width` to be a number.");
+        if (lua_tonumber(L, -1) <= (lua_Number)0)
+          return luaL_argerror(L, 1, "Expected `width` to be a positive integer.");
+        wd.dimensions.width = lua_tonumber(L, -1);
 
-    #if 0
-      Window *window = ...;
+        lua_getfield(L, 1, "height");
+        if (!lua_isnumber(L, -1))
+          return luaL_argerror(L, 1, "Expected `height` to be a number.");
+        if (lua_tonumber(L, -1) <= (lua_Number)0)
+          return luaL_argerror(L, 1, "Expected `height` to be a positive integer.");
+        wd.dimensions.height = lua_tonumber(L, -1);
+
+        lua_getfield(L, 1, "resizeable");
+        if (lua_isboolean(L, -1))
+          wd.resizeable = !!lua_toboolean(L, -1);
+        else if (lua_isnil(L, -1))
+          // Windows are resizeable by default.
+          wd.resizeable = true;
+        else
+          return luaL_argerror(L, 1, "Expected `resizeable` to be a boolean.");
+
+        lua_getfield(L, 1, "closable");
+        if (lua_isboolean(L, -1))
+          wd.closable = !!lua_toboolean(L, -1);
+        else if (lua_isnil(L, -1))
+          // Windows are closable by default.
+          wd.closable = true;
+        else
+          return luaL_argerror(L, 1, "Expected `closable` to be a boolean.");
+
+        lua_pop(L, 5);
+      }
+
+      Window *window = app->open_a_window(wd);
+
+      lua_getfield(L, 1, "hidden");
+      if (lua_isboolean(L, -1)) {
+        if (!lua_toboolean(L, -1))
+          window->show();
+      } else if (lua_isnil(L, -1)) {
+        // Windows are visible by default.
+        window->show();
+      } else {
+        return luaL_argerror(L, 1, "Expected `hidden` to be a boolean.");
+      }
+
+      lua_pop(L, 1);
+
       lua_pushlightuserdata(L, (void *)window);
-    #else
-      luaL_error(L, "Not implemented yet.");
-    #endif
 
       return 1;
     }
