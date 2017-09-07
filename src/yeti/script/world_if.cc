@@ -82,14 +82,14 @@ namespace world_if {
       World *world = script_if::to_a<World>(L, 1);
 
       if (!lua_isnumber(L, 2))
-        return luaL_argerror(L, 1, "Expected `dt` to be a number.");
+        return luaL_argerror(L, 2, "Expected `delta_time` to be a number.");
 
-      const lua_Number dt = lua_tonumber(L, 2);
+      const lua_Number delta_time = lua_tonumber(L, 2);
 
-      if (dt <= (lua_Number)0)
-        return luaL_argerror(L, 1, "Expected `dt` to be a positive number.");
+      if (delta_time < (lua_Number)0)
+        return luaL_argerror(L, 2, "Expected `delta_time` to be a positive number.");
 
-      app->update_a_world(world, dt);
+      app->update_a_world(world, delta_time);
 
       return 0;
     }
