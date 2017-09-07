@@ -12,20 +12,15 @@
 #include "yeti/resource_compiler.h"
 
 // TODO(mtwilliams): Drop dependence on global heap allocator.
-
 #include "yeti/foundation/global_heap_allocator.h"
-#include "yeti/foundation/path.h"
 
+// For log forwarding.
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
 
 static const yeti::log::Category::Id YETI_LOG_RESOURCE_COMPILER =
   ::yeti::log::Category::add("resource_compiler", YETI_LOG_GENERAL);
-
-// TODO(mtwilliams): Pattern-based ignores.
-// TODO(mtwilliams): Edit distance for detecting mispellings.
 
 namespace yeti {
 
@@ -35,13 +30,15 @@ ResourceCompiler::ResourceCompiler()
   , data_src_len_(0)
   , ignore_(foundation::heap())
   , debounce_(0)
-  , backlog_(foundation::heap()) {
+  , backlog_(foundation::heap())
+  , daemonized_(false)
+  , stop_(false) {
 }
 
 ResourceCompiler::~ResourceCompiler() {
 }
 
-ResourceCompiler *ResourceCompiler::start(const ResourceCompiler::Options &opts) {
+ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &opts) {
   // TODO(mtwilliams): Move into a validation function.
   yeti_assert_debug(opts.db != NULL);
   // TODO(mtwilliams): Check based on absolute paths.
@@ -51,13 +48,13 @@ ResourceCompiler *ResourceCompiler::start(const ResourceCompiler::Options &opts)
 
   resource_compiler->db_ = opts.db;
 
-  strcpy(&resource_compiler->data_[0], opts.data);
-  strcpy(&resource_compiler->data_src_[0], opts.data_src);
+  strcpy(resource_compiler->data_, opts.data);
+  strcpy(resource_compiler->data_src_, opts.data_src);
 
   resource_compiler->data_len_ = strlen(resource_compiler->data_);
   resource_compiler->data_src_len_ = strlen(resource_compiler->data_src_);
 
-  // Load ignore patterns from file, if it exists.
+  // Add ignore patterns from file, if it exists.
   resource_compiler->add_ignore_patterns(opts.ignore);
 
   resource_compiler->debounce_ = opts.debounce;
@@ -65,7 +62,7 @@ ResourceCompiler *ResourceCompiler::start(const ResourceCompiler::Options &opts)
   return resource_compiler;
 }
 
-void ResourceCompiler::shutdown() {
+void ResourceCompiler::destroy() {
   delete this;
 }
 
@@ -76,106 +73,36 @@ void ResourceCompiler::add_ignore_patterns(const char *path) {
   }
 }
 
-void ResourceCompiler::compile(bool force) {
-  // First, we recursively walk |data_src_| to build a list ("backlog") of
-  // files that may need to be compiled.
+// PERF(mtwilliams): Use task scheduler to multithread resource compilation.
+
+void ResourceCompiler::run(bool force) {
+  // We recursively walk source data directory to build a list of files that
+  // may need to be compiled.
   foundation::fs::walk(data_src_, (foundation::fs::Walker)&ResourceCompiler::walker, (void *)this);
 
   // TODO(mtwilliams): Track implicit dependencies like shader includes
   // so we know to recompile all dependents whenever they're modified. This
   // means ignoring a file after we determine it's not a hard dependency.
+  //
+  // TODO(mtwilliams): Cross reference with database, and remove compiled data
+  // if source data is removed.
+  //
 
-  // Second, we iterate over our "backlog" to identify any unallowed paths or
-  // uncompilable unignored source files. If we find any, we fail.
+  // Then we compile any files in our list if they have been modified since
+  // our last compilation or if forcing recompilation.
   for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
-    if (this->ignorable(*path))
-      continue;
-
-    // TODO(mtwilliams): Don't assert if |*path| is not allowed or compilable,
-    // instead, fail the compilation.
-    yeti_assert_development(this->allowable(*path));
-    yeti_assert_development(this->compilable(*path));
-  }
-
-  // Finally, we compile any files in our backlog if they have been modified
-  // since our last compilation or |force| is true. Refer to
-  // ResourceCompiler::compile/2 for details.
-  for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
-    if (this->ignorable(*path))
-      continue;
-
     this->compile(*path, force);
 
-    // TODO(mtwilliams): Create and use a foundation::String class.
-    // TODO(mtwilliams): Use type-traits to allow non-POD in foundational data
-    // structures, i.e. call destructors if required.
+    // TODO(mtwilliams): Move to a string class.
     foundation::heap().deallocate((uintptr_t)*path);
   }
 
   backlog_.clear();
 }
 
-bool ResourceCompiler::compile(const char *path, bool force) {
-  yeti_assert_debug(path != NULL);
-
-  const Resource::Id id = Resource::id_from_path(path);
-  const Resource::Type *type = resource_manager::type_from_path(path);
-
-  // TODO(mtwilliams): Only compile if |source_file_info.last_modified_at| is
-  // more recent than than whatever our |db| last saw, or if |hash| is
-  // different from whatever we've seen, and |force| is false.
-  foundation::fs::Info source_file_info;
-  foundation::fs::info(path, &source_file_info);
-
-  // TODO(mtwilliams): Update our |db| to reflect the compilation of this
-  // resource.
-
-  fprintf(stdout, "Compiling '%s' to `%016llx`...\n", path, id);
-
-  // TODO(mtwilliams): Setup resource compilation environment.
-  ResourceCompiler::Environment env;
-  env.info = &ResourceCompiler::info;
-  env.warning = &ResourceCompiler::warning;
-  env.error = &ResourceCompiler::error;
-
-  ResourceCompiler::Input input;
-  input.root = &data_src_[0];
-  input.path = path;
-
-  Path input_path;
-  sprintf(&input_path[0], "%s/%s", input.root, path);
-  input.source = foundation::fs::open(&input_path[0], foundation::fs::READ | foundation::fs::EXCLUSIVE);
-  yeti_assert(input.source != NULL);
-
-  ResourceCompiler::Output output;
-  output.root = &data_[0];
-
-  Path memory_resident_data_path = { 0, };
-  sprintf(&memory_resident_data_path[0], "%s/%016llx", output.root, id);
-  output.memory_resident_data = foundation::fs::create_or_open(&memory_resident_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
-  yeti_assert(output.memory_resident_data != NULL);
-
-  Path streaming_data_path = { 0, };
-  sprintf(&streaming_data_path[0], "%s.streaming", &memory_resident_data_path[0]);
-  output.streaming_data = foundation::fs::create_or_open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
-  yeti_assert(output.streaming_data != NULL);
-
-  const bool success = type->compile(&env, &input, &output);
-
-  // TODO(mtwilliams): Properly track resource compilation.
-  yeti_assert_development(success);
-
-  foundation::fs::close(input.source);
-  foundation::fs::close(output.memory_resident_data);
-  foundation::fs::close(output.streaming_data);
-
-  return success;
-}
-
-// TODO(mtwilliams): (Reuse) our task scheduler to multithread resource
-// compilation.
-
 void ResourceCompiler::daemon() {
+  daemonized_ = true;
+
   // Setup our watcher. It will watch the source data directory to collect a
   // stream of creation, modification, and deletion events for files and
   // folders.
@@ -186,9 +113,9 @@ void ResourceCompiler::daemon() {
   foundation::HighResolutionTimer *timer =
     foundation::HighResolutionTimer::create();
 
-  for (;;) {
+  while(!stop_) {
     // Collect creation, modification, and deletion events for a period of time.
-    while (timer->msecs() < debounce_)
+    while (timer->msecs() <= debounce_)
       foundation::fs::poll(watch);
 
     // TODO(mtwilliams): Coalesce events.
@@ -196,6 +123,104 @@ void ResourceCompiler::daemon() {
 
     timer->reset();
   }
+
+  // Stop watching source data directory.
+  foundation::fs::unwatch(watch);
+
+  // Clean up after ourselves.
+  timer->destroy();
+}
+
+void ResourceCompiler::stop() {
+  yeti_assert_debug(daemonized_);
+
+  // See loop in `ResourceCompiler::daemon`.
+  stop_ = true;
+}
+
+ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force) {
+  yeti_assert_debug(path != NULL);
+
+  if (this->ignorable(path))
+    return resource_compiler::Results::IGNORED;
+
+  if (!this->allowable(path))
+    return resource_compiler::Results::FORBIDDEN;
+
+  if (!this->compilable(path))
+    return resource_compiler::Results::UNCOMPILABLE;
+
+  const Resource::Id id = Resource::id_from_path(path);
+  const Resource::Type *type = resource_manager::type_from_path(path);
+
+  Path source_file_path;
+  sprintf(&source_file_path[0], "%s/%s", &data_src_[0], path);
+
+  foundation::fs::Info source_file_info;
+  foundation::fs::info(source_file_path, &source_file_info);
+
+  // TODO(mtwilliams): Only compile if source data was modified more recently
+  // than than whatever our database last saw, or if the file hash is different
+  // from whatever we've seen.
+
+  // TODO(mtwilliams): Setup resource compilation environment.
+  ResourceCompiler::Environment env;
+  env.info = &ResourceCompiler::info;
+  env.warning = &ResourceCompiler::warning;
+  env.error = &ResourceCompiler::error;
+
+  env.info(&env, "Compiling '%s' to `%016llx`...\n", path, id);
+
+  ResourceCompiler::Input input;
+  input.root = &data_src_[0];
+  input.path = path;
+  input.source = foundation::fs::open(source_file_path, foundation::fs::READ | foundation::fs::EXCLUSIVE);
+
+  ResourceCompiler::Output output;
+  output.root = &data_[0];
+
+  // TODO(mtwilliams): Atomic compilation?
+
+  Path memory_resident_data_path = { 0, };
+  sprintf(&memory_resident_data_path[0], "%s/%016llx", output.root, id);
+  output.memory_resident_data = foundation::fs::create_or_open(&memory_resident_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+
+  Path streaming_data_path = { 0, };
+  sprintf(&streaming_data_path[0], "%s.streaming", &memory_resident_data_path[0]);
+  output.streaming_data = foundation::fs::create_or_open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+
+  if (!input.source)
+    env.error(&env, "Could not open `%s` for reading!", source_file_path);
+
+  if (!output.memory_resident_data)
+    env.error(&env, "Could not open memory-resident data for writing!");
+
+  if (!output.streaming_data)
+    env.error(&env, "Could not open streaming data for writing!");
+
+  bool success;
+
+  if (input.source && output.memory_resident_data && output.streaming_data) {
+    if (success = type->compile(&env, &input, &output))
+      env.info(&env, "Compiled!");
+    else
+      env.error(&env, "Failed.");
+  } else {
+    success = false;
+  }
+
+  if (input.source)
+    foundation::fs::close(input.source);
+  if (output.memory_resident_data)
+    foundation::fs::close(output.memory_resident_data);
+  if (output.streaming_data)
+    foundation::fs::close(output.streaming_data);
+
+  // TODO(mtwilliams): Update our database to reflect the compilation of this
+  // resource.
+
+  return success ? resource_compiler::Results::SUCCEEDED :
+                   resource_compiler::Results::FAILED;
 }
 
 void ResourceCompiler::canonicalize(char *path) const {
@@ -249,6 +274,7 @@ bool ResourceCompiler::allowable(const char *path) const {
   return true;
 }
 
+// TODO(mtwilliams): Use edit distance to detect potential mispellings.
 bool ResourceCompiler::compilable(const char *path) const {
   yeti_assert_debug(path != NULL);
   return !!resource_manager::type_from_path(path);
@@ -270,8 +296,8 @@ bool ResourceCompiler::walk(const char *path, const foundation::fs::Info *info) 
     } break;
 
     case foundation::fs::DIRECTORY: {
-      // TODO(mtwilliams): Refactor into a work queue so we don't blow the stack
-      // if we end up recursing too deeply?
+      // TODO(mtwilliams): Refactor into a work queue so we don't blow the
+      // stack if we end up recursing too deeply?
       foundation::fs::walk(path, (foundation::fs::Walker)&walker, (void *)this);
     } break;
   }

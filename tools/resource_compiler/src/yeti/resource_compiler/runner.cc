@@ -41,6 +41,7 @@ void Runner::setup(const char *args[], const u32 num_args) {
   sprintf(&source_data_path[0], "%s/data_src", &cwd[0]);
 
   ResourceCompiler::Path ignores;
+
   sprintf(&ignores[0], "%s/.dataignore", &cwd[0]);
 
   for (const char **arg = &args[0], **end = &args[num_args]; arg < end; ++arg) {
@@ -78,17 +79,17 @@ void Runner::run() {
   // Make sure the data directory exists or resource compilation will fail.
   foundation::fs::create(foundation::fs::DIRECTORY, &resource_compiler_opts_.data[0]);
 
-  resource_compiler_ = ResourceCompiler::start(resource_compiler_opts_);
+  resource_compiler_ = ResourceCompiler::create(resource_compiler_opts_);
 
-  if (watch_) {
+  if (watch_)
     // TODO(mtwilliams): Install a signal handler to trap termination requests,
     // and call `ResourceCompiler::shutdown`.
     resource_compiler_->daemon();
-  } else {
-    resource_compiler_->compile(force_);
-  }
+  else
+    resource_compiler_->run(force_);
 
-  resource_compiler_->shutdown();
+  resource_compiler_->destroy();
+
   resource_database_->close();
 }
 
