@@ -23,7 +23,8 @@ World::~World() {
 }
 
 World *World::create() {
-  return NULL;
+  World *world = new (foundation::heap()) World();
+  return world;
 }
 
 void World::update(const f32 delta_time) {

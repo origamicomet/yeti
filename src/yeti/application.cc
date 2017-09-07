@@ -126,7 +126,12 @@ void Application::window_event_handler_(Window *window,
 }
 
 World *Application::create_a_world() {
-  return NULL;
+  World *world = World::create();
+
+  // Store a reference.
+  worlds_.push(world);
+
+  return world;
 }
 
 void Application::update_a_world(World *world,
@@ -140,6 +145,14 @@ void Application::render_a_world(const World *world,
 }
 
 void Application::destroy_a_world(World *world) {
+  // Swap and pop.
+  World **ref = worlds_.find(world);
+  yeti_assert_debug(ref != NULL);
+  *ref = *worlds_.last();
+  worlds_.pop();
+
+  // Destroy.
+  world->destroy();
 }
 
 void Application::run() {

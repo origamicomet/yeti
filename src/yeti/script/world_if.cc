@@ -13,7 +13,7 @@
 
 #include "yeti/script.h"
 
-// To recover `Application *` from `Script *`.
+// To recover `Application *` from `lua_State *`.
 #include "yeti/application.h"
 #include "yeti/script/application_if.h"
 
@@ -26,7 +26,7 @@ bool script_if::is_a<World>(lua_State *L, int idx) {
   World *world = (World *)lua_touserdata(L, idx);
 
   if (world == NULL)
-    // If it's not a pointer, then there's no way it's a `World *`.
+    // If it's not a pointer, then there's no way it's a pointer to a `World`.
     return false;
 
 #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
@@ -34,11 +34,10 @@ bool script_if::is_a<World>(lua_State *L, int idx) {
   Application *app = application(L);
 
   // Since all our worlds are referenced by our application, it's easy enough
-  // to check if the given pointer is indeed to a `yeti::World`.
-  for (World *const *I = app->worlds().first(); I <= app->worlds().last(); ++I)
-    if (world == *I)
-      // Bingo!
-      return true;
+  // to check if the given pointer is indeed to a `World`.
+  if (app->worlds().find(world))
+    // Bingo!
+    return true;
 
   return false;
 #else
@@ -59,7 +58,7 @@ namespace world_if {
     static int create(lua_State *L) {
       Application *app = script_if::application(L);
 
-      // We create worlds through the application so we can track them.
+      // We manage worlds through the application so we can track them.
       World *world = app->create_a_world();
 
       lua_pushlightuserdata(L, (void *)world);
