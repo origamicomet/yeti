@@ -65,7 +65,6 @@ Includes runtime.
 * Expand path manipulation utilities.
   * Provide a path joining function.
 * Implement `Array<T>` sort and search.
-* Support up to 32 processor on 32-bit, and 64 on 64-bit.
 * Polyfill type traits.
 * Provide platform independent condition variables.
 * Allow allocations to be tagged as "ignore" or "proxied."
@@ -76,7 +75,6 @@ Includes runtime.
 * Install a sophisticated assertion and error handler.
 * Interface resource compiler with database.
 * Make allocation tracking thread-safe.
-* Provide 32 bytes of data storage per task.
 
 ### `BUGS`
 
@@ -93,8 +91,6 @@ Includes runtime.
   * Audit fixed type usage.
     * Prefer `unsigned` and `size_t` where possible.
       * Especially loops.
-* Use intrusive task permits.
-  * Investigate performance.
 * Audit and eliminate (or minimize) false sharing.
   * Especially in logging and profiling.
 * Optimize `Script *` recovery from `lua_State *`.
@@ -106,7 +102,7 @@ Includes runtime.
     * Read-only
     * Fast to query
     * Perfect hashing in place of lookups for `path -> id`
-  * Dispatch using a function pointer table that fits into one cache line, and 16-byte aligns each pointer (to efficiently use RIP relative addressing).
+  * Dispatch using a function pointer table that fits into one cache line, and 16-byte aligns each pointer (to use RIP relative addressing).
     * Dale Weiler had the neat idea of using a function that takes a pointer to this struct and returns it by value thereby forcing the compiler to load the function pointers into registers, at least on the x86_64 ABI. Care must be taken to prevent the compiler from inlining the function.
 
 ### `REFACTOR`
@@ -123,14 +119,12 @@ Includes runtime.
 * Allow hash used for hash tables to be overriden.
 * Update `absolute` and `relative` mouse axes upon raw-input?
   * Manually translate `GetCursorPos` to a window-relative point?
-* Pass `Task *` to kernel and let kernel pull parameters.
+* Pass `Task` to kernel and let kernel pull parameters?
 
 ### `SMELL`
 
 * Containers do not call destructors for non-POD types.
 * Log categories aren't under the `yeti` namespace.
-* Worker threads aren't gracefully terminated.
-  * Deadlocks a-hoy!
 * Returning pointers from `foundation::HashMap<K,V>`.
 
 ### `CRAZY`
@@ -168,7 +162,6 @@ Includes runtime.
 * Daemonization.
   * Watch source data directories for changes, debounce for a user configurable amount of time, and then build any new or modified resources.
 * Detailed logging.
-* Support pattern-based ignore rules.
 * Use edit-distance to detect misspellings.
 
 ### `BUGS`
@@ -177,8 +170,6 @@ Includes runtime.
 
 ### `REFACTOR`
 
-* Properly track compilation success or failure.
-  * Replace assertions with proper error handling.
 * Use `String` instead of munging ourselves.
 
 ### `SMELL`
