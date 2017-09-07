@@ -116,7 +116,10 @@ void path::cwd(char *cwd, size_t cwd_len) {
 #endif
 }
 
-// TODO(mtwilliams): Implement pattern matching.
+// TODO(mtwilliams): Double wildcards should greedy match.
+// TODO(mtwilliams): One of any characters, e.g. `[abc]`.
+// TODO(mtwilliams): One of any range of characters, e.g. `[a-z]`.
+
 bool path::match(const char *pattern, const char *path) {
   while (*path) {
     if (*pattern == '*') {
