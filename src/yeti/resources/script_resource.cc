@@ -14,11 +14,13 @@
 #include "yeti/resource.h"
 #include "yeti/resource_compiler.h"
 
+// Compilation logic is factored into a seperate class.
+#include "script_compiler.h"
+
 extern "C" {
   #include <lua.h>
   #include <lauxlib.h>
   #include <lualib.h>
-  #include <luajit.h>
 }
 
 namespace yeti {
@@ -77,50 +79,10 @@ void ScriptResource::unload(Resource *resource) {
   delete script_resource;
 }
 
-namespace {
-  static int dump_to_file(lua_State *L, const void *chunk, size_t chunk_sz, foundation::fs::File *file) {
-    foundation::fs::write(file, (uintptr_t)chunk, chunk_sz);
-    return 0;
-  }
-}
-
 bool ScriptResource::compile(const resource_compiler::Environment *env,
                              const resource_compiler::Input *input,
                              const resource_compiler::Output *output) {
-  foundation::fs::Info src_file_info;
-  foundation::fs::info(input->source, &src_file_info);
-
-  foundation::Array<u8> src(foundation::heap(), src_file_info.size + 1);
-  foundation::fs::read(input->source, (uintptr_t)src.first(), src_file_info.size);
-  src[src_file_info.size] = '\0';
-
-  lua_State *L = luaL_newstate();
-
-  if (luaL_loadbuffer(L, (const char *)src.first(), src_file_info.size, input->path) != 0) {
-    env->error(env, lua_tostring(L, -1));
-    goto failed;
-  }
-
-  char path[256];
-  strncpy(&path[0], input->path, 255);
-  path[255] = '\0';
-
-  foundation::fs::write(output->memory_resident_data, (uintptr_t)&path[0], 256);
-  
-  if (lua_dump(L, (lua_Writer)&dump_to_file, (void *)output->memory_resident_data) != 0) {
-    env->error(env, "Couldn't dump bytecode to file?");
-    goto failed;
-  }
-
-  lua_close(L);
-
-  return true;
-
-failed:
-  if (L)
-    lua_close(L);
- 
-  return false;
+  return ScriptCompiler(env, input, output).run();
 }
 
 } // yeti
