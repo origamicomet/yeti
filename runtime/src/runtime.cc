@@ -32,8 +32,6 @@ static void debug() {
   // Check for memory leaks at program exit.
   flags |= _CRTDBG_LEAK_CHECK_DF;
 
-  flags |= _CRTDBG_DELAY_FREE_MEM_DF;
-
   _CrtSetDbgFlag(flags);
 #endif
 }
