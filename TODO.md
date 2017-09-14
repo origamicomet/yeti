@@ -81,6 +81,8 @@ Includes runtime.
 * Global heap allocator doesn't respect alignment.
 * Custom `new` and `delete` operators may not be working as expected.
   * Tag types with `YETI_ALLOCATOR_AWARE`?
+* Application implodes on exit when executing `Application::quit`.
+  * Could be `yeti::shutdown` imploding everything.
 
 ### `PERF`
 
@@ -131,11 +133,21 @@ Includes runtime.
 
 * Move to 100% task-based multi-threading, i.e. only have worker threads.
   * Introduce a separate multi-producer, single-consumer queue for thread specific work, like message pump.
+  * Use frames at a high level.
+    * Allocate memory from a transient frame specific heap.
+    * Update using a `yeti::Frame`.
+      * Results from previous frames (up to a limit) can be accessed.
+    * Explicit pipeline with stages:
+      * Update
+      * Reflect
+      * Render and Audio
 * Move to fibers a la Naughty Dog?
   * Overkill, probably. Mykola has been stupid enough to try, and he keeps having issues.
 * Allow wholesale switch over to fixed-point math.
   * Might be necessary for determinism.
 * Move to C++ style casts?
+* Drop global heap allocator for a global page allocator.
+  * Everything will need to be sub-allocated within page boundaries.
 
 ## Sherpa
 
