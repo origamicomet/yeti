@@ -60,7 +60,7 @@ Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
 }
 
 const Resource::Type *resource_manager::type_from_id(Resource::Type::Id id) {
-  for (const Resource::Type **type = types_.first(); type <= types_.last(); ++type)
+  for (const Resource::Type **type = types_.begin(); type != types_.end(); ++type)
     if (id == foundation::murmur_hash_32((*type)->name, 0))
       return *type;
 
@@ -80,7 +80,7 @@ const Resource::Type *resource_manager::type_from_path(const char *path) {
 const Resource::Type *resource_manager::type_from_ext(const char *ext) {
   yeti_assert_development(ext != NULL);
 
-  for (const Resource::Type **type = types_.first(); type <= types_.last(); ++type)
+  for (const Resource::Type **type = types_.begin(); type != types_.end(); ++type)
     for (const char **applicable_ext = &(*type)->extensions[0]; *applicable_ext; ++applicable_ext)
       if (strcmp(*applicable_ext, ext) == 0)
         return *type;
@@ -111,12 +111,12 @@ void resource_manager::track(const Resource::Type *type) {
 #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
     YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
   // Make sure `type->name` is indeed unique.
-  for (const Resource::Type **I = types_.first(); I <= types_.last(); ++I)
+  for (const Resource::Type **I = types_.begin(); I != types_.end(); ++I)
     if (strcmp((*I)->name, type->name) == 0)
       yeti_assertf(0, "A resource type with the name '%s' is already registered!", type->name);
 
   // Make sure `type->extensions` do not overlap.
-  for (const Resource::Type **I = types_.first(); I <= types_.last(); ++I)
+  for (const Resource::Type **I = types_.begin(); I != types_.end(); ++I)
     for (const char **E = &type->extensions[0]; *E; ++E)
       for (const char **ext = &(*I)->extensions[0]; *ext; ++ext)
         if (strcmp(*E, *ext) == 0)

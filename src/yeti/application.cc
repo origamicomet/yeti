@@ -95,9 +95,8 @@ Window *Application::open_a_window(const Window::Description &desc) {
 
 void Application::close_a_window(Window *window) {
   // Swap and pop.
-  Window **ref = windows_.find(window);
-  yeti_assert_debug(ref != NULL);
-  *ref = *windows_.last();
+  const size_t index = windows_.position(window);
+  windows_[index] = windows_[windows_.size() - 1];
   windows_.pop();
 
   // Close.
@@ -109,17 +108,17 @@ void Application::window_event_handler_(Window *window,
                                         void *self) {
   Application *app = (Application *)self;
 
+  const size_t id = app->windows_.position(window);
+
   switch (event.type) {
     case Window::Event::CLOSED: {
-      const bool main = (window == *app->windows().first());
 
-      if (main)
+      if (id == 0)
         // Main window closed. Quit.
         app->quit();
 
       // Swap and pop.
-      Window **ref = app->windows_.find(window);
-      *ref = *app->windows_.last();
+      app->windows_[id] = app->windows_[app->windows_.size() - 1];
       app->windows_.pop();
     } break;
   }
@@ -146,9 +145,8 @@ void Application::render_a_world(const World *world,
 
 void Application::destroy_a_world(World *world) {
   // Swap and pop.
-  World **ref = worlds_.find(world);
-  yeti_assert_debug(ref != NULL);
-  *ref = *worlds_.last();
+  const size_t index = worlds_.position(world);
+  worlds_[index] = worlds_[worlds_.size() - 1];
   worlds_.pop();
 
   // Destroy.
@@ -169,7 +167,7 @@ void Application::run() {
     yeti_assert_debug(time_step_policy_ != NULL);
     time_step_policy_->update(frame_timer, wall_timer);
 
-    for (Window **window = windows_.first(); window <= windows_.last(); ++window)
+    for (Window **window = windows_.begin(); window != windows_.end(); ++window)
       (*window)->update(&window_event_handler_, (void *)this);
 
     // It's important that these are pulled out prior to updating, just in case

@@ -90,7 +90,7 @@ void ResourceCompiler::run(bool force) {
 
   // Then we compile any files in our list if they have been modified since
   // our last compilation or if forcing recompilation.
-  for (const char **path = backlog_.first(); path <= backlog_.last(); ++path) {
+  for (const char **path = backlog_.begin(); path != backlog_.end(); ++path) {
     this->compile(*path, force);
 
     // TODO(mtwilliams): Move to a string class.
@@ -243,7 +243,7 @@ bool ResourceCompiler::ignorable(const char *path) const {
     return true;
 
   // Ignore any files matching patterns specified in `.dataignore`.
-  for (const char *const *pattern = ignore_.first(); pattern <= ignore_.last(); ++pattern)
+  for (const char *const *pattern = ignore_.begin(); pattern != ignore_.end(); ++pattern)
     if (foundation::path::match(*pattern, path))
       return true;
 
