@@ -13,6 +13,13 @@
 
 #include <stdlib.h>
 
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  #include <malloc.h>
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+      YETI_PLATFORM == YETI_PLATFORM_LINUX
+  #include <malloc.h>
+#endif
+
 namespace yeti {
 namespace foundation {
 
@@ -25,8 +32,8 @@ namespace {
     ~GlobalHeapAllocator();
 
    public:
-    uintptr_t allocate(size_t sz, size_t alignment);
-    uintptr_t reallocate(uintptr_t ptr, size_t sz, size_t alignment);
+    uintptr_t allocate(size_t size, size_t alignment);
+    uintptr_t reallocate(uintptr_t ptr, size_t size, size_t alignment);
     void deallocate(uintptr_t ptr);
   };
 
@@ -39,18 +46,31 @@ namespace {
   GlobalHeapAllocator::~GlobalHeapAllocator() {
   }
 
-  uintptr_t GlobalHeapAllocator::allocate(size_t sz, size_t alignment) {
-    // FIXME(mtwilliams): Respect |alignment|.
-    return (uintptr_t)::malloc(sz);
+  uintptr_t GlobalHeapAllocator::allocate(size_t size, size_t alignment) {
+  #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+    return (uintptr_t)_aligned_malloc(size, alignment);
+  #elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+        YETI_PLATFORM == YETI_PLATFORM_LINUX
+  #endif
   }
 
-  uintptr_t GlobalHeapAllocator::reallocate(uintptr_t ptr, size_t sz, size_t alignment) {
-    // FIXME(mtwilliams): Respect |alignment|.
-    return (uintptr_t)::realloc((void *)ptr, sz);
+  uintptr_t GlobalHeapAllocator::reallocate(uintptr_t ptr, size_t size, size_t alignment) {
+  #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+    if (ptr)
+      return (uintptr_t)_aligned_realloc((void *)ptr, size, alignment);
+    else
+      return this->allocate(size, alignment);
+  #elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+        YETI_PLATFORM == YETI_PLATFORM_LINUX
+  #endif
   }
 
   void GlobalHeapAllocator::deallocate(uintptr_t ptr) {
-    ::free((void *)ptr);
+  #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+    _aligned_free((void *)ptr);
+  #elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+        YETI_PLATFORM == YETI_PLATFORM_LINUX
+  #endif
   }
 }
 
