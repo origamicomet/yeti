@@ -74,7 +74,7 @@ extern YETI_PUBLIC void do_some_work_until_zero(volatile u32 *v);
 
 /// \brief Schedules available tasks, if there are any, until @v is @desired.
 /// \warning You should only call this from the main thread!
-extern YETI_PUBLIC void do_some_work_until_match(volatile u32 *v, u32 desired);
+extern YETI_PUBLIC void do_some_work_until_equal(volatile u32 *v, u32 desired);
 
 } // task_scheduler
 

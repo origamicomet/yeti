@@ -86,7 +86,7 @@ void task_scheduler::do_some_work_until_zero(volatile u32 *v) {
       foundation::Thread::yield();
 }
 
-void task_scheduler::do_some_work_until_match(volatile u32 *v, u32 desired) {
+void task_scheduler::do_some_work_until_equal(volatile u32 *v, u32 desired) {
   while (!is_desired_yet(v, desired))
     if (!do_some_work())
       foundation::Thread::yield();
