@@ -23,6 +23,7 @@ Allocator::Allocator() {
 #if (YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG) || \
     (YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT)
   ::memset(&name_[0], 0, sizeof(name_));
+  allocations_ = NULL;
 #endif
 }
 
