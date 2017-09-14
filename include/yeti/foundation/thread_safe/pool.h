@@ -53,6 +53,9 @@ class Pool {
   T *acquire();
   void release(T *borrowed);
 
+ public:
+  size_t size() const;
+
  private:
   Allocator *allocator_;
   uintptr_t lower_, upper_;
@@ -127,6 +130,11 @@ try_release:
 
   if (atomic::cmp_and_xchg((void ** volatile)&free_, (void *)head, (void *)element) != (void *)head)
     goto try_release;
+}
+
+template <typename T>
+size_t Pool<T>::size() const {
+  return (upper_ - lower_) / sizeof(Element);
 }
 
 } // thread_safe
