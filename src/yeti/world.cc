@@ -23,7 +23,7 @@ World::~World() {
 }
 
 World *World::create() {
-  World *world = new (foundation::heap()) World();
+  World *world = YETI_NEW(World, foundation::heap());
   return world;
 }
 
@@ -35,8 +35,7 @@ void World::update(const f32 delta_time) {
 }
 
 void World::destroy() {
-  // BUG(mtwilliams): Potential memory leak?
-  delete this;
+  YETI_DELETE(World, foundation::heap(), this);
 }
 
 void World::reflect() const {

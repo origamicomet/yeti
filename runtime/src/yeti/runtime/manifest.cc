@@ -27,7 +27,7 @@ Manifest *manifest::load_from_path(const char *path) {
 // TODO(mtwilliams): Actually load from |file|.
 
 Manifest *manifest::load_from_file(foundation::fs::File *file) {
-  Manifest *manifest = new (foundation::heap()) Manifest();
+  Manifest *manifest = YETI_NEW(Manifest, foundation::heap());
 
   manifest->app.id = "vanguard";
   manifest->app.publisher = "origamicomet";

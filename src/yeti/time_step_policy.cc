@@ -26,7 +26,7 @@ TimeStepPolicy *TimeStepPolicy::create(const TimeStepPolicy::Description &desc) 
   // TODO(mtwilliams): Perform more thorough validations.
   yeti_assert_development(desc.type != TimeStepPolicy::UNKNOWN);
 
-  TimeStepPolicy *tsp = new (foundation::heap()) TimeStepPolicy();
+  TimeStepPolicy *tsp = YETI_NEW(TimeStepPolicy, foundation::heap());
   tsp->desc_ = desc;
   memset((void *)&tsp->state_, 0, sizeof(TimeStepPolicy::State));
 
@@ -37,7 +37,7 @@ TimeStepPolicy *TimeStepPolicy::create(const TimeStepPolicy::Description &desc) 
 }
 
 void TimeStepPolicy::destroy() {
-  delete this;
+  YETI_DELETE(TimeStepPolicy, foundation::heap(), this);
 }
 
 void TimeStepPolicy::update(const foundation::HighResolutionTimer *frame,

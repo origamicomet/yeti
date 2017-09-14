@@ -31,7 +31,7 @@ struct ReadersWriterLock::Implementation {
 };
 
 ReadersWriterLock *ReadersWriterLock::create() {
-  Implementation *impl = new (foundation::heap()) Implementation();
+  Implementation *impl = YETI_NEW(Implementation, foundation::heap());
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::InitializeSRWLock(&impl->srwl);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
@@ -46,7 +46,7 @@ void ReadersWriterLock::destroy() {
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
-  delete impl;
+  YETI_DELETE(Implementation, foundation::heap(), impl);
 }
 
 // NOTE(mtwilliams): We assume readers-writer locks are mostly acquired

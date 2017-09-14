@@ -30,7 +30,7 @@ ResourceDatabase *ResourceDatabase::open_or_create(const char *path) {
   // TODO(mtwilliams): Modify |flags| based on additional parameters.
   static const int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 
-  ResourceDatabase *rdb = new (foundation::heap()) ResourceDatabase();
+  ResourceDatabase *rdb = YETI_NEW(ResourceDatabase, foundation::heap());
   const int status = sqlite3_open_v2(path, &rdb->db, flags, NULL);
   yeti_assert(status == SQLITE_OK);
 
@@ -44,8 +44,7 @@ void ResourceDatabase::close() {
 
   sqlite3_close_v2(this->db);
 
-  // TODO(mtwilliams): Memory leak?
-  delete this;
+  YETI_DELETE(ResourceDatabase, foundation::heap(), this);
 }
 
 void ResourceDatabase::prepare_() {

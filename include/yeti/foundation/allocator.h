@@ -93,16 +93,6 @@ class YETI_PUBLIC Allocator {
 } // foundation
 } // yeti
 
-// BUG(mtwilliams): The pointer variant of this is likely a placement new. A
-// fix is to throw a tag (and provide a default value.)
-extern YETI_PUBLIC void *operator new(size_t sz, yeti::foundation::Allocator &allocator);
-extern YETI_PUBLIC void *operator new(size_t sz, yeti::foundation::Allocator *allocator);
-extern YETI_PUBLIC void *operator new[](size_t sz, yeti::foundation::Allocator &allocator);
-extern YETI_PUBLIC void *operator new[](size_t sz, yeti::foundation::Allocator *allocator);
-
-extern YETI_PUBLIC void operator delete(void *ptr, yeti::foundation::Allocator &allocator);
-extern YETI_PUBLIC void operator delete(void *ptr, yeti::foundation::Allocator *allocator);
-
 /// \def YETI_NEW
 /// \brief Allocates memory with @Allocator for the given type @T, then calls
 /// its constructor.

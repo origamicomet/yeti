@@ -44,7 +44,7 @@ ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &opts
   // TODO(mtwilliams): Check based on absolute paths.
   yeti_assert_debug(strcmp(opts.data, opts.data_src) != 0);
 
-  ResourceCompiler *resource_compiler = new (foundation::heap()) ResourceCompiler();
+  ResourceCompiler *resource_compiler = YETI_NEW(ResourceCompiler, foundation::heap());
 
   resource_compiler->db_ = opts.db;
 
@@ -63,7 +63,7 @@ ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &opts
 }
 
 void ResourceCompiler::destroy() {
-  delete this;
+  YETI_DELETE(ResourceCompiler, foundation::heap(), this);
 }
 
 void ResourceCompiler::add_ignore_patterns(const char *path) {

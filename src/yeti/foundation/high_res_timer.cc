@@ -53,7 +53,7 @@ struct HighResolutionTimer::Implementation {
 };
 
 HighResolutionTimer *HighResolutionTimer::create() {
-  Implementation *impl = new (foundation::heap()) Implementation();
+  Implementation *impl = YETI_NEW(Implementation, foundation::heap());
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::QueryPerformanceFrequency(&impl->freq);
   ::QueryPerformanceCounter(&impl->epoch);
@@ -70,7 +70,7 @@ HighResolutionTimer *HighResolutionTimer::create() {
 
 void HighResolutionTimer::destroy() {
   Implementation *impl = (Implementation *)this;
-  delete impl;
+  YETI_DELETE(Implementation, foundation::heap(), impl);
 }
 
 void HighResolutionTimer::reset() {

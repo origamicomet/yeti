@@ -619,7 +619,7 @@ namespace fs {
       ::CloseHandle(watch->io.hEvent);
       ::CloseHandle(watch->hndl);
 
-      delete watch;
+      YETI_DELETE(Watch, foundation::heap(), watch);
 
       return;
     }
@@ -701,7 +701,7 @@ fs::Watch *fs::watch(const char *directory, fs::Watcher callback, void *callback
   if (hndl == INVALID_HANDLE_VALUE)
     return NULL;
 
-  Watch *watch = new (foundation::heap()) Watch();
+  Watch *watch = YETI_NEW(Watch, foundation::heap());
 
   watch->hndl = hndl;
   watch->io.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -720,7 +720,7 @@ fs::Watch *fs::watch(const char *directory, fs::Watcher callback, void *callback
   ::CloseHandle(watch->io.hEvent);
   ::CloseHandle(watch->hndl);
 
-  delete watch;
+  YETI_DELETE(Watch, foundation::heap(), watch);
 
   return NULL;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC

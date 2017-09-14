@@ -45,7 +45,7 @@ Surface *Surface::create_from_window(yeti::Window *window,
   u32 width, height;
   window->dimensions(&width, &height);
 
-  Surface *surface = new (foundation::heap()) Surface();
+  Surface *surface = YETI_NEW(Surface, foundation::heap());
 
   gala_swap_chain_desc_t swap_chain_desc;
   swap_chain_desc.format = GALA_PIXEL_FORMAT_R8G8B8;
@@ -85,7 +85,7 @@ void Surface::destroy(::gala_command_buffer_t *commands) {
   gala_swap_chain_destroy(engine::underlying(), commands, swap_chain_);
   gala_render_target_view_destroy(engine::underlying(), commands, render_target_view_);
 
-  delete this;
+  YETI_DELETE(Surface, foundation::heap(), this);
 }
 
 } // graphics

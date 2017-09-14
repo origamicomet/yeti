@@ -174,7 +174,7 @@ Thread *Thread::spawn(Thread::EntryPoint entry_point,
   thread_start_info->entry_point = entry_point;
   thread_start_info->entry_point_arg = entry_point_arg;
 
-  Thread *thread = new (foundation::heap()) Thread();
+  Thread *thread = YETI_NEW(Thread, foundation::heap())();
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   thread->native_hndl_ =
@@ -260,10 +260,10 @@ void Thread::join() {
   // QUESTION(mtwilliams): Should we check that this returns `WAIT_OBJECT_0`?
   ::WaitForSingleObject((HANDLE)native_hndl_, INFINITE);
   // Handle is closed in destructor.
-  delete this;
+  YETI_DELETE(Thread, foundation::heap(), this);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   ::pthread_join((pthread_t)native_hndl_, NULL);
-  delete this;
+  YETI_DELETE(Thread, foundation::heap(), this);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -271,10 +271,10 @@ void Thread::join() {
 void Thread::detach() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   // Handle is closed in destructor.
-  delete this;
+  YETI_DELETE(Thread, foundation::heap(), this);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   ::pthread_detach((pthread_t)native_hndl_);
-  delete this;
+  YETI_DELETE(Thread, foundation::heap(), this);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }
@@ -284,10 +284,10 @@ void Thread::terminate() {
   // I drink your milkshake...
   ::TerminateThread((HANDLE)native_hndl_, 0x0);
   // Handle is closed in destructor.
-  delete this;
+  YETI_DELETE(Thread, foundation::heap(), this);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   ::pthread_cancel((pthread_t)native_hndl_);
-  delete this;
+  YETI_DELETE(Thread, foundation::heap(), this);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
 }

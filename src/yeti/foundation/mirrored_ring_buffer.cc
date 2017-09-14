@@ -68,7 +68,7 @@ MirroredRingBuffer *MirroredRingBuffer::create(u32 sz) {
     }
 
     // We got a contiguous mapping!
-    Implementation *impl = new (foundation::heap()) Implementation();
+    Implementation *impl = YETI_NEW(Implementation, foundation::heap());
     impl->vm.mapping = mapping;
     impl->vm.lower_half = (uintptr_t)lower_half;
     impl->vm.upper_half = (uintptr_t)upper_half;
@@ -89,7 +89,7 @@ void MirroredRingBuffer::destroy() {
   ::UnmapViewOfFile((void *)impl->vm.lower_half);
   ::CloseHandle(impl->vm.mapping);
 
-  delete impl;
+  YETI_DELETE(Implementation, foundation::heap(), impl);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif

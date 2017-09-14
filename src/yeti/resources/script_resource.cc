@@ -51,7 +51,7 @@ const Resource::Type *ScriptResource::type() {
 
 Resource *ScriptResource::prepare(Resource::Id id) {
   // TODO(mtwilliams): Use an arena allocator.
-  return (Resource *)(new (foundation::heap()) ScriptResource(id));
+  return (Resource *)YETI_NEW(ScriptResource, foundation::heap())(id);
 }
 
 void ScriptResource::load(Resource *resource, const Resource::Data &data) {
@@ -75,8 +75,7 @@ void ScriptResource::unload(Resource *resource) {
 
   foundation::heap().deallocate((uintptr_t)script_resource->bytecode_);
 
-  // BUG(mtwilliams): Potential memory leak?
-  delete script_resource;
+  YETI_DELETE(ScriptResource, foundation::heap(), script_resource);
 }
 
 bool ScriptResource::compile(const resource_compiler::Environment *env,

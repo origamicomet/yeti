@@ -31,7 +31,7 @@ struct Mutex::Implementation {
 };
 
 Mutex *Mutex::create(u32 spin) {
-  Implementation *impl = new (foundation::heap()) Implementation();
+  Implementation *impl = YETI_NEW(Implementation, foundation::heap());
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   ::InitializeCriticalSectionAndSpinCount(&impl->cs, spin);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
@@ -47,7 +47,7 @@ void Mutex::destroy() {
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
-  delete impl;
+  YETI_DELETE(Implementation, foundation::heap(), impl);
 }
 
 void Mutex::lock() {

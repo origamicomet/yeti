@@ -62,7 +62,7 @@ Window *Window::open(const Window::Description &desc) {
   yeti_assert_development(desc.dimensions.height > 0);
   yeti_assert_development(desc.dimensions.height <= 65535);
 
-  Window *window = new (foundation::heap()) Window();
+  Window *window = YETI_NEW(Window, foundation::heap());
 
   window->is_resizeable_ = desc.resizeable;
   window->is_closable_ = desc.closable;
