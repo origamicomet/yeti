@@ -97,6 +97,9 @@ class Array {
   const T *find(const T &value) const;
 
  public:
+  size_t position(const T &value) const;
+
+ public:
   // TODO(mtwilliams): Implement sorting and searching.
   // void sort(...);
   // T search(...);
@@ -339,6 +342,13 @@ const T *Array<T>::find(const T &value) const {
       return I;
 
   return NULL;
+}
+
+template <typename T>
+size_t Array<T>::position(const T &value) const {
+  const T *I = this->find(value);
+  yeti_assert_debug(I != NULL);
+  return (I - first_);
 }
 
 } // foundation
