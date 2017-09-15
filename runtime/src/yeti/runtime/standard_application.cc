@@ -99,6 +99,8 @@ void StandardApplication::render() {
 }
 
 void StandardApplication::shutdown() {
+  log::print(YETI_LOG_APP, log::INFO, "Shutting down...");
+
   this->script_.call("shutdown", 0);
 
   yeti::shutdown();
