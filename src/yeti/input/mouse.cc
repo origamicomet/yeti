@@ -59,7 +59,7 @@ bool Mouse::held(const MouseButton btn) {
   yeti_assert_debug(btn < MouseButtons::_COUNT);
   const u32 prev_state = (_state[btn] >> 1) & 1;
   const u32 state = _state[btn] & 1;
-  return (prev_state & state) & state;
+  return (prev_state & state);
 }
 
 bool Mouse::released(const MouseButton btn) {

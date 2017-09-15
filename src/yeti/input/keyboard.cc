@@ -56,7 +56,7 @@ bool Keyboard::held(const Key key) {
   yeti_assert_debug(key < Keys::_COUNT);
   const u32 prev_state = (_state[key] >> 1) & 1;
   const u32 state = _state[key] & 1;
-  return (prev_state & state) & state;
+  return (prev_state & state);
 }
 
 bool Keyboard::released(const Key key) {
