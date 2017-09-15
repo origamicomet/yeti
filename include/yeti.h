@@ -53,7 +53,7 @@
 
 #include "yeti/window.h"
 
-#include "yeti/graphics.h"
+#include "yeti/graphics/engine.h"
 #include "yeti/renderer.h"
 
 #include "yeti/time_step_policy.h"

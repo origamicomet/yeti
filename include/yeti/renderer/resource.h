@@ -20,10 +20,6 @@
 #include "yeti/linkage.h"
 #include "yeti/foundation.h"
 
-#include "yeti/graphics/texture.h"
-#include "yeti/graphics/render_target.h"
-#include "yeti/graphics/depth_stencil_target.h"
-
 namespace yeti {
 namespace renderer {
 
