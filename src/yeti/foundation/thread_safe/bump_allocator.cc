@@ -35,7 +35,7 @@ uintptr_t BumpAllocator::allocate(size_t size, size_t alignment) {
     const uintptr_t unallocated = atomic::load(&unallocated_);
 
     const size_t padding = unallocated % alignment;
-    const size_t length = size + alignment;
+    const size_t length = size + padding;
 
     if (length >= upper_)
       // We don't have enough memory left to fufill the requested allocation.
