@@ -30,7 +30,7 @@ namespace engine {
     void *executed_ctx;
   };
 
-  static foundation::Queue<Commands> submitted_(foundation::heap(), 64);
+  static foundation::Queue<Commands> submitted_(foundation::heap(), 256);
 
   struct BootInfo {
     const Settings *settings;
@@ -122,7 +122,7 @@ void engine::thread(uintptr_t boot_info_ptr) {
   for (;;) {
     work_to_be_done_->wait();
 
-    Commands commands[64];
+    Commands commands[256];
     size_t count = 0;
 
     {
