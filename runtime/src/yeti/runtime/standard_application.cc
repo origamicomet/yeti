@@ -159,19 +159,20 @@ void StandardApplication::log_pertinent_information_about_system() const {
 }
 
 void StandardApplication::create_main_window_and_default_viewport() {
-  Window::Description wd;
+  Window::Description wd; {
+    wd.title = manifest_->app.name;
 
-  wd.title = manifest_->app.name;
+    wd.dimensions.width = manifest_->graphics.width;
+    wd.dimensions.height = manifest_->graphics.height;
 
-  wd.dimensions.width = manifest_->graphics.width;
-  wd.dimensions.height = manifest_->graphics.height;
+    wd.resizeable = false;
 
-  wd.resizeable = false;
+    // Quits application. See `Application::window_event_handler_`.
+    wd.closable = true;
+  }
 
-  // Quits application. See `Application::window_event_handler_`.
-  wd.closable = true;
-
-  this->open_a_window(wd);
+  // Create main window.
+  Window *window = this->open_a_window(wd);
 }
 
 void StandardApplication::expose_to_lua() {
