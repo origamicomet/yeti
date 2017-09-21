@@ -22,7 +22,9 @@ Runner::Runner()
   : resource_database_(NULL)
   , resource_compiler_(NULL)
   , force_(false)
-  , watch_(false) {
+  , watch_(false)
+{
+  this->start_logging_to_console();
 }
 
 Runner::~Runner() {
@@ -56,7 +58,7 @@ void Runner::setup(const char *args[], const u32 num_args) {
     else if (strcmp(*arg, "--watch") == 0)
       watch_ = true;
     else
-      fprintf(stderr, "Unknown command-line argument '%s'.", *arg);
+      core::logf(core::log::GENERAL, core::log::WARNING, "Passed unknown command-line argument `%s`.", *arg);
   }
 
   core::path::unixify(&resource_database_path[0]);
@@ -88,16 +90,28 @@ void Runner::run() {
 
   resource_compiler_ = ResourceCompiler::create(resource_compiler_options_);
 
-  if (watch_)
+  if (watch_) {
+    core::logf(core::log::GENERAL, core::log::INFO, "Starting resource compiler daemon...");
+
     // TODO(mtwilliams): Install a signal handler to trap termination requests,
     // and call `ResourceCompiler::shutdown`.
     resource_compiler_->daemon();
-  else
+  } else {
+    if (force_)
+      core::logf(core::log::GENERAL, core::log::INFO, "Recompiling all resources...");
+    else
+      core::logf(core::log::GENERAL, core::log::INFO, "Compiling new or modified resources...");
+
     resource_compiler_->run(force_);
+  }
 
   resource_compiler_->destroy();
 
   resource_database_->close();
+}
+
+void Runner::start_logging_to_console() const {
+  YETI_NEW(core::log::ConsoleBackend, core::global_heap_allocator())();
 }
 
 } // resource_compiler

@@ -33,6 +33,10 @@ class Runner {
   void run();
 
  private:
+  // Starts logging to console.
+  void start_logging_to_console() const;
+
+ private:
   ResourceDatabase *resource_database_;
 
   ResourceCompiler::Options resource_compiler_options_;
