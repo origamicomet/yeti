@@ -51,8 +51,8 @@ class YETI_PRIVATE ScriptCompiler {
 
   lua_State *lua_;
 
-  foundation::Array<u8> source_;
-  foundation::Array<u8> bytecode_;
+  core::Array<u8> source_;
+  core::Array<u8> bytecode_;
 };
 
 } // yeti

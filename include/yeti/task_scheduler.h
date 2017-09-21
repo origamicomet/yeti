@@ -16,9 +16,7 @@
 #ifndef _YETI_TASK_SCHEDULER_H_
 #define _YETI_TASK_SCHEDULER_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 #include "yeti/task.h"
 
@@ -27,6 +25,12 @@ namespace yeti {
 namespace task_scheduler {
 
 struct Config {
+  /// Number of worker threads to spawn.
+  ///
+  /// \note Setting this to `-n` will result in a worker thread being spawned
+  ///       for each core minus `n`, with a maximum of 31 on 32-bit and 63 on
+  ///       64-bit platforms.
+  ///
   i32 workers;
 };
 

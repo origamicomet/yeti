@@ -99,7 +99,7 @@ void StandardApplication::render() {
 }
 
 void StandardApplication::shutdown() {
-  log::print(YETI_LOG_APP, log::INFO, "Shutting down...");
+  core::logf(core::log::APP, core::log::INFO, "Shutting down...");
 
   this->script_.call("shutdown", 0);
 
@@ -107,7 +107,7 @@ void StandardApplication::shutdown() {
 }
 
 void StandardApplication::start_logging_to_console() const {
-  // TODO(mtwilliams): Log to stdout and stderr.
+  YETI_NEW(core::log::ConsoleBackend, core::global_heap_allocator())();
 }
 
 void StandardApplication::start_logging_to_file() const {
@@ -115,26 +115,25 @@ void StandardApplication::start_logging_to_file() const {
 }
 
 void StandardApplication::set_appropriate_logging_level() const {
-  // TODO(mtwilliams): Refactor start_logging_to_console() and
-  // start_logging_to_file() into Console/Log and use set_logging_level().
+  // TODO(mtwilliams): Set logging level.
 }
 
 void StandardApplication::log_copyright_notices() const {
-  log::printf(YETI_LOG_APP, log::INFO,
+  core::logf(core::log::APP, core::log::INFO,
     "                            __ __     _   _                            \n"
     "                           |  |  |___| |_|_|                           \n"
     "                           |_   _| -_|  _| |                           \n"
     "                             |_| |___|_| |_|                           \n\n"
   );
 
-  log::printf(YETI_LOG_APP, log::INFO,
+  core::logf(core::log::APP, core::log::INFO,
     "             %s             \n\n",
     __yeti_copyright__()
   );
 }
 
 void StandardApplication::log_pertinent_information_about_build() const {
-  log::printf(YETI_LOG_APP, log::INFO,
+  core::logf(core::log::APP, core::log::INFO,
     "Runtime\n"
     " platform = %s\n"
     " architecture = %s\n"
@@ -145,7 +144,7 @@ void StandardApplication::log_pertinent_information_about_build() const {
   );
 
   // TODO(mtwilliams): Determine content version.
-  log::printf(YETI_LOG_APP, log::INFO,
+  core::logf(core::log::APP, core::log::INFO,
     "Version\n"
     " engine = %s\n"
     " content = %s\n\n",
@@ -176,13 +175,15 @@ void StandardApplication::create_main_window_and_default_viewport() {
 }
 
 void StandardApplication::expose_to_lua() {
-  application_if::expose(&this->script_, this);
   math_if::expose(&this->script_);
+  application_if::expose(&this->script_, this);
   window_if::expose(&this->script_);
   viewport_if::expose(&this->script_);
   keyboard_if::expose(&this->script_);
   mouse_if::expose(&this->script_);
   world_if::expose(&this->script_);
+  entity_if::expose(&this->script_);
+  component_if::expose(&this->script_);
   transform_if::expose(&this->script_);
   camera_if::expose(&this->script_);
   light_if::expose(&this->script_);

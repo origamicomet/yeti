@@ -12,25 +12,31 @@
 #include "yeti/resource_compiler.h"
 
 // TODO(mtwilliams): Drop dependence on global heap allocator.
-#include "yeti/foundation/global_heap_allocator.h"
+#include "yeti/core/allocators/global_heap_allocator.h"
 
 // For log forwarding.
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
-static const yeti::log::Category::Id YETI_LOG_RESOURCE_COMPILER =
-  ::yeti::log::Category::add("resource_compiler", YETI_LOG_GENERAL);
-
 namespace yeti {
+
+namespace core {
+namespace log {
+
+static const core::log::Category::Id RESOURCE_COMPILER =
+  Category::add("resource_compiler", TOOLS);
+
+} // log
+} // core
 
 ResourceCompiler::ResourceCompiler()
   : db_(NULL)
   , data_len_(0)
   , data_src_len_(0)
-  , ignore_(foundation::heap())
+  , ignore_(core::global_heap_allocator())
   , debounce_(0)
-  , backlog_(foundation::heap())
+  , backlog_(core::global_heap_allocator())
   , daemonized_(false)
   , stop_(false) {
 }
@@ -38,38 +44,38 @@ ResourceCompiler::ResourceCompiler()
 ResourceCompiler::~ResourceCompiler() {
 }
 
-ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &opts) {
+ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &options) {
   // TODO(mtwilliams): Move into a validation function.
-  yeti_assert_debug(opts.db != NULL);
+  yeti_assert_debug(options.db != NULL);
   // TODO(mtwilliams): Check based on absolute paths.
-  yeti_assert_debug(strcmp(opts.data, opts.data_src) != 0);
+  yeti_assert_debug(strcmp(options.data, options.data_src) != 0);
 
-  ResourceCompiler *resource_compiler = YETI_NEW(ResourceCompiler, foundation::heap());
+  ResourceCompiler *resource_compiler = YETI_NEW(ResourceCompiler, core::global_heap_allocator());
 
-  resource_compiler->db_ = opts.db;
+  resource_compiler->db_ = options.db;
 
-  strcpy(resource_compiler->data_, opts.data);
-  strcpy(resource_compiler->data_src_, opts.data_src);
+  strcpy(resource_compiler->data_, options.data);
+  strcpy(resource_compiler->data_src_, options.data_src);
 
   resource_compiler->data_len_ = strlen(resource_compiler->data_);
   resource_compiler->data_src_len_ = strlen(resource_compiler->data_src_);
 
   // Add ignore patterns from file, if it exists.
-  resource_compiler->add_ignore_patterns(opts.ignore);
+  resource_compiler->add_ignore_patterns(options.ignore);
 
-  resource_compiler->debounce_ = opts.debounce;
+  resource_compiler->debounce_ = options.debounce;
 
   return resource_compiler;
 }
 
 void ResourceCompiler::destroy() {
-  YETI_DELETE(ResourceCompiler, foundation::heap(), this);
+  YETI_DELETE(ResourceCompiler, core::global_heap_allocator(), this);
 }
 
 void ResourceCompiler::add_ignore_patterns(const char *path) {
-  if (foundation::fs::File *file = foundation::fs::open(path, foundation::fs::READ)) {
-    foundation::PatternFileParser(file).parse(ignore_);
-    foundation::fs::close(file);
+  if (core::File *file = core::fs::open(path, core::File::READ)) {
+    core::PatternFileParser(file).parse(ignore_);
+    core::fs::close(file);
   }
 }
 
@@ -78,7 +84,7 @@ void ResourceCompiler::add_ignore_patterns(const char *path) {
 void ResourceCompiler::run(bool force) {
   // We recursively walk source data directory to build a list of files that
   // may need to be compiled.
-  foundation::fs::walk(data_src_, (foundation::fs::Walker)&ResourceCompiler::walker, (void *)this);
+  core::fs::walk(data_src_, (core::fs::Walker)&ResourceCompiler::walker, (void *)this);
 
   // TODO(mtwilliams): Track implicit dependencies like shader includes
   // so we know to recompile all dependents whenever they're modified. This
@@ -94,7 +100,7 @@ void ResourceCompiler::run(bool force) {
     this->compile(*path, force);
 
     // TODO(mtwilliams): Move to a string class.
-    foundation::heap().deallocate((uintptr_t)*path);
+    core::global_heap_allocator().deallocate((void *)*path);
   }
 
   backlog_.clear();
@@ -106,29 +112,25 @@ void ResourceCompiler::daemon() {
   // Setup our watcher. It will watch the source data directory to collect a
   // stream of creation, modification, and deletion events for files and
   // folders.
-  foundation::fs::Watch *watch =
-    foundation::fs::watch(data_src_, (foundation::fs::Watcher)&ResourceCompiler::watcher, (void *)this);
+  core::fs::Watch *watch =
+    core::fs::watch(data_src_, (core::fs::Watcher)&ResourceCompiler::watcher, (void *)this);
 
   // Setup a high-resolution timer so we time ourselves to debounce.
-  foundation::HighResolutionTimer *timer =
-    foundation::HighResolutionTimer::create();
+  core::Timer timer;
 
   while(!stop_) {
     // Collect creation, modification, and deletion events for a period of time.
-    while (timer->msecs() <= debounce_)
-      foundation::fs::poll(watch);
+    while (timer.msecs() <= debounce_)
+      core::fs::poll(watch);
 
     // TODO(mtwilliams): Coalesce events.
     // TODO(mtwilliams): Handle events.
 
-    timer->reset();
+    timer.reset();
   }
 
-  // Stop watching source data directory.
-  foundation::fs::unwatch(watch);
-
-  // Clean up after ourselves.
-  timer->destroy();
+  // Stop watching the source data directory.
+  core::fs::unwatch(watch);
 }
 
 void ResourceCompiler::stop() {
@@ -156,8 +158,8 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   Path source_file_path;
   sprintf(&source_file_path[0], "%s/%s", &data_src_[0], path);
 
-  foundation::fs::Info source_file_info;
-  foundation::fs::info(source_file_path, &source_file_info);
+  core::File::Info source_file_info;
+  core::fs::info(source_file_path, &source_file_info);
 
   // TODO(mtwilliams): Only compile if source data was modified more recently
   // than than whatever our database last saw, or if the file hash is different
@@ -174,7 +176,7 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   ResourceCompiler::Input input;
   input.root = &data_src_[0];
   input.path = path;
-  input.source = foundation::fs::open(source_file_path, foundation::fs::READ | foundation::fs::EXCLUSIVE);
+  input.source = core::fs::open(source_file_path, core::File::READ | core::File::EXCLUSIVE);
 
   ResourceCompiler::Output output;
   output.root = &data_[0];
@@ -183,11 +185,11 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
 
   Path memory_resident_data_path = { 0, };
   sprintf(&memory_resident_data_path[0], "%s/%016llx", output.root, id);
-  output.memory_resident_data = foundation::fs::create_or_open(&memory_resident_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+  output.memory_resident_data = core::fs::create_or_open(&memory_resident_data_path[0], core::File::WRITE | core::File::EXCLUSIVE);
 
   Path streaming_data_path = { 0, };
   sprintf(&streaming_data_path[0], "%s.streaming", &memory_resident_data_path[0]);
-  output.streaming_data = foundation::fs::create_or_open(&streaming_data_path[0], foundation::fs::WRITE | foundation::fs::EXCLUSIVE);
+  output.streaming_data = core::fs::create_or_open(&streaming_data_path[0], core::File::WRITE | core::File::EXCLUSIVE);
 
   if (!input.source)
     env.error(&env, "Could not open `%s` for reading!", source_file_path);
@@ -210,11 +212,11 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   }
 
   if (input.source)
-    foundation::fs::close(input.source);
+    core::fs::close(input.source);
   if (output.memory_resident_data)
-    foundation::fs::close(output.memory_resident_data);
+    core::fs::close(output.memory_resident_data);
   if (output.streaming_data)
-    foundation::fs::close(output.streaming_data);
+    core::fs::close(output.streaming_data);
 
   // TODO(mtwilliams): Update our database to reflect the compilation of this
   // resource.
@@ -231,7 +233,7 @@ void ResourceCompiler::canonicalize(char *path) const {
     memmove((void *)&path[0], (const void *)&path[data_src_len_ + 1], strlen(path) - data_src_len_);
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
-  foundation::path::unixify(&path[0]);
+  core::path::unixify(&path[0]);
 #endif
 }
 
@@ -239,12 +241,12 @@ bool ResourceCompiler::ignorable(const char *path) const {
   yeti_assert_debug(path != NULL);
 
   // Ignore any and all dot files.
-  if (foundation::path::file(path)[0] == '.')
+  if (core::path::file(path)[0] == '.')
     return true;
 
   // Ignore any files matching patterns specified in `.dataignore`.
   for (const char *const *pattern = ignore_.begin(); pattern != ignore_.end(); ++pattern)
-    if (foundation::path::match(*pattern, path))
+    if (core::path::match(*pattern, path))
       return true;
 
   return false;
@@ -280,25 +282,25 @@ bool ResourceCompiler::compilable(const char *path) const {
   return !!resource_manager::type_from_path(path);
 }
 
-bool ResourceCompiler::walk(const char *path, const foundation::fs::Info *info) {
+bool ResourceCompiler::walk(const char *path, const core::File::Info *info) {
   yeti_assert_debug(path != NULL);
   yeti_assert_debug(info != NULL);
 
   switch (info->type) {
-    case foundation::fs::FILE: {
+    case core::File::FILE: {
       // OPTIMIZE(mtwilliams): Use a buddy allocator.
       const size_t path_len = strlen(path);
-      char *path_copy = (char *)foundation::heap().allocate(path_len + 1);
+      char *path_copy = (char *)core::global_heap_allocator().allocate(path_len + 1);
       memcpy((void *)path_copy, (const void *)path, path_len + 1);
       this->canonicalize(path_copy);
 
       backlog_.push(path_copy);
     } break;
 
-    case foundation::fs::DIRECTORY: {
+    case core::File::DIRECTORY: {
       // TODO(mtwilliams): Refactor into a work queue so we don't blow the
       // stack if we end up recursing too deeply?
-      foundation::fs::walk(path, (foundation::fs::Walker)&walker, (void *)this);
+      core::fs::walk(path, (core::fs::Walker)&walker, (void *)this);
     } break;
   }
 
@@ -306,28 +308,28 @@ bool ResourceCompiler::walk(const char *path, const foundation::fs::Info *info) 
 }
 
 bool ResourceCompiler::walker(const char *path,
-                              const foundation::fs::Info *info,
+                              const core::File::Info *info,
                               ResourceCompiler *resource_compiler) {
   return resource_compiler->walk(path, info);
 }
 
-void ResourceCompiler::watch(foundation::fs::Event event, const char *path) {
+void ResourceCompiler::watch(core::fs::Event event, const char *path) {
   yeti_assert_debug(path != NULL);
 
   switch (event) {
-    case foundation::fs::CREATED:
-      log::printf(YETI_LOG_RESOURCE_COMPILER, log::TRACE, "+ %s", path);
+    case core::fs::CREATED:
+      core::logf(core::log::RESOURCE_COMPILER, core::log::TRACE, "+ %s", path);
       break;
-    case foundation::fs::MODIFIED:
-      log::printf(YETI_LOG_RESOURCE_COMPILER, log::TRACE, "* %s", path);
+    case core::fs::MODIFIED:
+      core::logf(core::log::RESOURCE_COMPILER, core::log::TRACE, "* %s", path);
       break;
-    case foundation::fs::DESTROYED:
-      log::printf(YETI_LOG_RESOURCE_COMPILER, log::TRACE, "- %s", path);
+    case core::fs::DESTROYED:
+      core::logf(core::log::RESOURCE_COMPILER, core::log::TRACE, "- %s", path);
       break;
   }
 }
 
-void ResourceCompiler::watcher(foundation::fs::Event event,
+void ResourceCompiler::watcher(core::fs::Event event,
                                const char *path,
                                ResourceCompiler *resource_compiler) {
   return resource_compiler->watch(event, path);
@@ -337,32 +339,32 @@ void ResourceCompiler::watcher(foundation::fs::Event event,
 
 namespace {
   // HACK(mtwilliams): (Broken) forwarding trickery.
-  static void forward_to_log_(log::Level level, const char *format, va_list va) {
+  static void forward_to_log_(core::log::Level level, const char *format, va_list va) {
     const int size = vsnprintf(NULL, 0, format, va) + 1;
     char *message = (char *)alloca(size);
     vsnprintf(message, size, format, va);
-    log::print(YETI_LOG_RESOURCE_COMPILER, level, message);
+    core::logf(core::log::RESOURCE_COMPILER, level, message);
   }
 }
 
 void ResourceCompiler::info(const Environment *env, const char *format, ...) {
   va_list va;
   va_start(va, format);
-  forward_to_log_(log::INFO, format, va);
+  forward_to_log_(core::log::INFO, format, va);
   va_end(va);
 }
 
 void ResourceCompiler::warning(const Environment *env, const char *format, ...) {
   va_list va;
   va_start(va, format);
-  forward_to_log_(log::WARNING, format, va);
+  forward_to_log_(core::log::WARNING, format, va);
   va_end(va);
 }
 
 void ResourceCompiler::error(const Environment *env, const char *format, ...) {
   va_list va;
   va_start(va, format);
-  forward_to_log_(log::ERROR, format, va);
+  forward_to_log_(core::log::ERROR, format, va);
   va_end(va);
 }
 

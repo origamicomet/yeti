@@ -16,9 +16,7 @@
 #ifndef _YETI_SCRIPT_H_
 #define _YETI_SCRIPT_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 extern "C" {
   #include <lua.h>
@@ -27,13 +25,14 @@ extern "C" {
   #include <luajit.h>
 }
 
-#include "yeti/script_environment.h"
+#include "yeti/script/environment.h"
 
 namespace yeti {
 
+// See `yeti/resources/script_resource.h`.
 class ScriptResource;
 
-// ...
+// A virtual machine and environment for executing Lua.
 class YETI_PUBLIC Script {
  YETI_DISALLOW_COPYING(Script)
 
@@ -58,11 +57,11 @@ class YETI_PUBLIC Script {
   ~Script();
 
  private:
-  static void *__alloc(Script *script, void *ptr, size_t old_sz, size_t new_sz);
+  static void *__alloc(Script *script, void *ptr, size_t, size_t size);
   static int __error_handler(lua_State *L);
 
  public:
-  /// \internal
+  /// \internal Recovers encompassing `Script` from @L.
   static Script *recover(lua_State *L);
 
  public:
@@ -70,7 +69,7 @@ class YETI_PUBLIC Script {
   void inject(const ScriptResource *script_resource);
 
  public:
-  /// \brief Adds @fn as @name globally.
+  /// \brief Binds @fn to @name.
   void add_function(const char *name,
                     const lua_CFunction fn);
 
@@ -81,16 +80,23 @@ class YETI_PUBLIC Script {
   void add_module_constructor(const char *module,
                               const lua_CFunction fn);
 
-  /// \brief Adds @fn as @name to the @module.
+  /// \brief Binds @fn to @name in @module.
   void add_module_function(const char *module,
                            const char *name,
                            const lua_CFunction fn);
 
  public:
+  /// \brief Determines if value at @index is convertible to @T.
+  template <typename T> bool is_a(int index);
+
+  /// \brief Returns value at @index as type @T.
+  template <typename T> T to_a(int index);
+
+ public:
   /// \brief Calls the global function @fn with @n number of arguments.
   ///
   /// Each argument is specified by the type preceding the value, except for
-  /// T_NIL. For example:
+  /// `T_NIL`. For example:
   ///
   ///   call("meaning_of_life", Script::T_INTEGER, 42);
   ///

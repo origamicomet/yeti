@@ -11,42 +11,40 @@
 
 #include "yeti.h"
 
-#include "yeti/runtime/standard_application.h"
 #include "yeti/runtime/manifest.h"
+#include "yeti/runtime/standard_application.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#if YETI_COMPILER == YETI_COMPILER_MSVC
-  #include <crtdbg.h>
-#endif
-
-static void debug() {
-#if YETI_COMPILER == YETI_COMPILER_MSVC
-  int flags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-
-  // Check memory integrity every time memory is allocated or freed.
-  flags |= _CRTDBG_CHECK_ALWAYS_DF;
-
-  // Check for memory leaks at program exit.
-  flags |= _CRTDBG_LEAK_CHECK_DF;
-
-  _CrtSetDbgFlag(flags);
-#endif
-}
+#include <locale.h>
 
 static yeti::Config config_from_manifest(yeti::runtime::Manifest *manifest) {
   yeti::Config config;
 
+  config.app.id = manifest->app.id;
+  config.app.publisher = manifest->app.publisher;
+
+  config.user.settings = manifest->user.settings;
+  config.user.saves = manifest->user.saves;
+
   config.resources.database = manifest->resources.database;
+  config.resources.autoload = manifest->resources.autoload;
 
-  // Spawn a worker thread for each logical core, sans one for the main thread.
-  config.threading.workers = -1;
+  config.keyboard.raw = manifest->keyboard.raw;
+  config.mouse.raw = manifest->mouse.raw;
 
+  config.debug.floating_point_exceptions = manifest->debug.floating_point_exceptions;
+  config.debug.memory = false;
+
+  // Spawn a worker thread for each logical core, minus one for the main thread.
+  config.workers = -1;
+
+#if 0
   config.graphics.enabled = true;
   config.graphics.settings.backend = yeti::graphics::engine::OPENGL;
   config.graphics.settings.fast_and_loose = manifest->graphics.fast_and_loose;
+#endif
 
   return config;
 }
@@ -63,19 +61,21 @@ int main(int argc, const char *argv[]) {
     if (strcmp(*arg, "--debug") == 0) {
     #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
         YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-      debug();
+      config.debug.floating_point_exceptions = true;
+      config.debug.memory = true;
     #else
       fprintf(stderr, "Can't run in debug mode unless a debug or development build!\n");
     #endif
     } else if (strcmp(*arg, "--workers") == 0) {
-      config.threading.workers = strtol(*++arg, NULL, 10);
+      config.workers = strtol(*++arg, NULL, 10);
     } else {
       fprintf(stderr, "Unknown command-line argument '%s'.", *arg);
     }
   }
 
+  yeti::boot(config);
+
   // Let the games begin.
-  yeti::initialize(config);
   yeti::runtime::StandardApplication app(manifest);
   app.run();
 

@@ -11,9 +11,10 @@
 
 #include "yeti/input/feeder.h"
 
-#include "yeti/window.h"
 #include "yeti/input/keyboard.h"
 #include "yeti/input/mouse.h"
+
+#include "yeti/window.h"
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>

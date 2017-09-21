@@ -35,7 +35,7 @@ class Runner {
  private:
   ResourceDatabase *resource_database_;
 
-  ResourceCompiler::Options resource_compiler_opts_;
+  ResourceCompiler::Options resource_compiler_options_;
   ResourceCompiler *resource_compiler_;
 
   bool force_;

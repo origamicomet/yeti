@@ -16,9 +16,7 @@
 #ifndef _YETI_COMPONENT_H_
 #define _YETI_COMPONENT_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 namespace yeti {
 

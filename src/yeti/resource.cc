@@ -10,9 +10,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "yeti/resource.h"
-
-#include "yeti/resource_database.h"
 #include "yeti/resource_manager.h"
+#include "yeti/resource_database.h"
 
 namespace yeti {
 
@@ -27,7 +26,7 @@ u32 Resource::hash_from_id(Resource::Id id) {
 Resource::Id Resource::id_from_path(const char *path) {
   yeti_assert_debug(path != NULL);
 
-  const char *ext = foundation::path::extension(path);
+  const char *ext = core::path::extension(path);
   yeti_assert_debug(ext != NULL);
 
   const Resource::Type *type = resource_manager::type_from_ext(ext);
@@ -44,7 +43,7 @@ Resource::Id Resource::id_from_path(const char *path) {
 Resource::Id Resource::id_from_type_and_name(Resource::Type::Id type,
                                              const char *name) {
   yeti_assert_debug(name != NULL);
-  return Resource::id_from_type_and_hash(type, foundation::murmur_hash_32(name, 0));
+  return Resource::id_from_type_and_hash(type, core::murmur_hash_32(name, 0));
 }
 
 Resource::Id Resource::id_from_type_and_hash(Resource::Type::Id type,
@@ -55,19 +54,19 @@ Resource::Id Resource::id_from_type_and_hash(Resource::Type::Id type,
 Resource::Resource(Resource::Id id)
   : id_(id)
 {
-  foundation::atomic::store(&refs_, 0);
-  foundation::atomic::store(&state_, UNLOADED);
+  atomic::store(&refs_, 0);
+  atomic::store(&state_, UNLOADED);
 }
 
 Resource::~Resource() {
 }
 
 void Resource::ref() {
-  foundation::atomic::increment(&refs_);
+  atomic::increment(&refs_);
 }
 
 void Resource::deref() {
-  const u32 refs = foundation::atomic::decrement(&refs_);
+  const u32 refs = atomic::decrement(&refs_);
 
   if (YETI_LIKELY(refs > 0))
     // Still in use somewhere.
@@ -78,11 +77,11 @@ void Resource::deref() {
 }
 
 Resource::State Resource::state() const {
-  return (Resource::State)foundation::atomic::load(&state_);
+  return (Resource::State)atomic::load(&state_);
 }
 
 void Resource::set_state(Resource::State state) {
-  foundation::atomic::store(&state_, (u32)state);
+  atomic::store(&state_, (u32)state);
 }
 
 Resource::Handle::Handle(Resource *resource) {

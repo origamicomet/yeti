@@ -72,8 +72,8 @@ void task_scheduler::kick_and_do_work_while_waiting_n(unsigned n, const Task::Ha
 }
 
 static bool is_desired_yet(volatile u32 *v, const u32 desired) {
-  return (foundation::atomic::load(v) == desired)
-      && (foundation::atomic::cmp_and_xchg(v, desired, desired) == desired);
+  return (atomic::load(v) == desired)
+      && (atomic::cmp_and_xchg(v, desired, desired) == desired);
 }
 
 bool task_scheduler::do_some_work() {
@@ -83,13 +83,13 @@ bool task_scheduler::do_some_work() {
 void task_scheduler::do_some_work_until_zero(volatile u32 *v) {
   while (!is_desired_yet(v, 0))
     if (!do_some_work())
-      foundation::Thread::yield();
+      core::Thread::yield();
 }
 
 void task_scheduler::do_some_work_until_equal(volatile u32 *v, u32 desired) {
   while (!is_desired_yet(v, desired))
     if (!do_some_work())
-      foundation::Thread::yield();
+      core::Thread::yield();
 }
 
 } // yeti

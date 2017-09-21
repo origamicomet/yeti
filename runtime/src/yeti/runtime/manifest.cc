@@ -15,9 +15,9 @@ namespace yeti {
 namespace runtime {
 
 Manifest *manifest::load_from_path(const char *path) {
-  if (foundation::fs::File *file = foundation::fs::open(path, foundation::fs::READ)) {
+  if (core::File *file = core::fs::open(path, core::File::READ)) {
     Manifest *manifest = load_from_file(file);
-    foundation::fs::close(file);
+    core::fs::close(file);
     return manifest;
   }
 
@@ -26,8 +26,8 @@ Manifest *manifest::load_from_path(const char *path) {
 
 // TODO(mtwilliams): Actually load from |file|.
 
-Manifest *manifest::load_from_file(foundation::fs::File *file) {
-  Manifest *manifest = YETI_NEW(Manifest, foundation::heap());
+Manifest *manifest::load_from_file(core::File *file) {
+  Manifest *manifest = YETI_NEW(Manifest, core::global_heap_allocator());
 
   manifest->app.id = "vanguard";
   manifest->app.publisher = "origamicomet";

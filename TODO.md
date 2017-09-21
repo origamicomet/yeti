@@ -109,9 +109,9 @@ Includes runtime.
 
 ### `REFACTOR`
 
-* Extract foundation into a library.
+* Extract core into a library.
   * Move source tree to `origamicomet/ocf`.
-* Convert `yeti::foundation::fs` to an interface?
+* Convert `yeti::core::fs` to an interface?
   * Transparent virtual file-systems.
 * Move to type-safe `Slice<T>`.
 * Prefer `void *` over `uintptr_t`.
@@ -127,7 +127,7 @@ Includes runtime.
 
 * Containers do not call destructors for non-POD types.
 * Log categories aren't under the `yeti` namespace.
-* Returning pointers from `foundation::HashMap<K,V>`.
+* Returning pointers from `yeti::core::Map<K,V>`.
 
 ### `CRAZY`
 
@@ -148,6 +148,13 @@ Includes runtime.
 * Move to C++ style casts?
 * Drop global heap allocator for a global page allocator.
   * Everything will need to be sub-allocated within page boundaries.
+* Global handle system for Lua.
+  * On x86 and x86_64, use light user-data to store:
+
+    Tag        =  1 ; Always set, to aid differentiation between handles and pointers.
+    Type       =  8 ; 256 types
+    Generation =  3 ; Tracks bad references.
+    Index      = 20 ; 1 million handles
 
 ## Sherpa
 

@@ -51,31 +51,32 @@ const Resource::Type *ScriptResource::type() {
 
 Resource *ScriptResource::prepare(Resource::Id id) {
   // TODO(mtwilliams): Use an arena allocator.
-  return (Resource *)YETI_NEW(ScriptResource, foundation::heap())(id);
+  return (Resource *)YETI_NEW(ScriptResource, core::global_heap_allocator())(id);
 }
 
 void ScriptResource::load(Resource *resource, const Resource::Data &data) {
   ScriptResource *script_resource = (ScriptResource *)resource;
 
-  foundation::fs::Info memory_resident_data_info;
-  foundation::fs::info(data.memory_resident_data, &memory_resident_data_info);
+  core::File::Info memory_resident_data_info;
+  core::fs::info(data.memory_resident_data, &memory_resident_data_info);
 
-  foundation::fs::read(data.memory_resident_data, (uintptr_t)&script_resource->path_[0], 256);
+  core::fs::read(data.memory_resident_data, (void *)&script_resource->path_[0], 256);
 
   script_resource->bytecode_len_ = memory_resident_data_info.size - 256;
-  script_resource->bytecode_ = (const char *)foundation::heap().allocate(script_resource->bytecode_len_);
-  foundation::fs::read(data.memory_resident_data, (uintptr_t)script_resource->bytecode_, script_resource->bytecode_len_);
+  script_resource->bytecode_ = (const char *)core::global_heap_allocator().allocate(script_resource->bytecode_len_);
 
-  foundation::fs::close(data.memory_resident_data);
-  foundation::fs::close(data.streaming_data);
+  core::fs::read(data.memory_resident_data, (void *)script_resource->bytecode_, script_resource->bytecode_len_);
+
+  core::fs::close(data.memory_resident_data);
+  core::fs::close(data.streaming_data);
 }
 
 void ScriptResource::unload(Resource *resource) {
   ScriptResource *script_resource = (ScriptResource *)resource;
 
-  foundation::heap().deallocate((uintptr_t)script_resource->bytecode_);
+  core::global_heap_allocator().deallocate((void *)script_resource->bytecode_);
 
-  YETI_DELETE(ScriptResource, foundation::heap(), script_resource);
+  YETI_DELETE(ScriptResource, core::global_heap_allocator(), script_resource);
 }
 
 bool ScriptResource::compile(const resource_compiler::Environment *env,

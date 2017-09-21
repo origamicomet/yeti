@@ -11,9 +11,16 @@
 
 #include "yeti/application.h"
 
+#include "yeti/application/time_step_policy.h"
+
+#include "yeti/world.h"
+
+#include "yeti/window.h"
+
+// We automatically hook up windows to input singletons.
 #include "yeti/input.h"
 
-// To do some work while waiting for hazards or rendering.
+// To do some work while waiting.
 #include "yeti/task.h"
 #include "yeti/task_scheduler.h"
 
@@ -21,18 +28,17 @@ namespace yeti {
 
 Application::Application()
   : time_step_policy_(NULL)
-  , windows_(foundation::heap(), 0)
-  , worlds_(foundation::heap(), 0)
+  , windows_(core::global_heap_allocator(), 0)
+  , worlds_(core::global_heap_allocator(), 0)
   , logical_frame_count_(0)
-  , visual_frame_count_(0)
-  , hazards_(0) {
+  , visual_frame_count_(0) {
 }
 
 Application::~Application() {
   // There's no need to clean up after ourselves as the operating system will
   // do that for us. Ever use software that takes more than a second to close?
   // That's because they follow "best" practices and make sure everything is
-  // properly destructed and free'd before they exit.
+  // properly destructed and deallocated before they exit.
 }
 
 const char *Application::platform() {
@@ -75,6 +81,7 @@ void Application::shutdown() {
 }
 
 void Application::update(const f32 delta_time) {
+  // No time travel, please.
   yeti_assert_debug(delta_time >= 0.f);
 }
 
@@ -84,7 +91,7 @@ void Application::render() {
 Window *Application::open_a_window(const Window::Description &desc) {
   Window *window = Window::open(desc);
 
-  // Hook up input to `Keyboard` and `Mouse`.
+  // Hook up input to input singletons.
   yeti::input::from(window);
 
   // Store a reference.
@@ -138,10 +145,12 @@ void Application::update_a_world(World *world,
   world->update(delta_time);
 }
 
+#if 0
 void Application::render_a_world(const World *world,
                                  Camera::Handle camera,
                                  Renderer::Viewport *viewport) {
 }
+#endif
 
 void Application::destroy_a_world(World *world) {
   // Swap and pop.
@@ -154,21 +163,19 @@ void Application::destroy_a_world(World *world) {
 }
 
 void Application::run() {
-  // TODO(mtwilliams): Move this into a task?
-  foundation::HighResolutionTimer *frame_timer = foundation::HighResolutionTimer::create();
-  foundation::HighResolutionTimer *wall_timer = foundation::HighResolutionTimer::create();
+  core::Timer frame_timer;
+  core::Timer wall_timer;
 
   this->startup();
 
   for (;;) {
-    // Don't mutate state until fully reflected.
-    task_scheduler::do_some_work_until_zero(&hazards_);
-
-    yeti_assert_debug(time_step_policy_ != NULL);
-    time_step_policy_->update(frame_timer, wall_timer);
-
     for (Window **window = windows_.begin(); window != windows_.end(); ++window)
       (*window)->update(&window_event_handler_, (void *)this);
+
+    yeti_assert_with_reason_development(time_step_policy_ != NULL,
+                                        "You must specify a time-step policy!");
+
+    time_step_policy_->update(frame_timer, wall_timer);
 
     // It's important that these are pulled out prior to updating, just in case
     // the time-step policy is changed during a step.
@@ -193,18 +200,18 @@ void Application::run() {
     // BUG(mtwilliams): Due to inadequate timing resolution, this may result in
     // all frames taking `zero' microseconds unless enough work is performed
     // every frame.
-    frame_timer->reset();
+    frame_timer.reset();
   }
 
   YETI_UNREACHABLE();
 }
 
 void Application::pause() {
-  yeti_assertf(0, "Pausing and unpausing applications has not been implemented yet.");
+  yeti_assert_with_reason(0, "Pausing and unpausing applications has not been implemented yet.");
 }
 
 void Application::unpause() {
-  yeti_assertf(0, "Pausing and unpausing applications has not been implemented yet.");
+  yeti_assert_with_reason(0, "Pausing and unpausing applications has not been implemented yet.");
 }
 
 void Application::quit() {
@@ -226,14 +233,15 @@ const TimeStepPolicy *Application::time_step_policy() const {
 void Application::set_time_step_policy(TimeStepPolicy *new_time_step_policy) {
   if (time_step_policy_)
     time_step_policy_->destroy();
+
   time_step_policy_ = new_time_step_policy;
 }
 
-const foundation::Array<Window *> &Application::windows() const {
+const core::Array<Window *> &Application::windows() const {
   return windows_;
 }
 
-const foundation::Array<World *> &Application::worlds() const {
+const core::Array<World *> &Application::worlds() const {
   return worlds_;
 }
 

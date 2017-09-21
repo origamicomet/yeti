@@ -17,6 +17,8 @@
 #ifndef _YETI_MATH_H_
 #define _YETI_MATH_H_
 
+#include <math.h>
+
 #include "yeti/math/vec2.h"
 #include "yeti/math/vec3.h"
 #include "yeti/math/vec4.h"

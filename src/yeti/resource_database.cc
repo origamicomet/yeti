@@ -25,12 +25,12 @@ ResourceDatabase *ResourceDatabase::open_or_create(const char *path) {
   yeti_assert_debug(path != NULL);
 
   // TODO(mtwilliams): Open existing databases.
-  foundation::fs::destroy(path);
+  core::fs::destroy(path);
 
   // TODO(mtwilliams): Modify |flags| based on additional parameters.
   static const int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 
-  ResourceDatabase *rdb = YETI_NEW(ResourceDatabase, foundation::heap());
+  ResourceDatabase *rdb = YETI_NEW(ResourceDatabase, core::global_heap_allocator());
   const int status = sqlite3_open_v2(path, &rdb->db, flags, NULL);
   yeti_assert(status == SQLITE_OK);
 
@@ -44,7 +44,7 @@ void ResourceDatabase::close() {
 
   sqlite3_close_v2(this->db);
 
-  YETI_DELETE(ResourceDatabase, foundation::heap(), this);
+  YETI_DELETE(ResourceDatabase, core::global_heap_allocator(), this);
 }
 
 void ResourceDatabase::prepare_() {
@@ -179,14 +179,14 @@ void ResourceDatabase::exec_(const char *sql) {
     int status;
 
     status = sqlite3_prepare_v2(this->db, sql, -1, &stmt, &sql);
-    yeti_assertf(status == SQLITE_OK, sqlite3_errmsg(this->db));
+    yeti_assert_with_reason(status == SQLITE_OK, sqlite3_errmsg(this->db));
 
     if (stmt == NULL)
       // We prepared an empty statement, probably due to trailing whitespace. Ingore.
       break;
 
     status = sqlite3_step(stmt);
-    yeti_assertf(status == SQLITE_DONE, sqlite3_errmsg(this->db));
+    yeti_assert_with_reason(status == SQLITE_DONE, sqlite3_errmsg(this->db));
 
     sqlite3_finalize(stmt);
   }

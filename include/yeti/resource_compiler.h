@@ -18,11 +18,11 @@
 
 #include "yeti/config.h"
 #include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 #include "yeti/resource.h"
-#include "yeti/resource_database.h"
 #include "yeti/resource_manager.h"
+#include "yeti/resource_database.h"
 
 namespace yeti {
 
@@ -86,7 +86,7 @@ namespace resource_compiler {
     const char *path;
 
     /// Handle to read source data.
-    foundation::fs::File *source;
+    core::File *source;
   };
 
   struct Output {
@@ -94,10 +94,10 @@ namespace resource_compiler {
     const char *root;
 
     /// Handle to write memory-resident data.
-    foundation::fs::File *memory_resident_data;
+    core::File *memory_resident_data;
 
     /// Handle to write streaming data.
-    foundation::fs::File *streaming_data;
+    core::File *streaming_data;
   };
 }
 
@@ -129,7 +129,7 @@ class YETI_PUBLIC ResourceCompiler {
   typedef resource_compiler::Output Output;
 
  public:
-  static ResourceCompiler *create(const ResourceCompiler::Options &opts);
+  static ResourceCompiler *create(const ResourceCompiler::Options &options);
   void destroy();
 
  private:
@@ -159,6 +159,8 @@ class YETI_PUBLIC ResourceCompiler {
   /// \param @force Forces compilation, even if already up to date.
   ///
   /// \return Result of compilation.
+  ///
+  ///
   Result compile(const char *path, bool force = false);
 
  private:
@@ -170,16 +172,16 @@ class YETI_PUBLIC ResourceCompiler {
   bool compilable(const char *path) const;
 
  private:
-  bool walk(const char *path, const foundation::fs::Info *info);
+  bool walk(const char *path, const core::File::Info *info);
 
   static bool walker(const char *path,
-                     const foundation::fs::Info *info,
+                     const core::File::Info *info,
                      ResourceCompiler *resource_compiler);
 
  private:
-  void watch(foundation::fs::Event event, const char *path);
+  void watch(core::fs::Event event, const char *path);
 
-  static void watcher(foundation::fs::Event event,
+  static void watcher(core::fs::Event event,
                       const char *path,
                       ResourceCompiler *resource_compiler);
 
@@ -198,13 +200,13 @@ class YETI_PUBLIC ResourceCompiler {
   size_t data_src_len_;
 
   // Patterns of source filenames to ignore.
-  foundation::Array<const char *> ignore_;
+  core::Array<const char *> ignore_;
 
   // Milliseconds to collect changes prior to processing.
   u32 debounce_;
 
   // Paths collected by `walker`.
-  foundation::Array<const char *> backlog_;
+  core::Array<const char *> backlog_;
 
   // Ture if daemonized.
   bool daemonized_;

@@ -20,48 +20,40 @@ namespace resource_manager {
     // Indicates if loading and unloading is available.
     static bool enabled_ = false;
 
-    static const size_t queue_mem_sz_ = 131072;
+    static const size_t queue_memory_ = 1 * 1024 * 1024;
 
-    static const size_t load_queue_mem_sz_    = queue_mem_sz_ * 1/3;
-    static const size_t unload_queue_mem_sz_  = queue_mem_sz_ * 1/3;
-    static const size_t online_queue_mem_sz_  = queue_mem_sz_ * 1/6;
-    static const size_t offline_queue_mem_sz_ = queue_mem_sz_ * 1/6;
+    static const size_t load_queue_memory_    = (queue_memory_ * 1) / 4;
+    static const size_t unload_queue_memory_  = (queue_memory_ * 1) / 4;
+    static const size_t online_queue_memory_  = (queue_memory_ * 1) / 4;
+    static const size_t offline_queue_memory_ = (queue_memory_ * 1) / 4;
 
-    static u8 queue_mem_[queue_mem_sz_] = { 0, };
+    core::Array<const Resource::Type *> types_(core::global_heap_allocator());
 
-    static u8 *load_queue_mem_ = &queue_mem_[0];
-    static u8 *unload_queue_mem_ = &load_queue_mem_[load_queue_mem_sz_];
-    static u8 *online_queue_mem_ = &unload_queue_mem_[unload_queue_mem_sz_];
-    static u8 *offline_queue_mem_ = &online_queue_mem_[online_queue_mem_sz_];
+    core::ReaderWriterLock lock_;
 
-    foundation::Array<const Resource::Type *> types_(foundation::heap());
-
-    foundation::ReadersWriterLock *resources_lock_ = foundation::ReadersWriterLock::create();
-
-    // TODO(mtwilliams): Replace with condition variable.
     // Signaled whenever some work is added to one of the four queues.
-    foundation::Event *work_to_be_done_ = foundation::Event::create();
+    core::Event work_to_be_done_;
 
-    foundation::HashMap<Resource::Id, Resource *> resources_(foundation::heap(), 65535);
+    core::Map<Resource::Id, Resource *> resources_(core::global_heap_allocator(), 65535);
 
-    foundation::Queue<Resource *> to_be_loaded_((uintptr_t)load_queue_mem_, load_queue_mem_sz_);
-    foundation::Queue<Resource *> to_be_unloaded_((uintptr_t)unload_queue_mem_, unload_queue_mem_sz_);
+    core::Queue<Resource *> to_be_loaded_(core::global_heap_allocator(), load_queue_memory_);
+    core::Queue<Resource *> to_be_unloaded_(core::global_heap_allocator(), unload_queue_memory_);
 
-    foundation::Queue<Resource *> to_be_brought_online_((uintptr_t)online_queue_mem_, online_queue_mem_sz_);
-    foundation::Queue<Resource *> to_be_put_offline_((uintptr_t)offline_queue_mem_, offline_queue_mem_sz_);
+    core::Queue<Resource *> to_be_brought_online_(core::global_heap_allocator(), online_queue_memory_);
+    core::Queue<Resource *> to_be_put_offline_(core::global_heap_allocator(), offline_queue_memory_);
   }
 
-  static void management_thread(uintptr_t /* unused */);
+  static void management_thread(void *);
 }
 
 Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
   yeti_assert_debug(type != NULL);
-  return (Resource::Type::Id)foundation::murmur_hash_32(type->name, 0);
+  return (Resource::Type::Id)core::murmur_hash_32(type->name, 0);
 }
 
 const Resource::Type *resource_manager::type_from_id(Resource::Type::Id id) {
   for (const Resource::Type **type = types_.begin(); type != types_.end(); ++type)
-    if (id == foundation::murmur_hash_32((*type)->name, 0))
+    if (id == core::murmur_hash_32((*type)->name, 0))
       return *type;
 
   return NULL;
@@ -69,12 +61,12 @@ const Resource::Type *resource_manager::type_from_id(Resource::Type::Id id) {
 
 const Resource::Type *resource_manager::type_from_name(const char *name) {
   yeti_assert_debug(name != NULL);
-  return type_from_id(foundation::murmur_hash_32(name, 0));
+  return type_from_id(core::murmur_hash_32(name, 0));
 }
 
 const Resource::Type *resource_manager::type_from_path(const char *path) {
   yeti_assert_development(path != NULL);
-  return type_from_ext(foundation::path::extension(path));
+  return type_from_ext(core::path::extension(path));
 }
 
 const Resource::Type *resource_manager::type_from_ext(const char *ext) {
@@ -91,12 +83,12 @@ const Resource::Type *resource_manager::type_from_ext(const char *ext) {
 void resource_manager::initialize(const Config &config) {
   yeti_assert_debug(!enabled_);
 
-  foundation::Thread::Options management_thread_opts;
-  sprintf(&management_thread_opts.name[0], "Resource Management");
+  core::Thread::Options management_thread_opts;
+  management_thread_opts.name = "Resource Management";
   management_thread_opts.affinity = ~0ull;
-  management_thread_opts.stack_size = 0x100000 /* 1MiB */;
+  management_thread_opts.stack = 0x100000 /* 1MiB */;
 
-  foundation::Thread::spawn(&resource_manager::management_thread, 0, &management_thread_opts)->detach();
+  core::Thread::spawn(&resource_manager::management_thread, 0, management_thread_opts)->detach();
 
   enabled_ = true;
 }
@@ -113,14 +105,14 @@ void resource_manager::track(const Resource::Type *type) {
   // Make sure `type->name` is indeed unique.
   for (const Resource::Type **I = types_.begin(); I != types_.end(); ++I)
     if (strcmp((*I)->name, type->name) == 0)
-      yeti_assertf(0, "A resource type with the name '%s' is already registered!", type->name);
+      yeti_assert_with_reason(0, "A resource type with the name '%s' is already registered!", type->name);
 
   // Make sure `type->extensions` do not overlap.
   for (const Resource::Type **I = types_.begin(); I != types_.end(); ++I)
     for (const char **E = &type->extensions[0]; *E; ++E)
       for (const char **ext = &(*I)->extensions[0]; *ext; ++ext)
         if (strcmp(*E, *ext) == 0)
-          yeti_assertf(0, "The resource type '%s' already registered the file extension '%s'!", (*I)->name, *E);
+          yeti_assert_with_reason(0, "The resource type '%s' already registered the file extension '%s'!", (*I)->name, *E);
 #endif
 
   types_.push(type);
@@ -130,7 +122,7 @@ Resource *resource_manager::find(Resource::Id id) {
   yeti_assert_debug(enabled_);
 
   {
-    YETI_SCOPED_LOCK_NON_EXCLUSIVE(resources_lock_);
+    YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
 
     if (Resource **resource = resources_.find(id)) {
       (*resource)->ref();
@@ -145,7 +137,7 @@ Resource *resource_manager::load(Resource::Id id) {
   yeti_assert_debug(enabled_);
 
   {
-    YETI_SCOPED_LOCK_NON_EXCLUSIVE(resources_lock_);
+    YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
 
     if (Resource **resource = resources_.find(id)) {
       (*resource)->ref();
@@ -160,13 +152,13 @@ Resource *resource_manager::load(Resource::Id id) {
   yeti_assert_debug(resource != NULL);
 
   {
-    YETI_SCOPED_LOCK_EXCLUSIVE(resources_lock_);
+    YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
 
     resources_.insert(id, resource);
     to_be_loaded_.push(resource);
   }
 
-  work_to_be_done_->signal();
+  work_to_be_done_.signal();
 
   return resource;
 }
@@ -177,25 +169,25 @@ void resource_manager::unload(Resource *resource) {
   yeti_assert_development(resource->refs() == 0);
 
   {
-    YETI_SCOPED_LOCK_EXCLUSIVE(resources_lock_);
+    YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
 
     resources_.remove(resource->id());
     to_be_unloaded_.push(resource);
   }
 
-  work_to_be_done_->signal();
+  work_to_be_done_.signal();
 }
 
-void resource_manager::management_thread(uintptr_t) {
+void resource_manager::management_thread(void *) {
   for (;;) {
-    work_to_be_done_->wait();
+    work_to_be_done_.wait();
 
     {
-      // TODO(mtwilliams): Collect work to be done to an internal "queue" then
-      // release |resources_lock_| so as not to block other threads when loading,
+      // PERF(mtwilliams): Collect work to be done to an internal "queue" then
+      // release `lock_` so as not to block other threads when loading,
       // unloading, onlining, or offlining.
 
-      YETI_SCOPED_LOCK_EXCLUSIVE(resources_lock_);
+      YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
 
       Resource *resource;
 
@@ -207,14 +199,14 @@ void resource_manager::management_thread(uintptr_t) {
 
         char memory_resident_data_path[256] = { 0, };
         sprintf(&memory_resident_data_path[0], "data/%016llx", resource->id());
-        data.memory_resident_data = foundation::fs::open(&memory_resident_data_path[0], foundation::fs::READ);
+        data.memory_resident_data = core::fs::open(&memory_resident_data_path[0], core::File::READ);
 
         // HACK(mtwilliams): Assume every resource has memory resident data.
         yeti_assert_debug(data.memory_resident_data != NULL);
 
         char streaming_data_path[256] = { 0, };
         sprintf(&streaming_data_path[0], "data/%016llx.streaming", resource->id());
-        data.streaming_data = foundation::fs::open(&streaming_data_path[0], foundation::fs::READ);
+        data.streaming_data = core::fs::open(&streaming_data_path[0], core::File::READ);
 
         type->load(resource, data);
 

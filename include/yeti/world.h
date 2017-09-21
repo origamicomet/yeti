@@ -16,23 +16,14 @@
 #ifndef _YETI_WORLD_H_
 #define _YETI_WORLD_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
-
-#include "yeti/ecs.h"
-
-#include "yeti/transform.h"
-#include "yeti/camera.h"
-#include "yeti/light.h"
+#include "yeti/core.h"
 
 namespace yeti {
 
-/// ...
 class YETI_PUBLIC World {
  YETI_DISALLOW_COPYING(World)
 
- protected:
+ private:
   World();
   ~World();
 
@@ -42,28 +33,6 @@ class YETI_PUBLIC World {
   void update(const f32 delta_time);
 
   void destroy();
-
- public:
-  /// \internal Reflects any changes to logical representation.
-  void reflect() const;
-
-  /// \internal Applys changes from logical representation.
-  void apply();
-
- private:
-#if 0
-  EntityManager entities_;
-
-  SystemManager systems_;
-
-  // Commonly used systems.
-  TransformSystem *transform_system_;
-  CameraSystem *camera_system_;
-  LightSystem *light_system_;
-  VisibilitySystem *visibility_system_;
-  TagSystem *tag_system_;
-  UserDataSystem *user_data_system_;
-#endif
 };
 
 } // yeti

@@ -23,7 +23,7 @@ World::~World() {
 }
 
 World *World::create() {
-  World *world = YETI_NEW(World, foundation::heap());
+  World *world = YETI_NEW(World, core::global_heap_allocator());
   return world;
 }
 
@@ -35,22 +35,7 @@ void World::update(const f32 delta_time) {
 }
 
 void World::destroy() {
-  YETI_DELETE(World, foundation::heap(), this);
-}
-
-void World::reflect() const {
-  // Lifecycle
-  // For each system...
-   // If `visual`, reflect.
-   // If `audio`, trap.
-   // If `physics`, trap.
-}
-
-void World::apply() {
-  // Lifecycle
-   // For each system...
-    // Notify about lifecycle events.
-    // Apply changes.
+  YETI_DELETE(World, core::global_heap_allocator(), this);
 }
 
 } // yeti

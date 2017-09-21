@@ -30,7 +30,7 @@ Runner::~Runner() {
 
 void Runner::setup(const char *args[], const u32 num_args) {
   ResourceCompiler::Path cwd;
-  foundation::path::cwd(&cwd[0], sizeof(cwd));
+  core::path::cwd(&cwd[0], sizeof(cwd));
 
   ResourceCompiler::Path resource_database_path;
   ResourceCompiler::Path data_path;
@@ -59,27 +59,34 @@ void Runner::setup(const char *args[], const u32 num_args) {
       fprintf(stderr, "Unknown command-line argument '%s'.", *arg);
   }
 
-  foundation::path::unixify(&resource_database_path[0]);
-  foundation::path::unixify(&data_path[0]);
-  foundation::path::unixify(&source_data_path[0]);
+  core::path::unixify(&resource_database_path[0]);
+  core::path::unixify(&data_path[0]);
+  core::path::unixify(&source_data_path[0]);
 
-  foundation::path::unixify(&ignores[0]);
+  core::path::unixify(&ignores[0]);
 
   resource_database_ = ResourceDatabase::open_or_create(&resource_database_path[0]);;
 
-  resource_compiler_opts_.db = resource_database_;
+  resource_compiler_options_.db = resource_database_;
 
-  memcpy((void *)&resource_compiler_opts_.data[0], (const void *)&data_path[0], sizeof(data_path));
-  memcpy((void *)&resource_compiler_opts_.data_src[0], (const void *)&source_data_path[0], sizeof(source_data_path));
+  core::memory::copy((const void *)&data_path[0],
+                     (void *)&resource_compiler_options_.data[0],
+                     sizeof(data_path));
 
-  memcpy((void *)&resource_compiler_opts_.ignore[0], (const void *)&ignores[0], sizeof(ignores));
+  core::memory::copy((const void *)&source_data_path[0],
+                     (void *)&resource_compiler_options_.data_src[0],
+                     sizeof(source_data_path));
+
+  core::memory::copy((const void *)&ignores[0],
+                     (void *)&resource_compiler_options_.ignore[0],
+                     sizeof(ignores));
 }
 
 void Runner::run() {
   // Make sure the data directory exists or resource compilation will fail.
-  foundation::fs::create(foundation::fs::DIRECTORY, &resource_compiler_opts_.data[0]);
+  core::fs::create(core::File::DIRECTORY, &resource_compiler_options_.data[0]);
 
-  resource_compiler_ = ResourceCompiler::create(resource_compiler_opts_);
+  resource_compiler_ = ResourceCompiler::create(resource_compiler_options_);
 
   if (watch_)
     // TODO(mtwilliams): Install a signal handler to trap termination requests,

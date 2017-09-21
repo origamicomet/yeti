@@ -62,7 +62,7 @@ Window *Window::open(const Window::Description &desc) {
   yeti_assert_development(desc.dimensions.height > 0);
   yeti_assert_development(desc.dimensions.height <= 65535);
 
-  Window *window = YETI_NEW(Window, foundation::heap());
+  Window *window = YETI_NEW(Window, core::global_heap_allocator());
 
   window->is_resizeable_ = desc.resizeable;
   window->is_closable_ = desc.closable;
@@ -461,7 +461,7 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       ::RemovePropA(hWnd, "event_handler_ctx");
 
       // And of course, we free any memory we've associated with |hWnd|.
-      foundation::heap().deallocate((uintptr_t)window);
+      core::global_heap_allocator().deallocate((void *)window);
     } return 0;
 
     case WM_ERASEBKGND: {

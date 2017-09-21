@@ -11,7 +11,7 @@
 ///
 /// \file
 /// \brief Defines and checks the sanity of various pre-processor macros that
-/// control the building and behaviour of Yeti.
+/// control the build and behaviour of Yeti.
 ///
 //===----------------------------------------------------------------------===//
 

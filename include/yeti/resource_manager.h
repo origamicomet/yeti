@@ -16,9 +16,7 @@
 #ifndef _YETI_RESOURCE_MANAGER_H_
 #define _YETI_RESOURCE_MANAGER_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 #include "yeti/resource.h"
 #include "yeti/resource_database.h"
@@ -27,9 +25,14 @@ namespace yeti {
 
 namespace resource_manager {
 
-///
 struct Config {
+  /// Path to resource database.
+  /// \note Resources cannot be loaded or unloaded if `NULL`.
   const char *database;
+
+  /// Toggles automatic loading of resources as required rather than loading
+  /// through packages.
+  bool autoload;
 };
 
 /// Derives the resource type id from @type.

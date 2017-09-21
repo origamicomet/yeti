@@ -16,9 +16,7 @@
 #ifndef _YETI_RESOURCE_H_
 #define _YETI_RESOURCE_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 namespace yeti {
 
@@ -107,10 +105,10 @@ namespace resource {
   /// Data available at runtime.
   struct Data {
     /// Handle to memory-resident data.
-    foundation::fs::File *memory_resident_data;
+    core::File *memory_resident_data;
 
     /// Handle to read streaming data.
-    foundation::fs::File *streaming_data;
+    core::File *streaming_data;
   };
 }
 
@@ -184,7 +182,7 @@ class YETI_PUBLIC Resource {
   Id id() const { return id_; }
 
   /// \internal Returns the number of references to this resource.
-  u32 refs() const { return foundation::atomic::load(&refs_); }
+  u32 refs() const { return atomic::load(&refs_); }
 
   /// \internal Adds a reference to this resource.
   void ref();

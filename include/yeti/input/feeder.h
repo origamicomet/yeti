@@ -1,4 +1,4 @@
-//===-- yeti/input/keyboard.h ---------------------------*- mode: C++11 -*-===//
+//===-- yeti/input/feeder.h -----------------------------*- mode: C++11 -*-===//
 //
 //                             __ __     _   _
 //                            |  |  |___| |_|_|
@@ -16,12 +16,11 @@
 #ifndef _YETI_INPUT_FEEDER_H_
 #define _YETI_INPUT_FEEDER_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
 namespace yeti {
 
+// See `yeti/window.h`.
 class Window;
 
 namespace input {

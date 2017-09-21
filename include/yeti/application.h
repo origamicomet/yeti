@@ -16,20 +16,21 @@
 #ifndef _YETI_APPLICATION_H_
 #define _YETI_APPLICATION_H_
 
-#include "yeti/config.h"
-#include "yeti/linkage.h"
-#include "yeti/foundation.h"
+#include "yeti/core.h"
 
-#include "yeti/time_step_policy.h"
-
+// Have to include because we use `Window::Description`.
 #include "yeti/window.h"
 
-// REFACTOR(mtwilliams): Decouple renderer by turning into singleton?
-#include "yeti/renderer.h"
-
-#include "yeti/world.h"
+// Have to include because we use `Camera::Handle`.
+#include "yeti/components/camera.h"
 
 namespace yeti {
+
+// See `yeti/application/time_step_policy.h`.
+class TimeStepPolicy;
+
+// See `yeti/world.h`.
+class World;
 
 /// ...
 class YETI_PUBLIC Application {
@@ -68,9 +69,11 @@ class YETI_PUBLIC Application {
   void update_a_world(World *world,
                       const f32 delta_time);
 
+#if 0
   void render_a_world(const World *world,
                       Camera::Handle camera,
                       Renderer::Viewport *viewport);
+#endif
 
   void destroy_a_world(World *world);
 
@@ -90,21 +93,18 @@ class YETI_PUBLIC Application {
 
  public:
   // TODO(mtwilliams): Document these interfaces.
-  const foundation::Array<Window *> &windows() const;
-  const foundation::Array<World *> &worlds() const;
+  const core::Array<Window *> &windows() const;
+  const core::Array<World *> &worlds() const;
 
  protected:
   TimeStepPolicy *time_step_policy_;
 
-  foundation::Array<Window *> windows_;
+  core::Array<Window *> windows_;
 
-  foundation::Array<World *> worlds_;
+  core::Array<World *> worlds_;
 
   u32 logical_frame_count_;
   u32 visual_frame_count_;
-
-  // Number of outstanding frames yet to finish reflection.
-  u32 hazards_;
 };
 
 } // yeti
