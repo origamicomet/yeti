@@ -67,7 +67,9 @@ namespace application_if {
           // OPTIMIZATION(mtwilliams): Store values in a Lua table?
           const char *level_s = luaL_checkstring(L, 1);
 
-          if (strcmp("debug", level_s) == 0) {
+          if (strcmp("trace", level_s) == 0) {
+            level = core::log::TRACE;
+          } else if (strcmp("debug", level_s) == 0) {
             level = core::log::DEBUG;
           } else if (strcmp("info", level_s) == 0) {
             level = core::log::INFO;
