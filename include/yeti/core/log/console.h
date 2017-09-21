@@ -47,6 +47,9 @@ class YETI_PUBLIC ConsoleBackend : public Backend {
   void set_foreground_color(Color color);
   void set_background_color(Color color);
 
+  void reset_foreground_color();
+  void reset_background_color();
+
  public:
   void log(const Message &message);
 

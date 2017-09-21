@@ -16,6 +16,8 @@
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
+
+  #undef ERROR
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
@@ -34,6 +36,8 @@ struct ConsoleBackend::Storage {
   HANDLE handle_for_stdout;
   HANDLE handle_for_stderr;
   WORD   attributes;
+  WORD   original_foreground_color;
+  WORD   original_background_color;
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
       YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
@@ -56,8 +60,8 @@ ConsoleBackend::ConsoleBackend()
 
   storage_->attributes = csbi.wAttributes;
 
-  this->set_foreground_color(WHITE);
-  this->set_background_color(BLACK);
+  storage_->original_foreground_color = (csbi.wAttributes & 0x0F);
+  storage_->original_background_color = ((csbi.wAttributes >> 4) & 0x0F);
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
       YETI_PLATFORM == YETI_PLATFORM_LINUX
 #endif
@@ -77,14 +81,14 @@ ConsoleBackend::~ConsoleBackend() {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   static WORD COLOR_TO_ATTRIBTUES[9] = {
     ( 0x0 | 0x0 | 0x0 | 0x0 ), // Black
-    ( 0x0 | 0x3 | 0x2 | 0x1 ), // Gray
-    ( 0x4 | 0x3 | 0x2 | 0x1 ), // White
-    ( 0x4 | 0x3 | 0x0 | 0x0 ), // Red
-    ( 0x4 | 0x0 | 0x2 | 0x0 ), // Green
-    ( 0x4 | 0x0 | 0x0 | 0x1 ), // Blue
-    ( 0x4 | 0x3 | 0x2 | 0x0 ), // Yellow
-    ( 0x4 | 0x0 | 0x2 | 0x1 ), // Cyan
-    ( 0x4 | 0x3 | 0x0 | 0x1 )  // Magenta
+    ( 0x0 | 0x4 | 0x2 | 0x1 ), // Gray
+    ( 0x8 | 0x4 | 0x2 | 0x1 ), // White
+    ( 0x0 | 0x4 | 0x0 | 0x0 ), // Red
+    ( 0x0 | 0x0 | 0x2 | 0x0 ), // Green
+    ( 0x8 | 0x0 | 0x0 | 0x1 ), // Blue
+    ( 0x8 | 0x4 | 0x2 | 0x0 ), // Yellow
+    ( 0x8 | 0x0 | 0x2 | 0x1 ), // Cyan
+    ( 0x8 | 0x4 | 0x0 | 0x1 )  // Magenta
   };
 #endif
 
@@ -110,6 +114,26 @@ void ConsoleBackend::set_background_color(Color color) {
 #endif
 }
 
+void ConsoleBackend::reset_foreground_color() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  storage_->attributes = (storage_->attributes & ~0x0F) | storage_->original_foreground_color;
+  ::SetConsoleTextAttribute(storage_->handle_for_stdout, storage_->attributes);
+  ::SetConsoleTextAttribute(storage_->handle_for_stderr, storage_->attributes);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+      YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+void ConsoleBackend::reset_background_color() {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  storage_->attributes = (storage_->attributes & ~0xF0) | (storage_->original_background_color << 4);
+  ::SetConsoleTextAttribute(storage_->handle_for_stdout, storage_->attributes);
+  ::SetConsoleTextAttribute(storage_->handle_for_stderr, storage_->attributes);
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+      YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
 void ConsoleBackend::log(const Message &message) {
   // TODO(mtwilliams): Use `message.when`..
   // TODO(mtwilliams): Millisecond resolution.
@@ -122,7 +146,7 @@ void ConsoleBackend::log(const Message &message) {
   const char *level;
   Color color;
 
-  switch (message.meta.level) {
+  switch ((Level)message.meta.level) {
     case TRACE:   stream = stdout; level = "TRACE"; color = MAGENTA; break;
     case DEBUG:   stream = stdout; level = "DEBUG"; color = CYAN;    break;
     case INFO:    stream = stdout; level = "INFO";  color = WHITE;   break;
@@ -154,10 +178,10 @@ void ConsoleBackend::log(const Message &message) {
     ::fputc(' ', stream);
     ::fprintf(stream, "[%-5s]", level);
     ::fputc(' ', stream);
-    ::fwrite((const void *)line, 1, cursor - line, stream);
+    ::fprintf(stream, "%s\n", line);
   }
 
-  this->set_foreground_color(WHITE);
+  this->reset_foreground_color();
 }
 
 } // log
