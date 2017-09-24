@@ -17,4 +17,31 @@
 #ifndef _YETI_CORE_ALGORITHMS_DIGEST_H_
 #define _YETI_CORE_ALGORITHMS_DIGEST_H_
 
+#include "yeti/config.h"
+#include "yeti/linkage.h"
+
+#include "yeti/core/types.h"
+
+// TODO(mtwilliams): SHA-256.
+
+namespace yeti {
+namespace core {
+
+// See `yeti/core/platform/filesystem.h`.
+struct File;
+
+namespace sha1 {
+  /// Computes the SHA-1 digest of @buf.
+  extern YETI_PUBLIC void compute(const void *buf, u32 buf_len, u8 digest[20]);
+
+  /// Computes the SHA-1 digest of @file.
+  extern YETI_PUBLIC void compute(File *file, u8 digest[20]);
+
+  /// Converts @digest to a null-terminated 40-character hexadecimal number
+  /// in @pretty.
+  extern YETI_PUBLIC void present(const u8 digest[20], char pretty[41]);
+}
+} // core
+} // yeti
+
 #endif // _YETI_CORE_ALGORITHMS_DIGEST_H_
