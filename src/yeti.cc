@@ -18,7 +18,30 @@
 
 namespace yeti {
 
+namespace {
+  static void default_assertion_handler(const core::Assertion &assertion, void *) {
+    core::logf(core::log::GENERAL, core::log::FATAL,
+               "Assertion failed in %s on %u!\n",
+               assertion.location.file,
+               (unsigned)assertion.location.line);
+
+    if (assertion.predicate) {
+      core::logf(core::log::GENERAL, core::log::FATAL,
+                 "Predicate: %s",
+                 assertion.predicate);
+    }
+
+    if (assertion.reason) {
+      core::logf(core::log::GENERAL, core::log::FATAL,
+                 "Reason: %s",
+                 assertion.reason);
+    }
+  }
+}
+
 void boot(const Config &config) {
+  core::set_assertion_handler(&default_assertion_handler);
+
   if (config.debug.floating_point_exceptions) {
   #if YETI_COMPILER == YETI_COMPILER_MSVC
     static const unsigned int floating_point_exceptions = _EM_INVALID |
