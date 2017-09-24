@@ -9,8 +9,6 @@ Includes runtime.
 * Inspect system to determine CPU, GPU, and RAM.
   * Provide a thorough `cpuid` implementation.
     * Build our own database of processors (and errata)?
-* Add an `open_or_create` function to our fileystem abstraction layer.
-  * Should open an existing file and append.
 * Expose asynchronous I/O on files.
   * Tie into task scheduler, to allow offloading.
 * Expose memory-mapped I/O on files.
@@ -25,12 +23,11 @@ Includes runtime.
 * Handle large files in 32-bit builds.
   * Specify `_FILE_OFFSET_BITS=64` on POSIX targets.
 * Improve random number generation.
-  * Thread-localize random number generation.
   * Provide multiple strategies.
   * Provide multiple distributions.
 * Expand cryptographic primitives.
-  * Provide SHA-1 and SHA-256.
-* Provide CRC32.
+  * Provide SHA-256.
+  * Provide CRC32.
 * Track storage device connects and disconnects.
 * Track keyboard and mouse connects and disconnects.
   * Enumerate connected devices through `GetRawInputDeviceList` whenever a `WM_INPUT_DEVICE_CHANGE` arrives.
@@ -48,8 +45,6 @@ Includes runtime.
 * Implement smoothed time-step-policy.
   * Also support debt payback using `wall`.
 * Finish logging infrastructure.
-  * Logging to console.
-    * Colors!
   * Logging to network.
   * Logging to file.
 * Finish `ResourceDatabase`.
@@ -78,11 +73,7 @@ Includes runtime.
 
 ### `BUGS`
 
-* Global heap allocator doesn't respect alignment.
-* Custom `new` and `delete` operators may not be working as expected.
-  * Tag types with `YETI_ALLOCATOR_AWARE`?
-* Application implodes on exit when executing `Application::quit`.
-  * Could be `yeti::shutdown` imploding everything.
+* Containers do not call destructors for non-POD types.
 
 ### `PERF`
 
@@ -125,8 +116,6 @@ Includes runtime.
 
 ### `SMELL`
 
-* Containers do not call destructors for non-POD types.
-* Log categories aren't under the `yeti` namespace.
 * Returning pointers from `yeti::core::Map<K,V>`.
 
 ### `CRAZY`
