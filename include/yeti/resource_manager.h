@@ -53,6 +53,9 @@ extern YETI_PUBLIC const Resource::Type *type_from_path(const char *path);
 /// Refer to yeti::Resource::Type::extensions for more information.
 extern YETI_PUBLIC const Resource::Type *type_from_ext(const char *ext);
 
+/// Returns resource database.
+extern YETI_PUBLIC ResourceDatabase *database();
+
 ///
 extern YETI_PUBLIC void initialize(const Config &config);
 

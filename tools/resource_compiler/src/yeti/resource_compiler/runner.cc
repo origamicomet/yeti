@@ -38,7 +38,7 @@ void Runner::setup(const char *args[], const u32 num_args) {
   ResourceCompiler::Path data_path;
   ResourceCompiler::Path source_data_path;
 
-  sprintf(&resource_database_path[0], "%s/resources.db", &cwd[0]);
+  sprintf(&resource_database_path[0], "%s/resource.db", &cwd[0]);
   sprintf(&data_path[0], "%s/data", &cwd[0]);
   sprintf(&source_data_path[0], "%s/data_src", &cwd[0]);
 

@@ -45,14 +45,18 @@ ResourceCompiler::~ResourceCompiler() {
 }
 
 ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &options) {
-  // TODO(mtwilliams): Move into a validation function.
-  yeti_assert_debug(options.db != NULL);
   // TODO(mtwilliams): Check based on absolute paths.
   yeti_assert_debug(strcmp(options.data, options.data_src) != 0);
 
+  ResourceDatabase *db = options.db;
+  yeti_assert_debug(db != NULL);
+
   ResourceCompiler *resource_compiler = YETI_NEW(ResourceCompiler, core::global_heap_allocator());
 
-  resource_compiler->db_ = options.db;
+  resource_compiler->db_ = db;
+
+  yeti_assert_with_reason_development(resource_compiler->db_->sophisticated(),
+                                      "Can only compile against a sophisticated resource database!");
 
   strcpy(resource_compiler->data_, options.data);
   strcpy(resource_compiler->data_src_, options.data_src);
@@ -60,10 +64,10 @@ ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &opti
   resource_compiler->data_len_ = strlen(resource_compiler->data_);
   resource_compiler->data_src_len_ = strlen(resource_compiler->data_src_);
 
+  resource_compiler->debounce_ = options.debounce;
+
   // Add ignore patterns from file, if it exists.
   resource_compiler->add_ignore_patterns(options.ignore);
-
-  resource_compiler->debounce_ = options.debounce;
 
   return resource_compiler;
 }
@@ -152,8 +156,8 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   if (!this->compilable(path))
     return resource_compiler::Results::UNCOMPILABLE;
 
-  const Resource::Id id = Resource::id_from_path(path);
   const Resource::Type *type = resource_manager::type_from_path(path);
+  const Resource::Id id = db_->id_from_path(path);
 
   Path source_file_path;
   sprintf(&source_file_path[0], "%s/%s", &data_src_[0], path);
@@ -161,12 +165,46 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   core::File::Info source_file_info;
   core::fs::info(source_file_path, &source_file_info);
 
-  // TODO(mtwilliams): Only compile if source data was modified more recently
-  // than than whatever our database last saw, or if the file hash is different
-  // from whatever we've seen.
+  const u32 source_file_id = db_->source_from_path(path);
 
-  // TODO(mtwilliams): Setup resource compilation environment.
+  Resource::Source previous_source_file_info;
+
+  db_->info(source_file_id, &previous_source_file_info);
+
+  // TODO(mtwilliams): Track when builds are `queued_at`, `started_at`, and
+  // `finished_at`. If there is a build queued, but not started for this
+  //  resource, we can skip.
+
+  // BUG(mtwilliams): Doesn't guarantee a build was attempted. We should
+  // compare against builds, to determine if should skip.
+  if (source_file_info.last_modified_at <= previous_source_file_info.timestamp)
+    if (!force)
+      // Already up to date.
+      return resource_compiler::Results::SKIPPED;
+
+  core::File *source_file_handle =
+    core::fs::open(source_file_path, core::File::READ | core::File::EXCLUSIVE);
+
+  char source_file_fingerprint[41];
+
+  // Compute fingerprint.
+  this->fingerprint_for_file(source_file_handle, &source_file_fingerprint[0]);
+
+  // Rewind to beginning.
+  core::fs::seek(source_file_handle, core::File::ABSOLUTE, 0);
+
+  db_->begin();
+
+  const u32 build = db_->start_a_build(id);
+
+  db_->touch(source_file_id, source_file_info.last_modified_at, source_file_fingerprint);
+
+  db_->end();
+
   ResourceCompiler::Environment env;
+  env.compiler = this;
+  env.id = id;
+  env.build = build;
   env.info = &ResourceCompiler::info;
   env.warning = &ResourceCompiler::warning;
   env.error = &ResourceCompiler::error;
@@ -176,20 +214,24 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   ResourceCompiler::Input input;
   input.root = &data_src_[0];
   input.path = path;
-  input.source = core::fs::open(source_file_path, core::File::READ | core::File::EXCLUSIVE);
+  input.source = source_file_handle;
+  strncpy(&input.fingerprint[0], &source_file_fingerprint[0], 41);
 
   ResourceCompiler::Output output;
   output.root = &data_[0];
 
   // TODO(mtwilliams): Atomic compilation?
-
   Path memory_resident_data_path = { 0, };
   sprintf(&memory_resident_data_path[0], "%s/%016llx", output.root, id);
-  output.memory_resident_data = core::fs::create_or_open(&memory_resident_data_path[0], core::File::WRITE | core::File::EXCLUSIVE);
+  output.memory_resident_data =
+    core::fs::create_or_open(&memory_resident_data_path[0],
+                             core::File::WRITE | core::File::EXCLUSIVE);
 
   Path streaming_data_path = { 0, };
   sprintf(&streaming_data_path[0], "%s.streaming", &memory_resident_data_path[0]);
-  output.streaming_data = core::fs::create_or_open(&streaming_data_path[0], core::File::WRITE | core::File::EXCLUSIVE);
+  output.streaming_data =
+    core::fs::create_or_open(&streaming_data_path[0],
+                             core::File::WRITE | core::File::EXCLUSIVE);
 
   if (!input.source)
     env.error(&env, "Could not open `%s` for reading!", source_file_path);
@@ -218,11 +260,10 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   if (output.streaming_data)
     core::fs::close(output.streaming_data);
 
-  // TODO(mtwilliams): Update our database to reflect the compilation of this
-  // resource.
+  db_->finish_a_build(build, success);
 
-  return success ? resource_compiler::Results::SUCCEEDED :
-                   resource_compiler::Results::FAILED;
+  return success ? resource_compiler::Results::SUCCEEDED
+                 : resource_compiler::Results::FAILED;
 }
 
 void ResourceCompiler::canonicalize(char *path) const {
@@ -282,6 +323,14 @@ bool ResourceCompiler::compilable(const char *path) const {
   return !!resource_manager::type_from_path(path);
 }
 
+void ResourceCompiler::fingerprint_for_file(core::File *file,
+                                            char fingerprint[41]) const {
+  u8 digest[20];
+
+  core::sha1::compute(file, digest);
+  core::sha1::present(digest, fingerprint);
+}
+
 bool ResourceCompiler::walk(const char *path, const core::File::Info *info) {
   yeti_assert_debug(path != NULL);
   yeti_assert_debug(info != NULL);
@@ -335,37 +384,52 @@ void ResourceCompiler::watcher(core::fs::Event event,
   return resource_compiler->watch(event, path);
 }
 
-// TODO(mtwilliams): Proper logging infrastructure.
-
 namespace {
-  // HACK(mtwilliams): (Broken) forwarding trickery.
-  static void forward_to_log_(core::log::Level level, const char *format, va_list va) {
-    const int size = vsnprintf(NULL, 0, format, va) + 1;
-    char *message = (char *)alloca(size);
-    vsnprintf(message, size, format, va);
-    core::logf(core::log::RESOURCE_COMPILER, level, message);
+  // Translates `Resource::Build::Log::Level` to `core::Log::Level`.
+  static core::log::Level level_to_core_(const Resource::Build::Log::Level level) {
+    switch (level) {
+      case Resource::Build::Log::INFO: return core::log::INFO;
+      case Resource::Build::Log::WARNING: return core::log::WARNING;
+      case Resource::Build::Log::ERROR: return core::log::ERROR;
+    }
   }
 }
 
 void ResourceCompiler::info(const Environment *env, const char *format, ...) {
   va_list va;
   va_start(va, format);
-  forward_to_log_(core::log::INFO, format, va);
+  env->compiler->forward_to_log(env, Resource::Build::Log::INFO, format, va);
   va_end(va);
 }
 
 void ResourceCompiler::warning(const Environment *env, const char *format, ...) {
   va_list va;
   va_start(va, format);
-  forward_to_log_(core::log::WARNING, format, va);
+  env->compiler->forward_to_log(env, Resource::Build::Log::WARNING, format, va);
   va_end(va);
 }
 
 void ResourceCompiler::error(const Environment *env, const char *format, ...) {
   va_list va;
   va_start(va, format);
-  forward_to_log_(core::log::ERROR, format, va);
+  env->compiler->forward_to_log(env, Resource::Build::Log::ERROR, format, va);
   va_end(va);
+}
+
+void ResourceCompiler::forward_to_log(const Environment *env,
+                                      Resource::Build::Log::Level level,
+                                      const char *format,
+                                      va_list ap) {
+  // Format.
+  const int size = vsnprintf(NULL, 0, format, ap) + 1;
+  char *message = (char *)alloca(size);
+  vsnprintf(message, size, format, ap);
+
+  // Copy to build log.
+  db_->log(env->build, level, message);
+
+  // Log to console.
+  core::logf(core::log::RESOURCE_COMPILER, level_to_core_(level), message);
 }
 
 } // yeti

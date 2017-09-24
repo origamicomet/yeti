@@ -15,40 +15,20 @@
 
 namespace yeti {
 
-Resource::Type::Id Resource::type_from_id(Resource::Id id) {
-  return (Type::Id)(id >> UINT64_C(32));
-}
-
-u32 Resource::hash_from_id(Resource::Id id) {
-  return (u32)(id & UINT64_C(0xFFFFFFFF));
-}
-
 Resource::Id Resource::id_from_path(const char *path) {
-  yeti_assert_debug(path != NULL);
-
-  const char *ext = core::path::extension(path);
-  yeti_assert_debug(ext != NULL);
-
-  const Resource::Type *type = resource_manager::type_from_ext(ext);
-  yeti_assert_debug(type != NULL);
-
-  char name[256] = { 0, };
-  const size_t name_len = ext - path - 1;
-  yeti_assert_debug(name_len <= 255);
-  strncpy(&name[0], path, name_len);
-
-  return Resource::id_from_type_and_name(resource_manager::id_from_type(type), &name[0]);
+  ResourceDatabase *db = resource_manager::database();
+  return db->id_from_path(path);
 }
 
 Resource::Id Resource::id_from_type_and_name(Resource::Type::Id type,
                                              const char *name) {
-  yeti_assert_debug(name != NULL);
-  return Resource::id_from_type_and_hash(type, core::murmur_hash_32(name, 0));
+  ResourceDatabase *db = resource_manager::database();
+  return db->id_from_name(type, name);
 }
 
-Resource::Id Resource::id_from_type_and_hash(Resource::Type::Id type,
-                                             u32 hash) {
-  return (Id)(((u64)type << UINT64_C(32)) | (u64)hash);
+Resource::Type::Id Resource::type_from_id(Resource::Id id) {
+  ResourceDatabase *db = resource_manager::database();
+  return db->type_from_id(id);
 }
 
 Resource::Resource(Resource::Id id)

@@ -110,6 +110,77 @@ namespace resource {
     /// Handle to read streaming data.
     core::File *streaming_data;
   };
+
+  struct Source {
+    /// An opaque identifier that uniquely identifies a source.
+    typedef u32 Id;
+
+    /// Unique identifier.
+    Id id;
+
+    typedef char Path[256];
+
+    /// Relative path, including extensions.
+    Path path;
+
+    /// Last modified, in seconds from Unix epoch.
+    u64 timestamp;
+
+    /// Hash of contents.
+    char fingerprint[41];
+  };
+
+  struct Override {
+    resource::Id resource;
+    resource::Id substitution;
+  };
+
+  struct Build {
+    /// An opaque identifier that uniquely identifies a build.
+    typedef u32 Id;
+
+    struct Log {
+      enum Level {
+        /// Informational message.
+        INFO = 1,
+
+        /// Warning message.
+        WARNING = 2,
+
+        /// Error message.
+        ERROR = 3
+      };
+
+      struct Message {
+        Level level;
+        const char *contents;
+      };
+    };
+
+    /// Unique identifier.
+    Id id;
+
+    /// When the build was commenced, in seconds from Unix epoch.
+    u64 started;
+
+    /// When the build finished, in seconds from Unix epoch.
+    u64 finished;
+
+    /// Whether or not the build completed successfully.
+    bool successful;
+  };
+
+  struct Dependency {
+    enum Type {
+      ONLINE  = 1,
+      OFFLINE = 2
+    };
+
+    Type type;
+
+    resource::Id resource;
+    Source::Id source;
+  };
 }
 
 // TODO(mtwilliams): Protect internal (to Yeti) interfaces.
@@ -133,21 +204,27 @@ class YETI_PUBLIC Resource {
   /// \copydoc yeti::resource::Data
   typedef resource::Data Data;
 
+  /// \copydoc yeti::resource::Source
+  typedef resource::Source Source;
+
+  /// \copydoc yeti::resource::Dependency
+  typedef resource::Dependency Dependency;
+
+  /// \copydoc yeti::resource::Override
+  typedef resource::Override Override;
+
+  /// \copydoc yeti::resource::Build
+  typedef resource::Build Build;
+
  public:
-  /// \internal
-  static Type::Id type_from_id(Resource::Id id);
-
-  /// \internal
-  static u32 hash_from_id(Resource::Id id);
-
-  /// \internal
+  /// Returns unique identifier for resource at @path.
   static Resource::Id id_from_path(const char *path);
 
-  /// \internal
+  /// Returns unique identifier for resource of @type with @name.
   static Resource::Id id_from_type_and_name(Resource::Type::Id type, const char *name);
 
-  /// \internal
-  static Resource::Id id_from_type_and_hash(Resource::Type::Id type, u32 hash);
+  /// Returns type of resource for given @id.
+  static Resource::Type::Id type_from_id(Resource::Id id);
 
  public:
   /// A handle to a resource that automatically maintains reference counts.

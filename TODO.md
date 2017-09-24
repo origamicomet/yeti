@@ -47,7 +47,6 @@ Includes runtime.
 * Finish logging infrastructure.
   * Logging to network.
   * Logging to file.
-* Finish `ResourceDatabase`.
 * Use our own allocator for Lua in 64-bit builds.
   * Allocator needs to allocate within the first 2GiB of VM.
     * Map some amount of memory in lower parts during startup.
@@ -68,8 +67,8 @@ Includes runtime.
   * Base off of Yeti logo.
 * Allow user to provide a custom icon.
 * Install a sophisticated assertion and error handler.
-* Interface resource compiler with database.
 * Make allocation tracking thread-safe.
+* Resource overrides.
 
 ### `BUGS`
 
@@ -113,6 +112,8 @@ Includes runtime.
 * Update `absolute` and `relative` mouse axes upon raw-input?
   * Manually translate `GetCursorPos` to a window-relative point?
 * Pass `Task` to kernel and let kernel pull parameters?
+* Split `ResourceCompiler::compile` into smaller methods.
+* Factor `ResourceCompiler::fingerprint_for_file` into a common utility.
 
 ### `SMELL`
 
@@ -171,10 +172,17 @@ Includes runtime.
   * Watch source data directories for changes, debounce for a user configurable amount of time, and then build any new or modified resources.
 * Detailed logging.
 * Use edit-distance to detect misspellings.
+* Allow user to specify compilation preferences.
+  * Mark certain resources (or types of resources?) to only be built manually.
+    * By default, mark anything that takes "the entire graph" as input as `BUILD_ON_REQUEST`. For example, global illumination.
+    * Provide hints when we detect lots of shaders (or permutations)?
+      * Anything with combinatorial explosion.
 
 ### `BUGS`
 
 ### `PERF`
+
+* Use task scheduler to multi-thread resource compilation.
 
 ### `REFACTOR`
 

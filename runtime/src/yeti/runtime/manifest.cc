@@ -37,7 +37,7 @@ Manifest *manifest::load_from_file(core::File *file) {
   manifest->app.name = "Vanguard™";
   manifest->app.icon = "default.ico";
 
-  manifest->resources.database = "resources.db";
+  manifest->resources.database = "resource.db";
 
   manifest->resources.autoload = true;
 

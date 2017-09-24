@@ -18,41 +18,56 @@
 
 #include "yeti/core.h"
 
-extern "C" {
-  struct sqlite3;
-}
+// Need various definitions.
+#include "yeti/resource.h"
 
 namespace yeti {
-
-// TODO(mtwilliams): Hide internals in a subclass.
 
 /// ...
 class YETI_PUBLIC ResourceDatabase {
  YETI_DISALLOW_COPYING(ResourceDatabase)
 
- private:
+ protected:
   ResourceDatabase();
-  ~ResourceDatabase();
+  virtual ~ResourceDatabase();
 
  public:
+  static ResourceDatabase *open(const char *path);
   static ResourceDatabase *open_or_create(const char *path);
   void close();
 
- private:
-  void prepare_();
-  void prepare_behaviour_();
-  void prepare_version_();
-  void prepare_schema_();
-  void prepare_statements_();
+ public:
+  virtual void begin() = 0;
+  virtual void end() = 0;
 
-  void cleanup_();
-  void cleanup_statements_();
+ public:
+  virtual Resource::Id id_from_name(Resource::Type::Id type,
+                                    const char *name) = 0;
 
- private:
-  void exec_(const char *sql);
+  virtual Resource::Id id_from_path(const char *path) = 0;
 
- private:
-  sqlite3 *db;
+  virtual Resource::Type::Id type_from_id(Resource::Id id) = 0;
+
+ public:
+  virtual Resource::Source::Id source_from_path(const char *path) = 0;
+
+  virtual void info(Resource::Source::Id source,
+                    Resource::Source *info) = 0;
+
+  virtual void touch(Resource::Source::Id source,
+                     u64 timestamp,
+                     const char fingerprint[41]) = 0;
+
+  virtual Resource::Build::Id start_a_build(Resource::Id resource) = 0;
+  virtual void finish_a_build(Resource::Build::Id build, bool success) = 0;
+
+  virtual void log(Resource::Build::Id build,
+                   Resource::Build::Log::Level level,
+                   const char *message) = 0;
+
+ public:
+  virtual bool optimized() const = 0;
+  virtual bool sophisticated() const = 0;
 };
 
 } // yeti

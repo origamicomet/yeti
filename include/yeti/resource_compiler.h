@@ -26,6 +26,9 @@
 
 namespace yeti {
 
+// Forward declared for `resource_compiler::Environment`.
+class ResourceCompiler;
+
 namespace resource_compiler {
   typedef char Path[256];
 
@@ -73,8 +76,22 @@ namespace resource_compiler {
   typedef Results::_ Result;
 
   struct Environment {
+    /// Resource compiler driving compilation.
+    ResourceCompiler *compiler;
+
+    /// Unique identifier of the resource being compiled.
+    Resource::Id id;
+
+    /// Unique identifier for the build.
+    Resource::Build::Id build;
+
+    /// Logs an informational message.
     void (*info)(const Environment *env, const char *format, ...);
+
+    /// Logs a warning.
     void (*warning)(const Environment *env, const char *format, ...);
+
+    /// Logs an error message.
     void (*error)(const Environment *env, const char *format, ...);
   };
 
@@ -87,6 +104,9 @@ namespace resource_compiler {
 
     /// Handle to read source data.
     core::File *source;
+
+    /// Digest of source data.
+    char fingerprint[41];
   };
 
   struct Output {
@@ -172,6 +192,10 @@ class YETI_PUBLIC ResourceCompiler {
   bool compilable(const char *path) const;
 
  private:
+  /// \internal Computes fingerprint for @file.
+  void fingerprint_for_file(core::File *file, char fingerprint[41]) const;
+
+ private:
   bool walk(const char *path, const core::File::Info *info);
 
   static bool walker(const char *path,
@@ -186,9 +210,18 @@ class YETI_PUBLIC ResourceCompiler {
                       ResourceCompiler *resource_compiler);
 
  private:
+  /// \internal Shims used to bind `forward_to_log`.
+  /// @{
   static void info(const Environment *env, const char *format, ...);
   static void warning(const Environment *env, const char *format, ...);
   static void error(const Environment *env, const char *format, ...);
+  /// @}
+
+  /// \internal Logs a message and copies to the build log.
+  void forward_to_log(const Environment *env,
+                      Resource::Build::Log::Level level,
+                      const char *format,
+                      va_list ap);
 
  private:
   ResourceDatabase *db_;

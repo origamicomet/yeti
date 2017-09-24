@@ -34,6 +34,8 @@ namespace resource_manager {
     // Signaled whenever some work is added to one of the four queues.
     core::Event work_to_be_done_;
 
+    ResourceDatabase *database_ = NULL;
+
     core::Map<Resource::Id, Resource *> resources_(core::global_heap_allocator(), 65535);
 
     core::Queue<Resource *> to_be_loaded_(core::global_heap_allocator(), load_queue_memory_);
@@ -80,8 +82,14 @@ const Resource::Type *resource_manager::type_from_ext(const char *ext) {
   return NULL;
 }
 
+ResourceDatabase *resource_manager::database() {
+  return database_;
+}
+
 void resource_manager::initialize(const Config &config) {
   yeti_assert_debug(!enabled_);
+
+  database_ = ResourceDatabase::open(config.database);
 
   core::Thread::Options management_thread_opts;
   management_thread_opts.name = "Resource Management";
@@ -145,7 +153,7 @@ Resource *resource_manager::load(Resource::Id id) {
     }
   }
 
-  const Resource::Type *type = type_from_id(Resource::type_from_id(id));
+  const Resource::Type *type = type_from_id(database_->type_from_id(id));
   yeti_assert_development(type != NULL);
 
   Resource *resource = type->prepare(id);
@@ -192,7 +200,7 @@ void resource_manager::management_thread(void *) {
       Resource *resource;
 
       while (to_be_loaded_.pop(&resource)) {
-        const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
+        const Resource::Type *type = type_from_id(database_->type_from_id(resource->id()));
         yeti_assert_debug(type != NULL);
 
         Resource::Data data;
