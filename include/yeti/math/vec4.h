@@ -33,52 +33,43 @@ class YETI_PUBLIC Vec4 {
   Vec4 operator=(const Vec4 &v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
 
  public:
-  friend Vec4 operator+(const Vec4 lhs, const Vec4 rhs);
-  friend Vec4 operator-(const Vec4 lhs, const Vec4 rhs);
-  friend Vec4 operator*(const Vec4 lhs, const Vec4 rhs);
-  friend Vec4 operator*(const Vec4 v, const f32 s);
-  friend Vec4 operator/(const Vec4 lhs, const Vec4 rhs);
-  friend Vec4 operator/(const Vec4 v, const f32 s);
+  friend Vec4 operator+(const Vec4 &lhs, const Vec4 &rhs);
+  friend Vec4 operator-(const Vec4 &lhs, const Vec4 &rhs);
+  friend Vec4 operator*(const Vec4 &lhs, const Vec4 &rhs);
+  friend Vec4 operator*(const Vec4 &v, const f32 s);
+  friend Vec4 operator/(const Vec4 &lhs, const Vec4 &rhs);
+  friend Vec4 operator/(const Vec4 &v, const f32 s);
 
  public:
   /// \brief Returns a normalized version of this vector.
-  ///
   Vec4 normalize() const;
 
   /// \brief Returns the length (or magnitude) of this vector.
-  ///
   f32 length() const;
 
   /// \brief Returns the magnitude (or length) of this vector.
-  ///
   f32 magnitude() const;
 
   /// \brief Calculates the dot-product between this vector and @v.
-  ///
-  f32 dot(const Vec4 v) const;
+  f32 dot(const Vec4 &v) const;
 
  public:
   /// \brief Returns the distance of @v2 from @v1.
-  ///
-  static f32 distance(const Vec4 v1, const Vec4 v2);
+  static f32 distance(const Vec4 &v1, const Vec4 &v2);
 
   /// \brief Returns the angle between @v1 and @v2.
-  ///
-  static f32 angle(const Vec4 v1, const Vec4 v2);
+  static f32 angle(const Vec4 &v1, const Vec4 &v2);
 
   /// \brief Returns a new vector with the smallest value taken from either @v1
   /// or @v2 for each dimension.
-  ///
-  static Vec4 min(const Vec4 v1, const Vec4 v2);
+  static Vec4 min(const Vec4 &v1, const Vec4 &v2);
 
   /// \brief Returns a new vector with the largest value taken from either @v1
   /// or @v2 for each dimension.
-  ///
-  static Vec4 max(const Vec4 v1, const Vec4 v2);
+  static Vec4 max(const Vec4 &v1, const Vec4 &v2);
 
   /// \brief Linearly interpolates between @v1 and @v2 based on @t.
-  ///
-  static Vec4 lerp(const Vec4 v1, const Vec4 v2, const f32 t);
+  static Vec4 lerp(const Vec4 &v1, const Vec4 &v2, const f32 t);
 
  public:
   static const Vec4 ZERO;
@@ -94,8 +85,8 @@ class YETI_PUBLIC Vec4 {
 };
 
 YETI_INLINE Vec4 Vec4::normalize() const {
-  const f32 inv_magnitude = 1.f / magnitude();
-  return (*this) * inv_magnitude;
+  const f32 inverse_of_magnitude = 1.f / magnitude();
+  return (*this) * inverse_of_magnitude;
 }
 
 YETI_INLINE f32 Vec4::length() const {
@@ -106,44 +97,44 @@ YETI_INLINE f32 Vec4::magnitude() const {
   return sqrtf((*this).dot(*this));
 }
 
-YETI_INLINE f32 Vec4::dot(const Vec4 v) const {
+YETI_INLINE f32 Vec4::dot(const Vec4 &v) const {
   return (x * v.x) + (y * v.y) + (z * v.z) + (w * v.w);
 }
 
-YETI_INLINE Vec4 operator+(const Vec4 lhs, const Vec4 rhs) {
+YETI_INLINE Vec4 operator+(const Vec4 &lhs, const Vec4 &rhs) {
   return Vec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w);
 }
 
-YETI_INLINE Vec4 operator-(const Vec4 lhs, const Vec4 rhs) {
+YETI_INLINE Vec4 operator-(const Vec4 &lhs, const Vec4 &rhs) {
   return Vec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
 }
 
-YETI_INLINE Vec4 operator*(const Vec4 lhs, const Vec4 rhs) {
+YETI_INLINE Vec4 operator*(const Vec4 &lhs, const Vec4 &rhs) {
   return Vec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w);
 }
 
-YETI_INLINE Vec4 operator*(const Vec4 v, const f32 s) {
+YETI_INLINE Vec4 operator*(const Vec4 &v, const f32 s) {
   return Vec4(v.x * s, v.y * s, v.z * s, v.w * s);
 }
 
-YETI_INLINE Vec4 operator/(const Vec4 lhs, const Vec4 rhs) {
+YETI_INLINE Vec4 operator/(const Vec4 &lhs, const Vec4 &rhs) {
   return Vec4(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z, lhs.w / rhs.w);
 }
 
-YETI_INLINE Vec4 operator/(const Vec4 v, const f32 s) {
+YETI_INLINE Vec4 operator/(const Vec4 &v, const f32 s) {
   return Vec4(v.x / s, v.y / s, v.z / s, v.w / s);
 }
 
-YETI_INLINE f32 Vec4::distance(const Vec4 v1, const Vec4 v2) {
+YETI_INLINE f32 Vec4::distance(const Vec4 &v1, const Vec4 &v2) {
   return (v1 - v2).length();
 }
 
-YETI_INLINE f32 Vec4::angle(const Vec4 v1, const Vec4 v2) {
+YETI_INLINE f32 Vec4::angle(const Vec4 &v1, const Vec4 &v2) {
   // Refer to http://math.stackexchange.com/questions/974178
   return acosf(v1.dot(v2) / (v1.length() * v2.length()));
 }
 
-YETI_INLINE Vec4 Vec4::min(const Vec4 v1, const Vec4 v2) {
+YETI_INLINE Vec4 Vec4::min(const Vec4 &v1, const Vec4 &v2) {
   return Vec4(
     fminf(v1.x, v2.x),
     fminf(v1.y, v2.y),
@@ -152,7 +143,7 @@ YETI_INLINE Vec4 Vec4::min(const Vec4 v1, const Vec4 v2) {
   );
 }
 
-YETI_INLINE Vec4 Vec4::max(const Vec4 v1, const Vec4 v2) {
+YETI_INLINE Vec4 Vec4::max(const Vec4 &v1, const Vec4 &v2) {
   return Vec4(
     fmaxf(v1.x, v2.x),
     fmaxf(v1.y, v2.y),
@@ -162,7 +153,7 @@ YETI_INLINE Vec4 Vec4::max(const Vec4 v1, const Vec4 v2) {
 }
 
 // TODO(mtwilliams): Determine if this is faster.
-YETI_INLINE Vec4 Vec4::lerp(const Vec4 v1, const Vec4 v2, const f32 t) {
+YETI_INLINE Vec4 Vec4::lerp(const Vec4 &v1, const Vec4 &v2, const f32 t) {
   // Linear interpolation is `v1*(1-t) + v2*t`, which is equivalent to:
   return v1 + (v2 - v1) * t;
 }
