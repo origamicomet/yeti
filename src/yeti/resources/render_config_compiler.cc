@@ -26,6 +26,7 @@ RenderConfigCompiler::RenderConfigCompiler(const resource_compiler::Environment 
   , modifiers_(core::global_heap_allocator())
   , layers_(core::global_heap_allocator())
 {
+  yeti_assert_debug(env_ != NULL);
   yeti_assert_debug(input_ != NULL);
   yeti_assert_debug(output_ != NULL);
 }

@@ -23,6 +23,7 @@ ScriptCompiler::ScriptCompiler(const resource_compiler::Environment *env,
   , source_(core::global_heap_allocator())
   , bytecode_(core::global_heap_allocator())
 {
+  yeti_assert_debug(env_ != NULL);
   yeti_assert_debug(input_ != NULL);
   yeti_assert_debug(output_ != NULL);
 }

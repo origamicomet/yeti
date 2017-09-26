@@ -30,7 +30,7 @@ class YETI_PUBLIC ScriptResource : public Resource {
  private:
   friend class Script;
 
- public:
+ private:
   ScriptResource(Resource::Id id);
   ~ScriptResource();
 

@@ -35,6 +35,9 @@ struct Config {
   bool autoload;
 };
 
+/// Derives the resource type id from @name.
+extern YETI_PUBLIC Resource::Type::Id id_from_name(const char *name);
+
 /// Derives the resource type id from @type.
 extern YETI_PUBLIC Resource::Type::Id id_from_type(const Resource::Type *type);
 

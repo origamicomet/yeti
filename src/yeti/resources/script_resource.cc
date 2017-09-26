@@ -33,7 +33,8 @@ ScriptResource::~ScriptResource() {
 }
 
 const Resource::Type *ScriptResource::type() {
-  static const char *extensions[] = {"lua", (const char *)NULL};
+  static const char *extensions[] = {"lua", NULL};
+
   static const Resource::Type type = {
     /* .name = */ "script",
     /* .extensions = */ extensions,

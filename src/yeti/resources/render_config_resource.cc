@@ -25,7 +25,8 @@ RenderConfigResource::~RenderConfigResource() {
 }
 
 const Resource::Type *RenderConfigResource::type() {
-  static const char *extensions[] = {"render_config", (const char *)NULL};
+  static const char *extensions[] = {"render_config", NULL};
+
   static const Resource::Type type = {
     /* .name = */ "render_config",
     /* .extensions = */ extensions,

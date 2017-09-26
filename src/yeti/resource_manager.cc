@@ -20,13 +20,6 @@ namespace resource_manager {
     // Indicates if loading and unloading is available.
     static bool enabled_ = false;
 
-    static const size_t queue_memory_ = 1 * 1024 * 1024;
-
-    static const size_t load_queue_memory_    = (queue_memory_ * 1) / 4;
-    static const size_t unload_queue_memory_  = (queue_memory_ * 1) / 4;
-    static const size_t online_queue_memory_  = (queue_memory_ * 1) / 4;
-    static const size_t offline_queue_memory_ = (queue_memory_ * 1) / 4;
-
     core::Array<const Resource::Type *> types_(core::global_heap_allocator());
 
     core::ReaderWriterLock lock_;
@@ -38,14 +31,19 @@ namespace resource_manager {
 
     core::Map<Resource::Id, Resource *> resources_(core::global_heap_allocator(), 65535);
 
-    core::Queue<Resource *> to_be_loaded_(core::global_heap_allocator(), load_queue_memory_);
-    core::Queue<Resource *> to_be_unloaded_(core::global_heap_allocator(), unload_queue_memory_);
+    core::Queue<Resource *> to_be_loaded_(core::global_heap_allocator(), 4096);
+    core::Queue<Resource *> to_be_unloaded_(core::global_heap_allocator(), 4096);
 
-    core::Queue<Resource *> to_be_brought_online_(core::global_heap_allocator(), online_queue_memory_);
-    core::Queue<Resource *> to_be_put_offline_(core::global_heap_allocator(), offline_queue_memory_);
+    core::Queue<Resource *> to_be_brought_online_(core::global_heap_allocator(), 4096);
+    core::Queue<Resource *> to_be_put_offline_(core::global_heap_allocator(), 4096);
   }
 
   static void management_thread(void *);
+}
+
+Resource::Type::Id resource_manager::id_from_name(const char *name) {
+  yeti_assert_debug(name != NULL);
+  return (Resource::Type::Id)core::murmur_hash_32(name, 0);
 }
 
 Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
@@ -91,12 +89,12 @@ void resource_manager::initialize(const Config &config) {
 
   database_ = ResourceDatabase::open(config.database);
 
-  core::Thread::Options management_thread_opts;
-  management_thread_opts.name = "Resource Management";
-  management_thread_opts.affinity = ~0ull;
-  management_thread_opts.stack = 0x100000 /* 1MiB */;
+  core::Thread::Options management_thread_options;
+  management_thread_options.name = "Resource Management";
+  management_thread_options.affinity = ~0ull;
+  management_thread_options.stack = 0x100000 /* 1MiB */;
 
-  core::Thread::spawn(&resource_manager::management_thread, 0, management_thread_opts)->detach();
+  core::Thread::spawn(&resource_manager::management_thread, 0, management_thread_options)->detach();
 
   enabled_ = true;
 }
