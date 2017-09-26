@@ -76,9 +76,11 @@ GlobalPageAllocator::~GlobalPageAllocator() {
 }
 
 void *GlobalPageAllocator::allocate(size_t size, size_t alignment) {
-  yeti_assert_debug(size == granularity());
   yeti_assert_debug(alignment <= granularity());
   yeti_assert_debug(YETI_IS_POWER_OF_TWO(alignment));
+
+  // Round up to nearest page.
+  size += size % granularity();
 
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   void *ptr = ::HeapAlloc(global_page_heap_,
