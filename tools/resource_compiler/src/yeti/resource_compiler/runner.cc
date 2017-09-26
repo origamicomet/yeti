@@ -15,6 +15,9 @@
 
 #include "yeti/resource_compiler/runner.h"
 
+#include "yeti/sophisticated_resource_database.h"
+#include "yeti/optimized_resource_database.h"
+
 namespace yeti {
 namespace resource_compiler {
 
@@ -67,7 +70,7 @@ void Runner::setup(const char *args[], const u32 num_args) {
 
   core::path::unixify(&ignores[0]);
 
-  resource_database_ = ResourceDatabase::open_or_create(&resource_database_path[0]);;
+  resource_database_ = SophisticatedResourceDatabase::open_or_create(&resource_database_path[0]);;
 
   resource_compiler_options_.db = resource_database_;
 

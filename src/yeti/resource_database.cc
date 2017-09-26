@@ -29,13 +29,6 @@ ResourceDatabase *ResourceDatabase::open(const char *path) {
   return SophisticatedResourceDatabase::open(path);
 }
 
-ResourceDatabase *ResourceDatabase::open_or_create(const char *path) {
-  yeti_assert_debug(path != NULL);
-
-  // TODO(mtwilliams): Guess type.
-  return SophisticatedResourceDatabase::open_or_create(path);
-}
-
 void ResourceDatabase::close() {
   YETI_DELETE(ResourceDatabase, core::global_heap_allocator(), this);
 }

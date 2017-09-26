@@ -33,7 +33,6 @@ class YETI_PUBLIC ResourceDatabase {
 
  public:
   static ResourceDatabase *open(const char *path);
-  static ResourceDatabase *open_or_create(const char *path);
   void close();
 
  public:
