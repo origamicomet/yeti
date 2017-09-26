@@ -123,7 +123,7 @@ bool path::match(const char *pattern, const char *path) {
   while (*path) {
     if (*pattern == '*') {
       // Coalesce wildcards.
-      while (*pattern++ == '*');
+      while (*++pattern == '*');
 
       // Match any until we match next class in pattern.
       while (*path) {
