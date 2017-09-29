@@ -16,6 +16,15 @@
 
 namespace yeti {
 
+namespace core {
+namespace log {
+
+extern const core::log::Category::Id RESOURCE_DATABASE =
+  Category::add("resource_database", GENERAL);
+
+} // log
+} // core
+
 ResourceDatabase::ResourceDatabase() {
 }
 

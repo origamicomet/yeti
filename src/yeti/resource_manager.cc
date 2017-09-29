@@ -9,75 +9,60 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "yeti/resource.h"
 #include "yeti/resource_manager.h"
-
-// TODO(mtwilliams): Dynamically associate file extensions to resource types.
+#include "yeti/resource_database.h"
 
 namespace yeti {
 
+namespace core {
+namespace log {
+
+static const core::log::Category::Id RESOURCE_MANAGER =
+  Category::add("resource_manager", GENERAL);
+
+} // log
+} // core
+
 namespace resource_manager {
   namespace {
-    // Indicates if loading and unloading is available.
-    static bool enabled_ = false;
-
-    core::Array<const Resource::Type *> types_(core::global_heap_allocator());
-
     core::ReaderWriterLock lock_;
+
+    ResourceDatabase *database_ = NULL;
+
+    //
+    bool autoload_ = false;
 
     // Signaled whenever some work is added to one of the four queues.
     core::Event work_to_be_done_;
 
-    ResourceDatabase *database_ = NULL;
+    core::Map<Resource::Id, Resource *> resources_(core::global_heap_allocator(), 131072);
+    core::Map<Resource::Id, Resource::State> states_(core::global_heap_allocator(), 131072);
 
-    core::Map<Resource::Id, Resource *> resources_(core::global_heap_allocator(), 65535);
+    core::Queue<Resource *> to_be_loaded_(core::global_heap_allocator(), 16384);
+    core::Queue<Resource *> to_be_unloaded_(core::global_heap_allocator(), 16384);
 
-    core::Queue<Resource *> to_be_loaded_(core::global_heap_allocator(), 4096);
-    core::Queue<Resource *> to_be_unloaded_(core::global_heap_allocator(), 4096);
+    core::Queue<Resource *> to_be_brought_online_(core::global_heap_allocator(), 16384);
+    core::Queue<Resource *> to_be_brought_offline_(core::global_heap_allocator(), 16384);
 
-    core::Queue<Resource *> to_be_brought_online_(core::global_heap_allocator(), 4096);
-    core::Queue<Resource *> to_be_put_offline_(core::global_heap_allocator(), 4096);
+    // Internal queues that the management thread copies the above queues to,
+    // so as not to block other threads while loading and unloading resources.
+    core::Queue<Resource *> loading_(core::global_heap_allocator(), 16384);
+    core::Queue<Resource *> unloading_(core::global_heap_allocator(), 16384);
+
+    // Additional internal queues that the management thread uses to defer
+    // mutation of state.
+    core::Queue<Resource *> loaded_(core::global_heap_allocator(), 16384);
+    core::Queue<Resource *> unloaded_(core::global_heap_allocator(), 16384);
   }
 
   static void management_thread(void *);
-}
 
-Resource::Type::Id resource_manager::id_from_name(const char *name) {
-  yeti_assert_debug(name != NULL);
-  return (Resource::Type::Id)core::murmur_hash_32(name, 0);
-}
+  // Loads a resource.
+  static void load_a_resource(Resource *resource);
 
-Resource::Type::Id resource_manager::id_from_type(const Resource::Type *type) {
-  yeti_assert_debug(type != NULL);
-  return (Resource::Type::Id)core::murmur_hash_32(type->name, 0);
-}
-
-const Resource::Type *resource_manager::type_from_id(Resource::Type::Id id) {
-  for (const Resource::Type **type = types_.begin(); type != types_.end(); ++type)
-    if (id == core::murmur_hash_32((*type)->name, 0))
-      return *type;
-
-  return NULL;
-}
-
-const Resource::Type *resource_manager::type_from_name(const char *name) {
-  yeti_assert_debug(name != NULL);
-  return type_from_id(core::murmur_hash_32(name, 0));
-}
-
-const Resource::Type *resource_manager::type_from_path(const char *path) {
-  yeti_assert_development(path != NULL);
-  return type_from_ext(core::path::extension(path));
-}
-
-const Resource::Type *resource_manager::type_from_ext(const char *ext) {
-  yeti_assert_development(ext != NULL);
-
-  for (const Resource::Type **type = types_.begin(); type != types_.end(); ++type)
-    for (const char **applicable_ext = &(*type)->extensions[0]; *applicable_ext; ++applicable_ext)
-      if (strcmp(*applicable_ext, ext) == 0)
-        return *type;
-
-  return NULL;
+  // Unloads a resource.
+  static void unload_a_resource(Resource *resource);
 }
 
 ResourceDatabase *resource_manager::database() {
@@ -85,9 +70,17 @@ ResourceDatabase *resource_manager::database() {
 }
 
 void resource_manager::initialize(const Config &config) {
-  yeti_assert_debug(!enabled_);
-
   database_ = ResourceDatabase::open(config.database);
+
+#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+    YETI_CONFIGURATION == YETI_CONFIGURATION_RELEASE
+  autoload_ = config.autoload;
+#else
+  autoload_ = false;
+#endif
+
+  if (autoload_)
+    core::logf(core::log::RESOURCE_MANAGER, core::log::DEBUG, "Automatically loading resources on demand.");
 
   core::Thread::Options management_thread_options;
   management_thread_options.name = "Resource Management";
@@ -95,138 +88,186 @@ void resource_manager::initialize(const Config &config) {
   management_thread_options.stack = 0x100000 /* 1MiB */;
 
   core::Thread::spawn(&resource_manager::management_thread, 0, management_thread_options)->detach();
-
-  enabled_ = true;
 }
 
 void resource_manager::shutdown() {
 }
 
-// Of course we can't call this "register" because that's a reserved keyword.
-void resource_manager::track(const Resource::Type *type) {
-  yeti_assert_debug(type != NULL);
-
-#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
-    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-  // Make sure `type->name` is indeed unique.
-  for (const Resource::Type **I = types_.begin(); I != types_.end(); ++I)
-    if (strcmp((*I)->name, type->name) == 0)
-      yeti_assert_with_reason(0, "A resource type with the name '%s' is already registered!", type->name);
-
-  // Make sure `type->extensions` do not overlap.
-  for (const Resource::Type **I = types_.begin(); I != types_.end(); ++I)
-    for (const char **E = &type->extensions[0]; *E; ++E)
-      for (const char **ext = &(*I)->extensions[0]; *ext; ++ext)
-        if (strcmp(*E, *ext) == 0)
-          yeti_assert_with_reason(0, "The resource type '%s' already registered the file extension '%s'!", (*I)->name, *E);
-#endif
-
-  types_.push(type);
+bool resource_manager::autoloads() {
+  return autoload_;
 }
 
-Resource *resource_manager::find(Resource::Id id) {
-  yeti_assert_debug(enabled_);
+bool resource_manager::available(Resource::Id id) {
+  if (autoload_) {
+    return true;
+  } else {
+    YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
+    return !!resources_.find(id);
+  }
+}
 
-  {
+Resource *resource_manager::lookup(Resource::Id id) {
+  if (autoload_) {
+    return load(id);
+  } else {
     YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
 
     if (Resource **resource = resources_.find(id)) {
       (*resource)->ref();
       return (*resource);
     }
-  }
 
-  return NULL;
+    return NULL;
+  }
 }
 
 Resource *resource_manager::load(Resource::Id id) {
-  yeti_assert_debug(enabled_);
+  lock_.acquire(true);
 
-  {
-    YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
-
-    if (Resource **resource = resources_.find(id)) {
-      (*resource)->ref();
-      return (*resource);
-    }
+  if (Resource **resource = resources_.find(id)) {
+    // Already loaded!
+    (*resource)->ref();
+    return (*resource);
   }
 
-  const Resource::Type *type = type_from_id(database_->type_from_id(id));
-  yeti_assert_development(type != NULL);
+  const Resource::Type *type;
+  u32 name;
 
+  resource::type_and_name_from_id(id, &type, &name);
+
+  // Allocate space up front to prevent blocking.
   Resource *resource = type->prepare(id);
-  yeti_assert_debug(resource != NULL);
 
-  {
-    YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
+  resource->ref();
 
-    resources_.insert(id, resource);
-    to_be_loaded_.push(resource);
-  }
+  // Track it.
+  resources_.insert(id, resource);
+  states_.insert(id, resource::UNLOADED);
 
+  // Queue for load.
+  to_be_loaded_.push(resource);
+
+  lock_.release(true);
+
+  // Let management thread know there's a resource that needs to be loaded.
   work_to_be_done_.signal();
 
   return resource;
 }
 
+void resource_manager::reload(Resource::Id id) {
+  // TODO(mtwilliams): Resource hot loading.
+  YETI_TRAP();
+}
+
 void resource_manager::unload(Resource *resource) {
-  yeti_assert_debug(enabled_);
-  yeti_assert_debug(resource != NULL);
-  yeti_assert_development(resource->refs() == 0);
+  const Resource::Id id = resource->id();
 
-  {
-    YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
+  lock_.acquire(true);
 
-    resources_.remove(resource->id());
-    to_be_unloaded_.push(resource);
-  }
+  resources_.remove(id);
+  states_.remove(id);
 
+  // Queue for unload.
+  to_be_unloaded_.push(resource);
+
+  lock_.release(true);
+
+  // Let management thread know there's a resource that needs to be unloaded.
   work_to_be_done_.signal();
 }
 
+Resource::State resource_manager::state(Resource::Id id) {
+  YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
+
+  if (const Resource::State *state = states_.find(id))
+    return *state;
+
+  // TODO(mtwilliams): Commute to `UNLOADED`?
+  return Resource::UNKNOWN;
+}
+
+Resource::State resource_manager::state(Resource *resource) {
+  return state(resource->id());
+}
+
 void resource_manager::management_thread(void *) {
-  for (;;) {
+  Resource *resource;
+
+  while (true) {
+    // Wait until there's resources that need to be loaded or unloaded.
     work_to_be_done_.wait();
 
+    // Copy work to be done to internal queues.
     {
-      // PERF(mtwilliams): Collect work to be done to an internal "queue" then
-      // release `lock_` so as not to block other threads when loading,
-      // unloading, onlining, or offlining.
-
       YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
 
-      Resource *resource;
+      while (to_be_loaded_.pop(&resource))
+        loading_.push(resource);
 
-      while (to_be_loaded_.pop(&resource)) {
-        const Resource::Type *type = type_from_id(database_->type_from_id(resource->id()));
-        yeti_assert_debug(type != NULL);
+      while (to_be_unloaded_.pop(&resource))
+        unloading_.push(resource);
+    }
 
-        Resource::Data data;
-
-        char memory_resident_data_path[256] = { 0, };
-        sprintf(&memory_resident_data_path[0], "data/%016llx", resource->id());
-        data.memory_resident_data = core::fs::open(&memory_resident_data_path[0], core::File::READ);
-
-        // HACK(mtwilliams): Assume every resource has memory resident data.
-        yeti_assert_debug(data.memory_resident_data != NULL);
-
-        char streaming_data_path[256] = { 0, };
-        sprintf(&streaming_data_path[0], "data/%016llx.streaming", resource->id());
-        data.streaming_data = core::fs::open(&streaming_data_path[0], core::File::READ);
-
-        type->load(resource, data);
-
-        resource->set_state(Resource::LOADED);
+    // Do the work.
+    {
+      while (loading_.pop(&resource)) {
+        load_a_resource(resource);
+        loaded_.push(resource);
       }
 
-      while (to_be_unloaded_.pop(&resource)) {
-        const Resource::Type *type = type_from_id(Resource::type_from_id(resource->id()));
-        yeti_assert_debug(type != NULL);
+      while (unloading_.pop(&resource)) {
+        unload_a_resource(resource);
+        unloaded_.push(resource);
+      }
+    }
 
-        type->unload(resource);
+    // Notify other threads.
+    {
+      YETI_SCOPED_LOCK_EXCLUSIVE(lock_);
+
+      while (loaded_.pop(&resource)) {
+        *states_.find(resource->id()) = resource::LOADED;
+      }
+
+      while (loaded_.pop(&resource)) {
+        resources_.remove(resource->id());
+        states_.remove(resource->id());
       }
     }
   }
+}
+
+void resource_manager::load_a_resource(Resource *resource) {
+  const Resource::Id id = resource->id();
+
+  const Resource::Type *type;
+  u32 name;
+
+  type_and_name_from_id(id, &type, &name);
+
+  Resource::Data data;
+
+  char memory_resident_data_path[256] = { 0, };
+  sprintf(&memory_resident_data_path[0], "data/%016llx", id);
+  data.memory_resident_data = core::fs::open(&memory_resident_data_path[0], core::File::READ);
+
+  char streaming_data_path[256] = { 0, };
+  sprintf(&streaming_data_path[0], "data/%016llx.streaming", id);
+  data.streaming_data = core::fs::open(&streaming_data_path[0], core::File::READ);
+
+  type->load(resource, data);
+}
+
+void resource_manager::unload_a_resource(Resource *resource) {
+  const Resource::Id id = resource->id();
+
+  const Resource::Type *type;
+  u32 name;
+
+  type_and_name_from_id(id, &type, &name);
+
+  type->unload(resource);
 }
 
 } // yeti

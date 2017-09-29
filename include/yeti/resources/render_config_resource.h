@@ -43,6 +43,8 @@ class YETI_PUBLIC RenderConfigResource : public Resource {
                       const resource_compiler::Input *input,
                       const resource_compiler::Output *output);
 
+  static bool compatible(u32 version);
+
  private:
   void *memory_resident_data_;
 };

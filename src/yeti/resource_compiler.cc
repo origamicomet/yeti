@@ -44,6 +44,12 @@ ResourceCompiler::ResourceCompiler()
 ResourceCompiler::~ResourceCompiler() {
 }
 
+static void register_with_database(Resource::Type::Id id,
+                                   const Resource::Type *type,
+                                   void *db) {
+  ((ResourceDatabase *)db)->register_a_type(type);
+}
+
 ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &options) {
   // TODO(mtwilliams): Check based on absolute paths.
   yeti_assert_debug(strcmp(options.data, options.data_src) != 0);
@@ -57,6 +63,9 @@ ResourceCompiler *ResourceCompiler::create(const ResourceCompiler::Options &opti
 
   yeti_assert_with_reason_development(resource_compiler->db_->sophisticated(),
                                       "Can only compile against a sophisticated resource database!");
+
+  // Register types with database.
+  resource::for_each_type(&register_with_database, (void *)db);
 
   strcpy(resource_compiler->data_, options.data);
   strcpy(resource_compiler->data_src_, options.data_src);
@@ -83,25 +92,33 @@ void ResourceCompiler::add_ignore_patterns(const char *path) {
   }
 }
 
-// PERF(mtwilliams): Use task scheduler to multithread resource compilation.
+// TODO(mtwilliams): Cross reference with database, and remove compiled data
+// if source data is removed.
 
 void ResourceCompiler::run(bool force) {
   // We recursively walk source data directory to build a list of files that
   // may need to be compiled.
   core::fs::walk(data_src_, (core::fs::Walker)&ResourceCompiler::walker, (void *)this);
 
-  // TODO(mtwilliams): Track implicit dependencies like shader includes
-  // so we know to recompile all dependents whenever they're modified. This
-  // means ignoring a file after we determine it's not a hard dependency.
-  //
-  // TODO(mtwilliams): Cross reference with database, and remove compiled data
-  // if source data is removed.
-  //
-
   // Then we compile any files in our list if they have been modified since
   // our last compilation or if forcing recompilation.
   for (const char **path = backlog_.begin(); path != backlog_.end(); ++path) {
-    this->compile(*path, force);
+    const ResourceCompiler::Result result = this->compile(*path, force);
+
+    switch (result) {
+      case resource_compiler::Results::IGNORED:
+        core::logf(core::log::RESOURCE_COMPILER, core::log::INFO, "Ignored `%s`.", *path);
+        break;
+      case resource_compiler::Results::FORBIDDEN:
+        core::logf(core::log::RESOURCE_COMPILER, core::log::ERROR, "Skipped `%s` due to path.", *path);
+        break;
+      case resource_compiler::Results::UNCOMPILABLE:
+        core::logf(core::log::RESOURCE_COMPILER, core::log::ERROR, "Skipped `%s` due to type.", *path);
+        break;
+      case resource_compiler::Results::SKIPPED:
+        core::logf(core::log::RESOURCE_COMPILER, core::log::INFO, "Skipped `%s` because it's up to date.", *path);
+        break;
+    }
 
     // TODO(mtwilliams): Move to a string class.
     core::global_heap_allocator().deallocate((void *)*path);
@@ -122,7 +139,7 @@ void ResourceCompiler::daemon() {
   // Setup a high-resolution timer so we time ourselves to debounce.
   core::Timer timer;
 
-  while(!stop_) {
+  while (!stop_) {
     // Collect creation, modification, and deletion events for a period of time.
     while (timer.msecs() <= debounce_)
       core::fs::poll(watch);
@@ -144,6 +161,8 @@ void ResourceCompiler::stop() {
   stop_ = true;
 }
 
+// PERF(mtwilliams): Use task scheduler to multi-thread resource compilation.
+
 ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force) {
   yeti_assert_debug(path != NULL);
 
@@ -156,50 +175,54 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   if (!this->compilable(path))
     return resource_compiler::Results::UNCOMPILABLE;
 
-  const Resource::Type *type = resource_manager::type_from_path(path);
-  const Resource::Id id = db_->id_from_path(path);
-
   Path source_file_path;
   sprintf(&source_file_path[0], "%s/%s", &data_src_[0], path);
 
   core::File::Info source_file_info;
   core::fs::info(source_file_path, &source_file_info);
 
-  const u32 source_file_id = db_->source_from_path(path);
+  const Resource::File::Id source_file_id = db_->add_a_file(path);
 
-  Resource::Source previous_source_file_info;
-
+  Resource::File previous_source_file_info;
   db_->info(source_file_id, &previous_source_file_info);
 
-  // TODO(mtwilliams): Track when builds are `queued_at`, `started_at`, and
-  // `finished_at`. If there is a build queued, but not started for this
-  //  resource, we can skip.
+  const Resource::Type *type = resource::type_from_path(path);
 
-  // BUG(mtwilliams): Doesn't guarantee a build was attempted. We should
-  // compare against builds, to determine if should skip.
-  if (source_file_info.last_modified_at <= previous_source_file_info.timestamp)
-    if (!force)
-      // Already up to date.
-      return resource_compiler::Results::SKIPPED;
+  char name[256];
+  name_from_path(path, &name[0], sizeof(name));
+
+  const Resource::Id id = db_->add_a_resource(resource::id_from_type(type), name);
+
+  if (!force)
+    if (source_file_info.last_modified_at <= previous_source_file_info.timestamp)
+      if (source_file_info.last_modified_at <= db_->built(id))
+        // Already up to date.
+        return resource_compiler::Results::SKIPPED;
 
   core::File *source_file_handle =
     core::fs::open(source_file_path, core::File::READ | core::File::EXCLUSIVE);
 
-  char source_file_fingerprint[41];
+  char source_file_fingerprint[40];
 
   // Compute fingerprint.
-  this->fingerprint_for_file(source_file_handle, &source_file_fingerprint[0]);
+  core::sha1::fingerprint(source_file_handle, &source_file_fingerprint[0]);
 
-  // Rewind to beginning.
+  // Rewind to beginning rather than reopening to prevent modifications.
   core::fs::seek(source_file_handle, core::File::ABSOLUTE, 0);
 
   db_->begin();
 
-  const u32 build = db_->start_a_build(id);
+  // Reflect filesystem changes to database.
+  db_->touch(source_file_id,
+             source_file_info.last_modified_at,
+             source_file_fingerprint);
 
-  db_->touch(source_file_id, source_file_info.last_modified_at, source_file_fingerprint);
+  // Queue the build.
+  const Resource::Build::Id build = db_->queue_a_build(id);
 
   db_->end();
+
+  db_->start_a_build(build);
 
   ResourceCompiler::Environment env;
   env.compiler = this;
@@ -209,13 +232,13 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
   env.warning = &ResourceCompiler::warning;
   env.error = &ResourceCompiler::error;
 
-  env.info(&env, "Compiling '%s' to `%016llx`...\n", path, id);
+  env.info(&env, "Compiling `%s` into `%016llx`...\n", path, id);
 
   ResourceCompiler::Input input;
   input.root = &data_src_[0];
   input.path = path;
   input.source = source_file_handle;
-  strncpy(&input.fingerprint[0], &source_file_fingerprint[0], 41);
+  core::memory::copy((const void *)&source_file_fingerprint[0], (void *)&input.fingerprint[0], 40);
 
   ResourceCompiler::Output output;
   output.root = &data_[0];
@@ -320,15 +343,26 @@ bool ResourceCompiler::allowable(const char *path) const {
 // TODO(mtwilliams): Use edit distance to detect potential mispellings.
 bool ResourceCompiler::compilable(const char *path) const {
   yeti_assert_debug(path != NULL);
-  return !!resource_manager::type_from_path(path);
+  return !!resource::type_from_path(path);
 }
 
-void ResourceCompiler::fingerprint_for_file(core::File *file,
-                                            char fingerprint[41]) const {
-  u8 digest[20];
+void ResourceCompiler::name_from_path(const char *path, char *name, size_t limit) {
+  yeti_assert_debug(path != NULL);
+  yeti_assert_debug(name != NULL);
 
-  core::sha1::compute(file, digest);
-  core::sha1::present(digest, fingerprint);
+  const char *extension = core::path::extension(path);
+
+  // Path sans extension is name.
+  const size_t length_sans_extension = extension - path - 1;
+
+  yeti_assert_with_reason_debug(length_sans_extension < limit,
+                                "Name derived from `%s` is too long!.",
+                                path);
+
+  strncpy(name, path, length_sans_extension);
+
+  // Ensure name is null-terminated.
+  name[length_sans_extension] = '\0';
 }
 
 bool ResourceCompiler::walk(const char *path, const core::File::Info *info) {

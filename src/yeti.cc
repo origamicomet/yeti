@@ -75,8 +75,9 @@ void boot(const Config &config) {
     resource_manager::initialize(resource_manager_config);
   }
 
-  resource_manager::track(RenderConfigResource::type());
-  resource_manager::track(ScriptResource::type());
+  resource::register_a_type(RenderConfigResource::type());
+  resource::register_a_type(EntityResource::type());
+  resource::register_a_type(ScriptResource::type());
 
   task_scheduler::Config task_scheduler_config;
   task_scheduler_config.workers = config.workers;

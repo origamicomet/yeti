@@ -23,11 +23,12 @@ namespace yeti {
 class Resource;
 
 namespace resource {
-  struct Type;
+  // Forward declared because callback signatures reference `Data`.
   struct Data;
 }
 
 namespace resource_compiler {
+  // Forward declared to prevent cyclic dependencies.
   struct Environment;
   struct Input;
   struct Output;
@@ -36,6 +37,24 @@ namespace resource_compiler {
 namespace resource {
   /// An opaque identifier that uniquely identifies a resource.
   typedef u64 Id;
+
+  /// Invalid resource identifier.
+  static const Id INVALID = 0ull;
+
+  /// Stage of a resource's lifecycle.
+  enum State {
+    /// Unknown.
+    UNKNOWN = 0,
+
+    /// Not loaded.
+    UNLOADED = 1,
+
+    /// Loaded.
+    LOADED = 2,
+
+    /// Failed to load.
+    FAILED = 3
+  };
 
   namespace LifecyclePreferences {
     /// Preference for how lifecycle callbacks should be called relative to
@@ -72,31 +91,71 @@ namespace resource {
     /// An opaque identifier assigned to a type of resource based on its name.
     typedef u32 Id;
 
+    /// Invalid type identifier.
+    static const Id INVALID = 0ul;
+
     /// Name of the resource type. Used as a unique identifier.
     ///
-    /// \note Convention is to use a sigular noun or nouns in `snake_case`. For
-    /// example, `vertex_shader` fits convention and is easily understood while
-    /// `environments (sound)` does not and is extremely confusing in the
-    /// contexts it is used.
+    /// \note Convention is to use a lowercase sigular nouns joined by
+    /// underscores. `snake_case`. For example, `vertex_shader` fits convention
+    /// and is easily understood while in the contexts it is used.
+    ///
     const char *name;
 
     /// Source file extension(s) associated with the resource type.
     ///
-    /// \note The end of array is marked with a sentinel value, `NULL`. For
-    /// example, `{"vs", "vertex_shader", NULL}`.
+    /// \note The end of array is denoted with `NULL`.
+    ///
     const char **extensions;
 
+    /// Arbitary number that determines the version of this type. Each resource
+    /// of this type is tagged with this during compilation, allowing the
+    /// engine and tools to quickly determine compatibility.
+    ///
+    /// \note If versions match, compatibility is assumed. When changing the
+    /// format of compiled data, make sure to bump the version number and
+    /// adjust the `compatible` callback accordingly.
+    ///
+    /// \note If version is `0`, incompatibility is always assumed. However,
+    /// compatibility is ignored at runtime. Set version to `0` until you've
+    /// stabilized your compiled data format.
+    ///
+    /// \remark If you want to properly maintain compatibility when dealing
+    /// with a resource that contains data compiled by pluggable code, like
+    /// `EntityResource`, `LevelResource`, and `RenderConfigResource` do, don't
+    /// use this. Instead, maintain a separate file with contents that is
+    /// deterministically derived from an internal versioning scheme, perhaps
+    /// modeled after this, and make all resources dependent on it. Since the
+    /// fingerprint of the file will only differ upon a version change,
+    /// resources will only be recompiled when pluggable code changes, rather
+    /// than everytime. This is also has the benefit of allowing you to version
+    /// the container format separately.
+    ///
+    u32 version;
+
+    /// Allocates space for a resource of this type.
     Resource *(*prepare)(resource::Id id);
 
+    /// Loads a resource of this type from compiled data.
     void (*load)(Resource *resource, const resource::Data &data);
+
+    /// Unloads a resource of this type.
     void (*unload)(Resource *resource);
 
+    /// Brings a resource of this type online.
     void (*online)(Resource *resource);
+
+    /// Brings a resource of this type offline.
     void (*offline)(Resource *resource);
 
+    /// Tries to compile a resource of this type from source data.
     bool (*compile)(const resource_compiler::Environment *env,
                     const resource_compiler::Input *input,
                     const resource_compiler::Output *output);
+
+    /// Determines if a resource compiled with @version is compatible with this
+    /// version of code.
+    bool (*compatible)(u32 version);
 
     /// \copydoc LifecyclePreference
     resource::LifecyclePreference lifecycle_preference;
@@ -111,7 +170,7 @@ namespace resource {
     core::File *streaming_data;
   };
 
-  struct Source {
+  struct File {
     /// An opaque identifier that uniquely identifies a source.
     typedef u32 Id;
 
@@ -179,12 +238,85 @@ namespace resource {
     Type type;
 
     resource::Id resource;
-    Source::Id source;
+    File::Id source;
   };
-}
 
-// TODO(mtwilliams): Protect internal (to Yeti) interfaces.
- // Maybe a descendant `MutableResource`?
+  /// Registers a resource type.
+  ///
+  /// \warning Registering types is thread-safe!
+  ///
+  /// \param @type Pointer to description of the type.
+  ///
+  /// \return Type identifier assigned to the type.
+  ///
+  extern YETI_PUBLIC Type::Id register_a_type(const Type *type);
+
+  /// Finds a type by name.
+  ///
+  /// \param @name The name of the type to find.
+  ///
+  /// \return Named type or `NULL` if no type named @name exists
+  ///
+  extern YETI_PUBLIC const Type *type_from_name(const char *name);
+
+  /// Determines the type of a resource from a path.
+  ///
+  /// \param @path Path to resource.
+  ///
+  /// \return Type of resource corresponding to @path or `NULL` if no type
+  /// is responsible for the resource at @path.
+  ///
+  extern YETI_PUBLIC const Type *type_from_path(const char *path);
+
+  /// Determines the type of a resource from an extension.
+  ///
+  /// \param @extension File extension.
+  ///
+  /// \return Type of resource corresponding to @extension or `NULL` if no type
+  /// is responsible for files with the given extension.
+  ///
+  extern YETI_PUBLIC const Type *type_from_extension(const char *extension);
+
+  /// Derives unique type identifier for a given type.
+  ///
+  /// \param @type Resource type.
+  ///
+  /// \return Unique identifier assigned to @type.
+  ///
+  extern YETI_PUBLIC Type::Id id_from_type(const Type *type);
+
+  /// Derives type given a unique type identifier.
+  ///
+  /// \param @id Unique identifier assigned to a type.
+  ///
+  /// \return Type corresponding to @id or `NULL` if no type has been assigned
+  /// the given identifier.
+  ///
+  extern YETI_PUBLIC const Type *type_from_id(Type::Id id);
+
+  /// Derives the unique identifier for a resource given its path.
+  ///
+  /// \param @path Path to resource.
+  ///
+  /// \return Unique identifier corresponding to resource at @path.
+  ///
+  extern YETI_PUBLIC Id id_from_path(const char *path);
+
+  /// Derives the unique identifier for a resource given its type and name.
+  ///
+  /// \param @path Path to resource.
+  ///
+  /// \return Unique identifier corresponding to resource at @path.
+  ///
+  extern YETI_PUBLIC Id id_from_name(Type::Id type, const char *name);
+
+  /// Derives a resource's type and name given its unique identifier.
+  extern YETI_PUBLIC void type_and_name_from_id(Id id, const Type **type, u32 *name);
+
+  /// Calls @callback for every registered type.
+  extern YETI_PUBLIC void for_each_type(void (*callback)(Type::Id id, const Type *type, void *context),
+                                        void *context = NULL);
+}
 
 /// An instance of a resource.
 ///
@@ -204,8 +336,8 @@ class YETI_PUBLIC Resource {
   /// \copydoc yeti::resource::Data
   typedef resource::Data Data;
 
-  /// \copydoc yeti::resource::Source
-  typedef resource::Source Source;
+  /// \copydoc yeti::resource::File
+  typedef resource::File File;
 
   /// \copydoc yeti::resource::Dependency
   typedef resource::Dependency Dependency;
@@ -216,18 +348,23 @@ class YETI_PUBLIC Resource {
   /// \copydoc yeti::resource::Build
   typedef resource::Build Build;
 
+  /// \copydoc yeti::resource::State
+  typedef resource::State State;
+
+  /// \copydoc yeti::resource::UNKNOWN
+  static const State UNKNOWN = resource::UNKNOWN;
+
+  /// \copydoc yeti::resource::UNLOADED
+  static const State UNLOADED = resource::UNLOADED;
+
+  /// \copydoc yeti::resource::LOADED
+  static const State LOADED = resource::LOADED;
+
+  /// \copydoc yeti::resource::FAILED
+  static const State FAILED = resource::FAILED;
+
  public:
-  /// Returns unique identifier for resource at @path.
-  static Resource::Id id_from_path(const char *path);
-
-  /// Returns unique identifier for resource of @type with @name.
-  static Resource::Id id_from_type_and_name(Resource::Type::Id type, const char *name);
-
-  /// Returns type of resource for given @id.
-  static Resource::Type::Id type_from_id(Resource::Id id);
-
- public:
-  /// A handle to a resource that automatically maintains reference counts.
+  /// A handle to a resource that automatically maintains reference count.
   class Handle {
    public:
     explicit Handle(Resource *resource);
@@ -242,43 +379,35 @@ class YETI_PUBLIC Resource {
     mutable Resource *resource_;
   };
 
- public:
-  ///
-  enum State {
-    UNLOADED = 0,
-    LOADED   = 1,
-    FAILED   = 2
-  };
-
  protected:
   Resource(Resource::Id id);
   ~Resource();
 
  public:
   /// Returns the unique identifier for this resource.
-  Id id() const { return id_; }
+  YETI_INLINE Id id() const {
+    return id_;
+  }
 
   /// \internal Returns the number of references to this resource.
-  u32 refs() const { return atomic::load(&refs_); }
+  YETI_INLINE u32 refs() const {
+    return atomic::load(&references_);
+  }
 
-  /// \internal Adds a reference to this resource.
-  void ref();
+ public:
+  /// \brief Increase reference count of this resource.
+  void ref() const;
 
-  /// \internal Removes a reference from this resource.
+  /// \brief Decreases reference count of this resource.
+  ///
   /// \note If the caller holds the last reference, the resource will be queued
   /// for unloading.
-  void deref();
-
   ///
-  State state() const;
-
-  ///
-  void set_state(State state);
+  void deref() const;
 
  private:
   const Id id_;
-  u32 refs_;
-  u32 state_;
+  mutable u32 references_;
 };
 
 } // yeti

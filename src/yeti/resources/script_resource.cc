@@ -38,12 +38,14 @@ const Resource::Type *ScriptResource::type() {
   static const Resource::Type type = {
     /* .name = */ "script",
     /* .extensions = */ extensions,
+    /* .version = */ 1,
     /* .prepare = */ &ScriptResource::prepare,
     /* .load = */ &ScriptResource::load,
     /* .unload = */ &ScriptResource::unload,
     /* .online = */ NULL,
     /* .offline = */ NULL,
     /* .compile = */ &ScriptResource::compile,
+    /* .compatible = */ &ScriptResource::compatible,
     /* .lifecycle_preference = */ resource::LifecyclePreferences::INDIFFERENT
   };
 
@@ -84,6 +86,10 @@ bool ScriptResource::compile(const resource_compiler::Environment *env,
                              const resource_compiler::Input *input,
                              const resource_compiler::Output *output) {
   return ScriptCompiler(env, input, output).run();
+}
+
+bool ScriptResource::compatible(u32 version) {
+  return false;
 }
 
 } // yeti

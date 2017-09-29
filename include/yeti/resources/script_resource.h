@@ -48,6 +48,8 @@ class YETI_PUBLIC ScriptResource : public Resource {
                       const resource_compiler::Input *input,
                       const resource_compiler::Output *output);
 
+  static bool compatible(u32 version);
+
  private:
   char path_[256];
   const char *bytecode_;

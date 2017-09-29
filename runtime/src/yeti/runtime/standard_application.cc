@@ -47,18 +47,7 @@ bool StandardApplication::startup() {
   this->log_pertinent_information_about_system();
 
   // TODO(mtwilliams): Load the renderer configuration specified by manfiest.
-#if 0
-  const Resource::Type *render_config_resource_type = resource_manager::type_from_name("render_config");
-  const Resource::Type::Id render_config_resource_type_id = resource_manager::id_from_type(render_config_resource_type);
-  const Resource::Id render_config_resource_id = Resource::id_from_type_and_name(render_config_resource_type_id, manifest->graphics.config);
-  RenderConfigResource *render_config_resource = (RenderConfigResource *)resource_manager::load(render_config_resource_id);
-  while (render_config_resource->state() != Resource::LOADED);
-#endif
-
   // TODO(mtwilliams): Configure rendering.
-#if 0
-  this->renderer_.configure(render_config_resource);
-#endif
 
   // Create the main window and default viewport.
   this->create_main_window_and_default_viewport();
@@ -191,38 +180,32 @@ void StandardApplication::expose_to_lua() {
 
 void StandardApplication::load_boot_package_and_script() {
   // TODO(mtwilliams): Load the boot package specified by manfiest.
-#if 0
-  const Resource::Type *package_resource_type = resource_manager::type_from_name("package");
-  const Resource::Type::Id package_resource_type_id = resource_manager::id_from_type(package_resource_type);
-  const Resource::Id boot_package_id = Resource::id_from_type_and_name(package_resource_type_id, manifest_->boot.package);
-
-  ResourcePackage *package = (ResourcePackage *)resource_manager::load(boot_package_id);
-
-  // Block until boot resources are loaded.
-  package->flush();
-#endif
 
   const Resource::Type *script_resource_type =
-    resource_manager::type_from_name("script");
+    resource::type_from_name("script");
 
   const Resource::Type::Id script_resource_type_id =
-    resource_manager::id_from_type(script_resource_type);
+    resource::id_from_type(script_resource_type);
 
   const Resource::Id boot_script_id =
-    Resource::id_from_type_and_name(script_resource_type_id,
-                                    manifest_->boot.script);
+    resource::id_from_name(script_resource_type_id,
+                           manifest_->boot.script);
 
-  ScriptResource *script =
-    (ScriptResource *)resource_manager::load(boot_script_id);
+  ScriptResource *boot_script_resource =
+    (ScriptResource *)resource_manager::lookup(boot_script_id);
 
-#if 1
-  while (script->state() != Resource::LOADED);
+#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+  while (resource_manager::state(boot_script_id) != Resource::LOADED)
+    core::Thread::yield();
 #else
   // Boot script must be part of boot package.
-  yeti_assert_development(script->state() == Resource::LOADED);
+  yeti_assert_development(resource_manager::state(boot_script_id) == Resource::LOADED);
 #endif
 
-  this->script_.inject(script);
+  this->script_.inject(boot_script_resource);
+
+  boot_script_resource->deref();
 }
 
 } // runtime

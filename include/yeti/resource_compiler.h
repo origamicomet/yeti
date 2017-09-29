@@ -26,7 +26,7 @@
 
 namespace yeti {
 
-// Forward declared for `resource_compiler::Environment`.
+// Forward declared for `Environment`.
 class ResourceCompiler;
 
 namespace resource_compiler {
@@ -113,6 +113,9 @@ namespace resource_compiler {
     /// Root directory of compiled data.
     const char *root;
 
+    /// Version of data.
+    u32 version;
+
     /// Handle to write memory-resident data.
     core::File *memory_resident_data;
 
@@ -121,7 +124,7 @@ namespace resource_compiler {
   };
 }
 
-/// ...
+/// Drives compilation of resources.
 class YETI_PUBLIC ResourceCompiler {
  YETI_DISALLOW_COPYING(ResourceCompiler)
 
@@ -156,30 +159,32 @@ class YETI_PUBLIC ResourceCompiler {
   void add_ignore_patterns(const char *path);
 
  public:
-  /// Walks source data directory for changes and compiles as necessary.
+  /// Walks source data directory and compiles as necessary.
   ///
-  /// \param @force Forces compilation, even if already up to date.
+  /// \param @force Forces compilation of every resource encountered even if
+  /// already up to date.
   ///
   void run(bool force = false);
 
-  /// Watches source data for changes and compiles as necessary.
+  /// Watches source data directory for changes and compiles as necessary.
   ///
-  /// \warning This does not return. If you want to gracefully stop, you will
-  /// need install signal handler(s) that call `stop`.
+  /// \warning This does not return until some time after you call `stop`. If
+  /// you want to gracefully stop, you will need install signal handler(s) that
+  /// call `stop`.
+  ///
+  /// \see yeti::ResourceCompiler::stop
   ///
   void daemon();
 
   /// Signals to daemonized resource compiler to stop.
   void stop();
 
- public:
   /// Compiles a resource.
   ///
-  /// \param @path Relative path of source data.
-  /// \param @force Forces compilation, even if already up to date.
+  /// \param @path Path relative to source data directory.
+  /// \param @force Forces compilation even if already up to date.
   ///
   /// \return Result of compilation.
-  ///
   ///
   Result compile(const char *path, bool force = false);
 
@@ -191,6 +196,8 @@ class YETI_PUBLIC ResourceCompiler {
   bool allowable(const char *path) const;
   bool compilable(const char *path) const;
 
+ private:
+  static void name_from_path(const char *path, char *name, size_t limit);
 
  private:
   bool walk(const char *path, const core::File::Info *info);
@@ -207,7 +214,7 @@ class YETI_PUBLIC ResourceCompiler {
                       ResourceCompiler *resource_compiler);
 
  private:
-  /// \internal Shims used to bind `forward_to_log`.
+  /// \internal Shims used to bind `forward_to_log` to `Environment`.
   /// @{
   static void info(const Environment *env, const char *format, ...);
   static void warning(const Environment *env, const char *format, ...);

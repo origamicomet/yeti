@@ -30,12 +30,14 @@ const Resource::Type *RenderConfigResource::type() {
   static const Resource::Type type = {
     /* .name = */ "render_config",
     /* .extensions = */ extensions,
+    /* .version = */ 0,
     /* .prepare = */ &RenderConfigResource::prepare,
     /* .load = */ &RenderConfigResource::load,
     /* .unload = */ &RenderConfigResource::unload,
     /* .online = */ NULL,
     /* .offline = */ NULL,
     /* .compile = */ &RenderConfigResource::compile,
+    /* .compatible = */ &RenderConfigResource::compatible,
     /* .lifecycle_preference */ resource::LifecyclePreferences::INDIFFERENT
   };
 
@@ -92,6 +94,10 @@ bool RenderConfigResource::compile(const resource_compiler::Environment *env,
                                    const resource_compiler::Input *input,
                                    const resource_compiler::Output *output) {
   return RenderConfigCompiler(env, input, output).run();
+}
+
+bool RenderConfigResource::compatible(u32 version) {
+  return false;
 }
 
 } // yeti
