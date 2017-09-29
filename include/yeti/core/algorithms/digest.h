@@ -37,9 +37,12 @@ namespace sha1 {
   /// Computes the SHA-1 digest of @file.
   extern YETI_PUBLIC void compute(File *file, u8 digest[20]);
 
-  /// Converts @digest to a null-terminated 40-character hexadecimal number
-  /// in @pretty.
-  extern YETI_PUBLIC void present(const u8 digest[20], char pretty[41]);
+  /// Converts @digest to a 40-character hexadecimal number in @pretty.
+  extern YETI_PUBLIC void present(const u8 digest[20], char pretty[40]);
+
+  /// Computes digest of @file and presents it as a 40-character hexadecimal
+  /// number.
+  extern YETI_PUBLIC void fingerprint(File *file, char fingerprint[40]);
 }
 } // core
 } // yeti

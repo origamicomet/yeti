@@ -106,7 +106,7 @@ namespace resource_compiler {
     core::File *source;
 
     /// Digest of source data.
-    char fingerprint[41];
+    char fingerprint[40];
   };
 
   struct Output {
@@ -191,9 +191,6 @@ class YETI_PUBLIC ResourceCompiler {
   bool allowable(const char *path) const;
   bool compilable(const char *path) const;
 
- private:
-  /// \internal Computes fingerprint for @file.
-  void fingerprint_for_file(core::File *file, char fingerprint[41]) const;
 
  private:
   bool walk(const char *path, const core::File::Info *info);

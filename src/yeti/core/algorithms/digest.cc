@@ -172,6 +172,15 @@ namespace sha1 {
     memset(block, '\0', sizeof(block));
   }
 
+  #undef blk0
+  #undef blk
+
+  #undef R0
+  #undef R1
+  #undef R2
+  #undef R3
+  #undef R4
+
   static void initialize(Context *context) {
     context->state[0] = 0x67452301;
     context->state[1] = 0xEFCDAB89;
@@ -253,19 +262,23 @@ namespace sha1 {
     final(&context, digest);
   }
 
-  void present(const u8 digest[20], char pretty[41]) {
-    for (unsigned i = 0; i < 20; ++i)
-      sprintf(&pretty[i * 2], "%02x", digest[i]);
+  void present(const u8 digest[20], char pretty[40]) {
+    for (unsigned i = 0; i < 20; ++i) {
+      char byte[3];
+      sprintf(&byte[0], "%02x", digest[i]);
+      memcpy((void *)&pretty[i * 2], (const void *)&byte[0], 2);
+    }
   }
 
-  #undef blk0
-  #undef blk
+  void fingerprint(File *file, char fingerprint[40]) {
+    u8 digest[20];
 
-  #undef R0
-  #undef R1
-  #undef R2
-  #undef R3
-  #undef R4
+    // Compute the digest.
+    compute(file, digest);
+
+    // Conver to a 40-character hexadecimal number.
+    present(digest, fingerprint);
+  }
 }
 
 } // core

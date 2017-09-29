@@ -127,7 +127,7 @@ namespace resource {
     u64 timestamp;
 
     /// Hash of contents.
-    char fingerprint[41];
+    char fingerprint[40];
   };
 
   struct Override {
