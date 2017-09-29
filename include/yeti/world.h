@@ -18,6 +18,14 @@
 
 #include "yeti/core.h"
 
+#include "yeti/resource.h"
+
+#include "yeti/math.h"
+
+#include "yeti/entity.h"
+#include "yeti/component.h"
+#include "yeti/system.h"
+
 namespace yeti {
 
 class YETI_PUBLIC World {
@@ -33,6 +41,23 @@ class YETI_PUBLIC World {
   void update(const f32 delta_time);
 
   void destroy();
+
+ public:
+  /// Spawns an entity from a resource given by @id at @position with a rotation
+  /// of @rotation and scaled by @scale.
+  ///
+  /// \return Handle to spawned entity.
+  ///
+  Entity spawn(Resource::Id id,
+               const Vec3 &position = Vec3(0.f, 0.f, 0.f),
+               const Quaternion &rotation = Quaternion(0.f, 0.f, 0.f, 1.f),
+               const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
+
+  /// Despawns @entity.
+  void kill(Entity entity);
+
+ private:
+  EntityManager entities_;
 };
 
 } // yeti

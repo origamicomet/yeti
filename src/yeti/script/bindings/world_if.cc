@@ -17,6 +17,10 @@
 #include "yeti/application.h"
 #include "yeti/script/bindings/application_if.h"
 
+// To deal with levels, entities, and prefabs.
+#include "yeti/resource.h"
+#include "yeti/resource_manager.h"
+
 #include "yeti/world.h"
 
 namespace yeti {
@@ -52,15 +56,20 @@ template <> World *Script::to_a<World *>(int index) {
   return (World *)lua_touserdata(L, index);
 }
 
+template <> void Script::push<World *>(World *world) {
+  lua_pushlightuserdata(L, (void *)world);
+}
+
 namespace world_if {
   namespace {
     static int create(lua_State *L) {
+      Script *script = Script::recover(L);
       Application *app = application_if::instance(L);
 
       // We manage worlds through the application so we can track them.
       World *world = app->create_a_world();
 
-      lua_pushlightuserdata(L, (void *)world);
+      script->push(world);
 
       return 1;
     }
@@ -100,6 +109,72 @@ namespace world_if {
       luaL_error(L, "Not implemented yet.");
       return 0;
     }
+
+    static int spawn(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world;
+
+      const char *name;
+
+      Resource::Id resource;
+
+      Vec3 position = Vec3(0.f, 0.f, 0.f);
+      Quaternion rotation = Quaternion(0.f, 0.f, 0.f, 1.f);
+      Vec3 scale = Vec3(1.f, 1.f, 1.f);
+
+      switch (lua_gettop(L)) {
+        default:
+          return luaL_error(L, "World.spawn expects two to five arguments.");
+
+        case 5:
+          scale = script->to_a<Vec3>(5);
+
+        case 4:
+          rotation = script->to_a<Quaternion>(4);
+
+        case 3:
+          position = script->to_a<Vec3>(3);
+
+        case 2:
+          if (!lua_isstring(L, 2))
+            return luaL_argerror(L, 2, "Expected `resource` to be a resource name.");
+
+          name = lua_tostring(L, 2);
+
+          static const Resource::Type::Id type =
+            resource::id_from_type(resource::type_from_name("entity"));
+
+          resource =
+            resource::id_from_name(type, name);
+
+        case 1:
+          world = script->to_a<World *>(1);
+      }
+
+    #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+        YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+      if (!resource_manager::available(resource))
+        return luaL_error(L, "Can't spawn `%s` as it is not available!", name);
+    #endif
+
+      const Entity entity = world->spawn(resource, position, rotation, scale);
+
+      script->push(entity);
+
+      return 1;
+    }
+
+    static int kill(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Entity entity = script->to_a<Entity>(2);
+
+      world->kill(entity);
+
+      return 0;
+    }
   }
 } // world_if
 
@@ -113,12 +188,14 @@ void world_if::expose(Script *script) {
   script->add_module_function("World", "render", &render);
 
 #if 0
-  script->add_module_function("World", "unit_by_id", &unit_by_id);
-  script->add_module_function("World", "unit_by_name", &unit_by_name);
+  script->add_module_function("World", "entity_by_id", &entity_by_id);
+  script->add_module_function("World", "entity_by_name", &entity_by_name);
+#endif
 
   script->add_module_function("World", "spawn", &spawn);
-  script->add_module_function("World", "despawn", &despawn);
+  script->add_module_function("World", "kill", &kill);
 
+#if 0
   script->add_module_function("World", "link", &link);
   script->add_module_function("World", "unlink", &unlink);
 #endif

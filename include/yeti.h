@@ -24,6 +24,7 @@
 #include "yeti/resource_compiler.h"
 
 #include "yeti/resources/render_config_resource.h"
+#include "yeti/resources/entity_resource.h"
 #include "yeti/resources/script_resource.h"
 
 #include "yeti/entity.h"

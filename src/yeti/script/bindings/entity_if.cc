@@ -13,7 +13,30 @@
 
 #include "yeti/script.h"
 
+#include "yeti/entity.h"
+#include "yeti/component.h"
+#include "yeti/system.h"
+
 namespace yeti {
+
+template <> bool Script::is_a<Entity>(int index) {
+  if (!is_a<Reference>(index))
+    return false;
+
+  // Assume it's a reference to an entity.
+  return true;
+}
+
+template <> Entity Script::to_a<Entity>(int index) {
+  if (!is_a<Entity>(index))
+    luaL_argerror(L, index, "Expected a reference to an `Entity`.");
+
+  return Entity(to_a<Reference>(index).opaque);
+}
+
+template <> void Script::push<Entity>(Entity entity) {
+  push<Reference>({entity.id});
+}
 
 namespace entity_if {
   namespace {
