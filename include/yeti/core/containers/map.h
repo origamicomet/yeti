@@ -54,6 +54,11 @@ struct HashFunctionSignature {
   typedef map::Hash (*Type)(const K &key);
 };
 
+// TODO(mtwilliams): Specialize for pointers.
+template <> struct HashFunctionSignature<const char *> {
+  typedef map::Hash (*Type)(const char *key);
+};
+
 /// \brief Default hash function.
 ///
 /// \details We default to FNV1A. This is good enough, because keys are
