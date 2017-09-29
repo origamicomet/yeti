@@ -22,20 +22,20 @@ namespace math_if {
     static int vec2(lua_State *L) {
       Vec2 *v = Script::recover(L)->environment()->allocate<Vec2>();
 
-      switch (lua_gettop(L)) {
+      switch (lua_gettop(L) - 1) {
         default:
           return luaL_error(L, "Vec2 expects x/y to be passed as a table or via arguments.");
 
         case 1: {
-          lua_getfield(L, 1, "x");
-          lua_getfield(L, 1, "y");
+          lua_getfield(L, 2, "x");
+          lua_getfield(L, 2, "y");
 
         #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
             YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
           if (!lua_isnumber(L, -2))
-            return luaL_argerror(L, 1, "Expected `x` to be a number.");
+            return luaL_argerror(L, 2, "Expected `x` to be a number.");
           if (!lua_isnumber(L, -1))
-            return luaL_argerror(L, 1, "Expected `y` to be a number.");
+            return luaL_argerror(L, 2, "Expected `y` to be a number.");
         #endif
 
           v->x = (f32)lua_tonumber(L, -2);
@@ -45,14 +45,14 @@ namespace math_if {
         case 2: {
         #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
             YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-          if (!lua_isnumber(L, 1))
-            return luaL_argerror(L, 1, "Expected `x` to be a number.");
           if (!lua_isnumber(L, 2))
-            return luaL_argerror(L, 2, "Expected `y` to be a number.");
+            return luaL_argerror(L, 2, "Expected `x` to be a number.");
+          if (!lua_isnumber(L, 3))
+            return luaL_argerror(L, 3, "Expected `y` to be a number.");
         #endif
 
-          v->x = (f32)lua_tonumber(L, 1);
-          v->y = (f32)lua_tonumber(L, 2);
+          v->x = (f32)lua_tonumber(L, 2);
+          v->y = (f32)lua_tonumber(L, 3);
         } break;
       }
 
@@ -78,23 +78,23 @@ namespace math_if {
     static int vec3(lua_State *L) {
       Vec3 *v = Script::recover(L)->environment()->allocate<Vec3>();
 
-      switch (lua_gettop(L)) {
+      switch (lua_gettop(L) - 1) {
         default:
-          return luaL_error(L, "Vec2 expects x/y/z to be passed as a table or via arguments.");
+          return luaL_error(L, "Vec3 expects x/y/z to be passed as a table or via arguments.");
 
         case 1: {
-          lua_getfield(L, 1, "x");
-          lua_getfield(L, 1, "y");
-          lua_getfield(L, 1, "z");
+          lua_getfield(L, 2, "x");
+          lua_getfield(L, 2, "y");
+          lua_getfield(L, 2, "z");
 
         #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
             YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
           if (!lua_isnumber(L, -3))
-            return luaL_argerror(L, 1, "Expected `x` to be a number.");
+            return luaL_argerror(L, 2, "Expected `x` to be a number.");
           if (!lua_isnumber(L, -2))
-            return luaL_argerror(L, 1, "Expected `y` to be a number.");
+            return luaL_argerror(L, 2, "Expected `y` to be a number.");
           if (!lua_isnumber(L, -1))
-            return luaL_argerror(L, 1, "Expected `z` to be a number.");
+            return luaL_argerror(L, 2, "Expected `z` to be a number.");
         #endif
 
           v->x = (f32)lua_tonumber(L, -3);
@@ -105,17 +105,17 @@ namespace math_if {
         case 3: {
         #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
             YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-          if (!lua_isnumber(L, 1))
-            return luaL_argerror(L, 1, "Expected `x` to be a number.");
           if (!lua_isnumber(L, 2))
-            return luaL_argerror(L, 2, "Expected `y` to be a number.");
+            return luaL_argerror(L, 2, "Expected `x` to be a number.");
           if (!lua_isnumber(L, 3))
-            return luaL_argerror(L, 3, "Expected `z` to be a number.");
+            return luaL_argerror(L, 3, "Expected `y` to be a number.");
+          if (!lua_isnumber(L, 4))
+            return luaL_argerror(L, 4, "Expected `z` to be a number.");
         #endif
 
-          v->x = (f32)lua_tonumber(L, 1);
-          v->y = (f32)lua_tonumber(L, 2);
-          v->z = (f32)lua_tonumber(L, 3);
+          v->x = (f32)lua_tonumber(L, 2);
+          v->y = (f32)lua_tonumber(L, 3);
+          v->z = (f32)lua_tonumber(L, 4);
         } break;
       }
 

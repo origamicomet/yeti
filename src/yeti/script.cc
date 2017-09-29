@@ -153,6 +153,82 @@ template <> const char *Script::to_a<const char *>(int index) {
   return luaL_checkstring(L, index);
 }
 
+template <> bool Script::is_a<Vec2>(int index) {
+  return E.valid<Vec2>((Vec2 *)lua_touserdata(L, index));
+}
+
+template <> Vec2 Script::to_a<Vec2>(int index) {
+  const Vec2 *temporary = (const Vec2 *)lua_touserdata(L, index);
+
+  if (!E.valid<Vec2>(temporary))
+    luaL_typerror(L, index, "Vec2");
+
+  return *temporary;
+}
+
+template <> void Script::push<Vec2>(Vec2 v) {
+  Vec2 *storage = E.allocate<Vec2>();
+  *storage = v;
+  lua_pushlightuserdata(L, (void *)storage);
+}
+
+template <> bool Script::is_a<Vec3>(int index) {
+  return E.valid<Vec3>((Vec3 *)lua_touserdata(L, index));
+}
+
+template <> Vec3 Script::to_a<Vec3>(int index) {
+  const Vec3 *temporary = (const Vec3 *)lua_touserdata(L, index);
+
+  if (!E.valid<Vec3>(temporary))
+    luaL_typerror(L, index, "Vec3");
+
+  return *temporary;
+}
+
+template <> void Script::push<Vec3>(Vec3 v) {
+  Vec3 *storage = E.allocate<Vec3>();
+  *storage = v;
+  lua_pushlightuserdata(L, (void *)storage);
+}
+
+template <> bool Script::is_a<Vec4>(int index) {
+  return E.valid<Vec4>((Vec4 *)lua_touserdata(L, index));
+}
+
+template <> Vec4 Script::to_a<Vec4>(int index) {
+  const Vec4 *temporary = (const Vec4 *)lua_touserdata(L, index);
+
+  if (!E.valid<Vec4>(temporary))
+    luaL_typerror(L, index, "Vec4");
+
+  return *temporary;
+}
+
+template <> void Script::push<Vec4>(Vec4 v) {
+  Vec4 *storage = E.allocate<Vec4>();
+  *storage = v;
+  lua_pushlightuserdata(L, (void *)storage);
+}
+
+template <> bool Script::is_a<Quaternion>(int index) {
+  return E.valid<Quaternion>((Quaternion *)lua_touserdata(L, index));
+}
+
+template <> Quaternion Script::to_a<Quaternion>(int index) {
+  const Quaternion *temporary = (const Quaternion *)lua_touserdata(L, index);
+
+  if (!E.valid<Quaternion>(temporary))
+    luaL_typerror(L, index, "Quaternion");
+
+  return *temporary;
+}
+
+template <> void Script::push<Quaternion>(Quaternion v) {
+  Quaternion *storage = E.allocate<Quaternion>();
+  *storage = v;
+  lua_pushlightuserdata(L, (void *)storage);
+}
+
 bool Script::call(const char *fn, u32 n, ...) {
   lua_pushlightuserdata(L, (void *)this);
   lua_pushcclosure(L, &Script::__error_handler, 1);

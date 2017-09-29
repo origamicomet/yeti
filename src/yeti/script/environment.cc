@@ -25,6 +25,7 @@ void ScriptEnvironment::reset() {
   this->counts.vec2 = 0;
   this->counts.vec3 = 0;
   this->counts.vec4 = 0;
+  this->counts.quaternion = 0;
 }
 
 } // yeti
