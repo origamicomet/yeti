@@ -86,11 +86,20 @@ class YETI_PUBLIC Script {
                            const lua_CFunction fn);
 
  public:
+  /// A light-weight handle.
+  struct Reference {
+    u32 opaque;
+  };
+
+ public:
   /// \brief Determines if value at @index is convertible to @T.
   template <typename T> bool is_a(int index);
 
   /// \brief Returns value at @index as type @T.
   template <typename T> T to_a(int index);
+
+  /// \brief Pushes @value to top of stack.
+  template <typename T> void push(T value);
 
  public:
   /// \brief Calls the global function @fn with @n number of arguments.

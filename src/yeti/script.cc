@@ -153,6 +153,34 @@ template <> const char *Script::to_a<const char *>(int index) {
   return luaL_checkstring(L, index);
 }
 
+template <> bool Script::is_a<Script::Reference>(int index) {
+  if (!lua_islightuserdata(L, index))
+    return false;
+
+  const uintptr_t lud = lua_islightuserdata(L, index);
+
+  return ((lud & 0x15) == 0x15);
+}
+
+template <> Script::Reference Script::to_a<Script::Reference>(int index) {
+  if (!lua_islightuserdata(L, index))
+    luaL_typerror(L, index, "ref");
+
+  const uintptr_t lud = lua_islightuserdata(L, index);
+
+  if ((lud & 0x15) != 0x15)
+    luaL_typerror(L, index, "ref");
+
+  Script::Reference reference;
+  reference.opaque = (lud >> 4) & 0xFFFFFFFF;
+  return reference;
+}
+
+template <> void Script::push<Script::Reference>(Script::Reference reference) {
+  const uintptr_t lud = ((uintptr_t)reference.opaque << 4) | 0x15;
+  lua_pushlightuserdata(L, (void *)lud);
+}
+
 template <> bool Script::is_a<Vec2>(int index) {
   return E.valid<Vec2>((Vec2 *)lua_touserdata(L, index));
 }
