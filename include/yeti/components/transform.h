@@ -16,16 +16,22 @@
 #ifndef _YETI_COMPONENTS_TRANSFORM_H_
 #define _YETI_COMPONENTS_TRANSFORM_H_
 
+#include "yeti/core.h"
+
+#include "yeti/entity.h"
+#include "yeti/component.h"
+#include "yeti/system.h"
+
 namespace yeti {
 
-struct Transform {
-#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEUBG
+struct Pose {
+#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
     YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
   Vec3 position;
-  Quat rotation;
+  Quaternion rotation;
   Vec3 scale;
 #else
-  Mat4 matrix;
+  Matrix4 matrix;
 #endif
 };
 

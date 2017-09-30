@@ -20,6 +20,7 @@
 // TODO(mtwilliams): Wave length based parameterization.
 // TODO(mtwilliams): Area lights.
 // TODO(mtwilliams): IES.
+// TODO(mtwilliams): Gobos.
 
 namespace yeti {
 
@@ -31,7 +32,7 @@ struct DirectionalLight {
   /// Color of light emitted.
   Color color;
 
-  /// Incident energy in lux.
+  /// Energy emitted in lux.
   f32 intensity;
 };
 
@@ -58,7 +59,7 @@ struct SpotLight {
   /// Distance up to which light affects.
   f32 radius;
 
-  /// Yaw, pitch, and roll.
+  /// Forward direction.
   Vec3 direction;
 
   /// Inner angle expressed in radians.

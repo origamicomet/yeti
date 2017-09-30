@@ -97,8 +97,8 @@ namespace resource {
     /// Name of the resource type. Used as a unique identifier.
     ///
     /// \note Convention is to use a lowercase sigular nouns joined by
-    /// underscores. `snake_case`. For example, `vertex_shader` fits convention
-    /// and is easily understood while in the contexts it is used.
+    /// underscores. For example, `vertex_shader` fits convention and is easily
+    /// understood while in the contexts it is used.
     ///
     const char *name;
 
@@ -243,7 +243,7 @@ namespace resource {
 
   /// Registers a resource type.
   ///
-  /// \warning Registering types is thread-safe!
+  /// \warning Registering types is *not* thread-safe!
   ///
   /// \param @type Pointer to description of the type.
   ///
@@ -255,7 +255,7 @@ namespace resource {
   ///
   /// \param @name The name of the type to find.
   ///
-  /// \return Named type or `NULL` if no type named @name exists
+  /// \return Named type or `NULL` if no type named @name exists.
   ///
   extern YETI_PUBLIC const Type *type_from_name(const char *name);
 

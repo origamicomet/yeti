@@ -18,6 +18,10 @@
 
 #include "yeti/core.h"
 
+#include "yeti/entity.h"
+#include "yeti/component.h"
+#include "yeti/system.h"
+
 namespace yeti {
 
 struct Camera {
