@@ -53,7 +53,7 @@ class YETI_PUBLIC World {
                const Quaternion &rotation = Quaternion(0.f, 0.f, 0.f, 1.f),
                const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
 
-  /// Despawns @entity.
+  /// Kills @entity.
   void kill(Entity entity);
 
  private:

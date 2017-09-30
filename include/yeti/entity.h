@@ -75,6 +75,9 @@ class YETI_PUBLIC EntityManager {
   /// Creates an entity, returning it.
   Entity create();
 
+  /// Creates @n entities, storing the handles in @entities.
+  void create(Entity *entities, unsigned n);
+
   /// Determines if @entity is alive.
   bool alive(Entity entity) const;
 

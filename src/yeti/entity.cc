@@ -32,14 +32,32 @@ EntityManager::~EntityManager() {
 Entity EntityManager::create() {
   yeti_assert_debug(n_ <= limit_);
 
-  const u32 index = free_.pop();
-  const u32 generation = generations_[index];
+  u32 index, generation;
+
+  free_.pop(&index);
+  generation = generations_[index];
 
   const Entity entity = Entity(index, generation);
 
   n_ += 1;
 
   return entity;
+}
+
+void EntityManager::create(Entity *entities, unsigned n) {
+  yeti_assert_debug(entities != NULL);
+  yeti_assert_debug(n_ + n <= limit_);
+
+  for (unsigned entity = 0; entity < n; ++entity) {
+    u32 index, generation;
+
+    free_.pop(&index);
+    generation = generations_[index];
+
+    entities[entity] = Entity(index, generation);
+  }
+
+  n_ += n;
 }
 
 bool EntityManager::alive(Entity entity) const {
