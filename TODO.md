@@ -6,29 +6,31 @@ Includes runtime.
 
 ### `TODO`
 
-* Inspect system to determine CPU, GPU, and RAM.
-  * Provide a thorough `cpuid` implementation.
-    * Build our own database of processors (and errata)?
-* Expose asynchronous I/O on files.
-  * Tie into task scheduler, to allow offloading.
-* Expose memory-mapped I/O on files.
-  * Fallback for consoles?
 * Provide platform independent Unicode conversion helpers.
   * Convert between UTF-8 and UTF-16.
   * Convert between UTF-8 and UTF-32.
 * Provide platform independent Unicode normalization helpers.
   * NFC and NFD
+* Make allocation tracking thread-safe.
+* Allow allocations to be tagged as "ignore" or "proxied."
 * Provide a buddy allocator.
-* Provide a dynamic string class `String` that a global buddy allocator.
-* Handle large files in 32-bit builds.
-  * Specify `_FILE_OFFSET_BITS=64` on POSIX targets.
+* Provide a dynamic string class `String` that uses a global buddy allocator.
+* Expand path manipulation utilities.
+  * Provide a path joining function.
 * Improve random number generation.
   * Provide multiple strategies.
   * Provide multiple distributions.
 * Expand cryptographic primitives.
   * Provide SHA-256.
   * Provide CRC32.
+* Polyfill type traits.
 * Track storage device connects and disconnects.
+* Handle large files in 32-bit builds.
+  * Specify `_FILE_OFFSET_BITS=64` on POSIX targets.
+* Expose asynchronous I/O on files.
+  * Tie into task scheduler, to allow offloading.
+* Expose memory-mapped I/O on files.
+  * Fallback for consoles?
 * Track keyboard and mouse connects and disconnects.
   * Enumerate connected devices through `GetRawInputDeviceList` whenever a `WM_INPUT_DEVICE_CHANGE` arrives.
 * Respect keyboard layout.
@@ -36,39 +38,51 @@ Includes runtime.
   * Handle `WM_INPUTLANGCHANGE`.
   * Use `WM_CHAR` and friends for textual input.
 * Extract mouse buttons and axes into an include file.
-* Expose mouse grabbing.
 * Expose setting of system cursor, either to standard or custom cursors.
-* On Lua errors, capture Lua and C/C++ callstack (and frames), then forward to a user specified error handler.
-* Expose Lua return values to C/C++.
-* Support Lua 5.2 and 5.3.
-  * Support registry with macro.
-* Implement smoothed time-step-policy.
-  * Also support debt payback using `wall`.
-* Finish logging infrastructure.
-  * Logging to network.
-  * Logging to file.
-* Use our own allocator for Lua in 64-bit builds.
-  * Allocator needs to allocate within the first 2GiB of VM.
-    * Map some amount of memory in lower parts during startup.
+  * Also allow showing/hiding of system cursor.
 * Target Windows 7 and later.
   * Don't want to target Windows XP, but may have to for Asia.
   * Specify in manfiest.
     * Add a manifest (and use it!)
   * Define `WINVER` and `_WIN32_WINNT`.
     * Refer to https://msdn.microsoft.com/en-us/library/6sehtctf.aspx for details.
-* Expand path manipulation utilities.
-  * Provide a path joining function.
-* Implement `Array<T>` sort and search.
-* Polyfill type traits.
-* Provide platform independent condition variables.
-* Allow allocations to be tagged as "ignore" or "proxied."
+* Inspect system to determine CPU, GPU, and RAM.
+  * Provide a thorough `cpuid` implementation.
+    * Build our own database of processors (and errata)?
+* Implement smoothed time-step-policy.
+  * Also support debt payback using `wall`.
 * Actually load application manifest.
+  * Gracefully handle corrupt or malformed configuration and settings.
+    * Automatically removed (or replaced with default).
+      * Rename corrupt, rather than deleting.
+    * Allow application to handle with `Application.did_settings_load_nicely()`.
 * Provide a default application icon.
   * Base off of Yeti logo.
 * Allow user to provide a custom icon.
+* Finish logging infrastructure.
+  * Logging to network.
+  * Logging to file.
+* Support Lua 5.2 and 5.3.
+  * Support registry with macro.
+* Use our own allocator for Lua in 64-bit builds.
+  * Allocator needs to allocate within the first 2GiB of VM.
+    * Map some amount of memory in lower parts during startup.
+* On Lua errors, capture Lua and C/C++ callstack (and frames), then forward to a user specified error handler.
+* Expose Lua return values to C/C++.
 * Install a sophisticated assertion and error handler.
-* Make allocation tracking thread-safe.
+* Allow waiting on multiple events.
 * Resource overrides.
+* Drive `ResourceCompiler::compile` through `ResourceCompiler::process`.
+* Break `ResourceCompiler::compile` into smaller functions.
+* Move `ResourceCompiler` to asynchronous compilation model.
+ * Use worker threads to multi-thread compilation.
+* Time compilation of resources.
+* Skip compilation if fingerprints match.
+  * Only touch a file when a build is started.
+* Make resource compilation atomic.
+  * Build to temporary files and move or rename if successful.
+* Boxing and unboxing of temporaries.
+* Hooks for components to update, cull, render, reflect, and so on.
 
 ### `BUGS`
 
@@ -93,9 +107,6 @@ Includes runtime.
   * Qualities
     * Read-only
     * Fast to query
-    * Perfect hashing in place of lookups for `path -> id`
-  * Dispatch using a function pointer table that fits into one cache line, and 16-byte aligns each pointer (to use RIP relative addressing).
-    * Dale Weiler had the neat idea of using a function that takes a pointer to this struct and returns it by value thereby forcing the compiler to load the function pointers into registers, at least on the x86_64 ABI. Care must be taken to prevent the compiler from inlining the function.
 
 ### `REFACTOR`
 
@@ -108,12 +119,9 @@ Includes runtime.
 * Switch time-step policies by updating `desc_` and `state_` rather than creating a new `TimeStepPolicy`?
 * Abstract `Resoruce::Data` I/O.
   * Future proofing for resource bundles.
-* Allow hash used for hash tables to be overriden.
 * Update `absolute` and `relative` mouse axes upon raw-input?
   * Manually translate `GetCursorPos` to a window-relative point?
-* Pass `Task` to kernel and let kernel pull parameters?
-* Split `ResourceCompiler::compile` into smaller methods.
-* Factor `ResourceCompiler::fingerprint_for_file` into a common utility.
+* Provide a common `CommandLineParser` utility.
 
 ### `SMELL`
 
@@ -138,13 +146,6 @@ Includes runtime.
 * Move to C++ style casts?
 * Drop global heap allocator for a global page allocator.
   * Everything will need to be sub-allocated within page boundaries.
-* Global handle system for Lua.
-  * On x86 and x86_64, use light user-data to store:
-
-    Tag        =  1 ; Always set, to aid differentiation between handles and pointers.
-    Type       =  8 ; 256 types
-    Generation =  3 ; Tracks bad references.
-    Index      = 20 ; 1 million handles
 
 ## Sherpa
 
@@ -166,17 +167,23 @@ Includes runtime.
 
 ### `TODO`
 
+* Use a lock file to prevent users from running multiple resource compilers.
 * Allow more than one source data directory.
   * Rather than "layering" by building `core` and then building `vanguard`, we should build all directories together.
 * Daemonization.
   * Watch source data directories for changes, debounce for a user configurable amount of time, and then build any new or modified resources.
-* Detailed logging.
 * Use edit-distance to detect misspellings.
 * Allow user to specify compilation preferences.
   * Mark certain resources (or types of resources?) to only be built manually.
     * By default, mark anything that takes "the entire graph" as input as `BUILD_ON_REQUEST`. For example, global illumination.
     * Provide hints when we detect lots of shaders (or permutations)?
       * Anything with combinatorial explosion.
+* Use a pool of sub-processes to compile resources.
+  * On crash, mark the build as a failure.
+* Orphan previously queued builds.
+* Specifiable target platform.
+  * Default to current.
+  * Allow specification on command line with `--target windows|mac|linux|android|ios|ps4|xb1`.
 
 ### `BUGS`
 
