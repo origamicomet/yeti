@@ -104,9 +104,14 @@ void GlobalPageAllocator::deallocate(void *ptr) {
 #endif
 }
 
-static GlobalPageAllocator global_page_allocator_;
 
 PageAllocator &global_page_allocator() {
+  // HACK(mtwilliams): Force initialization on first call in case static
+  // constructors need to allocate from the global page allocator.
+
+  // BUG(mtwilliams): May initialize more than once.
+  static GlobalPageAllocator global_page_allocator_;
+
   return global_page_allocator_;
 }
 

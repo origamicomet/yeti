@@ -69,9 +69,13 @@ void GlobalHeapAllocator::deallocate(void *ptr) {
 #endif
 }
 
-static GlobalHeapAllocator global_heap_allocator_;
-
 Allocator &global_heap_allocator() {
+  // HACK(mtwilliams): Force initialization on first call in case static
+  // constructors need to allocate from the global heap allocator.
+
+  // BUG(mtwilliams): May initialize more than once.
+  static GlobalHeapAllocator global_heap_allocator_;
+
   return global_heap_allocator_;
 }
 
