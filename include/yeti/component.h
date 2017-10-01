@@ -166,8 +166,8 @@ extern YETI_PUBLIC const Component *component_from_name(const char *name);
 /// \param @ids Identifiers assigned to components.
 /// \params @components Every registered component.
 ///
-extern YETI_PUBLIC void components(core::Array<Component::Id> &ids,
-                                   core::Array<const Component *> &components);
+extern YETI_PUBLIC void components(core::Array<Component::Id> *ids,
+                                   core::Array<const Component *> *components);
 
 } // yeti
 

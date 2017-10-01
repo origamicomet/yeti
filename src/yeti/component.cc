@@ -67,10 +67,12 @@ const Component *component_from_name(const char *name) {
   return NULL;
 }
 
-void components(core::Array<Component::Id> &ids,
-                core::Array<const Component *> &components) {
-  ids = id_for_components_;
-  components = components_;
+void components(core::Array<Component::Id> *ids,
+                core::Array<const Component *> *components) {
+  if (ids)
+    *ids = id_for_components_;
+  if (components)
+    *components = components_;
 }
 
 } // yeti
