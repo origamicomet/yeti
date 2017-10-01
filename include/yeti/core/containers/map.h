@@ -179,6 +179,12 @@ class Map {
   const V *find(const K &key) const;
   /// @}
 
+  /// Returns a the value associated with @key.
+  /// @{
+  V &get(const K &key);
+  const V &get(const K &key) const;
+  /// @}
+
   /// Associates @key with storage for a value.
   V &emplace(const K &key);
 
@@ -269,6 +275,20 @@ const V *Map<K,V,F>::find(const K &key) const {
 
   // Not found.
   return NULL;
+}
+
+template <typename K, typename V, typename map::HashFunctionSignature<K>::Type F>
+V &Map<K,V,F>::get(const K &key) {
+  V *ptr_to_value = this->find(key);
+  yeti_assert_debug(ptr_to_value != NULL);
+  return *ptr_to_value;
+}
+
+template <typename K, typename V, typename map::HashFunctionSignature<K>::Type F>
+const V &Map<K,V,F>::get(const K &key) const {
+  const V *ptr_to_value = this->find(key);
+  yeti_assert_debug(ptr_to_value != NULL);
+  return *ptr_to_value;
 }
 
 template <typename K, typename V, typename map::HashFunctionSignature<K>::Type F>
