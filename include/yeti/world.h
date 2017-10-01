@@ -68,7 +68,10 @@ class YETI_PUBLIC World {
 
  private:
   EntityManager entities_;
+
   SystemManager systems_;
+
+  TransformSystem *transforms_;
 };
 
 } // yeti

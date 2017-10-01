@@ -68,16 +68,18 @@ void boot(const Config &config) {
   #endif
   }
 
+  resource::register_a_type(RenderConfigResource::type());
+  resource::register_a_type(EntityResource::type());
+  resource::register_a_type(ScriptResource::type());
+
+  yeti::register_a_component(TransformSystem::component());
+
   if (config.resources.database) {
     resource_manager::Config resource_manager_config;
     resource_manager_config.database = config.resources.database;
     resource_manager_config.autoload = config.resources.autoload;
     resource_manager::initialize(resource_manager_config);
   }
-
-  resource::register_a_type(RenderConfigResource::type());
-  resource::register_a_type(EntityResource::type());
-  resource::register_a_type(ScriptResource::type());
 
   task_scheduler::Config task_scheduler_config;
   task_scheduler_config.workers = config.workers;
