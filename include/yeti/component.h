@@ -30,6 +30,9 @@ namespace component {
 
   /// Invalid identifier.
   static const Id INVALID = 0ul;
+
+  /// Derives a component's identifier from its name.
+  extern YETI_PUBLIC Id id_from_name(const char *name);
 }
 
 namespace component_compiler {

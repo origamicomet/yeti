@@ -19,6 +19,11 @@ namespace {
   static core::Map<const char *, const Component *> name_to_component_(core::global_heap_allocator(), 256);
 }
 
+Component::Id component::id_from_name(const char *name) {
+  yeti_assert_debug(name != NULL);
+  return (Component::Id)core::murmur_hash_32(name);
+}
+
 Component::Id register_a_component(const Component *component) {
   yeti_assert_debug(component != NULL);
 
@@ -30,8 +35,7 @@ Component::Id register_a_component(const Component *component) {
       yeti_assert_with_reason(0, "Already registered a component with the name '%s'!", component->name);
 #endif
 
-  const Component::Id id =
-    (Component::Id)core::murmur_hash_32(component->name);
+  const Component::Id id = component::id_from_name(component->name);
 
   id_for_components_.push(id);
   components_.push(component);
