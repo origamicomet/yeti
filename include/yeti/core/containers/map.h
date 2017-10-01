@@ -54,7 +54,17 @@ struct HashFunctionSignature {
   typedef map::Hash (*Type)(const K &key);
 };
 
-// TODO(mtwilliams): Specialize for pointers.
+// TODO(mtwilliams): Specialize for all integers.
+// TODO(mtwilliams): Specialize for all pointers.
+
+template <> struct HashFunctionSignature<u32> {
+  typedef map::Hash (*Type)(const u32 key);
+};
+
+template <> struct HashFunctionSignature<u64> {
+  typedef map::Hash (*Type)(const u64 key);
+};
+
 template <> struct HashFunctionSignature<const char *> {
   typedef map::Hash (*Type)(const char *key);
 };
@@ -70,12 +80,37 @@ struct DefaultHashFunction {};
 
 template <typename K> struct DefaultHashFunction<K, 32> {
   static u32 hash(const K &key) {
-    return fnv1a_hash_32((const void *)&key, sizeof(K)); }
+    return fnv1a_hash_32((const void *)&key, sizeof(K));
+  }
 };
 
 template <typename K> struct DefaultHashFunction<K, 64> {
   static u64 hash(const K &key) {
     return fnv1a_hash_64((const void *)&key, sizeof(K));
+  }
+};
+
+template <> struct DefaultHashFunction<u32, 32> {
+  static u32 hash(const u32 key) {
+    return fnv1a_hash_32((const void *)&key, 4);
+  }
+};
+
+template <> struct DefaultHashFunction<u32, 64> {
+  static u64 hash(const u32 key) {
+    return fnv1a_hash_64((const void *)&key, 4);
+  }
+};
+
+template <> struct DefaultHashFunction<u64, 32> {
+  static u32 hash(const u64 key) {
+    return fnv1a_hash_32((const void *)&key, 8);
+  }
+};
+
+template <> struct DefaultHashFunction<u64, 64> {
+  static u64 hash(const u64 key) {
+    return fnv1a_hash_64((const void *)&key, 8);
   }
 };
 
@@ -100,6 +135,10 @@ struct IdentityHashFunction {};
 
 template <> struct IdentityHashFunction<u32, 32> {
   static u32 hash(const u32 key) { return key; }
+};
+
+template <> struct IdentityHashFunction<u32, 64> {
+  static u64 hash(const u32 key) { return (u64)key; }
 };
 
 template <> struct IdentityHashFunction<u64, 64> {
