@@ -26,6 +26,16 @@
 #include "yeti/component.h"
 #include "yeti/system.h"
 
+// Pointers to commonly accessed components are provided. Reduces overhead, and
+// improves readability.
+#include "yeti/components/transform.h"
+#include "yeti/components/camera.h"
+#include "yeti/components/light.h"
+#include "yeti/components/mesh.h"
+#include "yeti/components/terrain.h"
+#include "yeti/components/data.h"
+#include "yeti/components/tag.h"
+
 namespace yeti {
 
 class YETI_PUBLIC World {

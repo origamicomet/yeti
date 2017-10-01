@@ -22,6 +22,8 @@
 #include "yeti/component.h"
 #include "yeti/system.h"
 
+#include "yeti/math.h"
+
 namespace yeti {
 
 struct Pose {
@@ -31,7 +33,7 @@ struct Pose {
   Quaternion rotation;
   Vec3 scale;
 #else
-  Matrix4 matrix;
+  Mat4 matrix;
 #endif
 };
 

@@ -16,6 +16,8 @@
 #ifndef _YETI_COMPONENTS_LIGHT_H_
 #define _YETI_COMPONENTS_LIGHT_H_
 
+#include "yeti/color.h"
+
 // TODO(mtwilliams): Temperature based parameterization.
 // TODO(mtwilliams): Wave length based parameterization.
 // TODO(mtwilliams): Area lights.
