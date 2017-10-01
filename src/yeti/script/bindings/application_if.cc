@@ -49,6 +49,16 @@ namespace application_if {
       return 1;
     }
 
+    static int did_configuration_load_nicely(lua_State *L) {
+      luaL_error(L, "Not implemented yet!");
+      return 0;
+    }
+
+    static int did_settings_load_nicely(lua_State *L) {
+      luaL_error(L, "Not implemented yet!");
+      return 0;
+    }
+
     static int log(lua_State *L) {
       core::log::Level level = core::log::OFF;
       const char *message = NULL;
@@ -210,6 +220,10 @@ void application_if::expose(Script *script, Application *app) {
   script->add_module_function("Application", "platform", &platform);
   script->add_module_function("Application", "architecture", &architecture);
   script->add_module_function("Application", "build", &build);
+
+  // REFACTOR(mtwilliams): Move into `StandardApplication`?
+  script->add_module_function("Application", "did_configuration_load_nicely", &did_configuration_load_nicely);
+  script->add_module_function("Application", "did_settings_load_nicely", &did_settings_load_nicely);
 
   script->add_module_function("Application", "log", &log);
   script->add_module_function("Application", "pause", &pause);
