@@ -22,6 +22,10 @@
 #include "yeti/math/vec2.h"
 #include "yeti/math/vec3.h"
 #include "yeti/math/vec4.h"
+
 #include "yeti/math/quaternion.h"
+
+#include "yeti/math/mat3.h"
+#include "yeti/math/mat4.h"
 
 #endif // _YETI_MATH_H_
