@@ -73,6 +73,10 @@ class YETI_PUBLIC Quaternion {
   static Quaternion slerp(const Quaternion &a, const Quaternion &b, const f32 t);
 
  public:
+  /// Quaternion with no rotation (or direction).
+  static const Quaternion IDENTITY;
+
+ public:
   f32 x, y, z, w;
 };
 
