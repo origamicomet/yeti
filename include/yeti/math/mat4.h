@@ -90,7 +90,7 @@ class YETI_PUBLIC Mat4 {
   /// Decomposes a matrix into its translation, rotation, and scale components.
   ///
   /// \warning Due to floating-point inaccuracy, @scale will not be recovered
-  /// exactly. Don't rely on decomposition for accumulative algorithms, as
+  /// exactly. Don't rely on decomposition for accumulative algorithms as
   /// this will introduce error at a noticeable rate!
   ///
   static void decompose(const Mat4 &matrix,

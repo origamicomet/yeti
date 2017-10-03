@@ -125,8 +125,8 @@ struct Entity {
 ///
 /// \warning As liveliness is implemented by counting underlying reuse of slots
 /// there is a very small possibility of erroneously considering an entity
-/// alive when in fact is dead. Good practice is to check relatively frequently
-/// to prevent that from happening.
+/// alive when it is actually dead. Good practice is to check relatively
+/// frequently to prevent that from happening.
 ///
 /// ## Callbacks
 ///
