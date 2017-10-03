@@ -55,7 +55,10 @@ class Array {
   T &emplace();
 
   /// Pushes @element to the back of the array.
-  void push(const T &element);
+  ///
+  /// \return Index of newly appended element.
+  ///
+  size_t push(const T &element);
 
   /// Pops an element from the back of the array and copies it to @element.
   void pop(T *element);
@@ -190,8 +193,9 @@ T &Array<T>::emplace() {
 }
 
 template <typename T>
-void Array<T>::push(const T &element) {
+size_t Array<T>::push(const T &element) {
   this->emplace() = element;
+  return (this->size() - 1);
 }
 
 template <typename T>
