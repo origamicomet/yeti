@@ -30,6 +30,7 @@ namespace yeti {
 #endif
 
 Window::Window() {
+  this->internal_hndl_ = NULL;
   this->native_hndl_ = NULL;
   this->is_closable_ = true;
   this->is_resizeable_ = true;

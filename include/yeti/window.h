@@ -113,6 +113,7 @@ class YETI_PUBLIC Window {
   uintptr_t to_native_hndl() const;
 
  private:
+  uintptr_t internal_hndl_;
   uintptr_t native_hndl_;
   bool is_resizeable_;
   bool is_closable_;
