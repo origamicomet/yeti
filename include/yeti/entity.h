@@ -100,6 +100,11 @@ struct Entity {
 /// consequence of names being hashed to reduce memory footprint and improve
 /// performance.
 ///
+/// ## Lifetime
+///
+/// As entities are essentially weak references, validity can be quickly
+/// checked through `alive` and `dead`.
+///
 /// ## Cookies & Ownership
 ///
 /// One or more entities may be associated with an arbitary non-zero 32-bit
@@ -112,11 +117,6 @@ struct Entity {
 /// be used. For example, each spawn point could be tagged as such and iterated
 /// on load to build internal data structures necessary for spawning or
 /// respawning players or enemies.
-///
-/// ## Liveliness
-///
-/// As entities are essentially weak references, the liveliness of entities can
-/// be quickly checked through `alive` and `dead`.
 ///
 /// ### Garbage Collection
 ///
