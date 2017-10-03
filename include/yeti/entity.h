@@ -108,9 +108,10 @@ struct Entity {
 /// used establish weak ownership semantics of entities.
 ///
 /// \remark Cookies shouldn't be used to tag entities as a certain type to
-/// drive game logic. Rather, the `TagSystem` should be used. For example,
-/// each spawn point could be tagged as `spawner` and iterated on load to build
-/// internal data structures necessary for spawning (or respawning) players.
+/// drive game logic. Rather, the [`TagSystem`](@ref yeti::TagSystem) should
+/// be used. For example, each spawn point could be tagged as such and iterated
+/// on load to build internal data structures necessary for spawning or
+/// respawning players or enemies.
 ///
 /// ## Liveliness
 ///
