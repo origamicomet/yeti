@@ -72,6 +72,7 @@ class YETI_PUBLIC World {
   SystemManager systems_;
 
   TransformSystem *transforms_;
+  CameraSystem *cameras_;
 };
 
 } // yeti

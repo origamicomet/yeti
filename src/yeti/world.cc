@@ -26,6 +26,7 @@ World::World()
   : entities_()
   , systems_(&entities_)
   , transforms_((TransformSystem *)systems_.lookup("transform"))
+  , cameras_((CameraSystem *)systems_.lookup("camera"))
 {
 }
 
