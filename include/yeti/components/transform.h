@@ -73,7 +73,7 @@ class YETI_PUBLIC TransformSystem : public System {
   Transform::Handle lookup(Entity entity);
 
   /// \brief Determines whether or not @entity has an associated transform.
-  bool has(Entity entity);
+  bool has(Entity entity) const;
 
   /// \brief Links @child to @parent.
   ///
