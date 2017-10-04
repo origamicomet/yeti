@@ -13,10 +13,22 @@
 
 namespace yeti {
 
-namespace {
-  // Shim that destroys transforms associated with destroyed entities.
-  static void entity_destroyed_callback_shim(Entity entity, void *context) {
-    ((TransformSystem *)context)->destroy(entity);
+namespace transform {
+  static bool compile(const component_compiler::Environment *env,
+                      const component_compiler::Input *input,
+                      const component_compiler::Output *output) {
+    return false;
+  }
+
+  static void spawn(void *system,
+                    const Entity *entities,
+                    const u32 *owners,
+                    size_t instances,
+                    const void *data) {
+  }
+
+  static bool compatible(u32 version) {
+    return false;
   }
 }
 
@@ -30,23 +42,33 @@ TransformSystem::TransformSystem(EntityManager *entities)
   , dirty_(core::global_heap_allocator())
   , changed_(core::global_heap_allocator())
 {
-  // entities_->register_destroy_callback(&entity_destroyed_callback_shim, (void *)this);
 }
 
 TransformSystem::~TransformSystem() {
-  // entities_->unregister_destroy_callback((void *)this);
 }
 
+// Automatically register with component registry.
+YETI_AUTO_REGISTER_COMPONENT(TransformSystem::component());
+
 const Component *TransformSystem::component() {
+  static const Component::Property properties[] = {
+    { "position",      Component::Property::FLOAT,  3 },
+    { "rotation",      Component::Property::FLOAT,  4 },
+    { "scale",         Component::Property::FLOAT,  3 },
+    { "parent",        Component::Property::ENTITY, 1 }
+  };
+
   static const Component component = {
-    /* .name = */ "transform",
-    /* .version = */ 1,
-    /* .order = */ 1,
-    /* .create_a_system = */ &TransformSystem::create,
-    /* .destroy_a_system = */ &TransformSystem::destroy,
-    /* .spawn = */ &TransformSystem::spawn,
-    /* .compile = */ &TransformSystem::compile,
-    /* .compatible = */ &TransformSystem::compatible
+    /* .name              = */ "transform",
+    /* .version           = */ 1,
+    /* .order             = */ 0,
+    /* .properties        = */ properties,
+    /* .num_of_properties = */ YETI_ELEMENTS_IN_ARRAY(properties),
+    /* .create_a_system   = */ &TransformSystem::create,
+    /* .destroy_a_system  = */ &TransformSystem::destroy,
+    /* .compile           = */ &transform::compile,
+    /* .spawn             = */ &transform::spawn,
+    /* .compatible        = */ &transform::compatible,
   };
 
   return &component;
@@ -58,23 +80,6 @@ void *TransformSystem::create(EntityManager *entities) {
 
 void TransformSystem::destroy(void *system) {
   YETI_DELETE(TransformSystem, core::global_heap_allocator(), (TransformSystem *)system);
-}
-
-void TransformSystem::spawn(void *system,
-                            const Entity *entities,
-                            const u32 *owners,
-                            size_t instances,
-                            const void *data) {
-}
-
-bool TransformSystem::compile(const component_compiler::Environment *env,
-                              const component_compiler::Input *input,
-                              const component_compiler::Output *output) {
-  return false;
-}
-
-bool TransformSystem::compatible(u32 version) {
-  return false;
 }
 
 } // yeti

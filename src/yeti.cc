@@ -68,11 +68,11 @@ void boot(const Config &config) {
   #endif
   }
 
+  // REFACTOR(mtwilliams): Automatically register.
   resource::register_a_type(RenderConfigResource::type());
   resource::register_a_type(EntityResource::type());
   resource::register_a_type(ScriptResource::type());
 
-  yeti::register_a_component(TransformSystem::component());
 
   if (config.resources.database) {
     resource_manager::Config resource_manager_config;

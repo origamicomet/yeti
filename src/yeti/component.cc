@@ -13,18 +13,20 @@
 
 namespace yeti {
 
-namespace {
-  static core::Array<Component::Id> id_for_components_(core::global_heap_allocator());
-  static core::Array<const Component *> components_(core::global_heap_allocator());
-  static core::Map<const char *, const Component *> name_to_component_(core::global_heap_allocator(), 256);
+namespace component_registry {
+  namespace {
+    static core::Array<Component::Id> ids_(core::global_heap_allocator());
+    static core::Array<const Component *> components_(core::global_heap_allocator());
+
+    // Map of identifiers to componments used to accelerate lookups of components by identifier or name.
+    static core::Map<Component::Id, const Component *, core::map::IdentityHashFunction<Component::Id>::hash> id_to_component_(core::global_heap_allocator(), 256);
+
+    // Number of registered components.
+    static size_t n_ = 0;
+  }
 }
 
-Component::Id component::id_from_name(const char *name) {
-  yeti_assert_debug(name != NULL);
-  return (Component::Id)core::murmur_hash_32(name);
-}
-
-Component::Id register_a_component(const Component *component) {
+Component::Id component_registry::register_a_component(const Component *component) {
   yeti_assert_debug(component != NULL);
 
 #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
@@ -35,42 +37,49 @@ Component::Id register_a_component(const Component *component) {
       yeti_assert_with_reason(0, "Already registered a component with the name '%s'!", component->name);
 #endif
 
-  const Component::Id id = component::id_from_name(component->name);
+  const Component::Id id = id_from_name(component->name);
 
-  id_for_components_.push(id);
+  ids_.push(id);
   components_.push(component);
-  name_to_component_.insert(component->name, component);
+
+  id_to_component_.insert(id, component);
+
+  n_ += 1;
 
   return id;
 }
 
-const Component *component_from_id(Component::Id id) {
+Component::Id component_registry::id_from_name(const char *name) {
+  yeti_assert_debug(name != NULL);
+  return (Component::Id)core::murmur_hash_32(name);
+}
+
+const Component *component_registry::component_by_id(Component::Id id) {
   yeti_assert_debug(id != Component::INVALID);
 
-  unsigned index = 0;
+  if (const Component **ptr_to_component = id_to_component_.find(id))
+    return *ptr_to_component;
 
-  for (const Component::Id *I = id_for_components_.begin(); I != id_for_components_.end(); ++I, ++index)
-    if (*I == id)
-      return components_[index];
-
-  // Not registered.
+  // No component with the specified identifier.
   return NULL;
 }
 
-const Component *component_from_name(const char *name) {
-  yeti_assert_debug(name != NULL);
-
-  if (const Component **component = name_to_component_.find(name))
-    return *component;
-
-  // Not registered.
-  return NULL;
+const Component *component_registry::component_by_name(const char *name) {
+  return component_by_id(id_from_name(name));
 }
 
-void components(core::Array<Component::Id> *ids,
-                core::Array<const Component *> *components) {
+void component_registry::for_each_registered(void (*callback)(Component::Id id, const Component *component, void *context),
+                                             void *context) {
+  yeti_assert_debug(callback != NULL);
+
+  for (unsigned component = 0; component < n_; ++component)
+    callback(ids_[component], components_[component], context);
+}
+
+void component_registry::registered(core::Array<Component::Id> *ids,
+                                    core::Array<const Component *> *components) {
   if (ids)
-    *ids = id_for_components_;
+    *ids = ids_;
   if (components)
     *components = components_;
 }

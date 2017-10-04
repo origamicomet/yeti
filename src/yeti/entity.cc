@@ -21,7 +21,7 @@ EntityManager::EntityManager(unsigned size)
   , name_to_entity_(core::global_page_allocator(), size)
   , cookies_(core::global_page_allocator(), size)
   , free_(core::global_page_allocator(), size)
-  , callbacks_(core::global_page_allocator())
+  , callbacks_(core::global_heap_allocator())
 {
   // PERF(mtwilliams): Optimize bulk insertions.
   for (unsigned index = 0; index < size; ++index) {
@@ -113,12 +113,20 @@ void EntityManager::name(Entity entity, const char *name) {
   this->name(entity, hash_of_name);
 }
 
+// TODO(mtwilliams): Handle renames.
+
 void EntityManager::name(Entity entity, const u32 hash_of_name) {
   yeti_assert_debug(alive(entity));
   yeti_assert_debug(hash_of_name != 0);
 
+  const u32 index = entity.index();
+
+  if (const u32 previous = names_[index])
+    // Rename.
+    name_to_entity_.remove(previous);
+
   name_to_entity_.insert(hash_of_name, entity);
-  names_[entity.index()] = hash_of_name;
+  names_[index] = hash_of_name;
 }
 
 void EntityManager::name(const Entity *entities, const u32 *hashes_of_names, unsigned n) {
@@ -126,12 +134,18 @@ void EntityManager::name(const Entity *entities, const u32 *hashes_of_names, uns
   yeti_assert_debug(hashes_of_names != NULL);
 
   for (unsigned entity = 0; entity < n; ++entity) {
+    const u32 index = entities[entity].index();
+
+    if (const u32 previous = names_[index])
+      // Rename.
+      name_to_entity_.remove(previous);
+
     name_to_entity_.insert(hashes_of_names[entity], entities[entity]);
-    names_[entities[entity].index()] = hashes_of_names[entity];
+    names_[index] = hashes_of_names[entity];
   }
 }
 
-bool EntityManager::named(const char *name, Entity *entity) {
+bool EntityManager::named(const char *name, Entity *entity) const {
   yeti_assert_debug(name != NULL);
 
   const u32 hash_of_name = core::murmur_hash_32(name);
@@ -139,7 +153,7 @@ bool EntityManager::named(const char *name, Entity *entity) {
   return this->named(hash_of_name, entity);
 }
 
-bool EntityManager::named(const u32 hash_of_name, Entity *entity) {
+bool EntityManager::named(const u32 hash_of_name, Entity *entity) const {
   yeti_assert_debug(hash_of_name != 0);
   yeti_assert_debug(entity != NULL);
 
@@ -166,7 +180,7 @@ void EntityManager::unregister_lifecycle_callback(u32 callback) {
       continue;
 
     // Swap 'n' pop.
-    callbacks_[index - 1] = callbacks_[callbacks_.size() - 1];
+    callbacks_[index] = callbacks_[callbacks_.size() - 1];
     callbacks_.pop();
 
     break;
@@ -193,6 +207,7 @@ EntityReflector::EntityReflector(EntityManager *manager)
 }
 
 EntityReflector::~EntityReflector() {
+  manager_->unregister_lifecycle_callback(callback_);
 }
 
 void EntityReflector::record(Entity::LifecycleEvent event, Entity entity) {

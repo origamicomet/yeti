@@ -170,13 +170,13 @@ class YETI_PUBLIC EntityManager {
   ///
   /// \return If the entity with @name was found.
   ///
-  bool named(const char *name, Entity *entity);
+  bool named(const char *name, Entity *entity) const;
 
   /// Tries to find a named entity.
   ///
   /// \return If the entity was found.
   ///
-  bool named(const u32 hash_of_name, Entity *entity);
+  bool named(const u32 hash_of_name, Entity *entity) const;
 
  public:
   typedef void (*LifecycleCallback)(Entity::LifecycleEvent event,
@@ -203,9 +203,7 @@ class YETI_PUBLIC EntityManager {
 
  public:
   /// Limit on number of entities that can be alive at any point in time.
-  unsigned limit() const {
-    return limit_;
-  }
+  unsigned limit() const { return limit_; }
 
  private:
   /// Limit on number of entities that can be alive at any point in time.

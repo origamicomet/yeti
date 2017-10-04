@@ -44,7 +44,7 @@ struct Transform {
   };
 };
 
-class YETI_PUBLIC TransformSystem {
+class YETI_PUBLIC TransformSystem : public System {
  YETI_DISALLOW_COPYING(TransformSystem)
 
  private:
@@ -224,23 +224,8 @@ class YETI_PUBLIC TransformSystem {
  private:
   /// \internal Callbacks and shims exposed through `Component`.
   /// @{
-
   static void *create(EntityManager *entities);
-
   static void destroy(void *system);
-
-  static void spawn(void *system,
-                    const Entity *entities,
-                    const u32 *owners,
-                    size_t instances,
-                    const void *data);
-
-  static bool compile(const component_compiler::Environment *env,
-                      const component_compiler::Input *input,
-                      const component_compiler::Output *output);
-
-  static bool compatible(u32 version);
-
   /// @}
 
  private:

@@ -13,33 +13,77 @@
 
 namespace yeti {
 
-SystemManager::SystemManager()
-  : systems_(core::global_heap_allocator(), 256)
+System::System() {
+}
+
+System::~System() {
+}
+
+void System::created(Entity entity) {
+}
+
+void System::destroyed(Entity entity) {
+}
+
+SystemManager::SystemManager(EntityManager *entities)
+  : entities_(entities)
+  , component_to_index_(core::global_heap_allocator(), 256)
   , components_(core::global_heap_allocator())
+  , systems_(core::global_heap_allocator())
+  , callbacks_(core::global_heap_allocator())
 {
   // Grab every registered component.
   core::Array<Component::Id> ids(core::global_heap_allocator());
-  yeti::components(&ids, &components_);
+  component_registry::registered(&ids, &components_);
+  count_ = components_.size();
 
-  // Create a system to manage components and insert into our hash table.
-  for (unsigned component = 0; component < components_.size(); ++component) {
-    void *system = components_[component]->create_a_system(NULL);
-    yeti_assert_debug(system != NULL);
-    systems_.insert(ids[component], system);
+  // Allocate storage for systems.
+  systems_.resize(count_);
+  callbacks_.resize(count_);
+
+  // Create 'em', hook up 'em up, and insert into our map.
+  for (unsigned i = 0; i < count_; ++i) {
+    component_to_index_.insert(ids[i], i);
+
+    systems_[i] = (System *)components_[i]->create_a_system(entities);
+
+    // Automatically register lifecycle callbacks on system's behalf.
+    callbacks_[i] = entities->register_lifecycle_callback(&entity_lifecycle_callback_shim,
+                                                          (void *)systems_[i]);
   }
 }
 
 SystemManager::~SystemManager() {
-  // PERF(mtwilliams): Don't hash name to recover identifiers.
-  for (unsigned component = 0; component < components_.size(); ++component) {
-    const Component::Id id = component::id_from_name(components_[component]->name);
-    void *system = systems_.get(id);
-    components_[component]->destroy_a_system(system);
+  // Tear down and destroy systems.
+  for (unsigned i = 0; i < count_; ++i) {
+    const Component *component = components_[i];
+
+    System *system = systems_[i];
+
+    // Automatically unregister lifecycle callbacks on system's behalf.
+    entities_->unregister_lifecycle_callback(callbacks_[i]);
+
+    component->destroy_a_system((void *)system);
   }
 }
 
-void *SystemManager::get(Component::Id id) {
-  return systems_.get(id);
+System *SystemManager::lookup(const char *name) {
+  const Component::Id id = component_registry::id_from_name(name);
+  return this->lookup(id);
+}
+
+System *SystemManager::lookup(Component::Id component) {
+  const u32 index = component_to_index_.get(component);
+  return systems_[index];
+}
+
+void SystemManager::entity_lifecycle_callback_shim(Entity::LifecycleEvent event,
+                                                   Entity entity,
+                                                   void *system) {
+  switch (event) {
+    case Entity::CREATED: ((System *)system)->created(entity); break;
+    case Entity::DESTROYED: ((System *)system)->destroyed(entity); break;
+  }
 }
 
 } // yeti
