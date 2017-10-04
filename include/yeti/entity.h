@@ -40,7 +40,7 @@ static const u32 ENTITY_GENERATION_MASK = (1 << ENTITY_GENERATION_BITS) - 1;
 /// Offset, in bits, for generation portion of `yeti::Entity::Id`.
 static const u32 ENTITY_GENERATION_OFFSET = 24;
 
-/// \brief An entity managed by an `EntityManager`.
+/// \brief An entity managed by an [`EntityManager`](@ref yeti::EntityManager).
 ///
 /// \note Entities don't actually "exist." Rather, they are weak references
 /// used to refer to entities.
@@ -105,7 +105,7 @@ struct Entity {
 /// As entities are essentially weak references, validity can be quickly
 /// checked through `alive` and `dead`.
 ///
-/// ## Cookies & Ownership
+/// ## Ownership
 ///
 /// One or more entities may be associated with an arbitary non-zero 32-bit
 /// integer referred to as a "cookie." At any point, various operations can be
@@ -120,8 +120,8 @@ struct Entity {
 ///
 /// ### Garbage Collection
 ///
-/// Rather than relying on callbacks, you can periodically query the liveliness
-/// of entities to perform "garbage collection" of data associated with a
+/// Rather than relying on callbacks, you can periodically check if entities
+/// are alive to perform "garbage collection" of data associated with a
 /// particular entity.
 ///
 /// \warning As liveliness is implemented by counting underlying reuse of slots
@@ -142,7 +142,7 @@ class YETI_PUBLIC EntityManager {
   ~EntityManager();
 
  public:
-  /// Creates an entity, returning it.
+  /// Creates an entity.
   Entity create();
 
   /// Creates @n entities, storing the handles in @entities.

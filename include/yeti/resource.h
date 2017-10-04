@@ -98,7 +98,7 @@ namespace resource {
     ///
     /// \note Convention is to use a lowercase sigular nouns joined by
     /// underscores. For example, `vertex_shader` fits convention and is easily
-    /// understood while in the contexts it is used.
+    /// understood in the contexts it is used.
     ///
     const char *name;
 
