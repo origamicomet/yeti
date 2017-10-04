@@ -78,4 +78,11 @@ namespace utility {
 #define YETI_IS_POWER_OF_TWO(v) \
   (::yeti::core::utility::is_power_of_two(v))
 
+// TODO(mtwilliams): Use templates to improve safety of `YETI_ELEMENTS_IN_ARRAY`.
+
+/// \def YETI_ELEMENTS_IN_ARRAY
+/// \brief Calculates the number of elements in an @array.
+#define YETI_ELEMENTS_IN_ARRAY(array) \
+  (sizeof(array) / sizeof(array[0]))
+
 #endif // _YETI_CORE_UTILITIES_H_
