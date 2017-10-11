@@ -25,7 +25,7 @@ namespace yeti {
 class YETI_PUBLIC Color {
  public:
   Color() : r(0.f), g(0.f), b(0.f), a(0.f) {}
-  Color(f32 r, f32 g, f32 b, f32 a = 0.f) : r(r), g(g), b(b), a(a) {}
+  Color(f32 r, f32 g, f32 b, f32 a = 1.f) : r(r), g(g), b(b), a(a) {}
   Color(const Color &c) : r(c.r), g(c.g), b(c.b), a(c.a) {}
   Color operator=(const Color &c) { r = c.r; g = c.g; b = c.b; a = c.a; return *this; }
 
