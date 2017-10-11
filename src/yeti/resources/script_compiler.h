@@ -45,6 +45,9 @@ class YETI_PRIVATE ScriptCompiler {
   bool dump();
 
  private:
+  bool empty() const;
+
+ private:
   const resource_compiler::Environment *env_;
   const resource_compiler::Input *input_;
   const resource_compiler::Output *output_;

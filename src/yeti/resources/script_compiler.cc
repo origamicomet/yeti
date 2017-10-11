@@ -42,7 +42,8 @@ bool ScriptCompiler::compile() {
   core::fs::read_into_buffer(input_->source, source_);
 
   // Compile but don't run.
-  const int result = luaL_loadbuffer(lua_, (const char *)&source_[0], source_.size(), input_->path);
+  const int result = !this->empty() ? luaL_loadbuffer(lua_, (const char *)&source_[0], source_.size(), input_->path)
+                                    : luaL_loadbuffer(lua_, "", 0, input_->path);
 
   // Report any errors.
   if (result == LUA_ERRSYNTAX)
@@ -53,6 +54,10 @@ bool ScriptCompiler::compile() {
     env_->error(env_, "Something went horribly wrong!");
 
   return (result == 0);
+}
+
+bool ScriptCompiler::empty() const {
+  return (source_.size() == 0);
 }
 
 namespace {
