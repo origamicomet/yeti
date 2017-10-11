@@ -421,8 +421,9 @@ u64 fs::read(File *file, void *in, u64 length) {
 
 u64 fs::read_into_buffer(File *file, Array<u8> &buffer) {
   yeti_assert_debug(file != NULL);
-  buffer.resize(size_of_file(file));
-  return fs::read(file, (void *)&buffer[0], buffer.size());
+  const u64 size = size_of_file(file);
+  buffer.resize(size);
+  return size ? fs::read(file, (void *)&buffer[0], size) : 0;
 }
 
 u64 fs::write(File *file, const void *out, u64 length) {
@@ -450,7 +451,8 @@ u64 fs::write(File *file, const void *out, u64 length) {
 u64 fs::write_to_file(File *file,
                       const Array<u8> &buffer) {
   yeti_assert_debug(file != NULL);
-  return fs::write(file, (void *)&buffer[0], buffer.size());
+  const u64 size = buffer.size();
+  return size ? fs::write(file, (void *)&buffer[0], buffer.size()) : 0;
 }
 
 i64 fs::seek(File *file, File::Position pos, i64 offset) {
