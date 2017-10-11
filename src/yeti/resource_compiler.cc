@@ -107,7 +107,7 @@ void ResourceCompiler::run(bool force) {
 
     switch (result) {
       case resource_compiler::Results::IGNORED:
-        core::logf(core::log::RESOURCE_COMPILER, core::log::INFO, "Ignored `%s`.", *path);
+        core::logf(core::log::RESOURCE_COMPILER, core::log::WARNING, "Ignored `%s`.", *path);
         break;
       case resource_compiler::Results::FORBIDDEN:
         core::logf(core::log::RESOURCE_COMPILER, core::log::ERROR, "Skipped `%s` due to path.", *path);
