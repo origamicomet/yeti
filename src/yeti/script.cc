@@ -33,10 +33,17 @@ Script::Script() {
   lua_pushlightuserdata(L, (void *)this);
   lua_setfield(L, -2, "__instance__");
   lua_setglobal(L, "Script");
+
+  // Allocated separately in case this ends up on the stack.
+  E = YETI_NEW(ScriptEnvironment, core::global_heap_allocator());
 }
 
 Script::~Script() {
   lua_close(L);
+
+  // Destroy environment after closing virtual machine, just in case the
+  // environment is touched when closing.
+  YETI_DELETE(ScriptEnvironment, core::global_heap_allocator(), E);
 }
 
 void *Script::__alloc(Script *script, void *ptr, size_t, size_t size) {
@@ -182,70 +189,70 @@ template <> void Script::push<Script::Reference>(Script::Reference reference) {
 }
 
 template <> bool Script::is_a<Vec2>(int index) {
-  return E.valid<Vec2>((Vec2 *)lua_touserdata(L, index));
+  return E->valid<Vec2>((Vec2 *)lua_touserdata(L, index));
 }
 
 template <> Vec2 Script::to_a<Vec2>(int index) {
   const Vec2 *temporary = (const Vec2 *)lua_touserdata(L, index);
 
-  if (!E.valid<Vec2>(temporary))
+  if (!E->valid<Vec2>(temporary))
     luaL_typerror(L, index, "Vec2");
 
   return *temporary;
 }
 
 template <> void Script::push<Vec2>(Vec2 v) {
-  Vec2 *storage = E.allocate<Vec2>();
+  Vec2 *storage = E->allocate<Vec2>();
   *storage = v;
   lua_pushlightuserdata(L, (void *)storage);
 }
 
 template <> bool Script::is_a<Vec3>(int index) {
-  return E.valid<Vec3>((Vec3 *)lua_touserdata(L, index));
+  return E->valid<Vec3>((Vec3 *)lua_touserdata(L, index));
 }
 
 template <> Vec3 Script::to_a<Vec3>(int index) {
   const Vec3 *temporary = (const Vec3 *)lua_touserdata(L, index);
 
-  if (!E.valid<Vec3>(temporary))
+  if (!E->valid<Vec3>(temporary))
     luaL_typerror(L, index, "Vec3");
 
   return *temporary;
 }
 
 template <> void Script::push<Vec3>(Vec3 v) {
-  Vec3 *storage = E.allocate<Vec3>();
+  Vec3 *storage = E->allocate<Vec3>();
   *storage = v;
   lua_pushlightuserdata(L, (void *)storage);
 }
 
 template <> bool Script::is_a<Vec4>(int index) {
-  return E.valid<Vec4>((Vec4 *)lua_touserdata(L, index));
+  return E->valid<Vec4>((Vec4 *)lua_touserdata(L, index));
 }
 
 template <> Vec4 Script::to_a<Vec4>(int index) {
   const Vec4 *temporary = (const Vec4 *)lua_touserdata(L, index);
 
-  if (!E.valid<Vec4>(temporary))
+  if (!E->valid<Vec4>(temporary))
     luaL_typerror(L, index, "Vec4");
 
   return *temporary;
 }
 
 template <> void Script::push<Vec4>(Vec4 v) {
-  Vec4 *storage = E.allocate<Vec4>();
+  Vec4 *storage = E->allocate<Vec4>();
   *storage = v;
   lua_pushlightuserdata(L, (void *)storage);
 }
 
 template <> bool Script::is_a<Quaternion>(int index) {
-  return E.valid<Quaternion>((Quaternion *)lua_touserdata(L, index));
+  return E->valid<Quaternion>((Quaternion *)lua_touserdata(L, index));
 }
 
 template <> Quaternion Script::to_a<Quaternion>(int index) {
   const Quaternion *temporary = (const Quaternion *)lua_touserdata(L, index);
 
-  if (!E.valid<Quaternion>(temporary))
+  if (!E->valid<Quaternion>(temporary))
     luaL_typerror(L, index, "Quaternion");
 
   return *temporary;

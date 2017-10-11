@@ -39,7 +39,7 @@ class YETI_PUBLIC ScriptEnvironment {
   friend Script;
 
  private:
-  static const u32 NUM_OF_TEMPORARIES = 8192;
+  static const unsigned NUM_OF_TEMPORARIES = 8192;
 
  private:
   ScriptEnvironment();
@@ -59,10 +59,10 @@ class YETI_PUBLIC ScriptEnvironment {
 
  private:
   struct {
-    u32 vec2;
-    u32 vec3;
-    u32 vec4;
-    u32 quaternion;
+    unsigned vec2;
+    unsigned vec3;
+    unsigned vec4;
+    unsigned quaternion;
   } counts;
 
   struct {

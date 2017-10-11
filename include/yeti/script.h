@@ -117,7 +117,7 @@ class YETI_PUBLIC Script {
 
  private:
   lua_State *L;
-  ScriptEnvironment E;
+  ScriptEnvironment *E;
 };
 
 YETI_INLINE lua_State *Script::state() {
@@ -125,7 +125,7 @@ YETI_INLINE lua_State *Script::state() {
 }
 
 YETI_INLINE ScriptEnvironment *Script::environment() {
-  return &E;
+  return E;
 }
 
 } // yeti
