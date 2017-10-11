@@ -172,6 +172,12 @@ namespace component_registry {
   ///
   extern YETI_PUBLIC Component::Id register_a_component(const Component *component);
 
+  /// Registers a component during boot.
+  ///
+  /// \see yeti::boot
+  ///
+  extern YETI_PUBLIC void register_during_boot(const Component *component);
+
   /// Derives a component's identifier from its name.
   extern YETI_PUBLIC Component::Id id_from_name(const char *name);
 
@@ -203,7 +209,7 @@ namespace component_registry {
 
 /// \def YETI_AUTO_REGISTER_COMPONENT
 /// \brief Automatically registers [`Component`](@ref yeti::Component) with
-/// the component registry.
+/// the component registry during boot.
 #define YETI_AUTO_REGISTER_COMPONENT(Component) \
   static const ::yeti::AutoRegisterComponent YETI_PASTE(__automatic_component_registration__, __LINE__)(Component);
 
@@ -214,14 +220,16 @@ class YETI_PUBLIC AutoRegisterComponent {
 
  public:
   AutoRegisterComponent(const Component *component)
-    : id_(component_registry::register_a_component(component))
-    , component_(component)
+    : component_(component)
+  {
+    // Registration is deferred until `yeti::boot`.
+    component_registry::register_during_boot(component);
+  }
+
+  ~AutoRegisterComponent()
   {}
 
-  ~AutoRegisterComponent() {}
-
  private:
-  const Component::Id id_;
   const Component *const component_;
 };
 

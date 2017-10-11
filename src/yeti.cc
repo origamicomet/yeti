@@ -18,6 +18,11 @@
 
 namespace yeti {
 
+namespace component_registry {
+  // See `src/yeti/component.cc`.
+  extern void perform_deferred_registrations();
+}
+
 namespace {
   static void default_assertion_handler(const core::Assertion &assertion, void *) {
     core::logf(core::log::GENERAL, core::log::FATAL,
@@ -73,6 +78,9 @@ void boot(const Config &config) {
   resource::register_a_type(EntityResource::type());
   resource::register_a_type(ScriptResource::type());
 
+  // Perform deferred registrations. We defer registration as we have no
+  // guarantee about ordering of static initializers.
+  component_registry::perform_deferred_registrations();
 
   if (config.resources.database) {
     resource_manager::Config resource_manager_config;

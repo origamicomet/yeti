@@ -23,7 +23,21 @@ namespace component_registry {
 
     // Number of registered components.
     static size_t n_ = 0;
+
+    // Component to register during boot.
+    struct DeferredRegistration {
+      const Component *component;
+    };
+
+    // Components to register during boot.
+    static DeferredRegistration deferreds_[256];
+
+    // Number of components to register during boot.
+    static size_t num_of_deferreds_;
   }
+
+  // Performs all deferred registrations. Called by `yeti::boot`.
+  void perform_deferred_registrations();
 }
 
 Component::Id component_registry::register_a_component(const Component *component) {
@@ -47,6 +61,17 @@ Component::Id component_registry::register_a_component(const Component *componen
   n_ += 1;
 
   return id;
+}
+
+void component_registry::register_during_boot(const Component *component) {
+  yeti_assert_debug(component != NULL);
+
+  deferreds_[num_of_deferreds_++].component = component;
+}
+
+void component_registry::perform_deferred_registrations() {
+  for (unsigned deferred = 0; deferred < num_of_deferreds_; ++deferred)
+    register_a_component(deferreds_[deferred].component);
 }
 
 Component::Id component_registry::id_from_name(const char *name) {
