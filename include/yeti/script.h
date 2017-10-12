@@ -58,6 +58,7 @@ class YETI_PUBLIC Script {
 
  private:
   static void *__alloc(Script *script, void *ptr, size_t, size_t size);
+  static int __require(lua_State *L);
   static int __error_handler(lua_State *L);
 
  public:

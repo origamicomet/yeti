@@ -12,9 +12,54 @@
 #include "yeti/script.h"
 #include "yeti/script/environment.h"
 
+#include "yeti/resource_manager.h"
+
 #include "yeti/resources/script_resource.h"
 
 // TODO(mtwilliams): Support Lua 5.2 by using LUA_REGISTRYINDEX and LUA_RIDX_GLOBALS.
+
+// Stolen from the Lua compatability project.
+#if LUA_VERSION_NUM <= 501
+  extern "C" {
+    static int lua_absindex (lua_State *L, int i) {
+      if (i < 0 && i > LUA_REGISTRYINDEX)
+        i += lua_gettop(L) + 1;
+      return i;
+    }
+
+    static int luaL_getsubtable(lua_State *L, int i, const char *name) {
+      int abs_i = lua_absindex(L, i);
+      lua_pushstring(L, name);
+      lua_gettable(L, abs_i);
+      if (lua_istable(L, -1))
+        return 1;
+      lua_pop(L, 1);
+      lua_newtable(L);
+      lua_pushstring(L, name);
+      lua_pushvalue(L, -2);
+      lua_settable(L, abs_i);
+      return 0;
+    }
+
+    static void luaL_requiref(lua_State *L, const char *modname,
+                              lua_CFunction openf, int glb) {
+      luaL_getsubtable(L, LUA_REGISTRYINDEX, "_LOADED");
+      if ((lua_getfield(L, -1, modname), lua_type(L, -1)) == LUA_TNIL) {
+        lua_pop(L, 1);
+        lua_pushcfunction(L, openf);
+        lua_pushstring(L, modname);
+        lua_call(L, 1, 1);
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -3, modname);
+      }
+      if (glb) {
+        lua_pushvalue(L, -1);
+        lua_setglobal(L, modname);
+      }
+      lua_replace(L, -2);
+    }
+  }
+#endif
 
 namespace yeti {
 
@@ -26,15 +71,38 @@ Script::Script() {
   L = luaL_newstate();
 #endif
 
-  // INSECURE(mtwilliams): Don't let unsigned code (ab)use the system.
-  luaL_openlibs(L);
-
+  // Insert reference to aid recovery. See `Script::recover`.
   lua_createtable(L, 0, 1);
   lua_pushlightuserdata(L, (void *)this);
   lua_setfield(L, -2, "__instance__");
   lua_setglobal(L, "Script");
 
-  // Allocated separately in case this ends up on the stack.
+  static const luaL_Reg libs[] = {
+    { "",              luaopen_base     },
+    { LUA_LOADLIBNAME, &luaopen_package },
+    { LUA_TABLIBNAME,  &luaopen_table   },
+    { LUA_STRLIBNAME,  &luaopen_string  },
+    { LUA_MATHLIBNAME, &luaopen_math    },
+    { LUA_DBLIBNAME,   &luaopen_debug   },
+    { NULL,            NULL             }
+  };
+
+  // Register safe libraries.
+  for (const luaL_Reg *lib = &libs[0]; lib->func; ++lib) {
+    luaL_requiref(L, lib->name, lib->func, 1);
+    lua_pop(L, 1);
+  }
+
+  // Use our own loader.
+  lua_getglobal(L, "package");
+  lua_createtable(L, 1, 0);
+  lua_pushlightuserdata(L, (void *)this);
+  lua_pushcclosure(L, &Script::__require, 1);
+  lua_rawseti(L, -2, 1);
+  lua_setfield(L, -2, "loaders");
+  lua_pop(L, 1);
+
+  // Allocate environment separately in case this ends up on the stack.
   E = YETI_NEW(ScriptEnvironment, core::global_heap_allocator());
 }
 
@@ -48,6 +116,38 @@ Script::~Script() {
 
 void *Script::__alloc(Script *script, void *ptr, size_t, size_t size) {
   return core::global_heap_allocator().reallocate(ptr, size);
+}
+
+int Script::__require(lua_State *L) {
+  const char *script_name = luaL_checkstring(L, 1);
+
+  static const Resource::Type *script_resource_type =
+    resource::type_from_name("script");
+
+  static const Resource::Type::Id script_resource_type_id =
+    resource::id_from_type(script_resource_type);
+
+  const Resource::Id script_id =
+    resource::id_from_name(script_resource_type_id, script_name);
+
+  ScriptResource *script_resource =
+    (ScriptResource *)resource_manager::lookup(script_id);
+
+  if (resource_manager::autoloads()) {
+    // Wait until resource is loaded.
+    while (resource_manager::state(script_id) != Resource::LOADED)
+      core::Thread::yield();
+  } else {
+    // Ensure resource is loaded.
+    if (!resource_manager::available(script_id))
+      return 0;
+  }
+
+  luaL_loadbuffer(L, (const char *)script_resource->bytecode_, script_resource->bytecode_len_, script_resource->path_);
+
+  script_resource->deref();
+
+  return 1;
 }
 
 int Script::__error_handler(lua_State *L) {
