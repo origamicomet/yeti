@@ -43,6 +43,18 @@ bool Keyboard::disconnected() {
   return !connected();
 }
 
+bool Keyboard::up(const Key key) {
+  yeti_assert_debug(key > Keys::UNKNOWN);
+  yeti_assert_debug(key < Keys::_COUNT);
+  return (~_state[key] & 1);
+}
+
+bool Keyboard::down(const Key key) {
+  yeti_assert_debug(key > Keys::UNKNOWN);
+  yeti_assert_debug(key < Keys::_COUNT);
+  return (_state[key] & 1);
+}
+
 bool Keyboard::pressed(const Key key) {
   yeti_assert_debug(key > Keys::UNKNOWN);
   yeti_assert_debug(key < Keys::_COUNT);
@@ -67,19 +79,20 @@ bool Keyboard::released(const Key key) {
   return (prev_state ^ state) & ~state;
 }
 
-void Keyboard::up(const Key key) {
-  yeti_assert_debug(key > Keys::UNKNOWN);
-  yeti_assert_debug(key < Keys::_COUNT);
-  _state[key] &= ~1;
-}
+void Keyboard::handle(const Event event) {
+  switch (event.type) {
+    case Event::PRESSED:
+      _state[event.pressed.key] |= 1;
+      break;
 
-void Keyboard::down(const Key key) {
-  yeti_assert_debug(key > Keys::UNKNOWN);
-  yeti_assert_debug(key < Keys::_COUNT);
-  _state[key] |= 1;
+    case Event::RELEASED:
+      _state[event.released.key] &= ~1;
+      break;
+  }
 }
 
 void Keyboard::update() {
+  // Assume state is unchanged.
   for (u32 key = 0; key < Keys::_COUNT; ++key)
     _state[key] = (_state[key] << 1) | (_state[key] & 1);
 }

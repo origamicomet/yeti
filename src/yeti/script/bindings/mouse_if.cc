@@ -76,6 +76,16 @@ namespace mouse_if {
       return 1;
     }
 
+    static int up(lua_State *L) {
+      lua_pushboolean(L, Mouse::up(to_button(L, 1)));
+      return 1;
+    }
+
+    static int down(lua_State *L) {
+      lua_pushboolean(L, Mouse::down(to_button(L, 1)));
+      return 1;
+    }
+
     static int pressed(lua_State *L) {
       lua_pushboolean(L, Mouse::pressed(to_button(L, 1)));
       return 1;
@@ -100,6 +110,9 @@ void mouse_if::expose(Script *script) {
   script->add_module_function("Mouse", "disconnected", &disconnected);
 
   script->add_module_function("Mouse", "axis", &axis);
+
+  script->add_module_function("Mouse", "up", &up);
+  script->add_module_function("Mouse", "down", &down);
 
   script->add_module_function("Mouse", "pressed", &pressed);
   script->add_module_function("Mouse", "held", &held);

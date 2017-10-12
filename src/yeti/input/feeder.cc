@@ -38,7 +38,7 @@ namespace yeti {
 #if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
 
 static void on_raw_keyboard_input(RAWKEYBOARD kb) {
-  if (kb.VKey == 0xff)
+  if (kb.VKey == 0xFF)
     // Part of an escape sequence; ignore.
     return;
 
@@ -165,10 +165,27 @@ static void on_raw_keyboard_input(RAWKEYBOARD kb) {
     } break;
   }
 
-  if (kb.Flags & RI_KEY_BREAK)
-    Keyboard::up(key);
-  else
-    Keyboard::down(key);
+  if (kb.Flags & RI_KEY_BREAK) {
+    Keyboard::Event event;
+    event.type = Keyboard::Event::RELEASED;
+    event.released.key = key;
+    Keyboard::handle(event);
+  } else {
+    Keyboard::Event event;
+    event.type = Keyboard::Event::PRESSED;
+    event.pressed.key = key;
+    Keyboard::handle(event);
+  }
+}
+
+static void on_mouse_moved(const MouseAxis axis, const Vec3 &value) {
+  Mouse::Event event;
+
+  event.type = Mouse::Event::MOVED;
+  event.moved.axis = axis;
+  event.moved.value = value;
+
+  Mouse::handle(event);
 }
 
 static void on_raw_mouse_input(RAWMOUSE mouse) {
@@ -181,10 +198,19 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
   };
 
   for (u32 btn = 0; btn < MouseButtons::_COUNT; ++btn) {
-    if (mouse.usButtonFlags & button_mappings[btn].up)
-      Mouse::up(button_mappings[btn].btn);
-    if (mouse.usButtonFlags & button_mappings[btn].down)
-      Mouse::down(button_mappings[btn].btn);
+    if (mouse.usButtonFlags & button_mappings[btn].up) {
+      Mouse::Event event;
+      event.type = Mouse::Event::RELEASED;
+      event.released.button = button_mappings[btn].btn;
+      Mouse::handle(event);
+    }
+
+    if (mouse.usButtonFlags & button_mappings[btn].down) {
+      Mouse::Event event;
+      event.type = Mouse::Event::PRESSED;
+      event.pressed.button = button_mappings[btn].btn;
+      Mouse::handle(event);
+    }
   }
 
   Vec3 delta = Vec3::ZERO;
@@ -198,8 +224,8 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
     wheel.x = (f32)((short)mouse.usButtonData);
   wheel = wheel / (f32)WHEEL_DELTA;
 
-  Mouse::update(MouseAxes::DELTA, delta);
-  Mouse::update(MouseAxes::WHEEL, wheel);
+  on_mouse_moved(MouseAxes::DELTA, delta);
+  on_mouse_moved(MouseAxes::WHEEL, wheel);
 }
 
 static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -238,8 +264,8 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       relative.x = GET_X_LPARAM(lParam);
       relative.y = GET_Y_LPARAM(lParam);
 
-      Mouse::update(MouseAxes::ABSOLUTE, Vec3((f32)absolute.x, (f32)absolute.y, 0.f));
-      Mouse::update(MouseAxes::RELATIVE, Vec3((f32)relative.x, (f32)relative.y, 0.f));
+      on_mouse_moved(MouseAxes::ABSOLUTE, Vec3((f32)absolute.x, (f32)absolute.y, 0.f));
+      on_mouse_moved(MouseAxes::RELATIVE, Vec3((f32)relative.x, (f32)relative.y, 0.f));
     } break;
 
     case WM_NCDESTROY: {

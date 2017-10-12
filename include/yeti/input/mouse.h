@@ -52,30 +52,63 @@ namespace MouseAxes {
 
 namespace Mouse {
 
-/// Returns wether a mouse is connected and functioning.
+/// Returns whether a mouse is connected and functioning.
 extern YETI_PUBLIC bool connected();
 extern YETI_PUBLIC bool disconnected();
 
 /// Returns the value of the @axis this frame.
 extern YETI_PUBLIC Vec3 axis(const MouseAxis axis);
 
-/// Returns wether the @btn was pressed this frame.
+/// Returns whether the @btn is up.
+extern YETI_PUBLIC bool up(const MouseButton btn);
+
+/// Returns whether the @btn is down.
+extern YETI_PUBLIC bool down(const MouseButton btn);
+
+/// Returns whether the @btn was pressed this frame.
 extern YETI_PUBLIC bool pressed(const MouseButton btn);
 
-/// Returns wether the @btn has been held down for more than one frame.
+/// Returns whether the @btn has been held down for more than one frame.
 extern YETI_PUBLIC bool held(const MouseButton btn);
 
-/// Returns wether the @btn was released this frame.
+/// Returns whether the @btn was released this frame.
 extern YETI_PUBLIC bool released(const MouseButton btn);
 
-/// \internal Updates the @axis for this frame.
-extern YETI_PRIVATE void update(const MouseAxis axis, const Vec3 &new_value);
+/// \internal Mouse event from platform.
+struct YETI_PRIVATE Event {
+  enum Type {
+    // Button was pressed.
+    PRESSED  = 1,
+    // Button was released.
+    RELEASED = 2,
+    // Mouse was moved.
+    MOVED    = 3,
+  };
 
-/// \internal Marks the @btn as released for this frame.
-extern YETI_PRIVATE void up(const MouseButton btn);
+  Type type;
 
-/// \internal Marks the @btn as pressed for this frame.
-extern YETI_PRIVATE void down(const MouseButton btn);
+  union {
+    struct { MouseButton button; } pressed;
+    struct { MouseButton button; } released;
+    struct { MouseAxis axis; Vec3 value; } moved;
+  };
+
+  Event() {
+    core::memory::zero((void *)this, sizeof(Event));
+  }
+
+  Event(const Event &event) {
+    core::memory::copy((const void *)&event, (void *)this, sizeof(Event));
+  }
+
+  Event operator=(const Event &event) {
+    core::memory::copy((const void *)&event, (void *)this, sizeof(Event));
+    return *this;
+  }
+};
+
+/// \internal Handles @event.
+extern YETI_PRIVATE void handle(const Event event);
 
 /// \internal
 extern YETI_PRIVATE void update();

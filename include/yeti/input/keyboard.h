@@ -32,24 +32,57 @@ namespace Keys {
 
 namespace Keyboard {
 
-/// Returns wether a keyboard is connected and functioning.
+/// Returns whether a keyboard is connected and functioning.
 extern YETI_PUBLIC bool connected();
 extern YETI_PUBLIC bool disconnected();
 
-/// Returns wether the @key was pressed this frame.
+/// Returns whether the @key is up.
+extern YETI_PUBLIC bool up(const Key key);
+
+/// Returns whether the @key is down.
+extern YETI_PUBLIC bool down(const Key key);
+
+/// Returns whether the @key was pressed this frame.
 extern YETI_PUBLIC bool pressed(const Key key);
 
-/// Returns wether the @key has been held down for more than one frame.
+/// Returns whether the @key has been held down for more than one frame.
 extern YETI_PUBLIC bool held(const Key key);
 
-/// Returns wether the @key was released this frame.
+/// Returns whether the @key was released this frame.
 extern YETI_PUBLIC bool released(const Key key);
 
-/// \internal Marks the @key as released for this frame.
-extern YETI_PRIVATE void up(const Key key);
+/// \internal Keyboard event from platform.
+struct YETI_PRIVATE Event {
+  enum Type {
+    // Key was pressed.
+    PRESSED  = 1,
+    // Key was released.
+    RELEASED = 2,
+  };
 
-/// \internal Marks the @key as pressed for this frame.
-extern YETI_PRIVATE void down(const Key key);
+  Type type;
+
+  union {
+    struct { Key key; } pressed;
+    struct { Key key; } released;
+  };
+
+  Event() {
+    core::memory::zero((void *)this, sizeof(Event));
+  }
+
+  Event(const Event &event) {
+    core::memory::copy((const void *)&event, (void *)this, sizeof(Event));
+  }
+
+  Event operator=(const Event &event) {
+    core::memory::copy((const void *)&event, (void *)this, sizeof(Event));
+    return *this;
+  }
+};
+
+/// \internal Handles @event.
+extern YETI_PRIVATE void handle(const Event event);
 
 /// \internal
 extern YETI_PRIVATE void update();

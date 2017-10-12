@@ -46,6 +46,18 @@ Vec3 Mouse::axis(const MouseAxis axis) {
   return _axes[axis];
 }
 
+bool Mouse::up(const MouseButton btn) {
+  yeti_assert_debug(btn > MouseButtons::UNKNOWN);
+  yeti_assert_debug(btn < MouseButtons::_COUNT);
+  return (~_state[btn] & 1);
+}
+
+bool Mouse::down(const MouseButton btn) {
+  yeti_assert_debug(btn > MouseButtons::UNKNOWN);
+  yeti_assert_debug(btn < MouseButtons::_COUNT);
+  return (_state[btn] & 1);
+}
+
 bool Mouse::pressed(const MouseButton btn) {
   yeti_assert_debug(btn > MouseButtons::UNKNOWN);
   yeti_assert_debug(btn < MouseButtons::_COUNT);
@@ -70,29 +82,41 @@ bool Mouse::released(const MouseButton btn) {
   return (prev_state ^ state) & ~state;
 }
 
-void Mouse::update(const MouseAxis axis, const Vec3 &new_value) {
-  yeti_assert_debug(axis > MouseAxes::UNKNOWN);
-  yeti_assert_debug(axis < MouseAxes::_COUNT);
-  _axes[axis] = new_value;
-}
+void Mouse::handle(const Event event) {
+  switch (event.type) {
+    case Event::PRESSED:
+      _state[event.pressed.button] |= 1;
+      break;
 
-void Mouse::up(const MouseButton btn) {
-  yeti_assert_debug(btn > MouseButtons::UNKNOWN);
-  yeti_assert_debug(btn < MouseButtons::_COUNT);
-  _state[btn] &= ~1;
-}
+    case Event::RELEASED:
+      _state[event.released.button] &= ~1;
+      break;
 
-void Mouse::down(const MouseButton btn) {
-  yeti_assert_debug(btn > MouseButtons::UNKNOWN);
-  yeti_assert_debug(btn < MouseButtons::_COUNT);
-  _state[btn] |= 1;
+    case Event::MOVED:
+      switch (event.moved.axis) {
+        case MouseAxes::ABSOLUTE:
+        case MouseAxes::RELATIVE:
+          _axes[event.moved.axis] = event.moved.value;
+          break;
+
+        case MouseAxes::DELTA:
+        case MouseAxes::WHEEL:
+          _axes[event.moved.axis] = _axes[event.moved.axis] + event.moved.value;
+          break;
+      }
+
+      break;
+  }
 }
 
 void Mouse::update() {
-  _axes[MouseAxes::DELTA] = Vec3::ZERO;
-
+  // Assume state is unchanged.
   for (u32 btn = 0; btn < MouseButtons::_COUNT; ++btn)
     _state[btn] = (_state[btn] << 1) | (_state[btn] & 1);
+
+  // New frame, so reset relative axes.
+  _axes[MouseAxes::DELTA] = Vec3::ZERO;
+  _axes[MouseAxes::WHEEL] = Vec3::ZERO;
 }
 
 } // yeti

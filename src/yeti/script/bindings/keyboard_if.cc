@@ -48,6 +48,16 @@ namespace keyboard_if {
       return 1;
     }
 
+    static int up(lua_State *L) {
+      lua_pushboolean(L, Keyboard::up(to_key(L, 1)));
+      return 1;
+    }
+
+    static int down(lua_State *L) {
+      lua_pushboolean(L, Keyboard::down(to_key(L, 1)));
+      return 1;
+    }
+
     static int pressed(lua_State *L) {
       lua_pushboolean(L, Keyboard::pressed(to_key(L, 1)));
       return 1;
@@ -67,6 +77,9 @@ namespace keyboard_if {
 
 void keyboard_if::expose(Script *script) {
   script->add_module("Keyboard");
+
+  script->add_module_function("Keyboard", "up", &up);
+  script->add_module_function("Keyboard", "down", &down);
 
   script->add_module_function("Keyboard", "connected", &connected);
   script->add_module_function("Keyboard", "disconnected", &disconnected);
