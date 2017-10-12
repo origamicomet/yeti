@@ -86,6 +86,11 @@ class YETI_PUBLIC Script {
                            const char *name,
                            const lua_CFunction fn);
 
+  /// \brief Binds @value to @name in @module.
+  void add_module_constant(const char *module,
+                           const char *name,
+                           const unsigned constant);
+
  public:
   /// A light-weight handle.
   struct Reference {

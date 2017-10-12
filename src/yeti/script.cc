@@ -221,6 +221,15 @@ void Script::add_module_function(const char *module,
   lua_pop(L, 1);
 }
 
+void Script::add_module_constant(const char *module,
+                                 const char *name,
+                                 const unsigned constant) {
+  lua_getglobal(L, module);
+  lua_pushinteger(L, (lua_Integer)constant);
+  lua_setfield(L, -2, name);
+  lua_pop(L, 1);
+}
+
 template <> bool Script::is_a<bool>(int index) {
   return !!lua_isboolean(L, index);
 }
