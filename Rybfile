@@ -4,7 +4,7 @@ mangle = Proc.new do |triplet, dependency|
   configuration, platform, arch = *triplet
 
   # HACK(mtwilliams): Link to `release` builds of Gala in `development`.
-  if %w{loom gala}.include? dependency
+  if %w{loom gala luajit}.include? dependency
     if configuration == :development
       configuration = :release
     end
