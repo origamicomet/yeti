@@ -22,10 +22,12 @@ ScriptEnvironment::ScriptEnvironment() {
   upper_bounds_of_pointers_ = (void *)(uintptr_t(&this->storage) + sizeof(this->storage));
 
   // Descended to determine type of a temporary.
-  lower_bounds_of_pointers_by_type_[0] = (void *)&this->storage.quaternion[0];
-  lower_bounds_of_pointers_by_type_[1] = (void *)&this->storage.vec4[0];
-  lower_bounds_of_pointers_by_type_[2] = (void *)&this->storage.vec3[0];
-  lower_bounds_of_pointers_by_type_[3] = (void *)&this->storage.vec2[0];
+  lower_bounds_of_pointers_by_type_[0] = (void *)&this->storage.mat4[0];
+  lower_bounds_of_pointers_by_type_[1] = (void *)&this->storage.mat3[0];
+  lower_bounds_of_pointers_by_type_[2] = (void *)&this->storage.quaternion[0];
+  lower_bounds_of_pointers_by_type_[3] = (void *)&this->storage.vec4[0];
+  lower_bounds_of_pointers_by_type_[4] = (void *)&this->storage.vec3[0];
+  lower_bounds_of_pointers_by_type_[5] = (void *)&this->storage.vec2[0];
 
   this->reset();
 }
@@ -38,6 +40,8 @@ void ScriptEnvironment::reset() {
   this->counts.vec3 = 0;
   this->counts.vec4 = 0;
   this->counts.quaternion = 0;
+  this->counts.mat3 = 0;
+  this->counts.mat4 = 0;
 }
 
 } // yeti

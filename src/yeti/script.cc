@@ -87,6 +87,9 @@ Script::Script() {
     { LUA_STRLIBNAME,  &luaopen_string  },
     { LUA_MATHLIBNAME, &luaopen_math    },
     { LUA_DBLIBNAME,   &luaopen_debug   },
+    { LUA_BITLIBNAME,  &luaopen_bit     },
+    { LUA_JITLIBNAME,  &luaopen_jit     },
+    { LUA_FFILIBNAME,  &luaopen_ffi     },
     { NULL,            NULL             }
   };
 
