@@ -25,9 +25,7 @@ extern "C" {
   #include <luajit.h>
 }
 
-namespace yeti {
-  class Script;
-  class ScriptEnvironment;
-}
+#include "yeti/script.h"
+#include "yeti/script/environment.h"
 
 #endif // _YETI_SCRIPT_BINDING_H_

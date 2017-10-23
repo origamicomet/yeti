@@ -18,15 +18,12 @@
 
 #include "yeti/core.h"
 
-extern "C" {
-  struct lua_State;
-}
+// A little backwards, because
+#include "yeti/script.h"
 
 #include "yeti/math.h"
 
 namespace yeti {
-
-class Script;
 
 /// ...
 class YETI_PUBLIC ScriptEnvironment {
@@ -57,7 +54,19 @@ class YETI_PUBLIC ScriptEnvironment {
   template <typename T>
   bool valid(const T *temporary);
 
+  /// Guesses type pointed to by @ptr.
+  Script::Type type(void *ptr) const;
+
  private:
+  // Pointers below are not a temporary.
+  void *lower_bounds_of_pointers_;
+
+  // Pointers above are not a temporary.
+  void *upper_bounds_of_pointers_;
+
+  // Descended to determine type of a temporary.
+  void *lower_bounds_of_pointers_by_type_[4];
+
   struct {
     unsigned vec2;
     unsigned vec3;
@@ -111,6 +120,29 @@ template <> YETI_INLINE bool ScriptEnvironment::valid(const Vec4 *temporary) {
 template <> YETI_INLINE bool ScriptEnvironment::valid(const Quaternion *temporary) {
   return (temporary >= &this->storage.quaternion[0])
       && (temporary <= &this->storage.quaternion[NUM_OF_TEMPORARIES]);
+}
+
+// PERF(mtwilliams): Overlap storage for all temporaries, padding to largest
+// type to force alignment when necessary. Then, maintain a look-aside array
+// to recover type. Should compile down to a subtraction, shift, and load.
+
+YETI_INLINE Script::Type ScriptEnvironment::type(void *ptr) const {
+  if ((ptr > upper_bounds_of_pointers_) || (ptr < lower_bounds_of_pointers_))
+    // Not a temporary.
+    return Script::T_UNKNOWN;
+
+  if (ptr >= lower_bounds_of_pointers_by_type_[0])
+    return Script::T_QUATERNION;
+  if (ptr >= lower_bounds_of_pointers_by_type_[1])
+    return Script::T_VEC4;
+  if (ptr >= lower_bounds_of_pointers_by_type_[2])
+    return Script::T_VEC3;
+  if (ptr >= lower_bounds_of_pointers_by_type_[3])
+    return Script::T_VEC2;
+
+  YETI_UNREACHABLE();
+
+  return Script::T_UNKNOWN;
 }
 
 } // yeti

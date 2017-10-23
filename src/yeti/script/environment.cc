@@ -15,6 +15,18 @@
 namespace yeti {
 
 ScriptEnvironment::ScriptEnvironment() {
+  // Pointers below are not temporary.
+  lower_bounds_of_pointers_ = (void *)&this->storage;
+
+  // Pointers above are not temporary.
+  upper_bounds_of_pointers_ = (void *)(uintptr_t(&this->storage) + sizeof(this->storage));
+
+  // Descended to determine type of a temporary.
+  lower_bounds_of_pointers_by_type_[0] = (void *)&this->storage.quaternion[0];
+  lower_bounds_of_pointers_by_type_[1] = (void *)&this->storage.vec4[0];
+  lower_bounds_of_pointers_by_type_[2] = (void *)&this->storage.vec3[0];
+  lower_bounds_of_pointers_by_type_[3] = (void *)&this->storage.vec2[0];
+
   this->reset();
 }
 

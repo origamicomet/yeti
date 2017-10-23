@@ -25,12 +25,13 @@ extern "C" {
   #include <luajit.h>
 }
 
-#include "yeti/script/environment.h"
-
 namespace yeti {
 
 // See `yeti/resources/script_resource.h`.
 class ScriptResource;
+
+// See `yeti/script/environment.h`.
+class ScriptEnvironment;
 
 // A virtual machine and environment for executing Lua.
 class YETI_PUBLIC Script {
@@ -38,18 +39,22 @@ class YETI_PUBLIC Script {
 
  public:
   enum Type {
-    T_UNKNOWN   = 0,
-    T_NIL       = 1,
-    T_BOOLEAN   = 2,
-    T_INTEGER   = 3,
-    T_FLOAT     = 4,
-    T_STRING    = 5,
-    T_ARRAY     = 6,
-    T_MAP       = 7,
-    T_POINTER   = 8,
-    T_FUNCTION  = 9,
-    T_TEMPORARY = 10,
-    T_REF       = 11
+    T_UNKNOWN    = 0,
+    T_NIL        = 1,
+    T_BOOLEAN    = 2,
+    T_INTEGER    = 3,
+    T_FLOAT      = 4,
+    T_STRING     = 5,
+    T_MAP        = 6,
+    T_POINTER    = 7,
+    T_FUNCTION   = 8,
+    T_VEC2       = 9,
+    T_VEC3       = 10,
+    T_VEC4       = 11,
+    T_QUATERNION = 12,
+    T_MAT3       = 13,
+    T_MAT4       = 14,
+    T_REFERENCE  = 15
   };
 
  public:
@@ -102,6 +107,9 @@ class YETI_PUBLIC Script {
   };
 
  public:
+  /// \brief Determines type of value at @index.
+  Type type(int index);
+
   /// \brief Determines if value at @index is convertible to @T.
   template <typename T> bool is_a(int index);
 
