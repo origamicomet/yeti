@@ -70,9 +70,8 @@ namespace mouse_if {
     }
 
     static int axis(lua_State *L) {
-      Vec3 *v = Script::recover(L)->environment()->allocate<Vec3>();
-      *v = Mouse::axis(to_axis(L, 1));
-      lua_pushlightuserdata(L, (void *)v);
+      const Vec2 state = Mouse::axis(to_axis(L, 1));
+      Script::recover(L)->push<Vec2>(state);
       return 1;
     }
 

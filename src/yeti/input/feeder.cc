@@ -178,7 +178,7 @@ static void on_raw_keyboard_input(RAWKEYBOARD kb) {
   }
 }
 
-static void on_mouse_moved(const MouseAxis axis, const Vec3 &value) {
+static void on_mouse_moved(const MouseAxis axis, const Vec2 &value) {
   Mouse::Event event;
 
   event.type = Mouse::Event::MOVED;
@@ -213,11 +213,11 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
     }
   }
 
-  Vec3 delta = Vec3::ZERO;
+  Vec2 delta = Vec2::ZERO;
   delta.x = (f32)mouse.lLastX;
   delta.y = (f32)mouse.lLastY;
 
-  Vec3 wheel = Vec3::ZERO;
+  Vec2 wheel = Vec2::ZERO;
   if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
     wheel.y = -(f32)((short)mouse.usButtonData);
   if (mouse.usButtonFlags & RI_MOUSE_HWHEEL)
@@ -264,8 +264,8 @@ static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
       relative.x = GET_X_LPARAM(lParam);
       relative.y = GET_Y_LPARAM(lParam);
 
-      on_mouse_moved(MouseAxes::ABSOLUTE, Vec3((f32)absolute.x, (f32)absolute.y, 0.f));
-      on_mouse_moved(MouseAxes::RELATIVE, Vec3((f32)relative.x, (f32)relative.y, 0.f));
+      on_mouse_moved(MouseAxes::ABSOLUTE, Vec2((f32)absolute.x, (f32)absolute.y));
+      on_mouse_moved(MouseAxes::RELATIVE, Vec2((f32)relative.x, (f32)relative.y));
     } break;
 
     case WM_NCDESTROY: {

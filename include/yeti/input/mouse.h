@@ -57,7 +57,7 @@ extern YETI_PUBLIC bool connected();
 extern YETI_PUBLIC bool disconnected();
 
 /// Returns the value of the @axis this frame.
-extern YETI_PUBLIC Vec3 axis(const MouseAxis axis);
+extern YETI_PUBLIC Vec2 axis(const MouseAxis axis);
 
 /// Returns whether the @btn is up.
 extern YETI_PUBLIC bool up(const MouseButton btn);
@@ -90,7 +90,7 @@ struct YETI_PRIVATE Event {
   union {
     struct { MouseButton button; } pressed;
     struct { MouseButton button; } released;
-    struct { MouseAxis axis; Vec3 value; } moved;
+    struct { MouseAxis axis; Vec2 value; } moved;
   };
 
   Event() {

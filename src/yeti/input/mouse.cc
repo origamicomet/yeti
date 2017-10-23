@@ -17,7 +17,7 @@ namespace Mouse {
   namespace {
     // Refer to src/yeti/input/keyboard.cc for the reasoning behind this.
     static u32 _state[MouseButtons::_COUNT] = { 0, };
-    static Vec3 _axes[MouseAxes::_COUNT] = { Vec3::ZERO, };
+    static Vec2 _axes[MouseAxes::_COUNT] = { Vec2::ZERO, };
   }
 }
 
@@ -40,7 +40,7 @@ bool Mouse::disconnected() {
   return !connected();
 }
 
-Vec3 Mouse::axis(const MouseAxis axis) {
+Vec2 Mouse::axis(const MouseAxis axis) {
   yeti_assert_debug(axis > MouseAxes::UNKNOWN);
   yeti_assert_debug(axis < MouseAxes::_COUNT);
   return _axes[axis];
@@ -115,8 +115,8 @@ void Mouse::update() {
     _state[btn] = (_state[btn] << 1) | (_state[btn] & 1);
 
   // New frame, so reset relative axes.
-  _axes[MouseAxes::DELTA] = Vec3::ZERO;
-  _axes[MouseAxes::WHEEL] = Vec3::ZERO;
+  _axes[MouseAxes::DELTA] = Vec2::ZERO;
+  _axes[MouseAxes::WHEEL] = Vec2::ZERO;
 }
 
 } // yeti
