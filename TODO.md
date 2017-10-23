@@ -83,6 +83,11 @@ Includes runtime.
   * Build to temporary files and move or rename if successful.
 * Boxing and unboxing of temporaries.
 * Hooks for components to update, cull, render, reflect, and so on.
+* Allow scripts to use constants for keys and mouse buttons.
+  * Still allow dynamic look ups.
+    * Improve look up performance using a hash table.
+* Generic `panic` function.
+  * Replace asserts to make purpose clearer.
 
 ### `BUGS`
 
@@ -100,6 +105,8 @@ Includes runtime.
 * Audit and eliminate (or minimize) false sharing.
   * Especially in logging and profiling.
 * Optimize `Script *` recovery from `lua_State *`.
+  * Replace `Script::recover(L)` with upvalues.
+    * Check for upvalue first?
 * Support bulk operations on resources.
 * Bundle resources then map `memory_resident_data` wholesale, providing slices instead of direct handles.
 * Improve `Array<T>` memory profile during growth and shrinking.
@@ -107,6 +114,13 @@ Includes runtime.
   * Qualities
     * Read-only
     * Fast to query
+* Reducing binding glue when binding components to Lua.
+* Investigate performance impact of using cdata for entity and component handles.
+  * Nominally 4+4 (x86) or 8+4 (x86_64) bytes.
+  * Could allocate from C.
+    * Garbage collection to push onto free-list.
+  * Type safety can be ensured, perhaps by using a lookaside.
+    * Convert pointer to index, and lookup sister array.
 
 ### `REFACTOR`
 
@@ -126,6 +140,7 @@ Includes runtime.
 ### `SMELL`
 
 * Returning pointers from `yeti::core::Map<K,V>`.
+* Namespace entities, components, and systems under `yeti::ecs`.
 
 ### `CRAZY`
 
@@ -146,6 +161,9 @@ Includes runtime.
 * Move to C++ style casts?
 * Drop global heap allocator for a global page allocator.
   * Everything will need to be sub-allocated within page boundaries.
+* Store transform, rotation, and scale components of local poses separately.
+  * Off-the-cuff introduces a ~12% overhead when computing local-to-world.
+    * We spend little time here anyway so it would have a small impact relative to everything else...
 
 ## Sherpa
 
