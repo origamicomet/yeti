@@ -200,7 +200,7 @@ void StandardApplication::load_boot_package_and_script() {
     core::Thread::yield();
 #else
   // Boot script must be part of boot package.
-  yeti_assert_development(resource_manager::state(boot_script_id) == Resource::LOADED);
+  yeti_assert(resource_manager::state(boot_script_id) == Resource::LOADED);
 #endif
 
   this->script_.inject(boot_script_resource);

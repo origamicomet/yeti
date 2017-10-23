@@ -73,7 +73,7 @@ void resource_manager::initialize(const Config &config) {
   database_ = ResourceDatabase::open(config.database);
 
 #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
-    YETI_CONFIGURATION == YETI_CONFIGURATION_RELEASE
+    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
   autoload_ = config.autoload;
 #else
   autoload_ = false;
