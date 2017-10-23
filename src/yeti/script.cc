@@ -77,6 +77,9 @@ Script::Script() {
   lua_setfield(L, -2, "__instance__");
   lua_setglobal(L, "Script");
 
+  // INSECURE(mtwilliams): Foreign function interface should not be exposed
+  // outside of engine.
+
   static const luaL_Reg libs[] = {
     { "",              luaopen_base     },
     { LUA_LOADLIBNAME, &luaopen_package },
@@ -216,7 +219,9 @@ void Script::add_module_function(const char *module,
                                  const char *name,
                                  const lua_CFunction fn) {
   lua_getglobal(L, module);
-  lua_pushcfunction(L, fn);
+  lua_pushlightuserdata(L, (void *)this);
+  lua_pushlightuserdata(L, (void *)this->E);
+  lua_pushcclosure(L, fn, 2);
   lua_setfield(L, -2, name);
   lua_pop(L, 1);
 }

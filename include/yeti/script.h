@@ -82,6 +82,10 @@ class YETI_PUBLIC Script {
                               const lua_CFunction fn);
 
   /// \brief Binds @fn to @name in @module.
+  ///
+  /// \note `Script` and `ScriptEnvironment` are available as the first and
+  /// second upvalues, respectively.
+  ///
   void add_module_function(const char *module,
                            const char *name,
                            const lua_CFunction fn);
