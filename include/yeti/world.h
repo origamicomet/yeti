@@ -53,8 +53,8 @@ class YETI_PUBLIC World {
   void destroy();
 
  public:
-  /// Spawns an entity from a resource given by @id at @position with a rotation
-  /// of @rotation and scaled by @scale.
+  /// \brief Spawns an entity from a resource given by @id at @position with a
+  /// rotation of @rotation and scaled by @scale.
   ///
   /// \return Handle to spawned entity.
   ///
@@ -63,8 +63,25 @@ class YETI_PUBLIC World {
                const Quaternion &rotation = Quaternion(0.f, 0.f, 0.f, 1.f),
                const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
 
-  /// Kills @entity.
+  /// \brief Kills @entity.
   void kill(Entity entity);
+
+ public:
+  YETI_INLINE EntityManager *entities() {
+    return &entities_;
+  }
+
+  YETI_INLINE TransformSystem *transforms() {
+    return transforms_;
+  }
+
+  YETI_INLINE CameraSystem *cameras() {
+    return cameras_;
+  }
+
+  YETI_INLINE LightSystem *lights() {
+    return lights_;
+  }
 
  private:
   EntityManager entities_;

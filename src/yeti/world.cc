@@ -77,7 +77,6 @@ Entity World::spawn(Resource::Id id,
 }
 
 void World::kill(Entity entity) {
-  // TODO(mtwilliams): Destroy components.
   // TODO(mtwilliams): Lifecycle events.
 
   entities_.destroy(entity);

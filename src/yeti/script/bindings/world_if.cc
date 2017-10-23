@@ -175,6 +175,26 @@ namespace world_if {
 
       return 0;
     }
+
+    static int entity_by_id(lua_State *L) {
+      return luaL_error(L, "Not implemented yet.");
+    }
+
+    static int entity_by_name(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const char *name = luaL_checkstring(L, 2);
+
+      Entity entity;
+
+      if (world->entities()->named(name, &entity))
+        script->push<Entity>(entity);
+      else
+        lua_pushnil(L);
+
+      return 1;
+    }
   }
 } // world_if
 
@@ -187,18 +207,11 @@ void world_if::expose(Script *script) {
   script->add_module_function("World", "update", &update);
   script->add_module_function("World", "render", &render);
 
-#if 0
-  script->add_module_function("World", "entity_by_id", &entity_by_id);
-  script->add_module_function("World", "entity_by_name", &entity_by_name);
-#endif
-
   script->add_module_function("World", "spawn", &spawn);
   script->add_module_function("World", "kill", &kill);
 
-#if 0
-  script->add_module_function("World", "link", &link);
-  script->add_module_function("World", "unlink", &unlink);
-#endif
+  script->add_module_function("World", "entity_by_id", &entity_by_id);
+  script->add_module_function("World", "entity_by_name", &entity_by_name);
 
 #if 0
   script->add_module_function("World", "load", &load);
