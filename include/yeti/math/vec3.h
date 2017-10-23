@@ -141,7 +141,7 @@ YETI_INLINE f32 Vec3::distance(const Vec3 &v1, const Vec3 &v2) {
 
 YETI_INLINE f32 Vec3::angle(const Vec3 &v1, const Vec3 &v2) {
   // Refer to http://math.stackexchange.com/questions/974178
-  return acosf(v1.dot(v2) / (v1.length() * v2.length()));
+  return acosf(v1.dot(v2) / sqrtf(v1.dot(v1) * v2.dot(v2)));
 }
 
 YETI_INLINE Vec3 Vec3::min(const Vec3 &v1, const Vec3 &v2) {

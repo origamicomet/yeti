@@ -53,12 +53,9 @@ class YETI_PUBLIC Vec4 {
   /// \brief Calculates the dot-product between this vector and @v.
   f32 dot(const Vec4 &v) const;
 
- public:
+public:
   /// \brief Returns the distance of @v2 from @v1.
   static f32 distance(const Vec4 &v1, const Vec4 &v2);
-
-  /// \brief Returns the angle between @v1 and @v2.
-  static f32 angle(const Vec4 &v1, const Vec4 &v2);
 
   /// \brief Returns a new vector with the smallest value taken from either @v1
   /// or @v2 for each dimension.
@@ -127,11 +124,6 @@ YETI_INLINE Vec4 operator/(const Vec4 &v, const f32 s) {
 
 YETI_INLINE f32 Vec4::distance(const Vec4 &v1, const Vec4 &v2) {
   return (v1 - v2).length();
-}
-
-YETI_INLINE f32 Vec4::angle(const Vec4 &v1, const Vec4 &v2) {
-  // Refer to http://math.stackexchange.com/questions/974178
-  return acosf(v1.dot(v2) / (v1.length() * v2.length()));
 }
 
 YETI_INLINE Vec4 Vec4::min(const Vec4 &v1, const Vec4 &v2) {

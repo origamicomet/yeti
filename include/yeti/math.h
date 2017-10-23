@@ -19,6 +19,9 @@
 
 #include <math.h>
 
+#include "yeti/math/constants.h"
+#include "yeti/math/conversions.h"
+
 #include "yeti/math/vec2.h"
 #include "yeti/math/vec3.h"
 #include "yeti/math/vec4.h"

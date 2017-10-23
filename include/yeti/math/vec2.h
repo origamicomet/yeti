@@ -51,9 +51,15 @@ class YETI_PUBLIC Vec2 {
   f32 magnitude() const;
 
  public:
-
   /// \brief Calculates the dot-product between this vector and @v.
   f32 dot(const Vec2 &v) const;
+
+  /// \brief Calculates the cross-product between this vector and @v.
+  ///
+  /// \detailed This is computes the Z-component of the cross-product, since
+  /// two-dimensional vectors are constrained to the XY plane.
+  ///
+  f32 cross(const Vec2 &v) const;
 
  public:
   /// \brief Returns the distance of @v2 from @v1.
@@ -101,6 +107,11 @@ YETI_INLINE f32 Vec2::dot(const Vec2 &v) const {
   return (x * v.x) + (y * v.y);
 }
 
+YETI_INLINE f32 Vec2::cross(const Vec2 &v) const {
+  // Just compute the Z-component.
+  return (x * v.y) - (y * v.x);
+}
+
 YETI_INLINE Vec2 operator+(const Vec2 &lhs, const Vec2 &rhs) {
   return Vec2(lhs.x + rhs.x, lhs.y + rhs.y);
 }
@@ -130,8 +141,12 @@ YETI_INLINE f32 Vec2::distance(const Vec2 &v1, const Vec2 &v2) {
 }
 
 YETI_INLINE f32 Vec2::angle(const Vec2 &v1, const Vec2 &v2) {
+#if 1
+  return asinf(fabsf(v1.cross(v2)));
+#else
   // Refer to http://math.stackexchange.com/questions/974178
   return acosf(v1.dot(v2) / (v1.length() * v2.length()));
+#endif
 }
 
 YETI_INLINE Vec2 Vec2::min(const Vec2 &v1, const Vec2 &v2) {

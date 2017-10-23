@@ -31,11 +31,12 @@ class YETI_PUBLIC Quaternion {
  public:
   Quaternion() : x(0.f), y(0.f), z(0.f), w(1.f) {}
   Quaternion(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w) {}
-  Quaternion(const Quaternion &v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
-  Quaternion operator=(const Quaternion &v) { x = v.x; y = v.y; z = v.z; w = v.w; return *this; }
+  Quaternion(const Quaternion &q) : x(q.x), y(q.y), z(q.z), w(q.w) {}
+  Quaternion operator=(const Quaternion &q) { x = q.x; y = q.y; z = q.z; w = q.w; return *this; }
 
  public:
   friend Quaternion operator*(const Quaternion &lhs, const Quaternion &rhs);
+  friend Vec3 operator*(const Quaternion &q, const Vec3 &v);
   friend Quaternion operator*(const Quaternion &q, const f32 s);
 
  public:
@@ -66,7 +67,7 @@ class YETI_PUBLIC Quaternion {
 
  public:
   /// \brief Linearly interpolates between @a and @b based on @t.
-  static Quaternion lerp(const Quaternion &a, const Quaternion &b, const f32 t);
+  static Quaternion nlerp(const Quaternion &a, const Quaternion &b, const f32 t);
 
   /// \brief Linearly interpolates between @a and @b based on @t with uniform
   /// angular velocity.
@@ -100,12 +101,10 @@ YETI_INLINE Quaternion Quaternion::conjugate() const {
 YETI_INLINE Quaternion Quaternion::inverse() const {
   const f32 inverse_of_magnitude = 1.f / magnitude();
 
-  return Quaternion(
-    -x * inverse_of_magnitude,
-    -y * inverse_of_magnitude,
-    -z * inverse_of_magnitude,
-     w * inverse_of_magnitude
-  );
+  return Quaternion(-x * inverse_of_magnitude,
+                    -y * inverse_of_magnitude,
+                    -z * inverse_of_magnitude,
+                     w * inverse_of_magnitude);
 }
 
 YETI_INLINE f32 Quaternion::dot(const Quaternion &q) const {
@@ -113,12 +112,23 @@ YETI_INLINE f32 Quaternion::dot(const Quaternion &q) const {
 }
 
 YETI_INLINE Quaternion operator*(const Quaternion &lhs, const Quaternion &rhs) {
-  return Quaternion(
-    (lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y),
-    (lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x),
-    (lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w),
-    (lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z)
-  );
+  return Quaternion(lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y,
+                    lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x,
+                    lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w,
+                    lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z);
+}
+
+YETI_INLINE Vec3 operator*(const Quaternion &q, const Vec3 &v) {
+  Vec3 uv, uuv;
+
+  const Vec3 q_as_v(q.x, q.y, q.z);
+
+  uv  = q_as_v.cross(v);
+  uuv = q_as_v.cross(uv);
+  uv  = uv * 2.f * q.w;
+  uuv = uuv * 2.f;
+
+  return v + uv + uuv;
 }
 
 YETI_INLINE Quaternion operator*(const Quaternion &q, const f32 s) {
@@ -126,38 +136,36 @@ YETI_INLINE Quaternion operator*(const Quaternion &q, const f32 s) {
 }
 
 YETI_INLINE Quaternion Quaternion::from_axis_angle(const Vec3 &axis, const f32 angle) {
-  const f32 half_angle = angle * 0.5f;
+  const f32 sin_of_half_angle = sinf(angle * 0.5f);
+  const f32 cos_of_half_angle = cosf(angle * 0.5f);
 
-  const f32 sin_of_half_angle = sinf(half_angle);
-  const f32 cos_of_half_angle = cosf(half_angle);
-
-  return Quaternion(
-    sin_of_half_angle * axis.x,
-    sin_of_half_angle * axis.y,
-    sin_of_half_angle * axis.z,
-    cos_of_half_angle
-  );
+  return Quaternion(sin_of_half_angle * axis.x,
+                    sin_of_half_angle * axis.y,
+                    sin_of_half_angle * axis.z,
+                    cos_of_half_angle);
 }
 
 YETI_INLINE Quaternion Quaternion::from_euler_angles(const f32 x, const f32 y, const f32 z) {
-  // PERF(mtwilliams): Derive optimized constructor.
+  const f32 cx = cosf(x * 0.5f);
+  const f32 sx = sinf(x * 0.5f);
+  const f32 cy = cosf(y * 0.5f);
+  const f32 sy = sinf(y * 0.5f);
+  const f32 cz = cosf(z * 0.5f);
+  const f32 sz = sinf(z * 0.5f);
 
-  const Quaternion qx = from_axis_angle(Vec3::X_AXIS, x);
-  const Quaternion qy = from_axis_angle(Vec3::Y_AXIS, y);
-  const Quaternion qz = from_axis_angle(Vec3::Z_AXIS, z);
-
-  return (qx * qy * qz);
+  return Quaternion(cy * sz * cx - sy * cz * sx,
+                    cy * cz * sx + sy * sz * cx,
+                    sy * cz * cx - cy * sz * sx,
+                    cy * cz * cx + sy * sz * sx);
 }
 
-YETI_INLINE Quaternion Quaternion::lerp(const Quaternion &a, const Quaternion &b, const f32 t) {
-  const f32 one_minus_t =  1.f - t;
+YETI_INLINE Quaternion Quaternion::nlerp(const Quaternion &a, const Quaternion &b, const f32 t) {
+  const f32 one_minus_t = 1.f - t;
 
-  const Quaternion q = Quaternion(
-    a.x * one_minus_t + b.x * t,
-    a.y * one_minus_t + b.y * t,
-    a.z * one_minus_t + b.z * t,
-    a.w * one_minus_t + b.w * t
-  );
+  const Quaternion q = Quaternion(a.x * one_minus_t + b.x * t,
+                                  a.y * one_minus_t + b.y * t,
+                                  a.z * one_minus_t + b.z * t,
+                                  a.w * one_minus_t + b.w * t);
 
   return q.normalize();
 }
@@ -172,12 +180,10 @@ YETI_INLINE Quaternion Quaternion::slerp(const Quaternion &a, const Quaternion &
   const f32 Wa = sinf(one_minus_t * theta) * inverse_of_sin_of_theta;
   const f32 Wb = sinf(t * theta) * inverse_of_sin_of_theta;
 
-  const Quaternion q = Quaternion(
-    Wa * a.x + Wb * b.x,
-    Wa * a.y + Wb * b.y,
-    Wa * a.z + Wb * b.z,
-    Wa * a.w + Wb * b.w
-  );
+  const Quaternion q = Quaternion(Wa * a.x + Wb * b.x,
+                                  Wa * a.y + Wb * b.y,
+                                  Wa * a.z + Wb * b.z,
+                                  Wa * a.w + Wb * b.w);
 
   return q.normalize();
 }
