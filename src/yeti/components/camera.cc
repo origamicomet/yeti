@@ -49,7 +49,7 @@ YETI_AUTO_REGISTER_COMPONENT(CameraSystem::component());
 
 const Component *CameraSystem::component() {
   static const Component::Property properties[] = {
-    { "type"      ,    Component::Property::STRING, 1 },
+    { "type",          Component::Property::STRING, 1 },
     { "field_of_view", Component::Property::FLOAT,  1 },
     { "box",           Component::Property::FLOAT,  4 },
     { "near",          Component::Property::FLOAT,  1 },

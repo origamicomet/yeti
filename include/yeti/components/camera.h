@@ -25,6 +25,11 @@
 namespace yeti {
 
 struct Camera {
+  /// Opaque handle to a camera component.
+  struct Handle {
+    u32 instance;
+  };
+
   /// Type of projection.
   enum Type {
     UNKNOWN      = 0,
@@ -32,11 +37,6 @@ struct Camera {
     PERSPECTIVE  = 1,
     /// Orthographic projection.
     ORTHOGRAPHIC = 2
-  };
-
-  /// Opaque handle to a camera component.
-  struct Handle {
-    u32 instance;
   };
 
   /// \copydoc yeti::Camera::Type
@@ -61,7 +61,7 @@ struct Camera {
 };
 
 namespace camera {
-  extern YETI_PUBLIC Camera::Type type_to_string(const char *type);
+  extern YETI_PUBLIC Camera::Type type_from_string(const char *type);
   extern YETI_PUBLIC const char *type_to_string(const Camera::Type type);
 }
 
@@ -88,7 +88,6 @@ class YETI_PUBLIC CameraSystem : public System {
   /// \brief Determines whether or not @entity has any associated cameras.
   bool has(Entity entity) const;
 
- public:
   /// \brief Returns the type of projection used by a camera.
   Camera::Type get_type(Camera::Handle handle) const;
 
@@ -108,16 +107,16 @@ class YETI_PUBLIC CameraSystem : public System {
   void set_type(Camera::Handle handle, Camera::Type type);
 
   /// \brief Sets the horizontal field-of-view of a camera.
-  void set_field_of_view(Camera::Handle handle, f32 new_field_of_view);
+  void set_field_of_view(Camera::Handle handle, f32 field_of_view);
 
   /// \brief Sets the viewing volume of a camera.
   void set_box(Camera::Handle handle, f32 top, f32 left, f32 bottom, f32 right);
 
   /// \brief Sets the near plane of a camera.
-  void set_near_plane(Camera::Handle handle, f32 new_near_plane);
+  void set_near_plane(Camera::Handle handle, f32 near_plane);
 
   /// \brief Sets the far plane of a camera.
-  void set_far_plane(Camera::Handle handle, f32 new_far_plane);
+  void set_far_plane(Camera::Handle handle, f32 far_plane);
 
   /// \brief Returns a complete description of a camera.
   Camera describe(Camera::Handle handle) const;
