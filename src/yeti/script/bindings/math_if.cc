@@ -191,6 +191,13 @@ template <> Mat4 Script::to_a<Mat4>(int index) {
   return *temporary;
 }
 
+// PERF(mtwilliams): LuaJIT performs internal conversion between floats and
+// doubles. This may be a bottleneck. It may be faster to forward to C to
+// perform math. Also, we may be able to store double width types and convert
+// only at boundary (calling into and from C/C++.)
+//
+// See https://github.com/LuaJIT/LuaJIT/issues/32
+
 namespace math_if {
   namespace {
     // Math is reimplemented using LuaJIT's FFI for a few reasons. First, it
