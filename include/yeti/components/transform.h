@@ -26,17 +26,6 @@
 
 namespace yeti {
 
-struct Pose {
-#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
-    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-  Vec3 position;
-  Quaternion rotation;
-  Vec3 scale;
-#else
-  Mat4 matrix;
-#endif
-};
-
 struct Transform {
   /// Opaque handle to a transform component.
   struct Handle {
@@ -105,13 +94,12 @@ class YETI_PUBLIC TransformSystem : public System {
   /// \note If the transform is parentless, then the local pose is the same as
   /// its world pose.
   ///
-  /// \warning Since release builds store local poses as matrices as an
-  /// optimization, we quantize scale when decomposing the matrix to prevent
-  /// drift.
+  /// \warning Since local poses are stored as matrices as an optimization, we
+  /// quantize scale when decomposing the matrix to prevent drift.
   ///
   /// \return Pose of the transform with respect to its parent.
   ///
-  Pose get_local_pose(Transform::Handle handle);
+  Mat4 get_local_pose(Transform::Handle handle);
 
   /// \brief Returns the position of an transform with respect to its parent.
   ///
@@ -136,9 +124,8 @@ class YETI_PUBLIC TransformSystem : public System {
   /// \note If the transform is parentless, then the local scale is the same as
   /// its world scale.
   ///
-  /// \warning Since release builds store local poses as matrices as an
-  /// optimization, we quantize scale when decomposing the matrix to prevent
-  /// drift.
+  /// \warning Since local poses are stored as matrices as an optimization, we
+  /// quantize scale when decomposing the matrix to prevent drift.
   ///
   /// \return Scale of the transform with respect to its parent.
   ///
@@ -153,7 +140,9 @@ class YETI_PUBLIC TransformSystem : public System {
   /// \see yeti::TransformSystem::recompute
   ///
   void set_local_pose(Transform::Handle handle,
-                      const Pose &new_local_pose);
+                      const Vec3 &position,
+                      const Quaternion &rotation,
+                      const Vec3 &scale);
 
   /// \brief Sets the position of an transform with respect to its parent.
   ///
@@ -194,6 +183,13 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   Mat4 get_world_pose(Transform::Handle handle);
 
+ private:
+  /// \internal Marks an instance and descendants as dirty and changed.
+  void modified(Transform::Handle handle);
+
+  /// \internal Unlinks children.
+  void unlink_all_children(Transform::Handle handle);
+
  public:
   /// \brief Recomputes world poses of modified transforms.
   void update();
@@ -217,6 +213,11 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   void changed(core::Array<Entity> &changed) const;
 
+ private:
+  /// \internal Glue that ensures any associated transforms are destroyed when
+  /// an entity is destroyed.
+  void destroyed(Entity entity);
+
  public:
   /// \internal Description of this component.
   static const Component *component();
@@ -236,12 +237,14 @@ class YETI_PUBLIC TransformSystem : public System {
 
   core::Array<u32> parent_;
 
-  core::Array<Pose> local_poses_;
+  core::Array<Mat4> local_poses_;
   core::Array<Mat4> world_poses_;
 
   // PERF(mtwilliams): MEM(mtwilliams): Use bitsets.
   core::Array<bool> dirty_;
   core::Array<bool> changed_;
+
+  unsigned n_;
 };
 
 } // yeti

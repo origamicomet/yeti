@@ -120,7 +120,7 @@ namespace world_if {
       Resource::Id resource;
 
       Vec3 position = Vec3(0.f, 0.f, 0.f);
-      Quaternion rotation = Quaternion(0.f, 0.f, 0.f, 1.f);
+      Quaternion rotation = Quaternion::IDENTITY;
       Vec3 scale = Vec3(1.f, 1.f, 1.f);
 
       switch (lua_gettop(L)) {

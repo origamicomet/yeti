@@ -13,15 +13,274 @@
 
 #include "yeti/script.h"
 
+// Transform system is accessed through `World`.
+#include "yeti/world.h"
+
+// Interfaces with entirety of Entity-Component-System.
+#include "yeti/entity.h"
+#include "yeti/component.h"
+#include "yeti/system.h"
+
+#include "yeti/components/transform.h"
+
 namespace yeti {
+
+template <> bool Script::is_a<Transform::Handle>(int index) {
+  if (!is_a<Reference>(index))
+    return false;
+
+  // Assume it's a reference to an transform.
+  return true;
+}
+
+template <> Transform::Handle Script::to_a<Transform::Handle>(int index) {
+  if (!is_a<Transform::Handle>(index))
+    luaL_argerror(L, index, "Expected a reference to a `Transform`.");
+
+  return {to_a<Reference>(index).opaque};
+}
+
+template <> void Script::push<Transform::Handle>(Transform::Handle transform) {
+  push<Reference>({transform.instance});
+}
 
 namespace transform_if {
   namespace {
+    static int create(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world;
+      Entity entity;
+
+      Vec3 position = Vec3(0.f, 0.f, 0.f);
+      Quaternion rotation = Quaternion::IDENTITY;
+      Vec3 scale = Vec3(1.f, 1.f, 1.f);
+
+      switch (lua_gettop(L)) {
+        default:
+          return luaL_error(L, "Transform.create expects two to five arguments.");
+
+        case 5:
+          scale = script->to_a<Vec3>(5);
+
+        case 4:
+          rotation = script->to_a<Quaternion>(4);
+
+        case 3:
+          position = script->to_a<Vec3>(3);
+
+        case 2:
+          world = script->to_a<World *>(1);
+          entity = script->to_a<Entity>(2);
+      }
+
+      const Transform::Handle transform =
+        world->transforms()->create(entity, position, rotation, scale);
+
+      script->push(transform);
+
+      return 1;
+    }
+
+    static int destroy(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+
+      if (script->is_a<Entity>(2)) {
+        const Entity entity = script->to_a<Entity>(2);
+        world->transforms()->destroy(entity);
+      } else if (script->is_a<Transform::Handle>(2)) {
+        const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+        world->transforms()->destroy(handle);
+      } else {
+        return luaL_argerror(L, 1, "Expected an `Entity` or a `Transform`.");
+      }
+
+      return 0;
+    }
+
+    static int lookup(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Entity entity = script->to_a<Entity>(2);
+
+      script->push<Transform::Handle>(world->transforms()->lookup(entity));
+
+      return 1;
+    }
+
+    static int get_local_position(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      script->push<Vec3>(world->transforms()->get_local_position(handle));
+
+      return 1;
+    }
+
+    static int get_local_rotation(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      script->push<Quaternion>(world->transforms()->get_local_rotation(handle));
+
+      return 1;
+    }
+
+    static int get_local_scale(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      script->push<Vec3>(world->transforms()->get_local_scale(handle));
+
+      return 1;
+    }
+
+    static int set_local_position(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      world->transforms()->set_local_position(handle, script->to_a<Vec3>(3));
+
+      return 0;
+    }
+
+    static int set_local_rotation(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      world->transforms()->set_local_rotation(handle, script->to_a<Quaternion>(3));
+
+      return 0;
+    }
+
+    static int set_local_scale(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      world->transforms()->set_local_scale(handle, script->to_a<Vec3>(3));
+
+      return 0;
+    }
+
+    static int get_local_pose(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      script->push<Mat4>(world->transforms()->get_local_pose(handle));
+
+      return 1;
+    }
+
+    static int get_world_pose(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      script->push<Mat4>(world->transforms()->get_world_pose(handle));
+
+      return 1;
+    }
+
+    static int link(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world;
+      Transform::Handle child;
+      Transform::Handle parent;
+
+      Vec3 position = Vec3(0.f, 0.f, 0.f);
+      Quaternion rotation = Quaternion::IDENTITY;
+      Vec3 scale = Vec3(1.f, 1.f, 1.f);
+
+      switch (lua_gettop(L)) {
+        default:
+          return luaL_error(L, "Transform.link expects three to six arguments.");
+
+        case 6:
+          scale = script->to_a<Vec3>(6);
+
+        case 5:
+          rotation = script->to_a<Quaternion>(5);
+
+        case 4:
+          position = script->to_a<Vec3>(4);
+
+        case 3:
+          world = script->to_a<World *>(1);
+          child = script->to_a<Transform::Handle>(2);
+          parent = script->to_a<Transform::Handle>(3);
+      }
+
+      world->transforms()->link(child, parent, position, rotation, scale);
+
+      return 0;
+    }
+
+    static int unlink(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      world->transforms()->unlink(handle);
+
+      return 0;
+    }
+
+    static int recompute(lua_State *L) {
+      Script *script = Script::recover(L);
+
+      World *world = script->to_a<World *>(1);
+      const Transform::Handle handle = script->to_a<Transform::Handle>(2);
+
+      world->transforms()->recompute(handle);
+
+      return 0;
+    }
   }
 } // transform_if
 
 void transform_if::expose(Script *script) {
   script->add_module("Transform");
+
+  script->add_module_function("Transform", "create", &create);
+  script->add_module_function("Transform", "destroy", &destroy);
+
+  script->add_module_function("Transform", "lookup", &lookup);
+
+  script->add_module_function("Transform", "position", &get_local_position);
+  script->add_module_function("Transform", "rotation", &get_local_rotation);
+  script->add_module_function("Transform", "scale", &get_local_scale);
+
+  script->add_module_function("Transform", "set_position", &set_local_position);
+  script->add_module_function("Transform", "set_rotation", &set_local_rotation);
+  script->add_module_function("Transform", "set_scale", &set_local_scale);
+
+  script->add_module_function("Transform", "local", &get_local_pose);
+  script->add_module_function("Transform", "world", &get_world_pose);
+
+  script->add_module_function("Transform", "link", &link);
+  script->add_module_function("Transform", "unlink", &unlink);
+
+  script->add_module_function("Transform", "recompute", &recompute);
 }
 
 } // yeti

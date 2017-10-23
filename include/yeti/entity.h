@@ -62,6 +62,10 @@ struct Entity {
   /// \copydoc yeti::Entity::Id
   Id id;
 
+  Entity()
+    : id(0xFFFFFFFFul)
+  {}
+
   explicit Entity(Id id)
     : id(id)
   {}
