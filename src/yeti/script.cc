@@ -99,7 +99,7 @@ Script::Script() {
     lua_pop(L, 1);
   }
 
-  // Use our own loader.
+  // Replace loaders with our own.
   lua_getglobal(L, "package");
   lua_createtable(L, 1, 0);
   lua_pushlightuserdata(L, (void *)this);
@@ -135,6 +135,11 @@ int Script::__require(lua_State *L) {
 
   const Resource::Id script_id =
     resource::id_from_name(script_resource_type_id, script_name);
+
+  if (!resource_manager::available(script_id)) {
+    lua_pushfstring(L, "The script `%s` is not available.", script_name);
+    return 1;
+  }
 
   ScriptResource *script_resource =
     (ScriptResource *)resource_manager::lookup(script_id);
