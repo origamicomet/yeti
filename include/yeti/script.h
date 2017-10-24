@@ -53,8 +53,7 @@ class YETI_PUBLIC Script {
     T_VEC4       = 11,
     T_QUATERNION = 12,
     T_MAT3       = 13,
-    T_MAT4       = 14,
-    T_REFERENCE  = 15
+    T_MAT4       = 14
   };
 
  public:
@@ -99,12 +98,6 @@ class YETI_PUBLIC Script {
   void add_module_constant(const char *module,
                            const char *name,
                            const unsigned constant);
-
- public:
-  /// A light-weight handle.
-  struct Reference {
-    u32 opaque;
-  };
 
  public:
   /// \brief Determines type of value at @index.

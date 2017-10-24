@@ -260,8 +260,6 @@ Script::Type Script::type(int index) {
       void *ptr = lua_touserdata(L, index);
       if (const Script::Type type = E->type(ptr))
         return type;
-      if ((uintptr_t(ptr) & 0xF) == 0xF)
-        return T_REFERENCE;
       return T_POINTER;
   }
 
@@ -307,34 +305,6 @@ template <> const char *Script::to_a<const char *>(int index) {
   return luaL_checkstring(L, index);
 }
 
-template <> bool Script::is_a<Script::Reference>(int index) {
-  if (!lua_islightuserdata(L, index))
-    return false;
-
-  const uintptr_t lud = (uintptr_t)lua_touserdata(L, index);
-
-  return ((lud & 0xF) == 0xF);
-}
-
-template <> Script::Reference Script::to_a<Script::Reference>(int index) {
-  if (!lua_islightuserdata(L, index))
-    luaL_typerror(L, index, "ref");
-
-  const uintptr_t lud = (uintptr_t)lua_touserdata(L, index);
-
-  if ((lud & 0xF) != 0xF)
-    luaL_typerror(L, index, "ref");
-
-  Script::Reference reference;
-  reference.opaque = (lud >> 4) & 0xFFFFFFFF;
-  return reference;
-}
-
-template <> void Script::push<Script::Reference>(Script::Reference reference) {
-  const uintptr_t lud = ((uintptr_t)reference.opaque << 4) | 0xF;
-  lua_pushlightuserdata(L, (void *)lud);
-}
-
 bool Script::call(const char *fn, u32 n, ...) {
   lua_pushlightuserdata(L, (void *)this);
   lua_pushcclosure(L, &Script::__error_handler, 1);
@@ -361,7 +331,6 @@ bool Script::call(const char *fn, u32 n, ...) {
       case T_QUATERNION: yeti_assert_with_reason(0, "Not implemented yet."); break;
       case T_MAT3:       yeti_assert_with_reason(0, "Not implemented yet."); break;
       case T_MAT4:       yeti_assert_with_reason(0, "Not implemented yet."); break;
-      case T_REFERENCE:  yeti_assert_with_reason(0, "Not implemented yet."); break;
       default:           yeti_assert_with_reason(0, "Invalid or unknown type."); break;
     }
   }
