@@ -12,6 +12,8 @@
 #include "yeti/script.h"
 #include "yeti/script/environment.h"
 
+#include "yeti/resource.h"
+#include "yeti/resource_database.h"
 #include "yeti/resource_manager.h"
 
 #include "yeti/resources/script_resource.h"
