@@ -475,9 +475,10 @@ Resource::Id SophisticatedResourceDatabase::resource_by_name(Resource::Type::Id 
   sqlite3_bind_int(find_a_resource_by_name_stmt_, 1, type);
   sqlite3_bind_text(find_a_resource_by_name_stmt_, 2, name, -1, SQLITE_STATIC);
 
-  sqlite3_step(find_a_resource_by_name_stmt_);
+  if (sqlite3_step(find_a_resource_by_name_stmt_) == SQLITE_ROW)
+    return (Resource::Id)sqlite3_column_int64(find_a_resource_by_name_stmt_, 0);
 
-  return (Resource::Id)sqlite3_column_int64(find_a_resource_by_name_stmt_, 0);
+  return resource::INVALID;
 }
 
 Resource::Id SophisticatedResourceDatabase::resource_by_source(Resource::File::Id source) {
