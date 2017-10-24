@@ -85,6 +85,10 @@ Transform::Handle TransformSystem::create(Entity entity,
 }
 
 void TransformSystem::destroy(Transform::Handle handle) {
+  // TODO(mtwilliams): Defer destruction until next update as this prevents
+  // handles from being invalidated (pointing to wrong instances) for the
+  // duration of a frame.
+
   // Unlink all children otherwise they'll be linked to a random transform at
   // some point in the future.
   this->unlink_all_children(handle);

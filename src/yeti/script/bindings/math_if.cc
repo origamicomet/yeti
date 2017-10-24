@@ -187,6 +187,12 @@ template <> Mat4 Script::to_a<Mat4>(int index) {
   return *ptr_to_v;
 }
 
+// TODO(mtwilliams): Use `ffi.C` instead of manually binding helpers.
+//
+// PERF(mtwilliams): Investigate using `ffi.new` instead of custom pools.
+//
+// PERF(mtwilliams): Move all boxing/unboxing to `ffi.copy`.
+//
 // PERF(mtwilliams): LuaJIT performs internal conversion between floats and
 // doubles. This may be a bottleneck. It may be faster to forward to C to
 // perform math. Also, we may be able to store double width types and convert
