@@ -121,24 +121,36 @@ Mat4 Mat4::compose(const Vec3 &translation,
                    const Vec3 &scale) {
   Mat4 matrix;
 
-  matrix.M[0][0] = scale.x * (1.f - 2.f * (rotation.y * rotation.y) - 2.f * (rotation.z * rotation.z));
-  matrix.M[0][1] = scale.y * (2.f * (rotation.x * rotation.y) - 2.f * (rotation.z * rotation.w));
-  matrix.M[0][2] = scale.z * (2.f * (rotation.x * rotation.z) + 2.f * (rotation.y * rotation.w));
+  matrix.M[0][0] = 1.f - 2.f * (rotation.y * rotation.y) - 2.f * (rotation.z * rotation.z);
+  matrix.M[0][1] = 2.f * (rotation.x * rotation.y) - 2.f * (rotation.z * rotation.w);
+  matrix.M[0][2] = 2.f * (rotation.x * rotation.z) + 2.f * (rotation.y * rotation.w);
   matrix.M[0][3] = translation.x;
 
-  matrix.M[1][0] = scale.x * (2.f * (rotation.x * rotation.y) + 2.f * (rotation.z * rotation.w));
-  matrix.M[1][1] = scale.y * (1.f - 2.f * (rotation.x * rotation.x) - 2.f * (rotation.z * rotation.z));
-  matrix.M[1][2] = scale.z * (2.f * (rotation.y * rotation.z) - 2.f * (rotation.x * rotation.w));
+  matrix.M[1][0] = 2.f * (rotation.x * rotation.y) + 2.f * (rotation.z * rotation.w);
+  matrix.M[1][1] = 1.f - 2.f * (rotation.x * rotation.x) - 2.f * (rotation.z * rotation.z);
+  matrix.M[1][2] = 2.f * (rotation.y * rotation.z) - 2.f * (rotation.x * rotation.w);
   matrix.M[1][3] = translation.y;
 
-  matrix.M[2][0] = scale.x * (2.f * (rotation.x * rotation.z) - 2.f * (rotation.y * rotation.w));
-  matrix.M[2][1] = scale.y * (2.f * (rotation.y * rotation.z) + 2.f * (rotation.x * rotation.w));
-  matrix.M[2][2] = scale.z * (1.f - 2.f * (rotation.x * rotation.x) - 2.f * (rotation.y * rotation.y));
+  matrix.M[2][0] = 2.f * (rotation.x * rotation.z) - 2.f * (rotation.y * rotation.w);
+  matrix.M[2][1] = 2.f * (rotation.y * rotation.z) + 2.f * (rotation.x * rotation.w);
+  matrix.M[2][2] = 1.f - 2.f * (rotation.x * rotation.x) - 2.f * (rotation.y * rotation.y);
   matrix.M[2][3] = translation.z;
 
-  matrix.M[0][3] = 0.f;
-  matrix.M[1][3] = 0.f;
-  matrix.M[2][3] = 0.f;
+  matrix.M[0][0] *= scale.x;
+  matrix.M[1][0] *= scale.x;
+  matrix.M[2][0] *= scale.x;
+
+  matrix.M[0][1] *= scale.y;
+  matrix.M[1][1] *= scale.y;
+  matrix.M[2][1] *= scale.y;
+
+  matrix.M[0][2] *= scale.z;
+  matrix.M[1][2] *= scale.z;
+  matrix.M[2][2] *= scale.z;
+
+  matrix.M[3][0] = 0.f;
+  matrix.M[3][1] = 0.f;
+  matrix.M[3][2] = 0.f;
   matrix.M[3][3] = 1.f;
 
   return matrix;
@@ -243,28 +255,40 @@ Vec3 translation_from_matrix(const Mat4 &m) {
 Vec3 scale_from_matrix(const Mat4 &m) {
   Vec3 scale;
 
-  scale.x = Vec3(m(0,0), m(0,1), m(0,2)).magnitude();
-  scale.y = Vec3(m(1,0), m(1,1), m(1,2)).magnitude();
-  scale.z = Vec3(m(2,0), m(2,1), m(2,2)).magnitude();
+  scale.x = Vec3(m(0,0), m(1,0), m(2,0)).magnitude();
+  scale.y = Vec3(m(0,1), m(1,1), m(2,1)).magnitude();
+  scale.z = Vec3(m(0,2), m(1,2), m(2,2)).magnitude();
 
   return scale;
 }
 
+// NOTE(mtwilliams): Breaks if shear or reflection are introduced.
 Quaternion rotation_from_matrix(const Mat4 &m) {
+  // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+  // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/christian.htm
+
   Quaternion rotation;
 
-  const f32 determinant = m(0,0) * (m(1,1) * m(2,2) - m(1,2) * m(2,1))
-                        + m(0,1) * (m(1,2) * m(2,0) - m(1,0) * m(2,2))
-                        + m(0,2) * (m(1,0) * m(2,1) - m(1,1) * m(2,0));
+  const f32 m00 = m(0,0), m01 = m(0,1), m02 = m(0,2);
+  const f32 m10 = m(1,0), m11 = m(1,1), m12 = m(1,2);
+  const f32 m20 = m(2,0), m21 = m(2,1), m22 = m(2,2);
 
-  const f32 cube_root_of_determinant = powf(determinant, 1.f / 3.f);
+  const f32 determinant = m00 * (m11 * m22 - m12 * m21)
+                        + m01 * (m12 * m20 - m10 * m22)
+                        + m02 * (m10 * m21 - m11 * m20);
 
-  rotation.x = sqrtf(YETI_MAX(0.0f, cube_root_of_determinant + m(0,0) - m(1,1) - m(2,2))) * 0.5f;
-  rotation.y = sqrtf(YETI_MAX(0.0f, cube_root_of_determinant - m(0,0) + m(1,1) - m(2,2))) * 0.5f;
-  rotation.z = sqrtf(YETI_MAX(0.0f, cube_root_of_determinant - m(0,0) - m(1,1) + m(2,2))) * 0.5f;
-  rotation.w = sqrtf(YETI_MAX(0.0f, cube_root_of_determinant + m(0,0) + m(1,1) + m(2,2))) * 0.5f;
+  const f32 n = powf(determinant, 1.f / 3.f);
 
-  return rotation;
+  rotation.w = sqrtf(fmaxf(0.f, n + m00 + m11 + m22)) * 0.5f;
+  rotation.x = sqrtf(fmaxf(0.f, n + m00 - m11 - m22)) * 0.5f;
+  rotation.y = sqrtf(fmaxf(0.f, n - m00 + m11 - m22)) * 0.5f;
+  rotation.z = sqrtf(fmaxf(0.f, n - m00 - m11 + m22)) * 0.5f;
+
+  rotation.x = copysignf(rotation.x, m21 - m12);
+  rotation.y = copysignf(rotation.y, m02 - m20);
+  rotation.z = copysignf(rotation.z, m10 - m01);
+
+  return rotation.normalize();
 }
 
 } // yeti
