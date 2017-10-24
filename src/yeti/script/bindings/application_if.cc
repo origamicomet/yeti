@@ -18,16 +18,15 @@
 
 namespace yeti {
 
-// TODO(mtwilliams): Refactor singleton management into `yeti::Script`?
 Application *application_if::instance(lua_State *L) {
-  lua_getglobal(L, "Application");
-  lua_getfield(L, -1, "__instance__");
+  lua_getfield(L, LUA_REGISTRYINDEX, "Application");
 
   if (!lua_islightuserdata(L, -1))
-    luaL_error(L, "Expected Application.__instance__ to be a light user-data reference to an `Application`.");
+    luaL_error(L, "Expected reigstry to contain a light user-data reference to `Application`.");
 
   Application *app = (Application *)lua_touserdata(L, -1);
-  lua_pop(L, 2);
+
+  lua_pop(L, 1);
 
   return app;
 }
@@ -212,10 +211,8 @@ namespace application_if {
 void application_if::expose(Script *script, Application *app) {
   script->add_module("Application");
 
-  lua_getglobal(script->state(), "Application");
   lua_pushlightuserdata(script->state(), (void *)app);
-  lua_setfield(script->state(), -2, "__instance__");
-  lua_pop(script->state(), 1);
+  lua_setfield(script->state(), LUA_REGISTRYINDEX, "Application");
 
   script->add_module_function("Application", "platform", &platform);
   script->add_module_function("Application", "architecture", &architecture);

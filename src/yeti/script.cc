@@ -74,10 +74,8 @@ Script::Script() {
 #endif
 
   // Insert reference to aid recovery. See `Script::recover`.
-  lua_createtable(L, 0, 1);
   lua_pushlightuserdata(L, (void *)this);
-  lua_setfield(L, -2, "__instance__");
-  lua_setglobal(L, "Script");
+  lua_setfield(L, LUA_REGISTRYINDEX, "Script");
 
   // INSECURE(mtwilliams): Foreign function interface should not be exposed
   // outside of engine.
@@ -187,15 +185,14 @@ int Script::__error_handler(lua_State *L) {
 Script *Script::recover(lua_State *L) {
   yeti_assert_debug(L != NULL);
 
-  lua_getglobal(L, "Script");
-  lua_getfield(L, -1, "__instance__");
+  lua_getfield(L, LUA_REGISTRYINDEX, "Script");
 
   yeti_assert_with_reason_debug(lua_islightuserdata(L, -1),
-                                "Expected Script.__instance__ to be a light user-data reference to a `Script`.");
+                                "Expected a registry to contain a light user-data reference to the `Script`.");
 
   Script *script = (Script *)lua_touserdata(L, -1);
 
-  lua_pop(L, 2);
+  lua_pop(L, 1);
 
   return script;
 }
