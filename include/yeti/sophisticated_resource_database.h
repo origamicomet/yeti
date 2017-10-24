@@ -71,6 +71,8 @@ class YETI_PUBLIC SophisticatedResourceDatabase : public ResourceDatabase {
 
   void remove_a_resource(Resource::Id resource);
 
+  bool exists(Resource::Id resource);
+
   Resource::Id resource_by_name(Resource::Type::Id type,
                                 const char *name);
 

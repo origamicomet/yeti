@@ -99,7 +99,7 @@ bool resource_manager::autoloads() {
 
 bool resource_manager::available(Resource::Id id) {
   if (autoload_) {
-    return true;
+    return database_->exists(id);
   } else {
     YETI_SCOPED_LOCK_NON_EXCLUSIVE(lock_);
     return !!resources_.find(id);

@@ -453,6 +453,19 @@ void SophisticatedResourceDatabase::remove_a_resource(Resource::Id resource) {
   YETI_TRAP();
 }
 
+bool SophisticatedResourceDatabase::exists(Resource::Id resource) {
+  YETI_SCOPED_LOCK(lock_);
+
+  RESET_ON_RETURN(find_a_resource_by_id_stmt_);
+
+  sqlite3_bind_int64(find_a_resource_by_id_stmt_, 1, resource);
+
+  if(sqlite3_step(find_a_resource_by_id_stmt_) == SQLITE_ROW)
+    return true;
+
+  return false;
+}
+
 Resource::Id SophisticatedResourceDatabase::resource_by_name(Resource::Type::Id type,
                                                              const char *name) {
   YETI_SCOPED_LOCK(lock_);

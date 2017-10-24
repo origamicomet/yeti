@@ -83,6 +83,9 @@ class YETI_PUBLIC ResourceDatabase {
   /// Removes a resource.
   virtual void remove_a_resource(Resource::Id resource) = 0;
 
+  /// Determines if a resource exists.
+  virtual bool exists(Resource::Id resource) = 0;
+
   /// Finds a resource by type and name.
   virtual Resource::Id resource_by_name(Resource::Type::Id type,
                                         const char *name) = 0;
