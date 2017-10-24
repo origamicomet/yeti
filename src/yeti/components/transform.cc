@@ -185,13 +185,13 @@ void TransformSystem::set_local_rotation(Transform::Handle handle,
   Mat4 &pose = local_poses_[instance_from_handle(handle)];
 
   // Derive existing position.
-  const Vec3 old_localposition = translation_from_matrix(pose);
+  const Vec3 old_local_position = translation_from_matrix(pose);
 
   // Derive existing scale.
   const Vec3 old_local_scale = scale_from_matrix(pose);
 
   // Build new local pose.
-  pose = Mat4::compose(old_localposition, new_local_rotation, old_local_scale);
+  pose = Mat4::compose(old_local_position, new_local_rotation, old_local_scale);
 
   // Mark instance and descendants as dirty and changed.
   this->modified(handle);

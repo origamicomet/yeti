@@ -153,42 +153,38 @@ template <> Quaternion Script::to_a<Quaternion>(int index) {
   return *ptr_to_v;
 }
 
-template <> void Script::push<Mat3>(Mat3 v) {
-  Mat3 *storage = E->allocate<Mat3>();
-  *storage = v;
-  lua_pushlightuserdata(L, (void *)storage);
-}
-
-template <> bool Script::is_a<Mat3>(int index) {
-  return E->valid<Mat3>((Mat3 *)lua_touserdata(L, index));
-}
-
-template <> Mat3 Script::to_a<Mat3>(int index) {
-  const Mat3 *temporary = (const Mat3 *)lua_touserdata(L, index);
-
-  if (!E->valid<Mat3>(temporary))
-    luaL_typerror(L, index, "Mat3");
-
-  return *temporary;
-}
-
 template <> void Script::push<Mat4>(Mat4 v) {
+  // Allocate temporary storage.
   Mat4 *storage = E->allocate<Mat4>();
+
+  // Copy value over.
   *storage = v;
+
+  // Cast to appropriate type.
+  lua_getfield(L, LUA_REGISTRYINDEX, "_Mat4.cast");
   lua_pushlightuserdata(L, (void *)storage);
+  lua_call(L, 1, 1);
 }
 
 template <> bool Script::is_a<Mat4>(int index) {
-  return E->valid<Mat4>((Mat4 *)lua_touserdata(L, index));
+  if (lua_type(L, index) != LUA_TCDATA)
+    return false;
+
+  const Mat4 *ptr_to_v = *(Mat4 **)lua_topointer(L, index);
+
+  return E->valid<Mat4>(ptr_to_v);
 }
 
 template <> Mat4 Script::to_a<Mat4>(int index) {
-  const Mat4 *temporary = (const Mat4 *)lua_touserdata(L, index);
-
-  if (!E->valid<Mat4>(temporary))
+  if (lua_type(L, index) != LUA_TCDATA)
     luaL_typerror(L, index, "Mat4");
 
-  return *temporary;
+  const Mat4 *ptr_to_v = *(Mat4 **)lua_topointer(L, index);
+
+  if (!E->valid<Mat4>(ptr_to_v))
+    luaL_typerror(L, index, "Mat4");
+
+  return *ptr_to_v;
 }
 
 // PERF(mtwilliams): LuaJIT performs internal conversion between floats and
@@ -212,8 +208,7 @@ namespace math_if {
       "  typedef struct Vec3 { float x, y, z; } Vec3;                      \n"
       "  typedef struct Vec4 { float x, y, z, w; } Vec4;                   \n"
       "  typedef struct Quaternion { float x, y, z, w; } Quaternion;       \n"
-      "  typedef struct Mat3 { float m[9]; } Mat3;                         \n"
-      "  typedef struct Mat4 { float m[16]; } Mat4;                        \n"
+      "  typedef struct Mat4 { float m[4][4]; } Mat4;                      \n"
       "]])                                                                 \n"
       "                                                                    \n"
       "ffi.cdef([[                                                         \n"
@@ -221,6 +216,7 @@ namespace math_if {
       "  typedef struct { Vec3 contents; } Vec3Box;                        \n"
       "  typedef struct { Vec4 contents; } Vec4Box;                        \n"
       "  typedef struct { Quaternion contents; } QuaternionBox;            \n"
+      "  typedef struct { Mat4 contents; } Mat4Box;                        \n"
       "]])                                                                 \n"
       "                                                                    \n"
       "local T_Vec2 = ffi.typeof('Vec2 *')                                 \n"
@@ -229,11 +225,15 @@ namespace math_if {
       "                                                                    \n"
       "local T_Quaternion = ffi.typeof('Quaternion *')                     \n"
       "                                                                    \n"
+      "local T_Mat4 = ffi.typeof('Mat4 *')                                 \n"
+      "                                                                    \n"
       "local T_Vec2Box = ffi.typeof('Vec2Box')                             \n"
       "local T_Vec3Box = ffi.typeof('Vec3Box')                             \n"
       "local T_Vec4Box = ffi.typeof('Vec4Box')                             \n"
       "                                                                    \n"
       "local T_QuaternionBox = ffi.typeof('QuaternionBox')                 \n"
+      "                                                                    \n"
+      "local T_Mat4Box = ffi.typeof('Mat4Box')                             \n"
       "                                                                    \n"
       "function _Vec2.cast(ptr) return ffi.cast(T_Vec2, ptr) end           \n"
       "function _Vec3.cast(ptr) return ffi.cast(T_Vec3, ptr) end           \n"
@@ -241,6 +241,10 @@ namespace math_if {
       "                                                                    \n"
       "function _Quaternion.cast(ptr)                                      \n"
       "  return ffi.cast(T_Quaternion, ptr)                                \n"
+      "end                                                                 \n"
+      "                                                                    \n"
+      "function _Mat4.cast(ptr)                                            \n"
+      "  return ffi.cast(T_Mat4, ptr)                                      \n"
       "end                                                                 \n"
       "                                                                    \n"
       "_G.Vec2 = ffi.metatype('Vec2', {                                    \n"
@@ -788,6 +792,84 @@ namespace math_if {
       "    return string.format('Quaternion[%g, %g, %g, %g]',              \n"
       "                         v.x, v.y, v.z, v.w)                        \n"
       "  end                                                               \n"
+      "})                                                                  \n"
+      "                                                                    \n"
+      "_G.Mat4 = ffi.metatype('Mat4', {                                    \n"
+      "  __new = function(ct)                                              \n"
+      "    return ffi.cast(T_Mat4, _Mat4.allocate())                       \n"
+      "  end,                                                              \n"
+      "                                                                    \n"
+      "  __index = {                                                       \n"
+      "    -- Forward almost everything to C.                              \n"
+      "                                                                    \n"
+      "    identity = _Mat4.identity,                                      \n"
+      "                                                                    \n"
+      "    perspective = _Mat4.perspective,                                \n"
+      "    orthographic = _Mat4.orthographic,                              \n"
+      "                                                                    \n"
+      "    translation = _Mat4.translation,                                \n"
+      "    rotation = _Mat4.rotation,                                      \n"
+      "    scale = _Mat4.scale,                                            \n"
+      "                                                                    \n"
+      "    compose = _Mat4.compose,                                        \n"
+      "    decompose = _Mat4.decompose,                                    \n"
+      "                                                                    \n"
+      "    determinant = _Mat4.determinant,                                \n"
+      "    inverse = _Mat4.inverse,                                        \n"
+      "    transpose = _Mat4.transpose,                                    \n"
+      "                                                                    \n"
+      "    box = function(matrix)                                          \n"
+      "      local box = ffi.new(T_Mat4Box)                                \n"
+      "      ffi.copy(box.contents, matrix, ffi.sizeof('Mat4'))            \n"
+      "      return box                                                    \n"
+      "    end                                                             \n"
+      "  },                                                                \n"
+      "                                                                    \n"
+      "  __mul = function(lhs, rhs)                                        \n"
+      "    if ffi.istype(T_Mat4, rhs) then                                 \n"
+      "      return _Mat4.multiply(lhs, rhs)                               \n"
+      "    elseif ffi.istype(T_Vec3, rhs) then                             \n"
+      "      return _Mat4.rotate(lhs, rhs)                                 \n"
+      "    end                                                             \n"
+      "  end,                                                              \n"
+      "                                                                    \n"
+      "  __tostring = function(matrix)                                     \n"
+      "    local m = matrix.m                                              \n"
+      "                                                                    \n"
+      "    return string.format('Mat4(%g, %g, %g, %g,\\n' ..               \n"
+      "                         '     %g, %g, %g, %g,\\n' ..               \n"
+      "                         '     %g, %g, %g, %g,\\n' ..               \n"
+      "                         '     %g, %g, %g, %g)',                    \n"
+      "                                                                    \n"
+      "                         m[0][0], m[0][1], m[0][2], m[0][3],        \n"
+      "                         m[1][0], m[1][1], m[1][2], m[1][3],        \n"
+      "                         m[2][0], m[2][1], m[2][2], m[2][3],        \n"
+      "                         m[3][0], m[3][1], m[3][2], m[3][3])        \n"
+      "  end                                                               \n"
+      "})                                                                  \n"
+      "                                                                    \n"
+      "ffi.metatype('Mat4Box', {                                           \n"
+      "  __index = {                                                       \n"
+      "    unbox = function(box)                                           \n"
+      "      local matrix = _Mat4.allocate()                               \n"
+      "      ffi.copy(matrix, box.contents, ffi.sizeof('Mat4'))            \n"
+      "      return ffi.cast(T_Mat4, matrix)                               \n"
+      "    end                                                             \n"
+      "  },                                                                \n"
+      "                                                                    \n"
+      "  __tostring = function(box)                                        \n"
+      "    local m = box.contents.m                                        \n"
+      "                                                                    \n"
+      "    return string.format('Mat4[%g, %g, %g, %g,\\n' ..               \n"
+      "                         '     %g, %g, %g, %g,\\n' ..               \n"
+      "                         '     %g, %g, %g, %g,\\n' ..               \n"
+      "                         '     %g, %g, %g, %g]',                    \n"
+      "                                                                    \n"
+      "                         m[0][0], m[0][1], m[0][2], m[0][3],        \n"
+      "                         m[1][0], m[1][1], m[1][2], m[1][3],        \n"
+      "                         m[2][0], m[2][1], m[2][2], m[2][3],        \n"
+      "                         m[3][0], m[3][1], m[3][2], m[3][3])        \n"
+      "  end                                                               \n"
       "})                                                                  \n";
 
     static int allocate_a_vec2(lua_State *L) {
@@ -881,6 +963,7 @@ namespace math_if {
 
       const Quaternion a = script->to_a<Quaternion>(1);
       const Quaternion b = script->to_a<Quaternion>(2);
+
       const f32 t = (f32)luaL_checknumber(L, 3);
 
       script->push<Quaternion>(Quaternion::nlerp(a, b, t));
@@ -893,9 +976,152 @@ namespace math_if {
 
       const Quaternion a = script->to_a<Quaternion>(1);
       const Quaternion b = script->to_a<Quaternion>(2);
+
       const f32 t = (f32)luaL_checknumber(L, 3);
 
       script->push<Quaternion>(Quaternion::slerp(a, b, t));
+
+      return 1;
+    }
+
+    static int allocate_a_mat4(lua_State *L) {
+      ScriptEnvironment *env = (ScriptEnvironment *)lua_touserdata(L, lua_upvalueindex(1));
+      Mat4 *m = env->allocate<Mat4>();
+      *m = Mat4::IDENTITY;
+      lua_pushlightuserdata(L, (void *)m);
+      return 1;
+    }
+
+    // PERF(mtwilliams): Reduce copies introduced by `push` and `to_a`.
+
+    static int mat4_identity(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+      script->push<Mat4>(Mat4::IDENTITY);
+      return 1;
+    }
+
+    static int mat4_perspective(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 matrix = Mat4::perspective((f32)luaL_checknumber(L, 1),
+                                            (f32)luaL_checknumber(L, 2),
+                                            (f32)luaL_checknumber(L, 3),
+                                            (f32)luaL_checknumber(L, 4));
+
+      script->push<Mat4>(matrix);
+
+      return 1;
+    }
+
+    static int mat4_orthographic(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 matrix = Mat4::orthographic((f32)luaL_checknumber(L, 1),
+                                             (f32)luaL_checknumber(L, 2),
+                                             (f32)luaL_checknumber(L, 3),
+                                             (f32)luaL_checknumber(L, 4),
+                                             (f32)luaL_checknumber(L, 5),
+                                             (f32)luaL_checknumber(L, 6));
+
+      script->push<Mat4>(matrix);
+
+      return 1;
+    }
+
+    static int mat4_translation(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 matrix = Mat4::translation(script->to_a<Vec3>(1));
+
+      script->push<Mat4>(matrix);
+
+      return 1;
+    }
+
+    static int mat4_rotation(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 matrix = Mat4::rotation(script->to_a<Quaternion>(1));
+
+      script->push<Mat4>(matrix);
+
+      return 1;
+    }
+
+    static int mat4_scale(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 matrix = Mat4::scale(script->to_a<Vec3>(1));
+
+      script->push<Mat4>(matrix);
+
+      return 1;
+    }
+
+    static int mat4_compose(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 matrix = Mat4::compose(script->to_a<Vec3>(1),
+                                        script->to_a<Quaternion>(2),
+                                        script->to_a<Vec3>(3));
+
+      script->push<Mat4>(matrix);
+
+      return 1;
+    }
+
+    static int mat4_decompose(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      Vec3 position;
+      Quaternion rotation;
+      Vec3 scale;
+
+      Mat4::decompose(script->to_a<Mat4>(1), &position, &rotation, &scale);
+
+      script->push<Vec3>(position);
+      script->push<Quaternion>(rotation);
+      script->push<Vec3>(scale);
+
+      return 3;
+    }
+
+    static int mat4_determinant(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+      lua_pushnumber(L, (lua_Number)script->to_a<Mat4>(1).determinant());
+      return 1;
+    }
+
+    static int mat4_inverse(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+      script->push<Mat4>(script->to_a<Mat4>(1).inverse());
+      return 1;
+    }
+
+    static int mat4_transpose(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+      script->push<Mat4>(script->to_a<Mat4>(1).transpose());
+      return 1;
+    }
+
+    static int mat4_multiply(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 lhs = script->to_a<Mat4>(1);
+      const Mat4 rhs = script->to_a<Mat4>(2);
+
+      script->push<Mat4>(lhs * rhs);
+
+      return 1;
+    }
+
+    static int mat4_rotate(lua_State *L) {
+      Script *script = (Script *)lua_touserdata(L, lua_upvalueindex(1));
+
+      const Mat4 lhs = script->to_a<Mat4>(1);
+      const Vec3 rhs = script->to_a<Vec3>(2);
+
+      script->push<Vec3>(lhs * rhs);
 
       return 1;
     }
@@ -913,7 +1139,8 @@ void math_if::expose(Script *script) {
   #define TYPES(_) _("Vec2",       &allocate_a_vec2) \
                    _("Vec3",       &allocate_a_vec3) \
                    _("Vec4",       &allocate_a_vec4) \
-                   _("Quaternion", &allocate_a_quaternion)
+                   _("Quaternion", &allocate_a_quaternion) \
+                   _("Mat4",       &allocate_a_mat4)
 
   #define BIND_TO_LUA(Type, Allocator)                                       \
     lua_createtable(L, 0, 1);                                                \
@@ -928,10 +1155,16 @@ void math_if::expose(Script *script) {
     lua_setfield(L, LUA_REGISTRYINDEX, "_" Type ".cast");                    \
     lua_pop(L, 1);
 
+  //
   // Bind hidden helpers used to interface with `ScriptEnvironment`.
+  //
+
   TYPES(BIND_TO_LUA);
 
+  //
   // Bind additional helpers we don't want to inline.
+  //
+
   script->add_module_function("_Quaternion", "from_axis_angle", &quaternion_from_axis_angle);
   script->add_module_function("_Quaternion", "from_euler_angles", &quaternion_from_euler_angles);
   script->add_module_function("_Quaternion", "multiply", &quaternion_multiply);
@@ -939,12 +1172,32 @@ void math_if::expose(Script *script) {
   script->add_module_function("_Quaternion", "nlerp", &quaternion_nlerp);
   script->add_module_function("_Quaternion", "slerp", &quaternion_slerp);
 
+  script->add_module_function("_Mat4", "identity", &mat4_identity);
+  script->add_module_function("_Mat4", "perspective", &mat4_perspective);
+  script->add_module_function("_Mat4", "orthographic", &mat4_orthographic);
+  script->add_module_function("_Mat4", "translation", &mat4_translation);
+  script->add_module_function("_Mat4", "rotation", &mat4_rotation);
+  script->add_module_function("_Mat4", "scale", &mat4_scale);
+  script->add_module_function("_Mat4", "compose", &mat4_compose);
+  script->add_module_function("_Mat4", "decompose", &mat4_decompose);
+  script->add_module_function("_Mat4", "determinant", &mat4_determinant);
+  script->add_module_function("_Mat4", "inverse", &mat4_inverse);
+  script->add_module_function("_Mat4", "transpose", &mat4_transpose);
+  script->add_module_function("_Mat4", "multiply", &mat4_multiply);
+  script->add_module_function("_Mat4", "rotate", &mat4_rotate);
+
+  //
   // Everything else is implemented in Lua, using FFI.
+  //
+
   lua_pushcfunction(L, &error_handler);
   luaL_loadstring(L, GLUE);
   lua_pcall(L, 0, 0, -2);
 
+  //
   // Setup cheap references to type casting helpers used by C/C++.
+  //
+
   TYPES(BIND_TO_C);
 
   #undef TYPES

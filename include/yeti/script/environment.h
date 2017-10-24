@@ -65,14 +65,13 @@ class YETI_PUBLIC ScriptEnvironment {
   void *upper_bounds_of_pointers_;
 
   // Descended to determine type of a temporary.
-  void *lower_bounds_of_pointers_by_type_[6];
+  void *lower_bounds_of_pointers_by_type_[5];
 
   struct {
     unsigned vec2;
     unsigned vec3;
     unsigned vec4;
     unsigned quaternion;
-    unsigned mat3;
     unsigned mat4;
   } counts;
 
@@ -81,7 +80,6 @@ class YETI_PUBLIC ScriptEnvironment {
     Vec3 vec3[NUM_OF_TEMPORARIES];
     Vec4 vec4[NUM_OF_TEMPORARIES];
     Quaternion quaternion[NUM_OF_TEMPORARIES];
-    Mat3 mat3[NUM_OF_TEMPORARIES];
     Mat4 mat4[NUM_OF_TEMPORARIES];
   } storage;
 };
@@ -104,11 +102,6 @@ template <> YETI_INLINE Vec4 *ScriptEnvironment::allocate() {
 template <> YETI_INLINE Quaternion *ScriptEnvironment::allocate() {
   yeti_assert_development(this->counts.quaternion < NUM_OF_TEMPORARIES);
   return &this->storage.quaternion[this->counts.quaternion++];
-}
-
-template <> YETI_INLINE Mat3 *ScriptEnvironment::allocate() {
-  yeti_assert_development(this->counts.mat3 < NUM_OF_TEMPORARIES);
-  return &this->storage.mat3[this->counts.mat3++];
 }
 
 template <> YETI_INLINE Mat4 *ScriptEnvironment::allocate() {
@@ -136,11 +129,6 @@ template <> YETI_INLINE bool ScriptEnvironment::valid(const Quaternion *temporar
       && (temporary <= &this->storage.quaternion[NUM_OF_TEMPORARIES]);
 }
 
-template <> YETI_INLINE bool ScriptEnvironment::valid(const Mat3 *temporary) {
-  return (temporary >= &this->storage.mat3[0])
-      && (temporary <= &this->storage.mat3[NUM_OF_TEMPORARIES]);
-}
-
 template <> YETI_INLINE bool ScriptEnvironment::valid(const Mat4 *temporary) {
   return (temporary >= &this->storage.mat4[0])
       && (temporary <= &this->storage.mat4[NUM_OF_TEMPORARIES]);
@@ -158,14 +146,12 @@ YETI_INLINE Script::Type ScriptEnvironment::type(void *ptr) const {
   if (ptr >= lower_bounds_of_pointers_by_type_[0])
     return Script::T_MAT4;
   if (ptr >= lower_bounds_of_pointers_by_type_[1])
-    return Script::T_MAT3;
-  if (ptr >= lower_bounds_of_pointers_by_type_[2])
     return Script::T_QUATERNION;
-  if (ptr >= lower_bounds_of_pointers_by_type_[3])
+  if (ptr >= lower_bounds_of_pointers_by_type_[2])
     return Script::T_VEC4;
-  if (ptr >= lower_bounds_of_pointers_by_type_[4])
+  if (ptr >= lower_bounds_of_pointers_by_type_[3])
     return Script::T_VEC3;
-  if (ptr >= lower_bounds_of_pointers_by_type_[5])
+  if (ptr >= lower_bounds_of_pointers_by_type_[4])
     return Script::T_VEC2;
 
   YETI_UNREACHABLE();

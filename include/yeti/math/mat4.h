@@ -28,9 +28,17 @@
 
 namespace yeti {
 
-/// \brief Represents arbitrary linear transformations of three-dimensional space.
+/// \brief Represents a linear transformation of three-dimensional space.
+///
+/// \remark Yeti stores matrices in column major order. This means columns are
+/// laid our contiguously in memory. Yeti also uses columns vectors when
+/// multiplying matrices and vectors, meaning transformations are applied
+/// right-to-left.
+///
 class YETI_PUBLIC Mat4 {
  public:
+  /// \brief Default constructor.
+  /// \warning Does *not* initialize for efficiency,
   Mat4();
 
   Mat4(const f32 m[4][4]);
@@ -45,13 +53,16 @@ class YETI_PUBLIC Mat4 {
   Mat4 operator=(const Mat4 &m);
 
  public:
+  /// Accesses entry at i-th row and j-th column.
+  /// @{
   f32 &operator()(const unsigned i, const unsigned j);
   f32 operator()(const unsigned i, const unsigned j) const;
+  /// @}
 
  public:
   friend Mat4 operator*(const Mat4 &lhs, const Mat4 &rhs);
-  friend Vec3 operator*(const Vec3 &v, const Mat4 &m);
-  friend Vec4 operator*(const Vec4 &v, const Mat4 &m);
+  friend Vec3 operator*(const Mat4 &m, const Vec3 &v);
+  friend Vec4 operator*(const Mat4 &m, const Vec4 &v);
 
  public:
   /// Builds a prespective projection matrix.
@@ -84,10 +95,10 @@ class YETI_PUBLIC Mat4 {
 
  public:
   /// Builds a translation matrix.
-  static Mat4 translate(const Vec3 &translation);
+  static Mat4 translation(const Vec3 &translation);
 
   /// Builds a rotation matrix.
-  static Mat4 rotate(const Quaternion &rotation);
+  static Mat4 rotation(const Quaternion &rotation);
 
   /// Builds a scale matrix.
   static Mat4 scale(const Vec3 &scale);
@@ -125,11 +136,11 @@ class YETI_PUBLIC Mat4 {
   static const Mat4 ZERO;
 
  private:
+  /// The matrix entries, indexed by row then column.
   f32 M[4][4];
 };
 
 YETI_INLINE Mat4::Mat4() {
-  // NOTE(mtwilliams): Not initialized for efficiency sake.
 }
 
 YETI_INLINE Mat4::Mat4(const f32 m00, const f32 m01, const f32 m02, const f32 m03,
@@ -137,10 +148,10 @@ YETI_INLINE Mat4::Mat4(const f32 m00, const f32 m01, const f32 m02, const f32 m0
                        const f32 m20, const f32 m21, const f32 m22, const f32 m23,
                        const f32 m30, const f32 m31, const f32 m32, const f32 m33)
 {
-  M[0][0] = m00; M[1][0] = m01; M[2][0] = m02; M[3][0] = m03;
-  M[0][1] = m10; M[1][1] = m11; M[2][1] = m12; M[3][1] = m13;
-  M[0][2] = m20; M[1][2] = m21; M[2][2] = m22; M[3][2] = m23;
-  M[0][3] = m30; M[1][3] = m31; M[2][3] = m32; M[3][3] = m33;
+  M[0][0] = m00; M[0][1] = m01; M[0][2] = m02; M[0][3] = m03;
+  M[1][0] = m10; M[1][1] = m11; M[1][2] = m12; M[1][3] = m13;
+  M[2][0] = m20; M[2][1] = m21; M[2][2] = m22; M[2][3] = m23;
+  M[3][0] = m30; M[3][1] = m31; M[3][2] = m32; M[3][3] = m33;
 }
 
 YETI_INLINE Mat4::Mat4(const f32 m[4][4]) {
@@ -159,11 +170,11 @@ YETI_INLINE Mat4 Mat4::operator=(const Mat4 &m) {
 // PERF(mtwillianms): Mark as `constexpr` when possible.
 
 YETI_INLINE f32 &Mat4::operator()(const unsigned i, const unsigned j) {
-  return M[j][i];
+  return M[i][j];
 }
 
 YETI_INLINE f32 Mat4::operator()(const unsigned i, const unsigned j) const {
-  return M[j][i];
+  return M[i][j];
 }
 
 YETI_INLINE Mat4 operator*(const Mat4 &lhs, const Mat4 &rhs) {
@@ -192,10 +203,10 @@ YETI_INLINE Mat4 operator*(const Mat4 &lhs, const Mat4 &rhs) {
   return concatenated;
 }
 
-YETI_INLINE Vec3 operator*(const Vec3 &v, const Mat4 &m) {
+YETI_INLINE Vec3 operator*(const Mat4 &m, const Vec3 &v) {
   Vec3 transformed;
 
-  f32 w = 1.0f / (m.M[3][0] * v.x + m.M[3][1] * v.y + m.M[3][2] * v.z + m.M[3][3]);
+  const f32 w = 1.0f / (m.M[3][0] * v.x + m.M[3][1] * v.y + m.M[3][2] * v.z + m.M[3][3]);
 
   transformed.x = (m.M[0][0] * v.x + m.M[0][1] * v.y + m.M[0][2] * v.z + m.M[0][3]) * w;
   transformed.y = (m.M[1][0] * v.x + m.M[1][1] * v.y + m.M[1][2] * v.z + m.M[1][3]) * w;
@@ -204,7 +215,7 @@ YETI_INLINE Vec3 operator*(const Vec3 &v, const Mat4 &m) {
   return transformed;
 }
 
-YETI_INLINE Vec4 operator*(const Vec4 &v, const Mat4 &m) {
+YETI_INLINE Vec4 operator*(const Mat4 &m, const Vec4 &v) {
   Vec4 transformed;
 
   transformed.x = m.M[0][0] * v.x + m.M[0][1] * v.y + m.M[0][2] * v.z + m.M[0][3] * v.w;
