@@ -144,7 +144,10 @@ int Script::__require(lua_State *L) {
     resource::id_from_name(script_resource_type_id, script_name);
 
   if (!resource_manager::available(script_id)) {
-    lua_pushfstring(L, "The script `%s` is not available.", script_name);
+    if (resource_manager::database()->exists(script_id))
+      lua_pushfstring(L, "The script `%s` has not been loaded through a package as necessary.", script_name);
+    else
+      lua_pushfstring(L, "The script `%s` does not exist.", script_name);
     return 1;
   }
 
