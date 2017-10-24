@@ -115,12 +115,16 @@ class YETI_PUBLIC Script {
  public:
   /// \brief Calls the global function @fn with @n number of arguments.
   ///
-  /// Each argument is specified by the type preceding the value, except for
-  /// `T_NIL`. For example:
+  /// \detailed Each argument is specified by the type preceding the value,
+  /// except for `T_NIL`. For example:
   ///
   ///   call("meaning_of_life", Script::T_INTEGER, 42);
   ///
   bool call(const char *fn, u32 n, ...);
+
+ public:
+  /// \brief Executes @code.
+  bool execute(const char *code);
 
  public:
   lua_State *state();

@@ -347,4 +347,20 @@ bool Script::call(const char *fn, u32 n, ...) {
   return true;
 }
 
+bool Script::execute(const char *code) {
+  lua_pushlightuserdata(L, (void *)this);
+  lua_pushcclosure(L, &Script::__error_handler, 1);
+
+  luaL_loadstring(L, code);
+
+  if (lua_pcall(L, 0, 0, -2) != 0) {
+    lua_pop(L, 1 + 1);
+    return false;
+  } else {
+    lua_pop(L, 1);
+  }
+
+  return true;
+}
+
 } // yeti
