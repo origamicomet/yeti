@@ -81,15 +81,22 @@ Script::Script() {
   // outside of engine.
 
   static const luaL_Reg libs[] = {
-    { "",              luaopen_base     },
+    { "",              &luaopen_base    },
+
+    { LUA_DBLIBNAME,   &luaopen_debug   },
     { LUA_LOADLIBNAME, &luaopen_package },
     { LUA_TABLIBNAME,  &luaopen_table   },
     { LUA_STRLIBNAME,  &luaopen_string  },
     { LUA_MATHLIBNAME, &luaopen_math    },
-    { LUA_DBLIBNAME,   &luaopen_debug   },
     { LUA_BITLIBNAME,  &luaopen_bit     },
-    { LUA_JITLIBNAME,  &luaopen_jit     },
     { LUA_FFILIBNAME,  &luaopen_ffi     },
+
+  #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+      YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+    // Available in debug and development builds since tooling uses it.
+    { LUA_JITLIBNAME,  &luaopen_jit     },
+  #endif
+
     { NULL,            NULL             }
   };
 
