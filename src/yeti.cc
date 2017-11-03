@@ -74,7 +74,6 @@ void boot(const Config &config) {
   }
 
   // REFACTOR(mtwilliams): Automatically register.
-  resource::register_a_type(RenderConfigResource::type());
   resource::register_a_type(EntityResource::type());
   resource::register_a_type(ScriptResource::type());
 

@@ -51,17 +51,17 @@ YETI_END_EXTERN_C // }
 
 namespace yeti {
 
-typedef yeti_int8_t i8;
-typedef yeti_uint8_t u8;
-typedef yeti_int16_t i16;
-typedef yeti_uint16_t u16;
-typedef yeti_int32_t i32;
-typedef yeti_uint32_t u32;
-typedef yeti_int64_t i64;
-typedef yeti_uint64_t u64;
+typedef ::yeti_int8_t i8;
+typedef ::yeti_uint8_t u8;
+typedef ::yeti_int16_t i16;
+typedef ::yeti_uint16_t u16;
+typedef ::yeti_int32_t i32;
+typedef ::yeti_uint32_t u32;
+typedef ::yeti_int64_t i64;
+typedef ::yeti_uint64_t u64;
 
-typedef yeti_float32_t f32;
-typedef yeti_float64_t f64;
+typedef ::yeti_float32_t f32;
+typedef ::yeti_float64_t f64;
 
 } // yeti
 

@@ -17,15 +17,8 @@
 
 #include "yeti/core.h"
 
-#include "yeti/resource.h"
-#include "yeti/resource_package.h"
-#include "yeti/resource_manager.h"
-#include "yeti/resource_database.h"
-#include "yeti/resource_compiler.h"
-
-#include "yeti/resources/render_config_resource.h"
-#include "yeti/resources/entity_resource.h"
-#include "yeti/resources/script_resource.h"
+#include "yeti/application.h"
+#include "yeti/application/time_step_policy.h"
 
 #include "yeti/entity.h"
 #include "yeti/component.h"
@@ -35,13 +28,18 @@
 
 #include "yeti/level.h"
 
-#include "yeti/application.h"
-#include "yeti/application/time_step_policy.h"
+#include "yeti/resource.h"
+#include "yeti/resource_package.h"
+#include "yeti/resource_bundle.h"
+#include "yeti/resource_manager.h"
+#include "yeti/resource_database.h"
+#include "yeti/resource_compiler.h"
+
+#include "yeti/resources/entity_resource.h"
+#include "yeti/resources/script_resource.h"
 
 #include "yeti/window.h"
 #include "yeti/input.h"
-
-#include "yeti/task_scheduler.h"
 
 #include "yeti/script.h"
 #include "yeti/script/environment.h"
@@ -58,6 +56,9 @@
 #include "yeti/script/bindings/transform_if.h"
 #include "yeti/script/bindings/camera_if.h"
 #include "yeti/script/bindings/light_if.h"
+
+#include "yeti/task.h"
+#include "yeti/task_scheduler.h"
 
 namespace yeti {
 

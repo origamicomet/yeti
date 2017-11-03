@@ -14,10 +14,11 @@
 // For sanity checks.
 #include "yeti/core/debug/assert.h"
 
-#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS || \
-    YETI_PLATFORM == YETI_PLATFORM_MAC || \
-    YETI_PLATFORM == YETI_PLATFORM_LINUX
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
   #include <windows.h>
+  #include <malloc.h>
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+      YETI_PLATFORM == YETI_PLATFORM_LINUX
   #include <malloc.h>
 #endif
 

@@ -112,8 +112,4 @@
   #endif
 #endif
 
-// HACK(mtwilliams): Disable warnings about types marked public when building
-// shared libraries.
-#pragma warning(disable: 4251)
-
 #endif // _YETI_LINKAGE_H_

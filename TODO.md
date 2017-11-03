@@ -141,6 +141,8 @@ Includes runtime.
 
 * Returning pointers from `yeti::core::Map<K,V>`.
 * Namespace entities, components, and systems under `yeti::ecs`.
+* Replace `YETI_CONFIGURATION == YETI_CONFIGURATION_XXX` with `YETI_IS_XXX`.
+* Replace `YETI_PLATFORM == YETI_PLATFORM_XXX` with `YETI_ON_XXX`.
 
 ### `CRAZY`
 

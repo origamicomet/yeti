@@ -211,7 +211,7 @@ namespace component_registry {
 /// \brief Automatically registers [`Component`](@ref yeti::Component) with
 /// the component registry during boot.
 #define YETI_AUTO_REGISTER_COMPONENT(Component) \
-  static const ::yeti::AutoRegisterComponent YETI_PASTE(__automatic_component_registration__, __LINE__)(Component);
+  static const ::yeti::AutoRegisterComponent YETI_PASTE(__automatic_component_registration__, __COUNTER__)(Component);
 
 /// \internal Automatically registers a [`Component`](@ref yeti::Component)
 /// with the component registry upon construction.

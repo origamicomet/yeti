@@ -23,10 +23,6 @@
   #undef ABSOLUTE
   #undef RELATIVE
   #undef DELETE
-
-  // HACK(mtwilliams): Define `RI_MOUSE_HWHEEL` until we specify build target
-  // correctly.
-  #define RI_MOUSE_HWHEEL 0x0800
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
 #elif YETI_PLATFORM == YETI_PLATFORM_IOS
@@ -189,7 +185,7 @@ static void on_mouse_moved(const MouseAxis axis, const Vec2 &value) {
 }
 
 static void on_raw_mouse_input(RAWMOUSE mouse) {
-  static const struct { USHORT up, down; MouseButton btn; } button_mappings[MouseButtons::_COUNT] = {
+  static const struct { USHORT up, down; MouseButton id; } button_mappings[MouseButtons::_COUNT] = {
     { RI_MOUSE_LEFT_BUTTON_UP,   RI_MOUSE_LEFT_BUTTON_DOWN,   MouseButtons::LEFT    },
     { RI_MOUSE_MIDDLE_BUTTON_UP, RI_MOUSE_MIDDLE_BUTTON_DOWN, MouseButtons::MIDDLE  },
     { RI_MOUSE_RIGHT_BUTTON_UP,  RI_MOUSE_RIGHT_BUTTON_DOWN,  MouseButtons::RIGHT   },
@@ -197,18 +193,18 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
     { RI_MOUSE_BUTTON_5_UP,      RI_MOUSE_BUTTON_5_DOWN,      MouseButtons::EXTRA_2 }
   };
 
-  for (u32 btn = 0; btn < MouseButtons::_COUNT; ++btn) {
-    if (mouse.usButtonFlags & button_mappings[btn].up) {
+  for (u32 button = 0; button < MouseButtons::_COUNT; ++button) {
+    if (mouse.usButtonFlags & button_mappings[button].up) {
       Mouse::Event event;
       event.type = Mouse::Event::RELEASED;
-      event.released.button = button_mappings[btn].btn;
+      event.released.button = button_mappings[button].id;
       Mouse::handle(event);
     }
 
-    if (mouse.usButtonFlags & button_mappings[btn].down) {
+    if (mouse.usButtonFlags & button_mappings[button].down) {
       Mouse::Event event;
       event.type = Mouse::Event::PRESSED;
-      event.pressed.button = button_mappings[btn].btn;
+      event.pressed.button = button_mappings[button].id;
       Mouse::handle(event);
     }
   }
@@ -228,55 +224,61 @@ static void on_raw_mouse_input(RAWMOUSE mouse) {
   on_mouse_moved(MouseAxes::WHEEL, wheel);
 }
 
-static LRESULT WINAPI _WindowProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-  const WNDPROC original_window_proc = (WNDPROC)::GetPropA(hWnd, "orginal_window_proc");
+namespace input {
+  static LRESULT WINAPI _WindowProcW(HWND hWnd,
+                                     UINT uMsg,
+                                     WPARAM wParam,
+                                     LPARAM lParam)
+  {
+    const WNDPROC original_window_proc = (WNDPROC)::GetPropA(hWnd, "orginal_window_proc");
 
-  switch (uMsg) {
-    case WM_INPUT_DEVICE_CHANGE: {
-      // TODO(mtwilliams): Handle device connections and disconnections.
-    } break;
+    switch (uMsg) {
+      case WM_INPUT_DEVICE_CHANGE: {
+        // TODO(mtwilliams): Handle device connections and disconnections.
+      } break;
 
-    case WM_INPUTLANGCHANGE: {
-      // TODO(mtwilliams): Handle different keyboard layouts.
-    } break;
+      case WM_INPUTLANGCHANGE: {
+        // TODO(mtwilliams): Handle different keyboard layouts.
+      } break;
 
-    case WM_INPUT: {
-      RAWINPUT raw_input;
-      UINT raw_input_sz = sizeof(RAWINPUT);
+      case WM_INPUT: {
+        RAWINPUT raw_input;
+        UINT raw_input_sz = sizeof(RAWINPUT);
 
-      ::GetRawInputData((HRAWINPUT)lParam,
-                        RID_INPUT,
-                        (LPVOID)&raw_input,
-                        &raw_input_sz,
-                        sizeof(RAWINPUTHEADER));
+        ::GetRawInputData((HRAWINPUT)lParam,
+                          RID_INPUT,
+                          (LPVOID)&raw_input,
+                          &raw_input_sz,
+                          sizeof(RAWINPUTHEADER));
 
-      if (raw_input.header.dwType == RIM_TYPEKEYBOARD)
-        on_raw_keyboard_input(raw_input.data.keyboard);
-      else if (raw_input.header.dwType == RIM_TYPEMOUSE)
-        on_raw_mouse_input(raw_input.data.mouse);
-    } break;
+        if (raw_input.header.dwType == RIM_TYPEKEYBOARD)
+          on_raw_keyboard_input(raw_input.data.keyboard);
+        else if (raw_input.header.dwType == RIM_TYPEMOUSE)
+          on_raw_mouse_input(raw_input.data.mouse);
+      } break;
 
-    case WM_MOUSEMOVE: {
-      POINT absolute;
-      ::GetCursorPos(&absolute);
+      case WM_MOUSEMOVE: {
+        POINT absolute;
+        ::GetCursorPos(&absolute);
 
-      POINT relative;
-      relative.x = GET_X_LPARAM(lParam);
-      relative.y = GET_Y_LPARAM(lParam);
+        POINT relative;
+        relative.x = GET_X_LPARAM(lParam);
+        relative.y = GET_Y_LPARAM(lParam);
 
-      on_mouse_moved(MouseAxes::ABSOLUTE, Vec2((f32)absolute.x, (f32)absolute.y));
-      on_mouse_moved(MouseAxes::RELATIVE, Vec2((f32)relative.x, (f32)relative.y));
-    } break;
+        on_mouse_moved(MouseAxes::ABSOLUTE, Vec2((f32)absolute.x, (f32)absolute.y));
+        on_mouse_moved(MouseAxes::RELATIVE, Vec2((f32)relative.x, (f32)relative.y));
+      } break;
 
-    case WM_NCDESTROY: {
-      // According to MSDN, all entries in the property list of a window must
-      // be removed (via RemoveProp) before it is destroyed. In practice, this
-      // doesn't make any material difference. Perhaps a (small) memory leak?
-      ::RemovePropA(hWnd, "orginal_window_proc");
-    } break;
+      case WM_NCDESTROY: {
+        // According to MSDN, all entries in the property list of a window must
+        // be removed (via RemoveProp) before it is destroyed. In practice, this
+        // doesn't make any material difference. Perhaps a (small) memory leak?
+        ::RemovePropA(hWnd, "orginal_window_proc");
+      } break;
+    }
+
+    return ::CallWindowProcW(original_window_proc, hWnd, uMsg, wParam, lParam);
   }
-
-  return ::CallWindowProcW(original_window_proc, hWnd, uMsg, wParam, lParam);
 }
 
 void input::from(const Window *window) {

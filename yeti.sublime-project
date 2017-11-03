@@ -7,14 +7,18 @@
 			"follow_symlinks": true,
 
 			"file_exclude_patterns": [
-				"*.sublime-project",
-				"*.ninja*"
+				"*.sublime-workspace",
 			],
 
 			"folder_exclude_patterns": [
-				"_build",
+				"_build/tools/cache",
+
+				"_build/obj",
+				"_build/lib",
+				"_build/bin",
+
 				"_deps",
-				"docs"
+				"_rel",
 			]
 		}
 	]
