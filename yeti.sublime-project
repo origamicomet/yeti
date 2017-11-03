@@ -8,6 +8,8 @@
 
 			"file_exclude_patterns": [
 				"*.sublime-workspace",
+
+				"_build/*.cc"
 			],
 
 			"folder_exclude_patterns": [

@@ -31,12 +31,13 @@ mkdir _build\obj 2>NUL
 mkdir _build\bin 2>NUL
 mkdir _build\lib 2>NUL
 
-call _build\scripts\unity.bat runtime > _build\runtime_debug_windows_64.cc
+call _build\scripts\unity.bat tools\resource_compiler ^
+     > _build\resource_compiler_debug_windows_64.cc
 
 cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /Gm- /GR- /EHa- /GS /MDd ^
-       /Fo%_build\obj\runtime_debug_windows_64.obj ^
-       /Zi /Fd%_build\runtime_debug_windows_64.pdb ^
+       /Fo%_build\obj\resource_compiler_debug_windows_64.obj ^
+       /Zi /Fd%_build\resource_compiler_debug_windows_64.pdb ^
        /DYETI_CONFIGURATION=YETI_CONFIGURATION_DEBUG ^
        /DYETI_LINKAGE=YETI_LINKAGE_STATIC ^
        /DLOOM_CONFIGURATION=LOOM_CONFIGURATION_DEBUG ^
@@ -48,8 +49,8 @@ cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /I_deps\loom\include ^
        /I_deps\gala\include ^
        /Iinclude /Isrc ^
-       /Iruntime\include /Iruntime\src ^
-       _build\runtime_debug_windows_64.cc
+       /Itools\resource_compiler\include /Itools\resource_compiler\src ^
+       _build\resource_compiler_debug_windows_64.cc
 
 if not %ERRORLEVEL% equ 0 (
   popd
@@ -58,8 +59,8 @@ if not %ERRORLEVEL% equ 0 (
 )
 
 link.exe /nologo /machine:X64 /DEBUG /stack:0x400000,0x400000 ^
-         /out:_build\bin\runtime_debug_windows_64.exe ^
-         _build\obj\runtime_debug_windows_64.obj ^
+         /out:_build\bin\resource_compiler_debug_windows_64.exe ^
+         _build\obj\resource_compiler_debug_windows_64.obj ^
          _build\lib\yeti_debug_windows_64.lib ^
          _deps\luajit\_build\lib\luajit_debug_windows_64.lib ^
          _deps\sqlite3\_build\lib\sqlite3_debug_windows_64.lib ^
@@ -73,6 +74,6 @@ if not %ERRORLEVEL% equ 0 (
   exit /B 1
 )
 
-echo Built `runtime_debug_windows_64.exe`.
+echo Built `resource_compiler_debug_windows_64.exe`.
 
 popd

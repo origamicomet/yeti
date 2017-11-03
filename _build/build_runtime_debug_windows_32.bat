@@ -31,7 +31,7 @@ mkdir _build\obj 2>NUL
 mkdir _build\bin 2>NUL
 mkdir _build\lib 2>NUL
 
-:build
+call _build\scripts\unity.bat runtime > _build\runtime_debug_windows_32.cc
 
 cl.exe /nologo /c /W4 /arch:IA32 /fp:except /favor:blend /Od /Oi ^
        /Gm- /GR- /EHa- /GS /MDd ^
@@ -48,8 +48,8 @@ cl.exe /nologo /c /W4 /arch:IA32 /fp:except /favor:blend /Od /Oi ^
        /I_deps\loom\include ^
        /I_deps\gala\include ^
        /Iinclude /Isrc ^
-       /Iruntime/include /Iruntime/src ^
-       runtime\src\build.cc
+       /Iruntime\include /Iruntime\src ^
+       _build\runtime_debug_windows_32.cc
 
 if not %ERRORLEVEL% equ 0 (
   popd
@@ -57,7 +57,7 @@ if not %ERRORLEVEL% equ 0 (
   exit /B 1
 )
 
-link.exe /nologo /machine:X86 /stack:0x400000,0x400000 ^
+link.exe /nologo /machine:X86 /DEBUG /stack:0x400000,0x400000 ^
          /out:_build\bin\runtime_debug_windows_32.exe ^
          _build\obj\runtime_debug_windows_32.obj ^
          _build\lib\yeti_debug_windows_32.lib ^

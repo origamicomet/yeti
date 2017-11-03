@@ -35,7 +35,8 @@ mkdir _build\obj 2>NUL
 mkdir _build\bin 2>NUL
 mkdir _build\lib 2>NUL
 
-:build
+echo #include "%~dp0\build.h" > _build\engine_debug_windows_64.cc
+call _build\scripts\unity.bat src >> _build\engine_debug_windows_64.cc
 
 cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /Gm- /GR- /EHa- /GS /MDd ^
@@ -55,7 +56,7 @@ cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /I_deps\loom\include ^
        /I_deps\gala\include ^
        /Iinclude /Isrc ^
-       src\build.cc
+       _build\engine_debug_windows_64.cc
 
 if not %ERRORLEVEL% equ 0 (
   popd

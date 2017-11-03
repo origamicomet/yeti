@@ -179,4 +179,7 @@
   #endif
 #endif
 
+// Necessary kludge because compilers suck.
+#include "yeti/kludge.h"
+
 #endif // _YETI_CONFIG_H_
