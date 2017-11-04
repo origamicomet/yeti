@@ -4,8 +4,11 @@
 # Ignore automatically fetched tools.
 _build/tools/cache
 
+# Ingore build intermediates.
+_build/*.cc
+
 # Ingore build artifacts.
-*.exe
-*.pdb
-*.obj
-*.ilk
+_build/**/*.exe
+_build/**/*.pdb
+_build/**/*.obj
+_build/**/*.ilk
