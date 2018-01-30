@@ -107,6 +107,10 @@ class Array {
   /// Returns the position of the first occurance of @value in the array.
   size_t position(const T &value) const;
 
+ public:
+  T *raw() { return (T *)first_; }
+  const T *raw() const { return (const T *)first_; }
+
  private:
   Allocator *allocator_;
 
@@ -250,7 +254,7 @@ void Array<T>::resize(size_t size) {
       end_   = last_;
     }
   } else if (size < current_in_bytes) {
-    // Shrink.
+    // TODO(mtwilliams): Shrink.
     last_ = first_ + size_in_bytes;
   }
 }
