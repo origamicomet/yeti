@@ -69,7 +69,6 @@ static void on_raw_keyboard_input(RAWKEYBOARD kb) {
     case VK_SHIFT:
     case VK_LSHIFT:
     case VK_RSHIFT:
-      // TODO(mtwilliams): Expose Keys::LEFT_SHIFT and Keys::RIGHT_SHIFT?
       key = Keys::SHIFT;
       break;
     case VK_CAPITAL:
@@ -85,16 +84,14 @@ static void on_raw_keyboard_input(RAWKEYBOARD kb) {
       key = Keys::BACKSPACE;
       break;
     case VK_CONTROL:
-      key = E0 ? Keys::RIGHT_CONTROL : Keys::LEFT_CONTROL;
+      key = Keys::ALT;
       break;
     case VK_MENU:
-      key = E0 ? Keys::RIGHT_ALT : Keys::LEFT_ALT;
+      key = Keys::ALT;
       break;
     case VK_LWIN:
-      key = Keys::LEFT_SUPER;
-      break;
     case VK_RWIN:
-      key = Keys::RIGHT_SUPER;
+      key = Keys::SUPER;
       break;
     case VK_NUMLOCK:
       key = Keys::NUMLOCK;
@@ -286,6 +283,8 @@ void input::from(const Window *window) {
 
   const HWND hndl = (HWND)window->to_native_hndl();
 
+  // SMELL(mtwilliams): Should only register for raw input events once.
+
   // Register for raw-input events from keyboards and mice. Also register for
   // device connection and disconnection events.
   //
@@ -297,13 +296,13 @@ void input::from(const Window *window) {
   // Keyboard:
   raw_input_devices[0].usUsagePage = 0x01;
   raw_input_devices[0].usUsage     = 0x06;
-  raw_input_devices[0].hwndTarget  = hndl;
+  raw_input_devices[0].hwndTarget  = NULL;
   raw_input_devices[0].dwFlags     = RIDEV_DEVNOTIFY;
 
   // Mouse:
   raw_input_devices[1].usUsagePage = 0x01;
   raw_input_devices[1].usUsage     = 0x02;
-  raw_input_devices[1].hwndTarget  = hndl;
+  raw_input_devices[1].hwndTarget  = NULL;
   raw_input_devices[1].dwFlags     = RIDEV_DEVNOTIFY;
 
   ::RegisterRawInputDevices(raw_input_devices, 2, sizeof(RAWINPUTDEVICE));
