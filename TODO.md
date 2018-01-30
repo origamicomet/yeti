@@ -51,11 +51,10 @@ Includes runtime.
     * Build our own database of processors (and errata)?
 * Implement smoothed time-step-policy.
   * Also support debt payback using `wall`.
-* Actually load application manifest.
-  * Gracefully handle corrupt or malformed configuration and settings.
-    * Automatically removed (or replaced with default).
-      * Rename corrupt, rather than deleting.
-    * Allow application to handle with `Application.did_settings_load_nicely()`.
+* Gracefully handle corrupt or malformed configuration and settings.
+  * Automatically removed (or replaced with default).
+    * Rename corrupt, rather than deleting?
+  * Allow application to handle with `Application.did_settings_load_nicely()`.
 * Provide a default application icon.
   * Base off of Yeti logo.
 * Allow user to provide a custom icon.
@@ -136,6 +135,7 @@ Includes runtime.
 * Update `absolute` and `relative` mouse axes upon raw-input?
   * Manually translate `GetCursorPos` to a window-relative point?
 * Provide a common `CommandLineParser` utility.
+* Replace template specialization with namespace methods, as they cause issues with unity builds.
 
 ### `SMELL`
 

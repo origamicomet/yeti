@@ -36,18 +36,16 @@ call _build\scripts\unity.bat tools\resource_compiler ^
 
 cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /Gm- /GR- /EHa- /GS /MDd ^
-       /Fo%_build\obj\resource_compiler_debug_windows_64.obj ^
-       /Zi /Fd%_build\resource_compiler_debug_windows_64.pdb ^
+       /Fo_build\obj\resource_compiler_debug_windows_64.obj ^
+       /Zi /Fd_build\obj\resource_compiler_debug_windows_64.pdb ^
        /DYETI_CONFIGURATION=YETI_CONFIGURATION_DEBUG ^
        /DYETI_LINKAGE=YETI_LINKAGE_STATIC ^
        /DLOOM_CONFIGURATION=LOOM_CONFIGURATION_DEBUG ^
        /DLOOM_LINKAGE=LOOM_LINKAGE_STATIC ^
-       /DGALA_CONFIGURATION=GALA_CONFIGURATION_DEBUG ^
-       /DGALA_LINKAGE=GALA_LINKAGE_STATIC ^
        /I_deps\luajit\include ^
        /I_deps\sqlite3\include ^
        /I_deps\loom\include ^
-       /I_deps\gala\include ^
+       /I_deps\gala ^
        /Iinclude /Isrc ^
        /Itools\resource_compiler\include /Itools\resource_compiler\src ^
        _build\resource_compiler_debug_windows_64.cc

@@ -1,4 +1,4 @@
-// This is automatically included by engine unity build files.
+// This is automatically included by unity build files.
 
 #if defined(_WIN32) || defined(_WIN64)
   // We target Windows 7 and later.
@@ -8,7 +8,7 @@
 #if defined(_WIN32) || defined(_WIN64)
   #define WIN32_LEAN_AND_MEAN
 
-  // There's so much crap...
+  // There's so much crap included by default. This should prune a lot.
   #define NOGDICAPMASKS
   #define NORASTEROPS
   #define NOCOLOR
@@ -27,7 +27,8 @@
   #define NOMCX
 
   // Preemptively include `windows.h` and `windowsx.h` and unfuck afterwords,
-  // because Microsoft litters the global namespace with so much crap.
+  // because Microsoft litters the global namespace with so much crap that is
+  // a nightmare to clean up as we go along.
   #include <windows.h>
   #include <windowsx.h>
 
@@ -37,10 +38,13 @@
   #undef NEAR
   #undef FAR
 
+  #undef absolute
+  #undef relative
+
   #undef near
   #undef far
 
-  #undef DELETE
-
   #undef ERROR
+
+  #undef DELETE
 #endif

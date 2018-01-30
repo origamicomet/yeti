@@ -40,8 +40,8 @@ call _build\scripts\unity.bat src >> _build\engine_debug_windows_64.cc
 
 cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /Gm- /GR- /EHa- /GS /MDd ^
-       /Fo%_build\obj\yeti_debug_windows_64.obj ^
-       /Zi /Fd%_build\yeti_debug_windows_64.pdb ^
+       /Fo_build\obj\yeti_debug_windows_64.obj ^
+       /Zi /Fd_build\obj\yeti_debug_windows_64.pdb ^
        /D__YETI_COPYRIGHT__="\"%YETI_COPYRIGHT%\"" ^
        /D__YETI_VERSION__="\"%YETI_VERSION%\"" ^
        /D__YETI_REVISION__="%YETI_REVISION%" ^
@@ -49,12 +49,10 @@ cl.exe /nologo /c /W4 /fp:except /favor:blend /Od /Oi ^
        /DYETI_LINKAGE=YETI_LINKAGE_STATIC ^
        /DLOOM_CONFIGURATION=LOOM_CONFIGURATION_DEBUG ^
        /DLOOM_LINKAGE=LOOM_LINKAGE_STATIC ^
-       /DGALA_CONFIGURATION=GALA_CONFIGURATION_DEBUG ^
-       /DGALA_LINKAGE=GALA_LINKAGE_STATIC ^
        /I_deps\luajit\include ^
        /I_deps\sqlite3\include ^
        /I_deps\loom\include ^
-       /I_deps\gala\include ^
+       /I_deps\gala ^
        /Iinclude /Isrc ^
        _build\engine_debug_windows_64.cc
 
@@ -67,6 +65,12 @@ if not %ERRORLEVEL% equ 0 (
 lib.exe /nologo /machine:X64 ^
         /out:_build\lib\yeti_debug_windows_64.lib ^
         _build\obj\yeti_debug_windows_64.obj
+
+if not %ERRORLEVEL% equ 0 (
+  popd
+  echo Linking failed.
+  exit /B 1
+)
 
 echo Built `yeti_debug_windows_64.lib`.
 

@@ -35,18 +35,16 @@ call _build\scripts\unity.bat runtime > _build\runtime_debug_windows_32.cc
 
 cl.exe /nologo /c /W4 /arch:IA32 /fp:except /favor:blend /Od /Oi ^
        /Gm- /GR- /EHa- /GS /MDd ^
-       /Fo%_build\obj\runtime_debug_windows_32.obj ^
-       /Zi /Fd%_build\runtime_debug_windows_32.pdb ^
+       /Fo_build\obj\runtime_debug_windows_32.obj ^
+       /Zi /Fd_build\obj\runtime_debug_windows_32.pdb ^
        /DYETI_CONFIGURATION=YETI_CONFIGURATION_DEBUG ^
        /DYETI_LINKAGE=YETI_LINKAGE_STATIC ^
        /DLOOM_CONFIGURATION=LOOM_CONFIGURATION_DEBUG ^
        /DLOOM_LINKAGE=LOOM_LINKAGE_STATIC ^
-       /DGALA_CONFIGURATION=GALA_CONFIGURATION_DEBUG ^
-       /DGALA_LINKAGE=GALA_LINKAGE_STATIC ^
        /I_deps\luajit\include ^
        /I_deps\sqlite3\include ^
        /I_deps\loom\include ^
-       /I_deps\gala\include ^
+       /I_deps\gala ^
        /Iinclude /Isrc ^
        /Iruntime\include /Iruntime\src ^
        _build\runtime_debug_windows_32.cc
