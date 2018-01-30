@@ -124,14 +124,10 @@ Window *Window::open(const Window::Description &desc) {
   ::memset((void *)&encompassing_monitor_info, 0, sizeof(MONITORINFO));
   encompassing_monitor_info.cbSize = sizeof(MONITORINFO);
   ::GetMonitorInfo(encompassing_monitor, &encompassing_monitor_info);
-  RECT encompassing_area;
-  ::GetWindowRect(hndl, &encompassing_area);
   const DWORD monitor_width = encompassing_monitor_info.rcMonitor.right - encompassing_monitor_info.rcMonitor.left;
   const DWORD monitor_height = encompassing_monitor_info.rcMonitor.bottom - encompassing_monitor_info.rcMonitor.top;
-  const DWORD encompassing_width = encompassing_area.right - encompassing_area.left - 1;
-  const DWORD encompassing_height = encompassing_area.bottom - encompassing_area.top - 1;
-  const DWORD centered_pos_x = (monitor_width - encompassing_width) / 2 + encompassing_monitor_info.rcMonitor.left;
-  const DWORD centered_pos_y = (monitor_height - encompassing_height) / 2 + encompassing_monitor_info.rcMonitor.top;
+  const DWORD centered_pos_x = (monitor_width - desc.dimensions.width) / 2 + encompassing_monitor_info.rcMonitor.left;
+  const DWORD centered_pos_y = (monitor_height - desc.dimensions.height) / 2 + encompassing_monitor_info.rcMonitor.top;
   ::SetWindowPos(hndl, HWND_TOP, centered_pos_x, centered_pos_y, 0, 0, SWP_NOOWNERZORDER | SWP_NOSIZE);
 
   window->native_hndl_ = (uintptr_t)hndl;

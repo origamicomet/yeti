@@ -26,7 +26,7 @@ namespace component_registry {
 namespace {
   static void default_assertion_handler(const core::Assertion &assertion, void *) {
     core::logf(core::log::GENERAL, core::log::FATAL,
-               "Assertion failed in %s on %u!\n",
+               "Assertion failed at %s:%u!\n",
                assertion.location.file,
                (unsigned)assertion.location.line);
 

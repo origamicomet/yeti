@@ -21,64 +21,66 @@
 #include "yeti/resource.h"
 #include "yeti/resource_manager.h"
 
+// To work with entity and component handles.
+#include "yeti/script/bindings/entity_if.h"
+#include "yeti/script/bindings/component_if.h"
+
 #include "yeti/world.h"
 
 namespace yeti {
 
-template <> bool Script::is_a<World *>(int index) {
-  World *world = (World *)lua_touserdata(L, index);
-
-  if (world == NULL)
-    // If it's not a pointer, then there's no way it's a pointer to a `World`.
-    return false;
-
-#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
-    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-  Application *app = application_if::instance(L);
-
-  // Since all our worlds are referenced by our application, it's easy enough
-  // to check if the given pointer is indeed to a `World`.
-  if (app->worlds().find(world))
-    // Bingo!
-    return true;
-
-  return false;
-#else
-  // We'll assume everything's good. It's been tested, right?
-  return true;
-#endif
-}
-
-template <> World *Script::to_a<World *>(int index) {
-  if (!is_a<World *>(index))
-    luaL_argerror(L, index, "Expected a light user-data reference to a `World`.");
-
-  return (World *)lua_touserdata(L, index);
-}
-
-template <> void Script::push<World *>(World *world) {
-  lua_pushlightuserdata(L, (void *)world);
-}
-
 namespace world_if {
+  bool check(lua_State *L, int idx) {
+    World *world = (World *)lua_touserdata(L, idx);
+
+    if (world == NULL)
+      // If it's not a pointer, then there's no way it's a pointer to a `World`.
+      return false;
+
+  #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+      YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+    Application *app = application_if::instance(L);
+
+    // Since all our worlds are referenced by our application, it's easy enough
+    // to check if the given pointer is indeed to a `World`.
+    if (app->worlds().find(world))
+      // Bingo!
+      return true;
+
+    return false;
+  #else
+    // We'll assume everything's good. It's been tested, right?
+    return true;
+  #endif
+  }
+
+  World *cast(lua_State *L, int idx) {
+    if (!check(L, idx))
+      luaL_argerror(L, idx, "Expected a light user-data reference to a `World`.");
+
+    return (World *)lua_touserdata(L, idx);
+  }
+
+  void push(lua_State *L, World *world) {
+    lua_pushlightuserdata(L, (void *)world);
+  }
+
   namespace {
     static int create(lua_State *L) {
-      Script *script = Script::recover(L);
       Application *app = application_if::instance(L);
 
       // We manage worlds through the application so we can track them.
       World *world = app->create_a_world();
 
-      script->push(world);
+      world_if::push(L, world);
 
       return 1;
     }
 
     static int destroy(lua_State *L) {
-      Script *script = Script::recover(L);
       Application *app = application_if::instance(L);
 
-      World *world = script->to_a<World *>(1);
+      World *world = world_if::cast(L, 1);
 
       app->destroy_a_world(world);
 
@@ -86,10 +88,9 @@ namespace world_if {
     }
 
     static int update(lua_State *L) {
-      Script *script = Script::recover(L);
       Application *app = application_if::instance(L);
 
-      World *world = script->to_a<World *>(1);
+      World *world = world_if::cast(L, 1);
 
       if (!lua_isnumber(L, 2))
         return luaL_argerror(L, 2, "Expected `delta_time` to be a number.");
@@ -145,11 +146,10 @@ namespace world_if {
           static const Resource::Type::Id type =
             resource::id_from_type(resource::type_from_name("entity"));
 
-          resource =
-            resource::id_from_name(type, name);
+          resource = resource::id_from_name(type, name);
 
         case 1:
-          world = script->to_a<World *>(1);
+          world = world_if::cast(L, 1);
       }
 
     #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
@@ -160,41 +160,41 @@ namespace world_if {
 
       const Entity entity = world->spawn(resource, position, rotation, scale);
 
-      script->push(entity);
+      entity_if::push(L, { world, entity });
 
       return 1;
     }
 
     static int kill(lua_State *L) {
-      Script *script = Script::recover(L);
+      World *world = world_if::cast(L, 1);
 
-      World *world = script->to_a<World *>(1);
-      const Entity entity = script->to_a<Entity>(2);
+      // TODO(mtwilliams): Vaildate handle against |world|.
+      const Entity entity = entity_if::cast(L, 2).entity;
 
       world->kill(entity);
 
       return 0;
     }
 
-    static int entity_by_id(lua_State *L) {
-      return luaL_error(L, "Not implemented yet.");
-    }
+    // static int entity_by_id(lua_State *L) {
+    //   return luaL_error(L, "Not implemented yet.");
+    // }
 
-    static int entity_by_name(lua_State *L) {
-      Script *script = Script::recover(L);
+    // static int entity_by_name(lua_State *L) {
+    //   Script *script = Script::recover(L);
 
-      World *world = script->to_a<World *>(1);
-      const char *name = luaL_checkstring(L, 2);
+    //   World *world = world_if::cast(L, 1);
+    //   const char *name = luaL_checkstring(L, 2);
 
-      Entity entity;
+    //   Entity entity;
 
-      if (world->entities()->named(name, &entity))
-        script->push<Entity>(entity);
-      else
-        lua_pushnil(L);
+    //   if (world->entities()->named(name, &entity))
+    //     script->push<Entity>(entity);
+    //   else
+    //     lua_pushnil(L);
 
-      return 1;
-    }
+    //   return 1;
+    // }
   }
 } // world_if
 
@@ -210,8 +210,8 @@ void world_if::expose(Script *script) {
   script->add_module_function("World", "spawn", &spawn);
   script->add_module_function("World", "kill", &kill);
 
-  script->add_module_function("World", "entity_by_id", &entity_by_id);
-  script->add_module_function("World", "entity_by_name", &entity_by_name);
+  // script->add_module_function("World", "entity_by_id", &entity_by_id);
+  // script->add_module_function("World", "entity_by_name", &entity_by_name);
 
 #if 0
   script->add_module_function("World", "load", &load);

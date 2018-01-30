@@ -13,7 +13,7 @@
 			],
 
 			"folder_exclude_patterns": [
-				"_build/tools/cache",
+				"_build/tools",
 
 				"_build/obj",
 				"_build/lib",

@@ -21,41 +21,44 @@
 
 namespace yeti {
 
-template <> bool Script::is_a<Window *>(int index) {
-  Window *window = (Window *)lua_touserdata(L, index);
-
-  if (window == NULL)
-    // If it's not a pointer, then there's no way it's a pointer to a `Window`.
-    return false;
-
-#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
-    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-  Application *app = application_if::instance(L);
-
-  // Since all our windows are referenced by our application, it's easy enough
-  // to check if the given pointer is indeed to a `Window`.
-  if (app->windows().find(window))
-    // Bingo!
-    return true;
-
-  return false;
-#else
-  // We'll assume everything's good. It's been tested, right?
-  return true;
-#endif
-}
-
-template <> Window *Script::to_a<Window *>(int index) {
-  if (!is_a<Window *>(index))
-    luaL_argerror(L, index, "Expected a light user-data reference to a `Window`.");
-
-  return (Window *)lua_touserdata(L, index);
-}
-
 namespace window_if {
+  bool check(lua_State *L, int idx) {
+    Window *window = (Window *)lua_touserdata(L, idx);
+
+    if (window == NULL)
+      // If it's not a pointer, then there's no way it's a pointer to a `Window`.
+      return false;
+
+  #if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
+      YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
+    Application *app = application_if::instance(L);
+
+    // Since all our windows are referenced by our application, it's easy enough
+    // to check if the given pointer is indeed to a `Window`.
+    if (app->windows().find(window))
+      // Bingo!
+      return true;
+
+    return false;
+  #else
+    // We'll assume everything's good. It's been tested, right?
+    return true;
+  #endif
+  }
+
+  Window *cast(lua_State *L, int idx) {
+    if (!check(L, idx))
+      luaL_argerror(L, idx, "Expected a light user-data reference to a `Window`.");
+
+    return (Window *)lua_touserdata(L, idx);
+  }
+
+  void push(lua_State *L, Window *window) {
+    lua_pushlightuserdata(L, (void *)window);
+  }
+
   namespace {
     static int open(lua_State *L) {
-      Script *script = Script::recover(L);
       Application *app = application_if::instance(L);
 
       Window::Description wd; {
@@ -105,6 +108,7 @@ namespace window_if {
       Window *window = app->open_a_window(wd);
 
       lua_getfield(L, 1, "hidden");
+
       if (lua_isboolean(L, -1)) {
         if (!lua_toboolean(L, -1))
           window->show();
@@ -117,84 +121,61 @@ namespace window_if {
 
       lua_pop(L, 1);
 
-      lua_pushlightuserdata(L, (void *)window);
+      window_if::push(L, window);
 
       return 1;
     }
 
     static int close(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->close();
-
       return 0;
     }
 
     static int show(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->show();
-
       return 0;
     }
 
     static int hide(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->hide();
-
       return 0;
     }
 
     static int minimize(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->minimize();
-
       return 0;
     }
 
     static int maximize(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->maximize();
-
       return 0;
     }
 
     static int clip(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
+      Window *window = window_if::cast(L, 1);
       window->clip();
       return 0;
     }
 
     static int unclip(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->unclip();
-
       return 0;
     }
 
     static int restore(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       window->restore();
-
       return 0;
     }
 
     static int title(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
+      Window *window = window_if::cast(L, 1);
 
       char title[256];
       window->title(title);
@@ -205,8 +186,7 @@ namespace window_if {
     }
 
     static int set_title(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
+      Window *window = window_if::cast(L, 1);
 
       if (!lua_isstring(L, 2))
         return luaL_argerror(L, 2, "Expected `title` to be a string.");
@@ -217,17 +197,13 @@ namespace window_if {
     }
 
     static int has_keyboard_focus(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       lua_pushboolean(L, window->keyboard_focus());
-
       return 1;
     }
 
     static int set_keyboard_focus(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
+      Window *window = window_if::cast(L, 1);
 
       if (!lua_isboolean(L, 2))
         return luaL_argerror(L, 2, "Expected `focus` to be a boolean.");
@@ -238,17 +214,13 @@ namespace window_if {
     }
 
     static int has_mouse_focus(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
-
+      Window *window = window_if::cast(L, 1);
       lua_pushboolean(L, window->mouse_focus());
-
       return 1;
     }
 
     static int set_mouse_focus(lua_State *L) {
-      Script *script = Script::recover(L);
-      Window *window = script->to_a<Window *>(1);
+      Window *window = window_if::cast(L, 1);
 
       if (!lua_isboolean(L, 2))
         return luaL_argerror(L, 2, "Expected `focus` to be a boolean.");

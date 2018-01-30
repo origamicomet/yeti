@@ -169,7 +169,7 @@ void Application::run() {
   this->startup();
 
   for (;;) {
-    for (Window **window = windows_.begin(); window != windows_.end(); ++window)
+    for (Window **window = windows_.begin(); window < windows_.end(); ++window)
       (*window)->update(&window_event_handler_, (void *)this);
 
     yeti_assert_with_reason_development(time_step_policy_ != NULL,
