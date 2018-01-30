@@ -38,5 +38,9 @@ int kludge::snprintf(char *buffer, size_t size, const char *format, ...) {
   return count;
 }
 
+bool string::compare(const char *a, const char *b) {
+  return (strcmp(a, b) == 0);
+}
+
 } // core
 } // yeti

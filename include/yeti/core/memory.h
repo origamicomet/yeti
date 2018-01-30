@@ -49,6 +49,11 @@ namespace memory {
     ::memset(ptr, 0, count);
   }
 
+  /// Fills @count bytes with @byte starting from @ptr.
+  static YETI_INLINE void fill(void *ptr, size_t count, unsigned char byte) {
+    ::memset(ptr, byte, count);
+  }
+
   /// Copies @count bytes from @source to @destination.
   static YETI_INLINE void copy(const void *source, void *destination, size_t count) {
     ::memcpy(destination, source, count);

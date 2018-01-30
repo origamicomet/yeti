@@ -34,6 +34,12 @@ namespace kludge {
   /// @}
 }
 
+namespace string {
+  /// \brief Compares @a to @b.
+  /// \return True if @a and @b match.
+  extern YETI_PUBLIC bool compare(const char *a, const char *b);
+}
+
 } // core
 } // yeti
 

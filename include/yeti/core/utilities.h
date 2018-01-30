@@ -58,6 +58,10 @@ namespace utility {
 } // core
 } // yeti
 
+/// \def YETI_BIT
+/// \brief Sets @n-th bit.
+#define YETI_BIT(n) (1 << (n))
+
 /// \def YETI_MIN
 /// \copydoc ::yeti::core::utility::min
 #define YETI_MIN(a, b) \
