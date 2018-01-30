@@ -35,7 +35,7 @@ namespace ini {
                            void *context);
 
   enum Options {
-    // Skip malformed entries and rather thant stopping parsing.
+    // Skip malformed entries and continue rather than stopping parsing.
     CONTINUE_ON_ERROR = (1 << 0)
   };
 
