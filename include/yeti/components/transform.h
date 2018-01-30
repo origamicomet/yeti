@@ -28,9 +28,10 @@ namespace yeti {
 
 struct Transform {
   /// Opaque handle to a transform component.
-  struct Handle {
-    u32 instance;
-  };
+  typedef Component::Handle Handle;
+
+  /// Transient handle to a transform component.
+  typedef Component::Instance Instance;
 };
 
 class YETI_PUBLIC TransformSystem : public System {
@@ -59,7 +60,15 @@ class YETI_PUBLIC TransformSystem : public System {
   void destroy(Entity entity);
 
   /// \brief Returns a handle to the transform with associated with @entity.
-  Transform::Handle lookup(Entity entity);
+  Transform::Handle lookup(Entity entity) const;
+
+  /// \brief Resolves an opaque @handle to a transient handle.
+  ///
+  /// \warning The resolved handle is not guaranteed to be correct between
+  /// frames. It's only exposed to let you amortize the cost of an indirection
+  /// across many operations.
+  ///
+  Transform::Instance resolve(Transform::Handle handle) const;
 
   /// \brief Determines whether or not @entity has an associated transform.
   bool has(Entity entity) const;
@@ -74,20 +83,20 @@ class YETI_PUBLIC TransformSystem : public System {
   /// \param @rotation Local rotation @child should have after linking.
   /// \param @scale Local scale @child should have after linking.
   ///
-  void link(Transform::Handle child,
-            Transform::Handle parent,
+  void link(Transform::Instance child,
+            Transform::Instance parent,
             const Vec3 &position = Vec3(0.f, 0.f, 0.f),
             const Quaternion &rotation = Quaternion::IDENTITY,
             const Vec3 &scale = Vec3(1.f, 1.f, 1.f));
 
   /// \brief Unlinks an transform from its parent.
   ///
-  /// \detail After unlinking, @handle will no longer follow the movement of
+  /// \detail After unlinking, @instance will no longer follow the movement of
   /// its parent.
   ///
-  /// \param @handle The handle that will become parentless.
+  /// \param @instance The instance that will become parentless.
   ///
-  void unlink(Transform::Handle handle);
+  void unlink(Transform::Instance instance);
 
   /// \brief Returns the pose of an transform with respect to its parent.
   ///
@@ -99,7 +108,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \return Pose of the transform with respect to its parent.
   ///
-  Mat4 get_local_pose(Transform::Handle handle);
+  Mat4 get_local_pose(Transform::Instance instance);
 
   /// \brief Returns the position of an transform with respect to its parent.
   ///
@@ -108,7 +117,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \return Position of the transform with respect to its parent.
   ///
-  Vec3 get_local_position(Transform::Handle handle);
+  Vec3 get_local_position(Transform::Instance instance);
 
   /// \brief Returns the rotation of an transform with respect to its parent.
   ///
@@ -117,7 +126,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \return Rotation of the transform with respect to its parent.
   ///
-  Quaternion get_local_rotation(Transform::Handle handle);
+  Quaternion get_local_rotation(Transform::Instance instance);
 
   /// \brief Returns the scale of an transform with respect to its parent.
   ///
@@ -129,7 +138,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \return Scale of the transform with respect to its parent.
   ///
-  Vec3 get_local_scale(Transform::Handle handle);
+  Vec3 get_local_scale(Transform::Instance instance);
 
   /// \brief Sets the pose of an transform with respect to its parent.
   ///
@@ -139,7 +148,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \see yeti::TransformSystem::recompute
   ///
-  void set_local_pose(Transform::Handle handle,
+  void set_local_pose(Transform::Instance instance,
                       const Vec3 &position,
                       const Quaternion &rotation,
                       const Vec3 &scale);
@@ -152,7 +161,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \see yeti::TransformSystem::recompute
   ///
-  void set_local_position(Transform::Handle handle,
+  void set_local_position(Transform::Instance instance,
                           const Vec3 &new_local_position);
 
   /// \brief Sets the rotation of an transform with respect to its parent.
@@ -163,7 +172,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \see yeti::TransformSystem::recompute
   ///
-  void set_local_rotation(Transform::Handle handle,
+  void set_local_rotation(Transform::Instance instance,
                           const Quaternion &new_local_rotation);
 
   /// \brief Sets the scale of an transform with respect to its parent.
@@ -174,21 +183,21 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \see yeti::TransformSystem::recompute
   ///
-  void set_local_scale(Transform::Handle handle,
+  void set_local_scale(Transform::Instance instance,
                        const Vec3 &new_local_scale);
 
   /// \brief Gets the world-space pose of an transform.
   ///
   /// \note May be out of date as updates are deferred.
   ///
-  Mat4 get_world_pose(Transform::Handle handle);
+  Mat4 get_world_pose(Transform::Instance instance);
 
  private:
   /// \internal Marks an instance and descendants as dirty and changed.
-  void modified(Transform::Handle handle);
+  void modified(Transform::Instance instance);
 
   /// \internal Unlinks children.
-  void unlink_all_children(Transform::Handle handle);
+  void unlink_all_children(Transform::Instance instance);
 
  public:
   /// \brief Recomputes world poses of modified transforms.
@@ -201,7 +210,7 @@ class YETI_PUBLIC TransformSystem : public System {
   /// update performed every frame. You should only rely on this when
   /// absolutely necessary.
   ///
-  void recompute(Transform::Handle handle);
+  void recompute(Transform::Instance instance);
 
  public:
   /// \brief Fills @changed with entities with transforms that have changed
@@ -209,7 +218,7 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   /// \warning Since changes are only tracked since the last update, once you
   /// call `update` you won't know which transforms have changed. Make sure to
-  /// grab this prior to updating.
+  /// grab this prior to updating!
   ///
   void changed(core::Array<Entity> &changed) const;
 
@@ -232,7 +241,11 @@ class YETI_PUBLIC TransformSystem : public System {
  private:
   EntityManager *entities_;
 
-  core::Array<u32> entity_to_instance_;
+  unsigned n_;
+
+  const unsigned limit_;
+
+  core::Array<Transform::Instance> entity_to_instance_;
   core::Array<Entity> instance_to_entity_;
 
   core::Array<u32> parent_;
@@ -244,8 +257,24 @@ class YETI_PUBLIC TransformSystem : public System {
   core::Array<bool> dirty_;
   core::Array<bool> changed_;
 
-  unsigned n_;
+  // PERF(mtwilliams): Think of a better way to defer destruction.
+  core::Array<Transform::Instance> dead_;
 };
+
+// Inlined to reduce cost of indirections.
+
+YETI_INLINE Transform::Handle TransformSystem::lookup(Entity entity) const {
+  // TODO(mtwilliams): Verify |handle| is (still) valid in debug builds.
+  return { entity.index() };
+}
+
+YETI_INLINE Transform::Instance TransformSystem::resolve(Transform::Handle handle) const {
+  return { entity_to_instance_[handle.opaque] };
+}
+
+YETI_INLINE bool TransformSystem::has(Entity entity) const {
+  return (entity_to_instance_[entity.index()].index != -1);
+}
 
 } // yeti
 

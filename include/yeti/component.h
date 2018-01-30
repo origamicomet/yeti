@@ -18,6 +18,9 @@
 
 #include "yeti/core.h"
 
+// SMELL(mtwilliams): Distinction between types of components and instances of
+// components is poor and noticeably confusing.
+
 namespace yeti {
 
 // Forward declared because callback signatures reference `Entity` and `EntityManager`.
@@ -41,6 +44,13 @@ struct Component {
 
   /// Invalid identifier.
   static const Id INVALID = 0ul;
+
+  /// An opaque handle used to reference a particular instance of a component.
+  struct Handle { u32 opaque; };
+
+  /// A transient handle used to reference a particular instance of a component
+  /// for the duration of a frame.
+  struct Instance { u32 index; };
 
   /// Name of the component. Used as a unique identifier.
   ///
@@ -250,9 +260,6 @@ namespace component_compiler {
   };
 
   struct Output {
-    /// Version of data.
-    u32 version;
-
     /// Handle to write compiled data.
     core::File *data;
   };

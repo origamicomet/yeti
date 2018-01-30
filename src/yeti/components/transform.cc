@@ -11,7 +11,7 @@
 
 #include "yeti/components/transform.h"
 
-// PERF(mtwilliams): Move to garbage collection.
+// PERF(mtwilliams): Move to "garbage collection" at the end of each frame.
 // TODO(mtwilliams): Quantize scale.
 
 namespace yeti {
@@ -35,25 +35,23 @@ namespace transform {
   }
 }
 
-static YETI_INLINE Transform::Handle handle_from_instance(const u32 instance) {
-  return { instance };
-}
-
-static YETI_INLINE u32 instance_from_handle(const Transform::Handle handle) {
-  return handle.instance;
-}
-
 TransformSystem::TransformSystem(EntityManager *entities)
-  : entities_(entities)
-  , entity_to_instance_(core::global_page_allocator(), entities->limit())
-  , instance_to_entity_(core::global_page_allocator(), entities->limit())
-  , parent_(core::global_page_allocator(), entities->limit())
-  , local_poses_(core::global_page_allocator(), entities->limit())
-  , world_poses_(core::global_page_allocator(), entities->limit())
-  , dirty_(core::global_page_allocator(), entities->limit())
-  , changed_(core::global_page_allocator(), entities->limit())
+  : System(TransformSystem::component())
+  , entities_(entities)
   , n_(0)
+  , limit_(entities->limit())
+  , entity_to_instance_(core::global_page_allocator(), limit_)
+  , instance_to_entity_(core::global_page_allocator(), limit_)
+  , parent_(core::global_page_allocator(), limit_)
+  , local_poses_(core::global_page_allocator(), limit_)
+  , world_poses_(core::global_page_allocator(), limit_)
+  , dirty_(core::global_page_allocator(), limit_)
+  , changed_(core::global_page_allocator(), limit_)
+  , dead_(core::global_heap_allocator())
 {
+  // FIXME(mtwilliams): Drop when containers respect overridden default constructors.
+  for (unsigned index = 0; index < limit_; ++index)
+    entity_to_instance_[index].index = -1;
 }
 
 TransformSystem::~TransformSystem() {
@@ -63,14 +61,12 @@ Transform::Handle TransformSystem::create(Entity entity,
                                           const Vec3 &position,
                                           const Quaternion &rotation,
                                           const Vec3 &scale) {
-  const u32 index = entity.index();
-
-  yeti_assert_with_reason_debug(entity_to_instance_[index] == 0,
-                                "Transform component already associated with entity.");
+  // Enforce one-to-one mapping.
+  yeti_assert_with_reason_debug(!this->has(entity), "Transform component already associated with entity.");
 
   const u32 instance = n_++;
 
-  entity_to_instance_[index] = instance + 1;
+  entity_to_instance_[entity.index()].index = instance;
   instance_to_entity_[instance] = entity;
 
   parent_[instance] = -1;
@@ -81,112 +77,94 @@ Transform::Handle TransformSystem::create(Entity entity,
   dirty_[instance] = true;
   changed_[instance] = true;
 
-  return handle_from_instance(instance);
+  return { entity.index() };
 }
 
 void TransformSystem::destroy(Transform::Handle handle) {
-  // TODO(mtwilliams): Defer destruction until next update as this prevents
-  // handles from being invalidated (pointing to wrong instances) for the
-  // duration of a frame.
+  const Transform::Instance instance = resolve(handle);
+
+  // Defer destruction until next update as this prevents instances from being
+  // invalidated (pointing to wrong instances) for the duration of a frame.
+  dead_.push(instance);
 
   // Unlink all children otherwise they'll be linked to a random transform at
   // some point in the future.
-  this->unlink_all_children(handle);
-
-  const u32 dead = instance_from_handle(handle);
-  const u32 replacement = n_ - 1;
-
-  // Swap 'n' pop.
-  entity_to_instance_[instance_to_entity_[replacement].index()] = dead;
-  instance_to_entity_[dead] = instance_to_entity_[replacement];
-  parent_[dead] = parent_[replacement];
-  local_poses_[dead] = local_poses_[replacement];
-  world_poses_[dead] = world_poses_[replacement];
-  dirty_[dead] = dirty_[replacement];
-  changed_[dead] = changed_[replacement];
+  this->unlink_all_children(instance);
 
   // Unmap.
-  entity_to_instance_[instance_to_entity_[replacement].index()] = 0;
-  entity_to_instance_[instance_to_entity_[dead].index()] = 0;
-
-  n_ -= 1;
+  entity_to_instance_[handle.opaque] = { 0 };
+  instance_to_entity_[instance.index] = { 0xFFFFFFFF };
 }
 
 void TransformSystem::destroy(Entity entity) {
-  if (const u32 instance = entity_to_instance_[entity.index()])
-    // Has a transform component.
-    this->destroy(handle_from_instance(instance - 1));
+  const Transform::Handle handle = lookup(entity);
+  const Transform::Instance instance = resolve(handle);
+
+  if (instance.index != -1)
+    // Has a transform component, so destroy it.
+    this->destroy(handle);
 }
 
-Transform::Handle TransformSystem::lookup(Entity entity) {
-  const u32 instance = entity_to_instance_[entity.index()];
-  return handle_from_instance(instance - 1);
-}
-
-bool TransformSystem::has(Entity entity) const {
-  return (entity_to_instance_[entity.index()] != 0);
-}
-
-void TransformSystem::link(Transform::Handle child,
-                           Transform::Handle parent,
+void TransformSystem::link(Transform::Instance child,
+                           Transform::Instance parent,
                            const Vec3 &position,
                            const Quaternion &rotation,
                            const Vec3 &scale) {
   YETI_TRAP();
 }
 
-void TransformSystem::unlink(Transform::Handle handle) {
+void TransformSystem::unlink(Transform::Instance handle) {
   YETI_TRAP();
 }
 
-Mat4 TransformSystem::get_local_pose(Transform::Handle handle) {
-  return local_poses_[instance_from_handle(handle)];
+Mat4 TransformSystem::get_local_pose(Transform::Instance instance) {
+  return local_poses_[instance.index];
 }
 
-Vec3 TransformSystem::get_local_position(Transform::Handle handle) {
-  const Mat4 &pose = local_poses_[instance_from_handle(handle)];
+Vec3 TransformSystem::get_local_position(Transform::Instance instance) {
+  const Mat4 &pose = local_poses_[instance.index];
   return translation_from_matrix(pose);
 }
 
-Quaternion TransformSystem::get_local_rotation(Transform::Handle handle) {
-  const Mat4 &pose = local_poses_[instance_from_handle(handle)];
+Quaternion TransformSystem::get_local_rotation(Transform::Instance instance) {
+  const Mat4 &pose = local_poses_[instance.index];
   return rotation_from_matrix(pose);
 }
 
-Vec3 TransformSystem::get_local_scale(Transform::Handle handle) {
-  const Mat4 &pose = local_poses_[instance_from_handle(handle)];
+Vec3 TransformSystem::get_local_scale(Transform::Instance instance) {
+  const Mat4 &pose = local_poses_[instance.index];
   return scale_from_matrix(pose);
 }
 
-void TransformSystem::set_local_pose(Transform::Handle handle,
+void TransformSystem::set_local_pose(Transform::Instance instance,
                                      const Vec3 &position,
                                      const Quaternion &rotation,
                                      const Vec3 &scale) {
   const Mat4 new_local_pose = Mat4::compose(position, rotation, scale);
 
-  local_poses_[instance_from_handle(handle)] = new_local_pose;
+  local_poses_[instance.index] = new_local_pose;
 
   // Mark instance and descendants as dirty and changed.
-  this->modified(handle);
+  this->modified(instance);
 }
 
-void TransformSystem::set_local_position(Transform::Handle handle,
+void TransformSystem::set_local_position(Transform::Instance instance,
                                          const Vec3 &new_local_position) {
-  Mat4 &pose = local_poses_[instance_from_handle(handle)];
+  Mat4 &pose = local_poses_[instance.index];
 
   pose(0,3) = new_local_position.x;
   pose(1,3) = new_local_position.y;
   pose(2,3) = new_local_position.z;
 
   // Mark instance and descendants as dirty and changed.
-  this->modified(handle);
+  this->modified(instance);
 }
 
 // PERF(mtwilliams): Only modify rotation (scaling accordingly).
 
-void TransformSystem::set_local_rotation(Transform::Handle handle,
+void TransformSystem::set_local_rotation(Transform::Instance instance,
                                          const Quaternion &new_local_rotation) {
-  Mat4 &pose = local_poses_[instance_from_handle(handle)];
+  Mat4 &pose = local_poses_[instance.index];
 
   // Derive existing position.
   const Vec3 old_local_position = translation_from_matrix(pose);
@@ -198,12 +176,12 @@ void TransformSystem::set_local_rotation(Transform::Handle handle,
   pose = Mat4::compose(old_local_position, new_local_rotation, old_local_scale);
 
   // Mark instance and descendants as dirty and changed.
-  this->modified(handle);
+  this->modified(instance);
 }
 
-void TransformSystem::set_local_scale(Transform::Handle handle,
+void TransformSystem::set_local_scale(Transform::Instance instance,
                                       const Vec3 &new_local_scale) {
-  Mat4 &pose = local_poses_[instance_from_handle(handle)];
+  Mat4 &pose = local_poses_[instance.index];
 
   // Derive existing scale.
   const Vec3 old_local_scale = scale_from_matrix(pose);
@@ -223,30 +201,48 @@ void TransformSystem::set_local_scale(Transform::Handle handle,
   pose(2,2) *= ratio.z;
 
   // Mark instance and descendants as dirty and changed.
-  this->modified(handle);
+  this->modified(instance);
 }
 
-Mat4 TransformSystem::get_world_pose(Transform::Handle handle) {
-  return world_poses_[instance_from_handle(handle)];
+Mat4 TransformSystem::get_world_pose(Transform::Instance instance) {
+  return world_poses_[instance.index];
 }
 
-void TransformSystem::modified(Transform::Handle handle) {
-  const u32 instance = instance_from_handle(handle);
-
+void TransformSystem::modified(Transform::Instance instance) {
   // TODO(mtwilliams): Mark descendants.
-  dirty_[instance] = true;
-  changed_[instance] = true;
+  dirty_[instance.index] = true;
+  changed_[instance.index] = true;
 }
 
-void TransformSystem::unlink_all_children(Transform::Handle handle) {
+void TransformSystem::unlink_all_children(Transform::Instance instance) {
   // TODO(mtwilliams): Unlink all children.
 }
 
 void TransformSystem::update() {
   YETI_TRAP();
+
+  const unsigned drop = dead_.size();
+
+  // const u32 dead = instance_from_handle(handle);
+  // const u32 replacement = n_ - 1;
+
+  // // Swap 'n' pop.
+  // entity_to_instance_[instance_to_entity_[replacement].index()] = dead;
+  // instance_to_entity_[dead] = instance_to_entity_[replacement];
+  // parent_[dead] = parent_[replacement];
+  // local_poses_[dead] = local_poses_[replacement];
+  // world_poses_[dead] = world_poses_[replacement];
+  // dirty_[dead] = dirty_[replacement];
+  // changed_[dead] = changed_[replacement];
+
+  // // Unmap.
+  // entity_to_instance_[instance_to_entity_[replacement].index()] = 0;
+  // entity_to_instance_[instance_to_entity_[dead].index()] = 0;
+
+  // n_ -= 1;
 }
 
-void TransformSystem::recompute(Transform::Handle handle) {
+void TransformSystem::recompute(Transform::Instance instance) {
   YETI_TRAP();
 }
 

@@ -13,7 +13,9 @@
 
 namespace yeti {
 
-System::System() {
+System::System(const Component *component)
+  : type_(component_registry::id_from_name(component->name))
+{
 }
 
 System::~System() {
@@ -41,7 +43,7 @@ SystemManager::SystemManager(EntityManager *entities)
   systems_.resize(count_);
   callbacks_.resize(count_);
 
-  // Create 'em', hook up 'em up, and insert into our map.
+  // Create 'em, hook up 'em up, and insert 'em into our map.
   for (unsigned i = 0; i < count_; ++i) {
     component_to_index_.insert(ids[i], i);
 

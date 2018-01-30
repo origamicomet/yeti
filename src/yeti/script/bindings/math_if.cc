@@ -1206,9 +1206,10 @@ void math_if::expose(Script *script) {
 
   TYPES(BIND_TO_C);
 
-  #undef TYPES
   #undef BIND_TO_LUA
   #undef BIND_TO_C
+
+  #undef TYPES
 }
 
 } // yeti

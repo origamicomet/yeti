@@ -194,14 +194,13 @@ void StandardApplication::load_boot_package_and_script() {
   ScriptResource *boot_script_resource =
     (ScriptResource *)resource_manager::lookup(boot_script_id);
 
-#if YETI_CONFIGURATION == YETI_CONFIGURATION_DEBUG || \
-    YETI_CONFIGURATION == YETI_CONFIGURATION_DEVELOPMENT
-  while (resource_manager::state(boot_script_id) != Resource::LOADED)
-    core::Thread::yield();
-#else
-  // Boot script must be part of boot package.
-  yeti_assert(resource_manager::state(boot_script_id) == Resource::LOADED);
-#endif
+  if (resource_manager::autoloads()) {
+    while (resource_manager::state(boot_script_id) != Resource::LOADED)
+      core::Thread::yield();
+  } else {
+    yeti_assert_with_reason(resource_manager::state(boot_script_id) == Resource::LOADED,
+                            "Boot script is not part of boot package.");
+  }
 
   this->script_.inject(boot_script_resource);
 

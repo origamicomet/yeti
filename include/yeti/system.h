@@ -32,8 +32,12 @@ class YETI_PUBLIC System {
  friend class SystemManager;
 
  protected:
-  System();
+  System(const Component *component);
   ~System();
+
+ public:
+  /// Type of components managed by this system.
+  Component::Id type() const { return type_; }
 
  public:
   /// Gets the value of a property.
@@ -47,6 +51,9 @@ class YETI_PUBLIC System {
  protected:
   virtual void created(Entity entity);
   virtual void destroyed(Entity entity);
+
+ private:
+  const Component::Id type_;
 };
 
 /// Manages systems.
@@ -59,8 +66,7 @@ class YETI_PUBLIC System {
 /// ## Registry
 ///
 /// Systems managing instances of particular components can be looked up by
-/// the component's uneique identifier or name. Systems can also be iterated,
-/// to allow call
+/// the component's uneique identifier or name.
 ///
 class YETI_PUBLIC SystemManager {
  YETI_DISALLOW_COPYING(SystemManager)

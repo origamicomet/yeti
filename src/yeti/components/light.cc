@@ -33,7 +33,8 @@ namespace light {
 }
 
 LightSystem::LightSystem(EntityManager *entities)
-  : entities_(entities)
+  : System(LightSystem::component())
+  , entities_(entities)
   , entity_to_instance_(core::global_heap_allocator(), 256)
   , instance_to_entity_(core::global_heap_allocator())
   , lights_(core::global_heap_allocator())

@@ -33,7 +33,8 @@ namespace camera {
 }
 
 CameraSystem::CameraSystem(EntityManager *entities)
-  : entities_(entities)
+  : System(CameraSystem::component())
+  , entities_(entities)
   , entity_to_instance_(core::global_heap_allocator(), 256)
   , instance_to_entity_(core::global_heap_allocator())
   , cameras_(core::global_heap_allocator())

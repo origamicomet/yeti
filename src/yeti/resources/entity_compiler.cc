@@ -13,6 +13,8 @@
 
 namespace yeti {
 
+// TODO(mtwilliams): Inheritance.
+
 EntityCompiler::EntityCompiler(const resource_compiler::Environment *env,
                                const resource_compiler::Input *input,
                                const resource_compiler::Output *output)
