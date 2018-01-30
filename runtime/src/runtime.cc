@@ -49,11 +49,25 @@ static yeti::Config config_from_manifest(yeti::runtime::Manifest *manifest) {
   return config;
 }
 
+// TODO(mtwilliams): Preemptively start logging infrastructure.
+
 int main(int argc, const char *argv[]) {
   ::setlocale(LC_ALL, "en_US.UTF-8");
 
+  char current_working_directory[256];
+  yeti::core::path::cwd(current_working_directory, sizeof(current_working_directory));
+
   yeti::runtime::Manifest *manifest =
     yeti::runtime::manifest::load_from_path("config.ini");
+
+  if (!manifest) {
+    fprintf(stderr, "Failed to load manifest from `%s%c%s`!\n",
+                     current_working_directory,
+                     yeti::core::path::seperator(),
+                     "config.ini");
+
+    return EXIT_FAILURE;
+  }
 
   yeti::Config config = config_from_manifest(manifest);
 

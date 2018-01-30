@@ -114,8 +114,8 @@ struct Manifest {
 };
 
 namespace manifest {
-  Manifest *load_from_path(const char *path);
-  Manifest *load_from_file(core::File *file);
+  Manifest *load_from_path(const char *path, bool lax = false);
+  Manifest *load_from_file(core::File *file, bool lax = false);
 }
 
 } // runtime
