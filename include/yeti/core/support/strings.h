@@ -38,13 +38,22 @@ namespace string {
   /// \brief Compares @a to @b.
   /// \return True if @a and @b match.
   extern YETI_PUBLIC bool compare(const char *a, const char *b);
+
+  /// \brief Compares up to @length characters of @a to @b.
+  /// \return True if @a and @b match.
+  extern YETI_PUBLIC bool compare(const char *a, const char *b, size_t length);
 }
 
 } // core
 } // yeti
 
-// All because Microsoft has to do things their own stupid way...
-#define vsnprintf ::yeti::core::kludge::vsnprintf
-#define snprintf ::yeti::core::kludge::snprintf
+#if YETI_COMPILER == YETI_COMPILER_MSVC
+  // Include prior to redefining otherwise we break things.
+  #include <cstdio>
+
+  // All because Microsoft has to do things their own stupid way...
+  #define vsnprintf ::yeti::core::kludge::vsnprintf
+  #define snprintf ::yeti::core::kludge::snprintf
+#endif
 
 #endif // _YETI_FOUNDATION_SUPPORT_STRINGS_H_

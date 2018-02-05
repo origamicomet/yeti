@@ -42,5 +42,9 @@ bool string::compare(const char *a, const char *b) {
   return (strcmp(a, b) == 0);
 }
 
+bool string::compare(const char *a, const char *b, size_t length) {
+  return (strncmp(a, b, length) == 0);
+}
+
 } // core
 } // yeti
