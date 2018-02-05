@@ -14,8 +14,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef _YETI_FOUNDATION_SUPPORT_STRINGS_H_
-#define _YETI_FOUNDATION_SUPPORT_STRINGS_H_
+#ifndef _YETI_CORE_SUPPORT_STRINGS_H_
+#define _YETI_CORE_SUPPORT_STRINGS_H_
 
 #include "yeti/linkage.h"
 
@@ -56,4 +56,4 @@ namespace string {
   #define snprintf ::yeti::core::kludge::snprintf
 #endif
 
-#endif // _YETI_FOUNDATION_SUPPORT_STRINGS_H_
+#endif // _YETI_CORE_SUPPORT_STRINGS_H_
