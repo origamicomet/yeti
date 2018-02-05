@@ -256,7 +256,7 @@ namespace component_compiler {
   };
 
   struct Input {
-    // const json &data;
+    const xml_element_t *root;
   };
 
   struct Output {
