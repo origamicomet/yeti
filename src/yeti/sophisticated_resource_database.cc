@@ -589,7 +589,7 @@ u32 SophisticatedResourceDatabase::version(Resource::Id resource) {
   return 0;
 }
 
-u64 SophisticatedResourceDatabase::built(Resource::Id resource) {
+u64 SophisticatedResourceDatabase::built(Resource::Id resource, bool *success) {
   YETI_SCOPED_LOCK(lock_);
 
   RESET_ON_RETURN(builds_of_resource_stmt_);
@@ -599,6 +599,8 @@ u64 SophisticatedResourceDatabase::built(Resource::Id resource) {
 
   switch (sqlite3_step(builds_of_resource_stmt_)) {
     case SQLITE_ROW:
+      if (success)
+        *success = !!sqlite3_column_int(builds_of_resource_stmt_, 7);
       return (u64)sqlite3_column_int64(builds_of_resource_stmt_, 4);
 
     case SQLITE_DONE:
