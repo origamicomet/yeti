@@ -104,6 +104,20 @@ struct Entity {
 /// consequence of names being hashed to reduce memory footprint and improve
 /// performance.
 ///
+/// ## Hierarchy
+///
+/// Entities can be and often are linked to each other to form a logical
+/// hierarchy. This is distinct from the physical hierarchy described by the
+/// [`TransformSystem`](@ref yeti::TransformSystem) as the this hierarchy
+/// controls how entities are managed. Specifically, whenever an entity is
+/// destroyed so are its logical children. Put another way, the logical
+/// hierarchy describes the logical composition of the world rather than its
+/// physical manifestation (although there is often overlap.)
+///
+/// \remark This is employed heavily by entities, prefabs, and levels. For
+/// example, levels are the logical parents of every entity contained in them,
+/// that way all entities are destroyed when the level is unloaded.
+///
 /// ## Lifetime
 ///
 /// As entities are essentially weak references, validity can be quickly
@@ -182,6 +196,13 @@ class YETI_PUBLIC EntityManager {
   ///
   bool named(const u32 hash_of_name, Entity *entity) const;
 
+ private:
+  /// \internal Destroys an entity and children if any.
+  void destroy_for_real(Entity entity);
+
+  /// \internal Destroys logical children.
+  void destroy_all_children(u32 index_of_parent);
+
  public:
   typedef void (*LifecycleCallback)(Entity::LifecycleEvent event,
                                     Entity entity,
@@ -224,6 +245,14 @@ class YETI_PUBLIC EntityManager {
 
   /// Map of names to entities used to accelerate lookups of entities by name.
   core::Map<u32, Entity, core::map::IdentityHashFunction<u32>::hash> name_to_entity_;
+
+  /// Logical hierarchy of entities.
+  /// @{
+  core::Array<u32> parent_;
+  core::Array<u32> children_;
+  core::Array<u32> next_;
+  core::Array<u32> previous_;
+  /// @}
 
   /// Cookies associated with entities.
   core::Array<u32> cookies_;

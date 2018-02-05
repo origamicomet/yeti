@@ -19,6 +19,10 @@ EntityManager::EntityManager(unsigned size)
   , entities_(core::global_page_allocator(), size)
   , names_(core::global_page_allocator(), size)
   , name_to_entity_(core::global_page_allocator(), size)
+  , parent_(core::global_page_allocator(), size)
+  , children_(core::global_page_allocator(), size)
+  , next_(core::global_page_allocator(), size)
+  , previous_(core::global_page_allocator(), size)
   , cookies_(core::global_page_allocator(), size)
   , free_(core::global_page_allocator(), size)
   , callbacks_(core::global_heap_allocator())
@@ -27,6 +31,10 @@ EntityManager::EntityManager(unsigned size)
   for (unsigned index = 0; index < size; ++index) {
     entities_[index] = Entity(index, 0);
     names_[index]    = 0;
+    parent_[index]   = -1;
+    children_[index] = -1;
+    next_[index]     = -1;
+    previous_[index] = -1;
     cookies_[index]  = 0;
     free_.push(index);
   }
@@ -72,26 +80,84 @@ void EntityManager::create(Entity *entities, unsigned n) {
 }
 
 void EntityManager::destroy(Entity entity) {
-  if (alive(entity)) {
-    const u32 index = entity.index();
-    const u8 generation = entity.generation();
+  if (alive(entity))
+    this->destroy_for_real(entity);
+}
+
+// PERF(mtwilliams): Defer notifications so we can process in a batch and to
+// reduce cache thrashing.
+
+void EntityManager::destroy_for_real(Entity entity) {
+  const u32 index = entity.index();
+  const u8 generation = entity.generation();
+
+  // Generation is bumped when destroyed, rather than when allocated, to
+  // catch dead entities right away.
+  entities_[index] = Entity(index, generation + 1);
+
+  if (const u32 name = names_[index])
+    name_to_entity_.remove(name);
+
+  names_[index] = 0;
+
+  if (parent_[index] != -1) {
+    // Unlink to prevent collateral damage when parent is destroyed.
+    if (previous_[index] != -1)
+      next_[previous_[index]] = next_[index];
+    else
+      children_[parent_[index]] = next_[index];
+
+    // No longer a part of the hierarchy.
+    parent_[index] = next_[index] = previous_[index] = -1;
+  }
+
+  if (children_[index] != -1)
+    // Destroy logical children.
+    this->destroy_all_children(index);
+
+  cookies_[index] = 0;
+
+  // Slot will be reused after any children.
+  free_.push(index);
+
+  n_ -= 1;
+
+  this->notify(Entity::DESTROYED, entity);
+}
+
+void EntityManager::destroy_all_children(u32 index_of_parent) {
+  for (u32 index = children_[index_of_parent]; index != -1; index = next_[index]) {
+    const Entity child = entities_[index];
 
     // Generation is bumped when destroyed, rather than when allocated, to
     // catch dead entities right away.
-    entities_[index] = Entity(index, generation + 1);
+    entities_[index] = Entity(index, child.generation() + 1);
 
     if (const u32 name = names_[index])
       name_to_entity_.remove(name);
 
     names_[index] = 0;
+
+    // We know we have a parent since we're being destroyed because of it.
+    parent_[index] = -1;
+
+    if (children_[index] != -1) {
+      // Destroy any logical children of our own.
+      this->destroy_all_children(index);
+
+      // No longer have children.
+      children_[index] = -1;
+    }
+
     cookies_[index] = 0;
 
-    // Slot will be reused last.
+    // Slot will be reused after any children.
     free_.push(index);
 
     n_ -= 1;
 
-    this->notify(Entity::DESTROYED, entity);
+    // Let listeners know about our path of destruction.
+    this->notify(Entity::DESTROYED, child);
   }
 }
 
