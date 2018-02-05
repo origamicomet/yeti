@@ -9,28 +9,201 @@
 //
 //===----------------------------------------------------------------------===//
 
+// TODO(mtwilliams): Use our own sort.
+#include <algorithm>
+
 #include "yeti/components/transform.h"
 
-// PERF(mtwilliams): Move to "garbage collection" at the end of each frame.
 // TODO(mtwilliams): Quantize scale.
 
+// PERF(mtwilliams): Sort or bucket transforms by depth. This will increase
+// the complexity of managing transforms but will allow us to parallelize
+// updates.
+
 namespace yeti {
+
+// TODO(mtwilliams): Error messages during compilation.
+// TODO(mtwilliams): Contextualize by indicating location in source.
+
+#pragma pack(push, 1)
+  struct Transform::Compiled {
+    f32 position[3];
+    f32 rotation[4];
+    f32 scale[3];
+  };
+#pragma pack(pop)
+
+
+class TransformCompiler {
+ public:
+  TransformCompiler(const component_compiler::Environment *env,
+                    const component_compiler::Input *input,
+                    const component_compiler::Output *output);
+
+  ~TransformCompiler();
+
+ public:
+  bool compile();
+
+ private:
+  bool parse();
+  bool output();
+
+ private:
+  bool parse_a_vector(const xml_element_t *element,
+                      f32 *vector,
+                      unsigned order);
+
+ private:
+  const component_compiler::Environment *env_;
+  const component_compiler::Input *input_;
+  const component_compiler::Output *output_;
+
+  // Tracks whether or not various properties have been specified.
+  bool position_has_been_specified_,
+       rotation_has_been_specified_,
+       scale_has_been_specified_;
+
+  // Intermediate storage of the transform we're compiling. Eventually written
+  // out after compilation.
+  Transform::Compiled transform_;
+};
+
+TransformCompiler::TransformCompiler(const component_compiler::Environment *env,
+                                     const component_compiler::Input *input,
+                                     const component_compiler::Output *output)
+  : env_(env)
+  , input_(input)
+  , output_(output)
+  , position_has_been_specified_(false)
+  , rotation_has_been_specified_(false)
+  , scale_has_been_specified_(false)
+{
+  core::memory::zero((void *)&transform_, sizeof(Transform::Compiled));
+}
+
+TransformCompiler::~TransformCompiler()
+{
+}
+
+bool TransformCompiler::compile()
+{
+  return parse() && output();
+}
+
+bool TransformCompiler::parse()
+{
+  const xml_element_t *root = input_->root;
+
+  // We parse the component in entirety so we can report as many issues as
+  // possible to reduce frustration.
+  unsigned errors = 0;
+
+  for (const xml_element_t *e = root->children; e; e = e->sibling) {
+    if (core::string::compare("position", e->name.s, e->name.l)) {
+      if (position_has_been_specified_) {
+        env_->error(env_, "Position has already been specified!");
+        errors++;
+      } else {
+        errors = this->parse_a_vector(e, transform_.position, 3) ? 0 : 1;
+        position_has_been_specified_ = true;
+      }
+    } else if (core::string::compare("rotation", e->name.s, e->name.l)) {
+      if (rotation_has_been_specified_) {
+        env_->error(env_, "Rotation has already been specified!");
+        errors++;
+      } else {
+        errors += this->parse_a_vector(e, transform_.rotation, 4) ? 0 : 1;
+        rotation_has_been_specified_ = true;
+      }
+    } else if (core::string::compare("scale", e->name.s, e->name.l)) {
+      if (scale_has_been_specified_) {
+        env_->error(env_, "Scale has already been specified!");
+        errors++;
+      } else {
+        errors += this->parse_a_vector(e, transform_.scale, 3) ? 0 : 1;
+        rotation_has_been_specified_ = true;
+      }
+    } else {
+      env_->error(env_, "Transforms do not have a '%.*s' property.", e->name.l, e->name.s);
+      errors++;
+    }
+  }
+
+  return (errors == 0);
+}
+
+bool TransformCompiler::parse_a_vector(const xml_element_t *root,
+                                       f32 *vector,
+                                       unsigned order)
+{
+  u32 mask = 0;
+
+  for (const xml_element_t *e = root->children; e; e = e->sibling) {
+    i32 axis = -1;
+
+    if (e->name.l == 1 && *e->name.s == 'x')               axis = 0;
+    if (e->name.l == 1 && *e->name.s == 'y')               axis = 1;
+    if (e->name.l == 1 && *e->name.s == 'z' && order >= 3) axis = 2;
+    if (e->name.l == 1 && *e->name.s == 'w' && order >= 4) axis = 3;
+
+    if (axis < 0) {
+      static const char *expected[] = { "x or y", "x, y, or z", "x, y, z, or w" };
+      env_->error(env_, "Expected %s not \"%.*s\" for %.*s.", expected[order-2], e->name.l, e->name.s, root->name.l, root->name.s);
+      return false;
+    }
+
+    if (mask & (1 << axis)) {
+      env_->error(env_, "You have already specified the %c-axis for %.*s.", "xyzw"[axis], e->name.l, e->name.s);
+      return false;
+    }
+
+    if (sscanf(e->body.s, "%f", &vector[axis]) != 1) {
+      env_->error(env_, "Expected a floating-point value but got \"%.*s\" for %c-axis of %.*s.", e->body.l, e->body.l, "xyzw"[axis], root->name.l, root->name.s);
+      return false;
+    }
+
+    mask |= (1 << axis);
+  }
+
+  for (unsigned axis = 0; axis < order; ++axis)
+    if (~mask & (1 << axis))
+      env_->error(env_, "You must specify the %c-axis for %.*s.", "xyzw"[axis], root->name.l, root->name.s);
+
+  if (order >= 2 && mask < 3)  return false;
+  if (order >= 3 && mask < 7)  return false;
+  if (order >= 4 && mask < 15) return false;
+
+  return true;
+}
+
+bool TransformCompiler::output()
+{
+  core::fs::write(output_->data,
+                  (const void *)&transform_,
+                  sizeof(Transform::Compiled));
+
+  return true;
+}
 
 namespace transform {
   static bool compile(const component_compiler::Environment *env,
                       const component_compiler::Input *input,
-                      const component_compiler::Output *output) {
-    return false;
+                      const component_compiler::Output *output)
+  {
+    return TransformCompiler(env, input, output).compile();
   }
 
   static void spawn(void *system,
                     const Entity *entities,
                     const u32 *owners,
                     size_t instances,
-                    const void *data) {
+                    const void *data)
+  {
   }
 
-  static bool compatible(u32 version) {
+  static bool compatible(u32 version)
+  {
     return false;
   }
 }
@@ -49,8 +222,8 @@ TransformSystem::TransformSystem(EntityManager *entities)
   , changed_(core::global_page_allocator(), limit_)
   , dead_(core::global_heap_allocator())
 {
-  // FIXME(mtwilliams): Drop when containers respect overridden default constructors.
   for (unsigned index = 0; index < limit_; ++index)
+    // We use -1 to indicate that there is no instance associated with an entity.
     entity_to_instance_[index].index = -1;
 }
 
@@ -92,7 +265,7 @@ void TransformSystem::destroy(Transform::Handle handle) {
   this->unlink_all_children(instance);
 
   // Unmap.
-  entity_to_instance_[handle.opaque] = { 0 };
+  entity_to_instance_[handle.opaque] = { u32(-1) };
   instance_to_entity_[instance.index] = { 0xFFFFFFFF };
 }
 
@@ -218,32 +391,67 @@ void TransformSystem::unlink_all_children(Transform::Instance instance) {
   // TODO(mtwilliams): Unlink all children.
 }
 
+// TODO(mtwilliams): Ensure transforms are updated from lowest link depth to
+// greatest.
+
 void TransformSystem::update() {
-  YETI_TRAP();
+  // Quick 'n' dirty linear walk through transforms.
+  for (u32 index = 0; index < n_; ++index)
+    this->recompute({ index });
 
-  const unsigned drop = dead_.size();
-
-  // const u32 dead = instance_from_handle(handle);
-  // const u32 replacement = n_ - 1;
-
-  // // Swap 'n' pop.
-  // entity_to_instance_[instance_to_entity_[replacement].index()] = dead;
-  // instance_to_entity_[dead] = instance_to_entity_[replacement];
-  // parent_[dead] = parent_[replacement];
-  // local_poses_[dead] = local_poses_[replacement];
-  // world_poses_[dead] = world_poses_[replacement];
-  // dirty_[dead] = dirty_[replacement];
-  // changed_[dead] = changed_[replacement];
-
-  // // Unmap.
-  // entity_to_instance_[instance_to_entity_[replacement].index()] = 0;
-  // entity_to_instance_[instance_to_entity_[dead].index()] = 0;
-
-  // n_ -= 1;
+  // Blow away dead transforms.
+  TransformSystem::gc();
 }
 
 void TransformSystem::recompute(Transform::Instance instance) {
-  YETI_TRAP();
+  const u32 index = instance.index;
+
+  if (parent_[index] != -1)
+    // Linked instances are transformed by their parent.
+    world_poses_[index] = world_poses_[parent_[index]]
+                        * local_poses_[index];
+  else
+    // Otherwise local-pose is equivalent to world-pose.
+    world_poses_[index] = local_poses_[index];
+
+  // No longer dirty, of course.
+  dirty_[instance.index] = false;
+}
+
+void TransformSystem::gc() {
+  // Sort from highest to lowest so we can work backwards.
+  std::sort(dead_.begin(), dead_.end(), [](const auto &a, const auto &b) { return a.index > b.index; });
+
+  u32 swap;
+
+  // Skip any dead instances occupying the tail end of our arrays.
+  for (swap = 0; swap < dead_.size(); swap++)
+    if (dead_[swap].index != n_ - swap - 1)
+      break;
+
+  // Swap the last alive instance with remaining dead instances.
+  for (Transform::Instance *dead = &dead_[swap]; dead < dead_.end(); ++dead) {
+    // Identify the last alive instance.
+    const Entity replacement = instance_to_entity_[swap];
+
+    // Remap.
+    entity_to_instance_[replacement.index()] = { dead->index };
+    instance_to_entity_[dead->index] = replacement;
+
+    // Replace parent and poses but not flags as we collect after recomputing
+    // poses.
+    parent_[dead->index] = parent_[swap];
+    local_poses_[dead->index] = local_poses_[swap];
+    world_poses_[dead->index] = world_poses_[swap];
+
+    swap--;
+  }
+
+  // Now "pop" the dead instances that are all at the end of our arrays.
+  n_ -= dead_.size();
+
+  // Clear our queue for the next frame.
+  dead_.clear();
 }
 
 void TransformSystem::changed(core::Array<Entity> &changed) const {

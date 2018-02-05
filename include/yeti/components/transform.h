@@ -32,6 +32,9 @@ struct Transform {
 
   /// Transient handle to a transform component.
   typedef Component::Instance Instance;
+
+  /// \internal Packed form of transform after compilation.
+  struct Compiled;
 };
 
 class YETI_PUBLIC TransformSystem : public System {
@@ -212,6 +215,10 @@ class YETI_PUBLIC TransformSystem : public System {
   ///
   void recompute(Transform::Instance instance);
 
+ private:
+  /// \internal Destroys instances and recompacts.
+  void gc();
+
  public:
   /// \brief Fills @changed with entities with transforms that have changed
   /// since the last update.
@@ -257,7 +264,7 @@ class YETI_PUBLIC TransformSystem : public System {
   core::Array<bool> dirty_;
   core::Array<bool> changed_;
 
-  // PERF(mtwilliams): Think of a better way to defer destruction.
+  // We defer destruction until the next frame.
   core::Array<Transform::Instance> dead_;
 };
 
