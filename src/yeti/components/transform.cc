@@ -397,7 +397,8 @@ void TransformSystem::unlink_all_children(Transform::Instance instance) {
 void TransformSystem::update() {
   // Quick 'n' dirty linear walk through transforms.
   for (u32 index = 0; index < n_; ++index)
-    this->recompute({ index });
+    if (dirty_[index])
+      this->recompute({ index });
 
   // Blow away dead transforms.
   TransformSystem::gc();
