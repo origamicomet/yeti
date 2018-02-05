@@ -78,7 +78,8 @@
 #include "yeti/core/network/http.h"
 
 #include "yeti/core/misc/ini.h"
-#include "yeti/core/misc/sjson.h"
+#include "yeti/core/misc/xml.h"
+#include "yeti/core/misc/json.h"
 
 #include "yeti/core/misc/uuid.h"
 
