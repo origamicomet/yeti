@@ -56,6 +56,8 @@ class YETI_PRIVATE EntityCompiler {
   core::Array<u8> heap_;
 
   xml_element_t *root_;
+
+  bool document_has_declaration_;
 };
 
 } // yeti
