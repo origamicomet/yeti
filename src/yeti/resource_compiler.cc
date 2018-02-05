@@ -193,11 +193,14 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
 
   const Resource::Id id = db_->add_a_resource(resource::id_from_type(type), name);
 
+  bool previous_build_was_successful;
+
   if (!force)
     if (source_file_info.last_modified_at <= previous_source_file_info.timestamp)
-      if (source_file_info.last_modified_at <= db_->built(id))
-        // Already up to date.
-        return resource_compiler::Results::SKIPPED;
+      if (source_file_info.last_modified_at <= db_->built(id, &previous_build_was_successful))
+        if (previous_build_was_successful)
+          // Already up to date.
+          return resource_compiler::Results::SKIPPED;
 
   core::File *source_file_handle =
     core::fs::open(source_file_path, core::File::READ | core::File::EXCLUSIVE);

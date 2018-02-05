@@ -56,34 +56,23 @@ class YETI_PUBLIC SophisticatedResourceDatabase : public ResourceDatabase {
   void register_a_type(const Resource::Type *type);
 
   Resource::File::Id add_a_file(const char *path);
-
   void remove_a_file(Resource::File::Id file);
 
-  void info(Resource::File::Id file,
-            Resource::File *info);
+  void info(Resource::File::Id file, Resource::File *info);
+  void touch(Resource::File::Id file, u64 timestamp, const char fingerprint[40]);
 
-  void touch(Resource::File::Id file,
-             u64 timestamp,
-             const char fingerprint[40]);
-
-  Resource::Id add_a_resource(Resource::Type::Id type,
-                              const char *name);
-
+  Resource::Id add_a_resource(Resource::Type::Id type, const char *name);
   void remove_a_resource(Resource::Id resource);
 
   bool exists(Resource::Id resource);
 
-  Resource::Id resource_by_name(Resource::Type::Id type,
-                                const char *name);
-
+  Resource::Id resource_by_name(Resource::Type::Id type, const char *name);
   Resource::Id resource_by_source(Resource::File::Id source);
 
   Resource::Build::Id queue_a_build(Resource::Id resource);
 
   void start_a_build(Resource::Build::Id build);
-
-  void finish_a_build(Resource::Build::Id build,
-                      bool success);
+  void finish_a_build(Resource::Build::Id build, bool success);
 
   void queued(core::Array<Resource::Build::Id> &builds);
 
@@ -93,7 +82,7 @@ class YETI_PUBLIC SophisticatedResourceDatabase : public ResourceDatabase {
 
   u32 version(Resource::Id resource);
 
-  u64 built(Resource::Id resource);
+  u64 built(Resource::Id resource, bool *success);
 
  public:
   bool optimized() const;

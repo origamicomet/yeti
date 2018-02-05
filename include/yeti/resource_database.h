@@ -124,7 +124,7 @@ class YETI_PUBLIC ResourceDatabase {
   ///
   /// \note Returns `0` if the resource has not been compiled.
   ///
-  virtual u64 built(Resource::Id resource) = 0;
+  virtual u64 built(Resource::Id resource, bool *success = NULL) = 0;
 
  public:
   virtual bool optimized() const = 0;
