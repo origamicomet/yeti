@@ -78,6 +78,8 @@ bool EntityCompiler::load() {
   return true;
 }
 
+// TODO(mtwilliams): Contextualize errors and warnings.
+
 #define BAD_MARKUP_DECLARATION \
   return env_->warning(env_, "Bad markup declaration."), true;
 #define BAD_DOCUMENT_ENCODING \
@@ -125,22 +127,117 @@ bool EntityCompiler::validate() {
     e = e->sibling;
   }
 
+  bool valid = true;
+
   // Everything remaining should be entity definitions.
   while (e) {
     if (!core::string::compare("entity", e->name.s, e->name.l))
       NOT_AN_ENTITY;
 
-    // TODO(mtwilliams): Check components and children.
+    if (!this->validate_an_entity_definition(e))
+      valid = false;
 
     e = e->sibling;
   }
 
-  return true;
+  return valid;
 }
+
 
 #undef BAD_MARKUP_DECLARATION
 #undef BAD_DOCUMENT_ENCODING
 #undef NOT_AN_ENTITY
+
+bool EntityCompiler::validate_an_entity_definition(xml_element_t *e) {
+  bool valid = true;
+
+  // Check for an identifier.
+  if (e->num_of_attributes >= 1) {
+    const xml_fragment_t *name = &e->attributes[0].name,
+                         *value = &e->attributes[0].value;
+
+    if (core::string::compare("id", name->s, name->l)) {
+      // Check that the identifier is a well-formed UUID.
+      if ((value->l != 36) || !core::uuid::validate(value->s))
+        env_->error(env_, "Expected an identifier but got \"%.*s\" instead.", value->l, value->s);
+    } else {
+      env_->error(env_, "Expected an identifier but got \"%.*s\" instead.", name->l, name->s);
+      valid = false;
+    }
+  } else {
+    env_->error(env_, "Entity not assigned an identifier. Will automatically be assigned one.");
+  }
+
+  if (e->num_of_attributes >= 2) {
+    env_->warning(env_, "Ignoring superfluous attributes on entity definition.");
+  }
+
+  static const struct {
+    const char *name;
+    bool (EntityCompiler::*validate)(xml_element_t *);
+  } validations[] = {
+    { "components", &EntityCompiler::validate_all_component_definitions },
+    { "children",   &EntityCompiler::validate_all_children_definitions }
+  };
+
+  for (e = e->children; e; e = e->sibling) {
+    for (unsigned v = 0; v < YETI_ELEMENTS_IN_ARRAY(validations); ++v) {
+      if (core::string::compare(validations[v].name, e->name.s, e->name.l)) {
+        if (!(this->*validations[v].validate)(e))
+          valid = false;
+        goto validated;
+      }
+    }
+
+    env_->error(env_, "Expected component or child definitions but got \"%.*s\" instead.", e->name.l, e->name.s);
+
+    // Egregious enough that it should be fixed.
+    valid = false;
+
+  validated:
+    continue;
+  }
+
+  return valid;
+}
+
+bool EntityCompiler::validate_all_component_definitions(xml_element_t *e) {
+  bool valid = true;
+
+  for (e = e->children; e; e = e->sibling)
+    if (!this->validate_a_component_definition(e))
+      valid = false;
+
+  return valid;
+}
+
+bool EntityCompiler::validate_a_component_definition(xml_element_t *e) {
+  // TODO(mtwilliams): Validate component definitions.
+  return false;
+}
+
+bool EntityCompiler::validate_all_children_definitions(xml_element_t *e) {
+  bool valid = true;
+
+  for (e = e->children; e; e = e->sibling)
+    if (!this->validate_an_entity_definition(e))
+      valid = false;
+
+  return valid;
+}
+
+#if 0
+static xml_element_t *xml_find(xml_element_t *e, const char *path) {
+  // TODO(mtwilliams): Implement a subset of XPath with mutually recursive
+  // functions.
+
+  for (xml_element_t *c = e->children; c; c = c->sibling)
+    if (core::string::compare(path, c->name.s, c->name.l))
+      return c;
+
+  return NULL;
+}
+#endif
 
 bool EntityCompiler::compile() {
   xml_element_t *e = root_->children;
@@ -149,10 +246,16 @@ bool EntityCompiler::compile() {
     // Skip declaration.
     e = e->sibling;
 
+  while (e) {
+    // TODO(mtwilliams): Compile definitions into intermediate format.
+    e = e->sibling;
+  }
+
   return false;
 }
 
 bool EntityCompiler::bake() {
+  // TODO(mtwilliams): Bake intermediate format to file.
   return false;
 }
 

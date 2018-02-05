@@ -45,6 +45,12 @@ class YETI_PRIVATE EntityCompiler {
   bool bake();
 
  private:
+  bool validate_an_entity_definition(xml_element_t *e);
+  bool validate_all_component_definitions(xml_element_t *e);
+  bool validate_a_component_definition(xml_element_t *e);
+  bool validate_all_children_definitions(xml_element_t *e);
+
+ private:
   const resource_compiler::Environment *env_;
   const resource_compiler::Input *input_;
   const resource_compiler::Output *output_;
