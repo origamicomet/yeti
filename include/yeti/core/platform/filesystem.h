@@ -111,6 +111,9 @@ extern YETI_PUBLIC bool info(File *file, File::Info *info);
 /// Returns true if a file (or directory) exists at @path.
 extern YETI_PUBLIC bool exists(const char *path);
 
+/// Returns the logical size of @file.
+extern YETI_PUBLIC u64 size(File *file);
+
 /// Creates a new file or directory at @path.
 ///
 /// \note Fails if a file or directory already exists at @path.

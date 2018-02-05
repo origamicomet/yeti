@@ -73,12 +73,6 @@ namespace {
     else
       return FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
   }
-
-  static u64 size_of_file(File *file) {
-    u64 size;
-    yeti_assert(::GetFileSizeEx((HANDLE)file, (LARGE_INTEGER *)&size) != 0);
-    return size;
-  }
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   static int fd_from_handle(File *file) {
     yeti_assert_debug(file != NULL);
@@ -172,12 +166,6 @@ namespace {
 
     return true;
   }
-
-  static u64 size_of_file(File *file) {
-    struct stat stat;
-    yeti_assert(::fstat(fd_from_handle(file), &stat) == 0);
-    return stat->st_size;
-  }
 #endif
 }
 
@@ -254,6 +242,21 @@ bool fs::exists(const char *path) {
 #elif YETI_PLATFORM == YETI_PLATFORM_MAC
   return (::access(path, F_OK) == 0);
 #elif YETI_PLATFORM == YETI_PLATFORM_LINUX
+#endif
+}
+
+u64 fs::size(File *file) {
+#if YETI_PLATFORM == YETI_PLATFORM_WINDOWS
+  LARGE_INTEGER size;
+  if (::GetFileSizeEx((HANDLE)file, &size) != 0)
+    return size.QuadPart;
+  return 0;
+#elif YETI_PLATFORM == YETI_PLATFORM_MAC || \
+      YETI_PLATFORM == YETI_PLATFORM_LINUX
+  struct stat stat;
+  if (::fstat(fd_from_handle(file), &stat) == 0)
+    return stat->st_size;
+  return 0;
 #endif
 }
 
@@ -421,7 +424,7 @@ u64 fs::read(File *file, void *in, u64 length) {
 
 u64 fs::read_into_buffer(File *file, Array<u8> &buffer) {
   yeti_assert_debug(file != NULL);
-  const u64 size = size_of_file(file);
+  const u64 size = fs::size(file);
   buffer.resize(size);
   return size ? fs::read(file, (void *)&buffer[0], size) : 0;
 }
