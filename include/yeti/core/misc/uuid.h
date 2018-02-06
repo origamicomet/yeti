@@ -26,11 +26,17 @@ namespace yeti {
 namespace core {
 
 namespace uuid {
-  /// \brief Determines if @string contains a UUID.
-  extern YETI_PUBLIC bool validate(const char *string);
+  /// Generates a UUID v4.
+  extern YETI_PUBLIC void generate(u8 uuid[16]);
 
-  /// \brief Parses @string into a @uuid.
+  /// Parses @string into a @uuid.
   extern YETI_PUBLIC bool parse(const char *string, u8 uuid[16]);
+
+  /// Converts @uuid to a human-readable representation in @pretty.
+  extern YETI_PUBLIC void present(const u8 uuid[20], char pretty[36+1]);
+
+  /// Determines if @string contains a UUID.
+  extern YETI_PUBLIC bool validate(const char *string);
 }
 
 } // core
