@@ -34,6 +34,9 @@ extern YETI_PUBLIC T random();
 template <typename T>
 extern YETI_PUBLIC T random(const T min, const T max);
 
+/// Fills @buffer with @n random bytes.
+extern YETI_PUBLIC void random_n(u8 *buffer, size_t n);
+
 } // core
 } // yeti
 

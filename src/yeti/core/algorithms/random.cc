@@ -103,5 +103,26 @@ template <> f32 random(const f32 min, const f32 max) {
   return random<u64>() / (f32(~0ull) / (max - min)) + min;
 }
 
+void random_n(u8 *buffer, size_t n) {
+  const unsigned k = n / 8;
+
+  // Fill in 64-bit increments.
+  for (unsigned i = n / 8; i; --i, buffer += 8)
+    *(u64 *)buffer = prng_for_thread_.next();
+
+  u64 leftover = prng_for_thread_.next();
+
+  // Fill remaining bits from next 64-bit number in sequence.
+  switch (n % 8) {
+    case 7: buffer[6] = leftover >>= 8;
+    case 6: buffer[5] = leftover >>= 8;
+    case 5: buffer[4] = leftover >>= 8;
+    case 4: buffer[3] = leftover >>= 8;
+    case 3: buffer[2] = leftover >>= 8;
+    case 2: buffer[1] = leftover >>= 8;
+    case 1: buffer[0] = leftover >>= 8;
+  }
+}
+
 } // core
 } // yeti
