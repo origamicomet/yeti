@@ -15,6 +15,16 @@ namespace yeti {
 
 // TODO(mtwilliams): Inheritance.
 
+namespace entity_compiler {
+  // We only allow names composed of `a-z`, `0-9`, and `_` characters.
+  static bool is_acceptable_name(const char *s, size_t l) {
+    for (; l--; s++)
+      if ((*s < 'a' && *s > 'z') && (*s < '0' && *s > '9') && (*s != '_'))
+        return false;
+    return true;
+  }
+}
+
 EntityCompiler::EntityCompiler(const resource_compiler::Environment *env,
                                const resource_compiler::Input *input,
                                const resource_compiler::Output *output)
@@ -93,14 +103,13 @@ bool EntityCompiler::validate() {
   while (e) {
     const bool is_entity_definition = core::string::compare("entity", e->name.s, e->name.l);
 
-    if (!is_entity_definition)
-      env_->error(env_, "Expected an entity definition but got \"%.*s\" instead.", e->name.l, e->name.s);
-
-    if (is_entity_definition)
+    if (is_entity_definition) {
       if (!this->validate_an_entity_definition(e))
         valid = false;
-    else
+    } else {
+      env_->error(env_, "Expected an entity definition but got \"%.*s\" instead.", e->name.l, e->name.s);
       valid = false;
+    }
 
     e = e->sibling;
   }
@@ -111,7 +120,6 @@ bool EntityCompiler::validate() {
 bool EntityCompiler::validate_an_entity_definition(xml_element_t *e) {
   bool valid = true;
 
-  // Check for identifier.
   if (e->num_of_attributes >= 1) {
     const xml_fragment_t *name = &e->attributes[0].name,
                          *value = &e->attributes[0].value;
@@ -129,8 +137,26 @@ bool EntityCompiler::validate_an_entity_definition(xml_element_t *e) {
     env_->error(env_, "Entity not assigned an identifier. Will automatically be assigned one.");
   }
 
-  // Ignore superfluous attributes.
   if (e->num_of_attributes >= 2) {
+    const xml_fragment_t *name = &e->attributes[0].name,
+                         *value = &e->attributes[0].value;
+
+    if (core::string::compare("name", name->s, name->l)) {
+      if (!entity_compiler::is_acceptable_name(name->s, name->l)) {
+        env_->error(env_, "Names can only contain alphanumerics and underscores but got \"%.*s\".", value->l, value->s);
+        valid = false;
+      }
+      if (name->l > 255) {
+        env_->error(env_, "Given name \"%.*s\" is too long.", name->l, name->s);
+        valid = false;
+      }
+    } else {
+      env_->error(env_, "Expected a name but got \"%.*s\" instead.", name->l, name->s);
+      valid = false;
+    }
+  }
+
+  if (e->num_of_attributes >= 3) {
     env_->warning(env_, "Ignoring superfluous attributes on entity definition.");
   }
 
@@ -165,7 +191,6 @@ bool EntityCompiler::validate_all_component_definitions(xml_element_t *e) {
 bool EntityCompiler::validate_a_component_definition(xml_element_t *e) {
   bool valid = true;
 
-  // Check for identifier.
   if (e->num_of_attributes >= 1) {
     const xml_fragment_t *name = &e->attributes[0].name,
                          *value = &e->attributes[0].value;
