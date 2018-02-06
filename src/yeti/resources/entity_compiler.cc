@@ -11,6 +11,10 @@
 
 #include "entity_compiler.h"
 
+// To work with entity and component handles.
+#include "yeti/entity.h"
+#include "yeti/component.h"
+
 namespace yeti {
 
 // TODO(mtwilliams): Inheritance.
@@ -35,6 +39,9 @@ EntityCompiler::EntityCompiler(const resource_compiler::Environment *env,
   , heap_(core::global_heap_allocator(), SIZE_OF_HEAP)
   , root_(NULL)
   , document_has_declaration_(false)
+  , entity_definitions_(core::global_heap_allocator())
+  , component_definitions_(core::global_heap_allocator())
+  , data_(core::global_heap_allocator())
 {
   yeti_assert_debug(env_ != NULL);
   yeti_assert_debug(input_ != NULL);
@@ -226,7 +233,6 @@ bool EntityCompiler::validate_all_children_definitions(xml_element_t *e) {
   return valid;
 }
 
-#if 0
 static xml_element_t *xml_find(xml_element_t *e, const char *path) {
   // TODO(mtwilliams): Implement a subset of XPath with mutually recursive
   // functions.
@@ -246,17 +252,181 @@ bool EntityCompiler::compile() {
     // Skip declaration.
     e = e->sibling;
 
-  while (e) {
-    // TODO(mtwilliams): Compile definitions into intermediate format.
-    e = e->sibling;
+  do {
+    if (!this->compile_an_entity(e))
+      return false;
+  } while (e = e->sibling);
+
+  return true;
+}
+
+// TODO(mtwilliams): Link together component definitions by type as we compile
+// using a hash table pointing to the head of an intrusive linked-list.
+
+bool EntityCompiler::compile_an_entity(xml_element_t *e, u32 parent) {
+  EntityDef *def = &entity_definitions_.emplace();
+
+  // Preemptively store index for children *after* allocating since we want
+  // indices in [1, n].
+  const u32 self = entity_definitions_.size();
+
+  if (e->num_of_attributes >= 1) {
+    core::uuid::parse(e->attributes[0].value.s, def->identifier);
+  } else {
+    // Assign an identifier since none was given.
+    core::uuid::generate(def->identifier);
   }
 
-  return false;
+  if (e->num_of_attributes >= 2) {
+    // We defer pooling until baking.
+    def->name = e->attributes[1].value.s;
+    def->length_of_name = u8(e->attributes[1].value.l);
+  } else {
+    def->name = NULL;
+    def->length_of_name = 0;
+  }
+
+  // We can't store pointers because they can be invalidated when resizing our
+  // intermediate arrays, so we store an index instead.
+  def->parent = parent;
+
+  // Same deal for components.
+  def->num_of_components = 0;
+  def->offset_to_components = component_definitions_.size();
+
+  // Compile components.
+  if (xml_element_t *components = xml_find(e, "components")) {
+    for (xml_element_t *component = components->children; component; component = component->sibling) {
+      if (!this->compile_a_component(component)) {
+        if (def->name) {
+          env_->error(env_, "Compilation of \"%.*s\" failed due to component.", def->length_of_name, def->name);
+        } else {
+          char identifier[36+1];
+          core::uuid::present(def->identifier, identifier);
+          env_->error(env_, "Compilation of \"%s\" failed due to component.", identifier);
+        }
+        return false;
+      }
+      def->num_of_components++;
+    }
+  }
+
+  // Then compile children.
+  if (xml_element_t *children = xml_find(e, "children"))
+    for (xml_element_t *child = children->children; child; child = child->sibling)
+      if (!this->compile_an_entity(child, self))
+        return false;
+
+  return true;
+}
+
+bool EntityCompiler::compile_a_component(xml_element_t *e) {
+  ComponentDef *def = &component_definitions_.emplace();
+
+  Component::Id type;
+  const Component *component;
+
+  // Copy name so we can null-terminate it.
+  char *name_of_type = (char *)alloca(e->name.l + 1);
+  core::memory::copy((const void *)e->name.s, (void *)name_of_type, e->name.l);
+  name_of_type[e->name.l] = '\0';
+
+  // Then lookup component by name.
+  type = component_registry::id_from_name(name_of_type);
+  component = component_registry::component_by_id(type);
+
+  if (!component) {
+    env_->error(env_, "Don't know how to compile \"%.*s\" components.", e->name.l, e->name.s);
+    return false;
+  }
+
+  def->type = type;
+  def->version = component->version;
+
+  if (e->num_of_attributes >= 1) {
+    core::uuid::parse(e->attributes[0].value.s, def->identifier);
+  } else {
+    // Assign an identifier since none was given.
+    core::uuid::generate(def->identifier);
+  }
+
+  if (e->num_of_attributes >= 2) {
+    // We defer pooling until baking.
+    def->name = e->attributes[1].value.s;
+    def->length_of_name = u8(e->attributes[1].value.l);
+  } else {
+    def->name = NULL;
+    def->length_of_name = 0;
+  }
+
+  def->offset_to_data = data_.size();
+  def->amount_of_data = 0;
+
+  component_compiler::Environment env;
+  env.compiler = this;
+  env.info = &EntityCompiler::info;
+  env.warning = &EntityCompiler::warning;
+  env.error = &EntityCompiler::error;
+
+  component_compiler::Input input;
+  input.root = e;
+
+  component_compiler::Output output;
+  output.write = &write;
+
+  const bool successful = component->compile(&env, &input, &output);
+
+  def->amount_of_data = data_.size() - def->offset_to_data;
+
+  return successful;
 }
 
 bool EntityCompiler::bake() {
   // TODO(mtwilliams): Bake intermediate format to file.
   return false;
+}
+
+void EntityCompiler::info(const component_compiler::Environment *env, const char *format, ...) {
+  EntityCompiler *compiler = env->compiler;
+  va_list va;
+  va_start(va, format);
+  compiler->forward(format, va, compiler->env_->info);
+  va_end(va);
+}
+
+void EntityCompiler::warning(const component_compiler::Environment *env, const char *format, ...) {
+  EntityCompiler *compiler = env->compiler;
+  va_list va;
+  va_start(va, format);
+  compiler->forward(format, va, compiler->env_->warning);
+  va_end(va);
+}
+
+void EntityCompiler::error(const component_compiler::Environment *env, const char *format, ...) {
+  EntityCompiler *compiler = env->compiler;
+  va_list va;
+  va_start(va, format);
+  compiler->forward(format, va, compiler->env_->error);
+  va_end(va);
+}
+
+void EntityCompiler::forward(const char *format, va_list ap, Forwardee callback) {
+  // Format.
+  const int size = vsnprintf(NULL, 0, format, ap) + 1;
+  char *message = (char *)alloca(size);
+  vsnprintf(message, size, format, ap);
+
+  // Forward to given callback.
+  callback(env_, message);
+}
+
+void EntityCompiler::write(const component_compiler::Environment *env,
+                           const void *buffer,
+                           size_t amount) {
+  auto &pool = env->compiler->data_;
+  const size_t offset = env->compiler->data_.size();
+  pool.grow(amount);
+  core::memory::copy(buffer, (void *)&pool.raw()[offset], amount);
 }
 
 } // yeti

@@ -23,9 +23,12 @@
 
 namespace yeti {
 
-// Forward declared because callback signatures reference `Entity` and `EntityManager`.
+// Forward declarations for callback signatures.
 struct Entity;
 class EntityManager;
+
+// Forward declaration for component compilation environment.
+class EntityCompiler;
 
 // Forward declared because callback signatures reference `component_compiler`.
 namespace component_compiler {
@@ -77,7 +80,7 @@ struct Component {
   // TODO(mtwilliams): Determine order automatically by letting components
   // specify dependencies.
 
-  /// Compilation and spawn order relevant to other components.
+  /// Spawn order relevant to other components.
   ///
   /// \note If order is `0`, then any order is considered valid. Otherwise,
   /// components are compiled and spawned from lowest order to highest.
@@ -245,6 +248,9 @@ class YETI_PUBLIC AutoRegisterComponent {
 
 namespace component_compiler {
   struct Environment {
+    /// Entity compiler driving compilation.
+    EntityCompiler *compiler;
+
     /// Logs an informational message.
     void (*info)(const Environment *env, const char *format, ...);
 
@@ -260,8 +266,7 @@ namespace component_compiler {
   };
 
   struct Output {
-    /// Handle to write compiled data.
-    core::File *data;
+    void (*write)(const Environment *env, const void *buffer, size_t amount);
   };
 }
 

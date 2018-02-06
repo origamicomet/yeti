@@ -25,7 +25,7 @@ class YETI_PRIVATE EntityCompiler {
  YETI_DISALLOW_COPYING(EntityCompiler);
 
  private:
-  static const size_t SIZE_OF_SCRATCH = 64 * 1024 - 1;
+  static const size_t SIZE_OF_SCRATCH = 65535;
   static const size_t SIZE_OF_HEAP = 1 * 1024 * 1024;
 
  public:
@@ -51,19 +51,70 @@ class YETI_PRIVATE EntityCompiler {
   bool validate_all_children_definitions(xml_element_t *e);
 
  private:
+  bool compile_an_entity(xml_element_t *e, u32 parent = 0);
+  bool compile_a_component(xml_element_t *e);
+
+ private:
+  typedef void (*Forwardee)(const ResourceCompiler::Environment *env, const char *format, ...);
+
+  /// \internal Shims used to forward component compiler logs to resource compiler.
+  /// @{
+  static void info(const component_compiler::Environment *env, const char *format, ...);
+  static void warning(const component_compiler::Environment *env, const char *format, ...);
+  static void error(const component_compiler::Environment *env, const char *format, ...);
+  /// @}
+
+  /// \internal Forwards a log to @callback.
+  void forward(const char *format, va_list ap, Forwardee callback);
+
+ private:
+  /// \internal Copies data from component compilation to `data_`.
+  static void write(const component_compiler::Environment *env,
+                    const void *buffer,
+                    size_t amount);
+
+ private:
   const resource_compiler::Environment *env_;
   const resource_compiler::Input *input_;
   const resource_compiler::Output *output_;
 
+ private:
   // Buffer storing entire document.
   core::Array<u8> document_;
 
   // Heap passed to parser for tree.
   core::Array<u8> heap_;
 
+  // Root element composing the tree.
   xml_element_t *root_;
 
+  // Document has an optional markup declaration.
   bool document_has_declaration_;
+
+ private:
+  struct EntityDef {
+    u8 identifier[16];
+    const char *name;
+    u8 length_of_name;
+    u32 parent;
+    u32 num_of_components;
+    u32 offset_to_components;
+  };
+
+  struct ComponentDef {
+    u32 type;
+    u32 version;
+    u8 identifier[16];
+    const char *name;
+    u8 length_of_name;
+    u32 offset_to_data;
+    u32 amount_of_data;
+  };
+
+  core::Array<EntityDef> entity_definitions_;
+  core::Array<ComponentDef> component_definitions_;
+
+  core::Array<u8> data_;
 };
 
 } // yeti

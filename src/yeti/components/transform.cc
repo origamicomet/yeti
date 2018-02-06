@@ -179,10 +179,7 @@ bool TransformCompiler::parse_a_vector(const xml_element_t *root,
 
 bool TransformCompiler::output()
 {
-  core::fs::write(output_->data,
-                  (const void *)&transform_,
-                  sizeof(Transform::Compiled));
-
+  output_->write(env_, (const void *)&transform_, sizeof(Transform::Compiled));
   return true;
 }
 

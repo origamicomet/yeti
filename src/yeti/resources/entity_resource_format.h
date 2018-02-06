@@ -36,16 +36,14 @@ namespace entity_resource_format {
 
   struct Entity {
     // Universally unique identifier assigned to instance.
-    u8 identifier[128 / 8];
-    // Name of entity. Used for debugging. *Not* mapped to runtime naming system!
-    char name[31+1];
+    u8 identifier[16];
   };
 
   struct Component {
     // Type of component, i.e. `Component::Id`.
     u32 type;
-    // Name of component. Used for debugging.
-    char name[31+1];
+    // Version of component, i.e. `Component::version`.
+    u32 version;
     // Size of each instance in bytes.
     u32 size;
     // Number of instances.
@@ -60,9 +58,7 @@ namespace entity_resource_format {
 
   struct Instance {
     // Universally unique identifier assigned to instance.
-    u8 identifier[128 / 8];
-    // Name of instance. Used for debugging.
-    char name[31+1];
+    u8 identifier[16];
     // Component data.
     u8 data[0];
   };
