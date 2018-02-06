@@ -81,6 +81,9 @@ class Array {
   /// Resizes the array to store @size elements.
   void resize(size_t size);
 
+  /// Grows the array to store @amount additional elements.
+  void grow(size_t amount);
+
   /// Reserves spaces to hold @additional elements.
   void reserve(size_t additional);
 
@@ -256,6 +259,25 @@ void Array<T>::resize(size_t size) {
   } else if (size < current_in_bytes) {
     // TODO(mtwilliams): Shrink.
     last_ = first_ + size_in_bytes;
+  }
+}
+
+template <typename T>
+void Array<T>::grow(size_t amount) {
+  // Requested amount in bytes.
+  const size_t amount_in_bytes = amount * sizeof(T);
+
+  if ((last_ + amount_in_bytes) <= end_) {
+    // Grow into reserved.
+    last_ = first_ + amount_in_bytes;
+  } else {
+    // Calculate new size.
+    const size_t size_in_bytes = last_ - first_ + amount_in_bytes;
+
+    // Grow.
+    first_ = (uintptr_t)allocator_->reallocate((void *)first_, size_in_bytes, alignof(T));
+    last_  = first_ + size_in_bytes;
+    end_   = last_;
   }
 }
 
