@@ -176,7 +176,7 @@ bool EntityCompiler::validate_an_entity_definition(xml_element_t *e) {
       if (!this->validate_all_children_definitions(e))
         valid = false;
     } else {
-      // Egregious enough that it can be ignored.
+      // Egregious enough that it cannot be ignored.
       env_->error(env_, "Expected component or children definition but got \"%.*s\" instead.", e->name.l, e->name.s);
       valid = false;
     }

@@ -257,7 +257,7 @@ class YETI_PUBLIC EntityManager {
   /// Cookies associated with entities.
   core::Array<u32> cookies_;
 
-  /// Queue of available indicies.
+  /// Queue of available indices.
   core::Queue<u32> free_;
 
   struct RegisteredLifecycleCallback {
