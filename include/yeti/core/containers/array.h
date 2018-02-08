@@ -51,6 +51,14 @@ class Array {
   const T &operator[](size_t index) const;
 
  public:
+  /// Returns the position of the value at @pointer in the array.
+  size_t index_from_pointer(const T *pointer) const;
+
+  /// Returns a pointer to the element at @index in the array.
+  T *pointer_from_index(size_t index);
+  const T *pointer_from_index(size_t index) const;
+
+ public:
   /// Reserves space for an element at the back of the array.
   T &emplace();
 
@@ -190,6 +198,22 @@ template <typename T>
 const T &Array<T>::operator[](size_t index) const {
   yeti_assert_debug(index < size());
   return ((const T *)first_)[index];
+}
+
+template <typename T>
+size_t Array<T>::index_from_pointer(const T *pointer) const {
+  yeti_assert_debug(uintptr_t(pointer) >= first_ && uintptr_t(pointer) < last_);
+  return (size_t)(pointer - ((const T *)first_));
+}
+
+template <typename T>
+T *Array<T>::pointer_from_index(size_t index) {
+  return &(*this)[index];
+}
+
+template <typename T>
+const T *Array<T>::pointer_from_index(size_t index) const {
+  return &(*this)[index];
 }
 
 template <typename T>
@@ -336,9 +360,9 @@ const T *Array<T>::find(const T &value) const {
 
 template <typename T>
 size_t Array<T>::position(const T &value) const {
-  const T *I = this->find(value);
-  yeti_assert_debug(I != NULL);
-  return (I - this->begin());
+  if (const T *I = this->find(value))
+    return (I - this->begin());
+  return ~(size_t)0;
 }
 
 } // core
