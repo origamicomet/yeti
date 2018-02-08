@@ -245,6 +245,7 @@ ResourceCompiler::Result ResourceCompiler::compile(const char *path, bool force)
 
   ResourceCompiler::Output output;
   output.root = &data_[0];
+  output.version = type->version;
 
   // TODO(mtwilliams): Atomic compilation?
   Path memory_resident_data_path = { 0, };
