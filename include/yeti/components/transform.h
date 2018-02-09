@@ -32,9 +32,6 @@ struct Transform {
 
   /// Transient handle to a transform component.
   typedef Component::Instance Instance;
-
-  /// \internal Packed form of transform after compilation.
-  struct Compiled;
 };
 
 class YETI_PUBLIC TransformSystem : public System {

@@ -28,6 +28,33 @@ class YETI_PRIVATE EntityCompiler {
   static const size_t SIZE_OF_SCRATCH = 65535;
   static const size_t SIZE_OF_HEAP = 1 * 1024 * 1024;
 
+ private:
+  struct EntityDef {
+    u8 identifier[16];
+    const char *name;
+    u8 length_of_name;
+    u32 index_of_parent;
+  };
+
+  struct ComponentDef {
+    u32 type;
+    u32 version;
+    u32 head;
+    u32 tail;
+    u32 count;
+    u32 data;
+  };
+
+  struct InstanceDef {
+    u8 identifier[16];
+    const char *name;
+    u8 length_of_name;
+    u32 offset_to_data;
+    u32 amount_of_data;
+    u32 index_of_entity;
+    u32 next;
+  };
+
  public:
   EntityCompiler(const resource_compiler::Environment *env,
                  const resource_compiler::Input *input,
@@ -52,7 +79,12 @@ class YETI_PRIVATE EntityCompiler {
 
  private:
   bool compile_an_entity(xml_element_t *e, u32 parent = 0);
-  bool compile_a_component(xml_element_t *e);
+  bool compile_a_component(xml_element_t *e, u32 entity);
+
+ private:
+  ComponentDef *find_component_definition(u32 type);
+  ComponentDef *add_component_definition(u32 type, u32 version);
+  void link_instance_definition(ComponentDef *cdef, InstanceDef *idef);
 
  private:
   typedef void (*Forwardee)(const ResourceCompiler::Environment *env, const char *format, ...);
@@ -91,29 +123,12 @@ class YETI_PRIVATE EntityCompiler {
   // Document has an optional markup declaration.
   bool document_has_declaration_;
 
- private:
-  struct EntityDef {
-    u8 identifier[16];
-    const char *name;
-    u8 length_of_name;
-    u32 parent;
-    u32 num_of_components;
-    u32 offset_to_components;
-  };
-
-  struct ComponentDef {
-    u32 type;
-    u32 version;
-    u8 identifier[16];
-    const char *name;
-    u8 length_of_name;
-    u32 offset_to_data;
-    u32 amount_of_data;
-  };
-
+  // Intermediates.
   core::Array<EntityDef> entity_definitions_;
   core::Array<ComponentDef> component_definitions_;
+  core::Array<InstanceDef> instance_definitions_;
 
+  // Data from compiled instances.
   core::Array<u8> data_;
 };
 

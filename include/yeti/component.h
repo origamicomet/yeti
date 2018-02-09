@@ -148,7 +148,7 @@ struct Component {
   ///
   /// \param @system System managing instances of this component.
   /// \param @entities Entities being spawned.
-  /// \param @owners Indicies into @entities that identity the owners of instances.
+  /// \param @owners Indices into @entities that identity the owners of instances.
   /// \param @instances Number of instances to spawn.
   /// \param @data Compiled data.
   ///

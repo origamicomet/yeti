@@ -26,13 +26,12 @@ namespace yeti {
 // TODO(mtwilliams): Contextualize by indicating location in source.
 
 #pragma pack(push, 1)
-  struct Transform::Compiled {
+  struct CompiledTransform {
     f32 position[3];
     f32 rotation[4];
     f32 scale[3];
   };
 #pragma pack(pop)
-
 
 class TransformCompiler {
  public:
@@ -50,9 +49,9 @@ class TransformCompiler {
   bool output();
 
  private:
-  bool parse_a_vector(const xml_element_t *element,
-                      f32 *vector,
-                      unsigned order);
+  bool parse_vector(const xml_element_t *element,
+                    f32 *vector,
+                    unsigned order);
 
  private:
   const component_compiler::Environment *env_;
@@ -66,7 +65,7 @@ class TransformCompiler {
 
   // Intermediate storage of the transform we're compiling. Eventually written
   // out after compilation.
-  Transform::Compiled transform_;
+  CompiledTransform transform_;
 };
 
 TransformCompiler::TransformCompiler(const component_compiler::Environment *env,
@@ -79,7 +78,7 @@ TransformCompiler::TransformCompiler(const component_compiler::Environment *env,
   , rotation_has_been_specified_(false)
   , scale_has_been_specified_(false)
 {
-  core::memory::zero((void *)&transform_, sizeof(Transform::Compiled));
+  core::memory::zero((void *)&transform_, sizeof(CompiledTransform));
 }
 
 TransformCompiler::~TransformCompiler()
@@ -105,7 +104,7 @@ bool TransformCompiler::parse()
         env_->error(env_, "Position has already been specified!");
         errors++;
       } else {
-        errors = this->parse_a_vector(e, transform_.position, 3) ? 0 : 1;
+        errors = this->parse_vector(e, transform_.position, 3) ? 0 : 1;
         position_has_been_specified_ = true;
       }
     } else if (core::string::compare("rotation", e->name.s, e->name.l)) {
@@ -113,7 +112,7 @@ bool TransformCompiler::parse()
         env_->error(env_, "Rotation has already been specified!");
         errors++;
       } else {
-        errors += this->parse_a_vector(e, transform_.rotation, 4) ? 0 : 1;
+        errors += this->parse_vector(e, transform_.rotation, 4) ? 0 : 1;
         rotation_has_been_specified_ = true;
       }
     } else if (core::string::compare("scale", e->name.s, e->name.l)) {
@@ -121,7 +120,7 @@ bool TransformCompiler::parse()
         env_->error(env_, "Scale has already been specified!");
         errors++;
       } else {
-        errors += this->parse_a_vector(e, transform_.scale, 3) ? 0 : 1;
+        errors += this->parse_vector(e, transform_.scale, 3) ? 0 : 1;
         rotation_has_been_specified_ = true;
       }
     } else {
@@ -133,9 +132,9 @@ bool TransformCompiler::parse()
   return (errors == 0);
 }
 
-bool TransformCompiler::parse_a_vector(const xml_element_t *root,
-                                       f32 *vector,
-                                       unsigned order)
+bool TransformCompiler::parse_vector(const xml_element_t *root,
+                                     f32 *vector,
+                                     unsigned order)
 {
   u32 mask = 0;
 
@@ -179,7 +178,7 @@ bool TransformCompiler::parse_a_vector(const xml_element_t *root,
 
 bool TransformCompiler::output()
 {
-  output_->write(env_, (const void *)&transform_, sizeof(Transform::Compiled));
+  output_->write(env_, (const void *)&transform_, sizeof(CompiledTransform));
   return true;
 }
 

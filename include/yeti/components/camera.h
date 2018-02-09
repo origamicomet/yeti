@@ -45,7 +45,7 @@ struct Camera {
   union {
     struct {
       /// Horizontal field of view.
-      f32 fov;
+      f32 field_of_view;
     } perspective;
 
     struct {
@@ -61,7 +61,7 @@ struct Camera {
 };
 
 namespace camera {
-  extern YETI_PUBLIC Camera::Type type_from_string(const char *type);
+  extern YETI_PUBLIC Camera::Type type_from_string(const char *string);
   extern YETI_PUBLIC const char *type_to_string(const Camera::Type type);
 }
 

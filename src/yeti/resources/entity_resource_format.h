@@ -32,6 +32,8 @@ namespace entity_resource_format {
     u32 offset_to_entities;
     u32 offset_to_components;
     u32 offset_to_hierarchy;
+    // Pad to 16-byte alignment.
+    u8 padding[12];
   };
 
   struct Entity {
@@ -44,23 +46,22 @@ namespace entity_resource_format {
     u32 type;
     // Version of component, i.e. `Component::version`.
     u32 version;
-    // Size of each instance in bytes.
-    u32 size;
     // Number of instances.
     u32 count;
     // Offsets to relevant data.
-    u32 offset_to_instances;
     u32 offset_to_mapping;
+    u32 offset_to_instances;
+    u32 offset_to_data;
   };
 
   // Maps from component to entity.
-  typedef u32 Mapping;
+  struct Mappings {
+    u32 indef_of_entity[0];
+  };
 
   struct Instance {
     // Universally unique identifier assigned to instance.
     u8 identifier[16];
-    // Component data.
-    u8 data[0];
   };
 
   struct Hierarchy {
